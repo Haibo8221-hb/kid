@@ -230,41 +230,93 @@ def _load_plan_context(child):
     return '\n\n---\n\n'.join(parts) if parts else ''
 
 
-def _load_config():
-    """Load LLM config from Hermes config.yaml — uses the active provider.
-    Falls back to .env.local for API keys if config has masked placeholders."""
-    import yaml
-    cfg_path = os.path.join(os.environ.get('HERMES_HOME', os.path.expanduser('~/.hermes')), 'config.yaml')
-    
-    # Load .env.local overrides first
-    env_overrides = {}
-    env_local = os.path.join(os.path.dirname(__file__), '.env.local')
-    if os.path.exists(env_local):
-        for line in open(env_local):
-            line = line.strip()
-            if line and not line.startswith('#') and '=' in line:
-                k, v = line.split('=', 1)
-                env_overrides[k] = v
-    
-    if os.path.exists(cfg_path):
+# ── LLM 配置（UI 可配 + 持久化到 DATA_DIR/llm_config.json，见 /api/settings/llm）──
+LLM_CONFIG_FILE = os.path.join(DATA_DIR, 'llm_config.json')
+# 向后兼容：旧 Hermes config.yaml 仍可作为兜底
+_HERMES_CFG = os.path.join(os.environ.get('HERMES_HOME', os.path.expanduser('~/.hermes')), 'config.yaml')
+
+def _normalize_endpoint(url):
+    """规整 OpenAI 兼容端点：去除末尾斜杠与 /chat/completions 等后缀。"""
+    if not url:
+        return ''
+    url = url.strip()
+    for suffix in ('/chat/completions', '/chat', '/v1/chat/completions'):
+        if url.endswith(suffix):
+            url = url[: -len(suffix)]
+    return url.rstrip('/')
+
+def _load_llm_config():
+    """加载 LLM 配置。优先级：持久化文件 > 进程环境变量 > 旧 Hermes config.yaml > 内置默认。
+    返回 {api_key, base_url, model, temperature, openrouter_key}。"""
+    cfg = {
+        'api_key': '',
+        'base_url': 'https://api.deepseek.com',
+        'model': 'deepseek-chat',
+        'temperature': 0.7,
+        'openrouter_key': '',
+    }
+
+    # 1) 旧 Hermes config.yaml 兜底（deepseek provider）
+    try:
+        import yaml
+        if os.path.exists(_HERMES_CFG):
+            hc = yaml.safe_load(open(_HERMES_CFG)) or {}
+            prov = hc.get('providers', {}).get(hc.get('model', {}).get('provider', 'deepseek'), {})
+            if prov.get('api_key') and '...' not in prov.get('api_key', ''):
+                cfg['api_key'] = prov['api_key']
+            if prov.get('base_url'):
+                cfg['base_url'] = prov['base_url']
+            if prov.get('default_model'):
+                cfg['model'] = prov['default_model']
+            or_key = hc.get('providers', {}).get('openrouter', {}).get('api_key', '')
+            if or_key and '...' not in or_key:
+                cfg['openrouter_key'] = or_key
+    except Exception:
+        pass
+
+    # 2) 进程环境变量覆盖（Docker / 宝塔 environment= 段）
+    env_key = os.environ.get('LLM_API_KEY') or os.environ.get('OPENAI_API_KEY') or os.environ.get('DEEPSEEK_API_KEY')
+    if env_key:
+        cfg['api_key'] = env_key
+    if os.environ.get('LLM_BASE_URL'):
+        cfg['base_url'] = os.environ['LLM_BASE_URL']
+    if os.environ.get('LLM_MODEL'):
+        cfg['model'] = os.environ['LLM_MODEL']
+    if os.environ.get('LLM_TEMPERATURE'):
         try:
-            cfg = yaml.safe_load(open(cfg_path))
-            active_provider = cfg.get('model', {}).get('provider', 'deepseek')
-            provider_cfg = cfg.get('providers', {}).get(active_provider, {})
-            api_key = provider_cfg.get('api_key', '')
-            # If key is masked (contains '...'), try env override
-            if '...' in api_key:
-                env_var = f'{active_provider.upper()}_API_KEY'
-                if env_var in env_overrides:
-                    api_key = env_overrides[env_var]
-            return {
-                'api_key': api_key,
-                'base_url': provider_cfg.get('base_url', 'https://api.deepseek.com'),
-                'model': provider_cfg.get('default_model', 'deepseek-v4-pro')
-            }
+            cfg['temperature'] = float(os.environ['LLM_TEMPERATURE'])
         except Exception:
             pass
-    return {'api_key': '', 'base_url': 'https://api.deepseek.com', 'model': 'deepseek-v4-pro'}
+    if os.environ.get('OPENROUTER_API_KEY'):
+        cfg['openrouter_key'] = os.environ['OPENROUTER_API_KEY']
+
+    # 3) 持久化文件（UI 保存，最高优先级）
+    if os.path.exists(LLM_CONFIG_FILE):
+        try:
+            f = json.load(open(LLM_CONFIG_FILE, encoding='utf-8')) or {}
+            if f.get('api_key'):
+                cfg['api_key'] = f['api_key']
+            if f.get('endpoint') or f.get('base_url'):
+                cfg['base_url'] = f.get('endpoint') or f.get('base_url')
+            if f.get('model'):
+                cfg['model'] = f['model']
+            if f.get('temperature') is not None:
+                try:
+                    cfg['temperature'] = float(f['temperature'])
+                except Exception:
+                    pass
+            if f.get('openrouter_key'):
+                cfg['openrouter_key'] = f['openrouter_key']
+        except Exception:
+            pass
+
+    cfg['base_url'] = _normalize_endpoint(cfg['base_url']) or 'https://api.deepseek.com'
+    return cfg
+
+def _load_config():
+    """兼容旧调用方：返回 {api_key, base_url, model, temperature}（取自 _load_llm_config）。"""
+    c = _load_llm_config()
+    return {'api_key': c['api_key'], 'base_url': c['base_url'], 'model': c['model'], 'temperature': c['temperature']}
 
 def _call_llm(conv, child, plan_info):
     """Call DeepSeek V4 Pro LLM with full conversation history + full plan context."""
@@ -283,9 +335,10 @@ def _call_llm(conv, child, plan_info):
     api_key = cfg['api_key']
     base_url = cfg['base_url']
     model = cfg['model']
+    temperature = cfg.get('temperature', 0.7)
 
     if not api_key:
-        return '[配置错误] 未找到DeepSeek API Key'
+        return '[配置错误] 未配置 LLM API Key。请在侧边栏「⚙️ LLM 设置」中填写 OpenAI 兼容端点、API Key 与模型。'
 
     try:
         with httpx.Client(timeout=60.0) as client:
@@ -299,7 +352,7 @@ def _call_llm(conv, child, plan_info):
                     'model': model,
                     'messages': messages,
                     'max_tokens': 3000,
-                    'temperature': 0.7
+                    'temperature': temperature
                 }
             )
             if resp.status_code == 200:
@@ -382,7 +435,7 @@ def chat_stream():
 
     cfg = _load_config()
     if not cfg['api_key']:
-        return jsonify({'error': 'no API key'}), 500
+        return jsonify({'error': '未配置 LLM API Key，请在侧边栏「⚙️ LLM 设置」中填写。'}), 500
 
     def generate():
         full_reply = ''
@@ -399,7 +452,7 @@ def chat_stream():
                         'model': cfg['model'],
                         'messages': messages,
                         'max_tokens': 3000,
-                        'temperature': 0.7,
+                        'temperature': cfg.get('temperature', 0.7),
                         'stream': True
                     }
                 ) as resp:
@@ -438,6 +491,111 @@ def chat_stream():
     _set_cors(resp)
     resp.headers['Cache-Control'] = 'no-cache'
     resp.headers['X-Accel-Buffering'] = 'no'
+    return resp
+
+
+# ── LLM Settings (UI 配置；持久化到 DATA_DIR/llm_config.json) ──────────
+def _mask_key(k):
+    """对 API Key 做脱敏展示：保留前后 4 位，中间用 … 代替。"""
+    if not k:
+        return ''
+    if len(k) <= 8:
+        return '****'
+    return k[:4] + '…' + k[-4:]
+
+@app.route('/api/settings/llm', methods=['GET', 'POST', 'OPTIONS'])
+def llm_settings():
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+
+    if request.method == 'GET':
+        c = _load_llm_config()
+        resp = jsonify({
+            'endpoint': c['base_url'],
+            'model': c['model'],
+            'temperature': c['temperature'],
+            'has_key': bool(c['api_key']),
+            'key_masked': _mask_key(c['api_key']),
+            'has_openrouter': bool(c['openrouter_key']),
+            'openrouter_masked': _mask_key(c['openrouter_key']),
+        })
+        _set_cors(resp)
+        return resp
+
+    # POST — 保存配置（原子写入，避免半截文件）
+    data = request.get_json(force=True, silent=True) or {}
+    endpoint = (data.get('endpoint') or data.get('base_url') or '').strip()
+    api_key = (data.get('api_key') or '').strip()
+    model = (data.get('model') or '').strip()
+    try:
+        temperature = float(data.get('temperature', 0.7))
+    except Exception:
+        temperature = 0.7
+    openrouter_key = (data.get('openrouter_key') or '').strip()
+
+    import re as _re
+    if not _re.match(r'^https?://', endpoint):
+        resp = jsonify({'ok': False, 'error': '端点必须是 http(s):// 开头的 URL'})
+        _set_cors(resp)
+        return resp, 400
+
+    # 读取已有配置：字段为空时保留原值（允许单独更新 key 而不清空其它项）
+    cur = {}
+    if os.path.exists(LLM_CONFIG_FILE):
+        try:
+            cur = json.load(open(LLM_CONFIG_FILE, encoding='utf-8')) or {}
+        except Exception:
+            cur = {}
+    new_cfg = {
+        'endpoint': endpoint,
+        'api_key': api_key or cur.get('api_key', ''),
+        'model': model or cur.get('model', 'deepseek-chat'),
+        'temperature': temperature,
+        'openrouter_key': openrouter_key or cur.get('openrouter_key', ''),
+    }
+    atomic_write(LLM_CONFIG_FILE, new_cfg, ensure_ascii=False, indent=2)
+    resp = jsonify({'ok': True})
+    _set_cors(resp)
+    return resp
+
+
+@app.route('/api/settings/llm/test', methods=['POST', 'OPTIONS'])
+def llm_settings_test():
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+
+    data = request.get_json(force=True, silent=True) or {}
+    # 字段留空时回退到已保存配置：既可直接测现有配置，也能测新填的值
+    cur = _load_llm_config()
+    endpoint = _normalize_endpoint((data.get('endpoint') or data.get('base_url') or cur['base_url'] or '').strip())
+    api_key = (data.get('api_key') or cur['api_key'] or '').strip()
+    model = (data.get('model') or cur['model'] or '').strip()
+    if not endpoint or not api_key or not model:
+        resp = jsonify({'ok': False, 'error': 'endpoint / api_key / model 均必填（留空则使用已保存配置）'})
+        _set_cors(resp)
+        return resp, 400
+    try:
+        with httpx.Client(timeout=30.0) as client:
+            r = client.post(
+                f'{endpoint}/chat/completions',
+                headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+                json={'model': model, 'messages': [{'role': 'user', 'content': 'ping'}], 'max_tokens': 5, 'temperature': 0.1}
+            )
+            if r.status_code == 200:
+                resp = jsonify({'ok': True, 'model': model, 'status': r.status_code})
+            else:
+                resp = jsonify({'ok': False, 'error': f'HTTP {r.status_code}: {r.text[:120]}'})
+    except Exception as e:
+        resp = jsonify({'ok': False, 'error': str(e)[:160]})
+    _set_cors(resp)
     return resp
 
 
@@ -1145,12 +1303,10 @@ def _call_vision_ocr(image_b64, prompt):
     """Call OpenRouter vision model for OCR. Falls back through models."""
     api_key = os.environ.get('OPENROUTER_API_KEY', '')
     if not api_key:
-        # Try from config
+        # Try from persistent LLM config (UI 设置)
         try:
-            import yaml
-            cfg = yaml.safe_load(open(os.path.expanduser('~/.hermes/config.yaml')))
-            api_key = cfg.get('providers', {}).get('openrouter', {}).get('api_key', '')
-        except:
+            api_key = _load_llm_config().get('openrouter_key', '')
+        except Exception:
             pass
 
     if not api_key:

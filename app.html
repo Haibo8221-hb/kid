@@ -460,6 +460,21 @@ canvas.radar{width:240px!important;height:240px!important}
 .lm-nav button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 .lm-nav button:disabled{opacity:0.3;cursor:not-allowed}
 .lm-counter{font-size:12px;font-weight:600;color:var(--text2)}
+/* ── LLM 设置弹窗 ── */
+.llmset-row{margin-bottom:14px}
+.llmset-row label{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px}
+.llmset-row .hint{font-size:11px;color:var(--text2);margin-top:3px}
+.llmset-row input{width:100%;padding:9px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);outline:none;box-sizing:border-box}
+.llmset-row input:focus{border-color:var(--accent)}
+.llmset-keywrap{position:relative}
+.llmset-keywrap input{padding-right:64px}
+.llmset-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--accent);font-size:11px;cursor:pointer}
+.llmset-range{display:flex;align-items:center;gap:10px}
+.llmset-range input[type=range]{flex:1}
+.llmset-range .val{font-size:13px;font-weight:600;min-width:34px;text-align:right}
+.llmset-status{font-size:12px;margin-top:6px;min-height:16px}
+.llmset-status.ok{color:var(--green,#34d399)}
+.llmset-status.err{color:var(--red)}
 </style>
 </head>
 <body>
@@ -508,6 +523,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <a href="/Diya_Plan.html" target="_blank">Diya Plan</a>
 <a href="/Diya_Jemma_Oxbridge_Plan.html" target="_blank">Route Overview</a>
 <a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">Summer Guide</a>
+<a href="#" onclick="openLLMSettings();return false" title="配置 LLM 端点 / API Key / 模型">⚙️ LLM 设置</a>
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
@@ -956,6 +972,57 @@ Hong Kong parallel: HKUST+PolyU
 <div class="avatar-picker" id="avatar-picker-grid"></div>
 <div class="modal-actions">
 <button class="btn" onclick="document.getElementById('avatar-modal').classList.remove('open')">Cancel</button>
+</div>
+</div>
+
+<!-- LLM Settings Modal -->
+<div class="modal-overlay" id="llm-settings-modal">
+<div class="modal" style="width:520px">
+<h3>⚙️ LLM 设置（OpenAI 兼容）</h3>
+
+<div class="llmset-row">
+  <label>API Endpoint（兼容 OpenAI 的 Base URL）</label>
+  <input type="text" id="llm-endpoint" placeholder="https://api.deepseek.com 或 https://api.openai.com/v1">
+  <div class="hint">留末尾不要带 /chat/completions，系统会自动拼接。</div>
+</div>
+
+<div class="llmset-row">
+  <label>API Key</label>
+  <div class="llmset-keywrap">
+    <input type="password" id="llm-apikey" placeholder="sk-..." autocomplete="off">
+    <button type="button" class="llmset-eye" onclick="llmToggleKey()">显示</button>
+  </div>
+  <div class="hint" id="llm-keyhint">未配置时聊天与错题解析将无法使用。</div>
+</div>
+
+<div class="llmset-row">
+  <label>Model（模型名）</label>
+  <input type="text" id="llm-model" placeholder="deepseek-chat / gpt-4o / claude-... ">
+</div>
+
+<div class="llmset-row">
+  <label>Temperature（创作温度）</label>
+  <div class="llmset-range">
+    <input type="range" id="llm-temp" min="0" max="1" step="0.1" value="0.7" oninput="document.getElementById('llm-temp-val').textContent=this.value">
+    <span class="val" id="llm-temp-val">0.7</span>
+  </div>
+</div>
+
+<div class="llmset-row">
+  <label>OpenRouter API Key（可选，用于图片 OCR 识别）</label>
+  <div class="llmset-keywrap">
+    <input type="password" id="llm-openrouter" placeholder="sk-or-..." autocomplete="off">
+    <button type="button" class="llmset-eye" onclick="llmToggleKey('llm-openrouter',this)">显示</button>
+  </div>
+</div>
+
+<div class="llmset-status" id="llm-status"></div>
+
+<div class="modal-actions">
+  <button class="btn btn-sm" onclick="llmTestSettings()">测试连接</button>
+  <button class="btn" onclick="document.getElementById('llm-settings-modal').classList.remove('open')">取消</button>
+  <button class="btn" onclick="llmSaveSettings()">保存</button>
+</div>
 </div>
 </div>
 </div>
@@ -2160,23 +2227,53 @@ async function sendChatMsg(){
  appendChatMsg('user',text);
  input.value='';
  btn.disabled=true;
+ const container=document.getElementById('chat-messages');
+ // 建一个空的 AI 气泡用于流式填充
+ const aiDiv=document.createElement('div'); aiDiv.className='msg assistant';
+ const aiBubble=document.createElement('div'); aiBubble.className='bubble';
+ aiBubble.innerHTML='<span style="opacity:.5">思考中…</span>';
+ aiDiv.appendChild(aiBubble); container.appendChild(aiDiv);
+ const scroll=()=>{container.scrollTop=container.scrollHeight;};
+ const stripThink=s=>s.replace(/<think>[\s\S]*?<\/think>/g,'').trim();
+ let full='';
  try{
- const r=await fetch('/api/chat/'+currentChatChild,{
- method:'POST',
- headers:{'Content-Type':'application/json'},
- body:JSON.stringify({message:text})
- });
- const data=await r.json();
- if(data.reply){
- appendChatMsg('ai',data.reply);
- } else if(data.error){
- appendChatMsg('ai','Error: '+data.error);
+ const r=await fetch('/api/chat/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,user:currentChatChild})});
+ if(r.status!==200){
+ let msg='请求失败 ('+r.status+')';
+ try{ const d=await r.json(); if(d.error) msg=d.error; }catch(e){}
+ aiBubble.innerHTML='<span style="color:var(--red)">Error: '+msg+'</span>';
+ return;
  }
+ const reader=r.body.getReader(); const dec=new TextDecoder(); let buf='';
+ while(true){
+ const {done,value}=await reader.read();
+ if(done) break;
+ buf+=dec.decode(value,{stream:true});
+ let idx;
+ while((idx=buf.indexOf('\n\n'))>=0){
+ const frame=buf.slice(0,idx); buf=buf.slice(idx+2);
+ const line=frame.split('\n').find(l=>l.startsWith('data: '));
+ if(!line) continue;
+ let payload; try{ payload=JSON.parse(line.slice(6)); }catch(e){ continue; }
+ if(payload.token){ full+=payload.token; aiBubble.innerHTML=markdownToHtml(stripThink(full)); scroll(); }
+ else if(payload.error){ aiBubble.innerHTML='<span style="color:var(--red)">Error: '+payload.error+'</span>'; full=''; }
+ }
+ }
+ if(full) aiBubble.innerHTML=markdownToHtml(stripThink(full));
  }catch(e){
- appendChatMsg('ai','Network error, please retry');
+ // 流式异常则回退到非流式接口
+ try{
+ const r2=await fetch('/api/chat/'+currentChatChild,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
+ const d=await r2.json();
+ if(d.reply) aiBubble.innerHTML=markdownToHtml(stripThink(d.reply));
+ else if(d.error) aiBubble.innerHTML='<span style="color:var(--red)">Error: '+d.error+'</span>';
+ else aiBubble.innerHTML='<span style="color:var(--red)">Error: 未知响应</span>';
+ }catch(e2){
+ aiBubble.innerHTML='<span style="color:var(--red)">网络错误，请重试</span>';
  }
- btn.disabled=false;
- document.getElementById('chat-messages').scrollTop=document.getElementById('chat-messages').scrollHeight;
+ }finally{
+ btn.disabled=false; scroll();
+ }
 }
 async function clearChatHistory(){
  if(!confirm('Clear all chat history?')) return;
@@ -2727,6 +2824,70 @@ function showAvatarPicker(){
  const avatars = ['\uD83D\uDC67','\uD83D\uDC69\u200D\uD83D\uDD2C','\uD83D\uDC69\u200D\uD83D\uDCBB','\uD83D\uDC69\u200D\uD83C\uDFA8','\uD83D\uDC69\u200D\uD83D\uDD27','\uD83D\uDC69\u200D\uD83D\uDE80','\uD83C\uDF1F','\uD83C\uDFAF','\uD83D\uDD2C','\uD83D\uDCA1','\uD83E\uDDE0','\uD83D\uDCD0','\uD83D\uDC31','\uD83E\uDD8A','\uD83C\uDF38','\uD83C\uDF0D','\uD83C\uDF0A','\uD83C\uDF08','\u2601\uFE0F','\u2728','\uD83D\uDD25','\uD83D\uDCA5','\uD83C\uDFB5','\uD83C\uDFAE','\uD83D\uDCDA','\uD83D\uDC8E','\uD83D\uDD2E','\uD83D\uDD2D','\uD83E\uDDD0','\uD83C\uDF0C','\u2699\uFE0F','\u26A1'];
  grid.innerHTML = avatars.map(a=>`<div class="avatar-option${document.getElementById('profile-avatar').textContent===a?' selected':''}" onclick="document.getElementById('profile-avatar').textContent='${a}';saveProfile();document.getElementById('avatar-modal').classList.remove('open')">${a}</div>`).join('');
  modal.classList.add('open');
+}
+
+// ── LLM Settings (UI) ──────────────────────────────────
+function openLLMSettings(){
+  const m = document.getElementById('llm-settings-modal');
+  const st = document.getElementById('llm-status');
+  st.textContent=''; st.className='llmset-status';
+  fetch('/api/settings/llm').then(r=>r.ok?r.json():{}).then(d=>{
+    document.getElementById('llm-endpoint').value = d.endpoint||'';
+    document.getElementById('llm-model').value = d.model||'';
+    const t = (d.temperature!=null?d.temperature:0.7);
+    document.getElementById('llm-temp').value = t;
+    document.getElementById('llm-temp-val').textContent = t;
+    // 安全：不回显明文 key，仅告知是否已配置
+    document.getElementById('llm-apikey').value = '';
+    document.getElementById('llm-openrouter').value = '';
+    const kh = document.getElementById('llm-keyhint');
+    kh.textContent = d.has_key
+      ? ('当前已配置 Key：'+(d.key_masked||'****')+'（如要更换请在上方填写新 Key，留空则保留）')
+      : '未配置 Key：聊天与错题解析将无法使用，请在上方填写。';
+  }).catch(()=>{});
+  m.classList.add('open');
+}
+
+function llmToggleKey(id, btn){
+  id = id || 'llm-apikey';
+  const el = document.getElementById(id);
+  if(el.type==='password'){ el.type='text'; if(btn) btn.textContent='隐藏'; }
+  else { el.type='password'; if(btn) btn.textContent='显示'; }
+}
+
+function llmSaveSettings(){
+  const payload = {
+    endpoint: document.getElementById('llm-endpoint').value.trim(),
+    api_key: document.getElementById('llm-apikey').value.trim(),
+    model: document.getElementById('llm-model').value.trim(),
+    temperature: parseFloat(document.getElementById('llm-temp').value)||0.7,
+    openrouter_key: document.getElementById('llm-openrouter').value.trim(),
+  };
+  const st = document.getElementById('llm-status');
+  fetch('/api/settings/llm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.ok){ st.textContent='✅ 已保存'; st.className='llmset-status ok'; toast('LLM 设置已保存'); setTimeout(()=>document.getElementById('llm-settings-modal').classList.remove('open'),700); }
+      else { st.textContent='❌ '+(d.error||'保存失败'); st.className='llmset-status err'; }
+    })
+    .catch(e=>{ st.textContent='❌ 网络错误：'+e.message; st.className='llmset-status err'; });
+}
+
+function llmTestSettings(){
+  const payload = {
+    endpoint: document.getElementById('llm-endpoint').value.trim(),
+    api_key: document.getElementById('llm-apikey').value.trim(),
+    model: document.getElementById('llm-model').value.trim(),
+  };
+  const st = document.getElementById('llm-status');
+  st.textContent='测试中…'; st.className='llmset-status';
+  fetch('/api/settings/llm/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.ok){ st.textContent='✅ 连接成功（'+(d.model||'')+'）'; st.className='llmset-status ok'; }
+      else { st.textContent='❌ '+(d.error||'测试失败'); st.className='llmset-status err'; }
+    })
+    .catch(e=>{ st.textContent='❌ 网络错误：'+e.message; st.className='llmset-status err'; });
 }
 
 // Toast 
