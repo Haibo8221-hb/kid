@@ -5,7 +5,7 @@
 # 前提：本机 ~/.ssh/config 已配 112.74.40.8 走公司代理（见 ~/.ssh/config）。
 # =============================================================================
 set -e
-SITE_ROOT="${SITE_ROOT:-/www/wwwroot/kid-site}"
+SITE_ROOT="${SITE_ROOT:-/www/wwwroot/kid}"
 ECS_HOST="${ECS_HOST:-112.74.40.8}"
 ECS_PORT="${ECS_PORT:-443}"
 ECS_USER="${ECS_USER:-root}"
