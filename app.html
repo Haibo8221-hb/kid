@@ -525,7 +525,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <a href="/Diya_Plan.html" target="_blank">Diya Plan</a>
 <a href="/Diya_Jemma_Oxbridge_Plan.html" target="_blank">Route Overview</a>
 <a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">Summer Guide</a>
-<a href="#" id="llm-settings-btn" title="配置 LLM 端点 / API Key / 模型">⚙️ LLM 设置</a>
+<a href="#" id="llm-settings-btn" title="配置 LLM 端点 / API Key / 模型" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM模块未加载(版本 4895408)。很可能是浏览器或代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或改用带版本号的地址：app.html?v=4895408');}}catch(e){alert('LLM设置打开失败: '+((e&&e.message)||e));} return false;">⚙️ LLM 设置</a>
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
@@ -1062,6 +1062,8 @@ window.addEventListener('error', function(e){
 })();
 // State 
 let currentChild = 'diya';
+// 版本号（即部署 commit 短哈希）；用于诊断“缓存了旧版 app.html”
+const APP_VERSION = '4895408';
 let plannerWeeks = {diya:0};
 let plannerData = {diya:{}};
 let tasksData = {diya:{}};
@@ -3039,6 +3041,14 @@ document.addEventListener('DOMContentLoaded',()=>{
  setTheme(theme);
  loadDashboard();
  loadStreak();
+ // 自检：若 LLM 模块未就绪，页面红字提示（多为缓存旧版）
+ try{
+   var _btn=document.getElementById('llm-settings-btn');
+   if(_btn && typeof openLLMSettings!=='function'){
+     var _t=document.getElementById('toast');
+     if(_t){ _t.textContent='⚠️ LLM 模块未加载(版本 '+APP_VERSION+')：很可能是浏览器/代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或访问 https://112.74.40.8/app.html?v='+APP_VERSION; _t.style.background='#f59e0b'; _t.classList.add('show'); setTimeout(function(){_t.classList.remove('show');_t.style.background='';},15000); }
+   }
+ }catch(_){}
 });
 </script>
 </body>
