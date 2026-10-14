@@ -3,6 +3,4 @@ flask>=2.3
 httpx>=0.24
 gunicorn>=21.0
 pyyaml>=6.0
-
-# 可选（仅高级功能用到，按需取消注释）：
-# pdfplumber>=3.0     # PDF 解析相关接口
+pypdfium2>=4.0     # 作业上传：PDF 逐页渲染为 PNG（纯 pip，免系统 poppler）

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Flask API for planner data storage + AI chat + wiki logs"""
-import hashlib, hmac, json, os, re, time, uuid
+import base64, hashlib, hmac, json, os, re, time, uuid
 from datetime import datetime
 from flask import Flask, request, jsonify, Response, stream_with_context
 import httpx
@@ -1515,6 +1515,490 @@ def ocr_api():
 
     result = _call_vision_ocr(image_b64, prompt)
     return jsonify(result)
+
+
+# ── Upload & OCR Pipeline（作业/报告上传识别入库，设计见 UPLOAD_FEATURE_DESIGN.md）──
+
+UPLOAD_ROOT = os.path.join(DATA_DIR, 'uploads')
+UPLOAD_INDEX = os.path.join(DATA_DIR, 'uploads_index.json')
+UPLOAD_CHILDREN = ('diya', 'jemma')
+UPLOAD_MAX_IMG = 10 * 1024 * 1024        # 图片 ≤10MB
+UPLOAD_MAX_PDF = 30 * 1024 * 1024        # PDF ≤30MB
+UPLOAD_MAX_PAGES = 20                    # PDF ≤20 页
+OCR_EXTRACT_MODEL = os.environ.get('OCR_EXTRACT_MODEL', 'qwen3.8-flash')  # 字段抽取模型（文本）
+
+app.config['MAX_CONTENT_LENGTH'] = 35 * 1024 * 1024
+
+import concurrent.futures
+import threading
+
+_upload_pool = concurrent.futures.ThreadPoolExecutor(max_workers=2)   # OCR 属 IO 密集，2 并发
+_upload_lock = threading.Lock()          # meta/index 进程内写锁
+# 上传频率限制（进程内计数；gunicorn 每 worker 独立，家庭场景足够）
+_upload_rate = {}                        # ip -> [timestamps]
+
+try:
+    import pypdfium2 as pdfium           # PDF 渲染（纯 pip，免系统 poppler）
+except Exception:
+    pdfium = None
+
+
+def _upload_dir(child, uid):
+    return os.path.join(UPLOAD_ROOT, child, uid[:8], uid)
+
+def _upload_meta_path(child, uid):
+    return os.path.join(_upload_dir(child, uid), 'meta.json')
+
+def _save_upload_meta(child, uid, meta):
+    meta['updated'] = datetime.now().isoformat(timespec='seconds')
+    with _upload_lock:
+        atomic_write(_upload_meta_path(child, uid), meta, indent=2)
+
+def _load_upload_meta(child, uid):
+    return safe_load(_upload_meta_path(child, uid), default=None)
+
+def _load_upload_index():
+    with _upload_lock:
+        return safe_load(UPLOAD_INDEX, default=[])
+
+def _save_upload_index(entries):
+    with _upload_lock:
+        atomic_write(UPLOAD_INDEX, entries, indent=2)
+
+def _index_upsert(child, uid, patch):
+    """线程安全地更新 index 条目（读-改-写）"""
+    with _upload_lock:
+        entries = safe_load(UPLOAD_INDEX, default=[])
+        hit = None
+        for e in entries:
+            if e.get('id') == uid and e.get('child') == child:
+                hit = e
+                break
+        if hit is None:
+            hit = {'id': uid, 'child': child}
+            entries.append(hit)
+        hit.update(patch)
+        atomic_write(UPLOAD_INDEX, entries, indent=2)
+
+def _index_remove(child, uid):
+    with _upload_lock:
+        entries = safe_load(UPLOAD_INDEX, default=[])
+        entries = [e for e in entries if not (e.get('id') == uid and e.get('child') == child)]
+        atomic_write(UPLOAD_INDEX, entries, indent=2)
+
+def _sniff_upload(data, filename):
+    """文件魔数嗅探（优先于扩展名）。返回 (kind, ext) 或 (None, reason)"""
+    head = data[:16]
+    ext = os.path.splitext(filename or '')[1].lower()
+    if head.startswith(b'%PDF'):
+        return ('pdf', '.pdf')
+    if head.startswith(b'\x89PNG'):
+        return ('image', '.png')
+    if head.startswith(b'\xff\xd8\xff'):
+        return ('image', '.jpg')
+    if head[:4] == b'RIFF' and head[8:12] == b'WEBP':
+        return ('image', '.webp')
+    if ext in ('.pdf',):
+        return (None, '文件内容不是有效 PDF（头部特征不符）')
+    if ext in ('.png', '.jpg', '.jpeg', '.webp'):
+        return (None, '文件内容与扩展名不符（已按文件头校验）')
+    return (None, f'不支持的格式 {ext or "（无扩展名）"}，仅支持 PNG/JPG/WEBP/PDF')
+
+def _render_pages(child, uid, meta):
+    """PDF → 逐页 PNG（200dpi）；图片 → 直接引用原文件。返回 meta['pages'] 列表。"""
+    d = _upload_dir(child, uid)
+    kind = meta['kind']
+    if kind == 'image':
+        return [{'no': 1, 'image': meta['stored_name'], 'ok': False}]
+    if pdfium is None:
+        raise RuntimeError('服务器未安装 pypdfium2，无法解析 PDF')
+    pdf = pdfium.PdfDocument(os.path.join(d, meta['stored_name']))
+    total = len(pdf)
+    if total > UPLOAD_MAX_PAGES:
+        raise RuntimeError(f'PDF 共 {total} 页，超过上限 {UPLOAD_MAX_PAGES} 页')
+    pages = []
+    render_errors = []
+    for i in range(total):
+        try:
+            img = pdf[i].render(scale=200 / 72).to_pil()
+            name = f'page-{i + 1:02d}.png'
+            img.save(os.path.join(d, name), 'PNG')
+            pages.append({'no': i + 1, 'image': name, 'ok': False})
+        except Exception as e:
+            render_errors.append({'page': i + 1, 'error': str(e)[:120]})
+            pages.append({'no': i + 1, 'image': None, 'ok': False, 'render_error': str(e)[:120]})
+    try:
+        pdf.close()
+    except Exception:
+        pass
+    meta['render_errors'] = render_errors
+    return pages
+
+def _extract_upload_fields(full_text, child):
+    """字段抽取：主 LLM（文本模型）输出 JSON。失败返回 None（不阻塞入库）。"""
+    cfg = _load_llm_config()
+    if not cfg.get('base_url') or not cfg.get('api_key'):
+        return None
+    prompt = (
+        '从下面的作业/试卷 OCR 文本中抽取结构化字段，只输出 JSON（不要 markdown 围栏）：\n'
+        '{"subject": "科目(枚举 Maths/FMaths/Physics/Chemistry/Biology/English/History/Drama/CS/Other)", '
+        '"doc_type": "homework|report|exam|quiz", "title": "≤80字标题", "date": "YYYY-MM-DD或null", '
+        '"score": {"got": 数字, "total": 数字} 或 null, '
+        '"topics": ["知识点标签，≤5个"], '
+        '"mistakes": [{"question_no": "题号", "wrong_answer": "学生的错误答案", '
+        '"correct_answer": "正确答案或要点", "reason": "错误原因一句话"}], '
+        '"weakness_summary": "一句话弱点总结，≤120字"}\n'
+        '只识别真实存在的错题（有学生错误答案的题）；没有错题时 mistakes 为空数组。\n\n'
+        'OCR 文本：\n' + full_text[:12000]
+    )
+    try:
+        with httpx.Client(timeout=90.0) as client:
+            resp = client.post(
+                f'{cfg["base_url"]}/chat/completions',
+                headers={'Authorization': f'Bearer {cfg["api_key"]}', 'Content-Type': 'application/json'},
+                json={'model': OCR_EXTRACT_MODEL, 'messages': [{'role': 'user', 'content': prompt}],
+                      'max_tokens': 2000, 'temperature': 0.1}
+            )
+        if resp.status_code != 200:
+            return None
+        raw = (resp.json().get('choices') or [{}])[0].get('message', {}).get('content', '')
+        m = re.search(r'\{.*\}', raw, re.S)
+        if not m:
+            return None
+        out = json.loads(m.group(0))
+        out['model'] = OCR_EXTRACT_MODEL
+        return out
+    except Exception:
+        return None
+
+def _process_upload(child, uid):
+    """异步管线：rendering → ocr（逐页）→ extract → done。失败置 failed，文件保留可重试。"""
+    meta = _load_upload_meta(child, uid)
+    if not meta:
+        return
+    try:
+        # 1) 渲染
+        meta['status'] = 'rendering'
+        _save_upload_meta(child, uid, meta)
+        pages = _render_pages(child, uid, meta)
+        meta['pages'] = pages
+        meta['page_count'] = len(pages)
+        meta['status'] = 'ocr'
+        meta['ocr_done'] = 0
+        _save_upload_meta(child, uid, meta)
+
+        # 2) 逐页 OCR（只跑尚无文本的页——支持部分重试）
+        d = _upload_dir(child, uid)
+        for pg in pages:
+            if pg.get('ok') or not pg.get('image'):
+                continue
+            try:
+                with open(os.path.join(d, pg['image']), 'rb') as f:
+                    b64 = base64.b64encode(f.read()).decode()
+                r = _call_vision_ocr(b64, OCR_PROMPT_DEFAULT)
+                if r.get('text'):
+                    pg['raw_text'] = r['text']
+                    pg['clean_text'] = r['text']
+                    pg['ocr_model'] = r.get('model', '')
+                    pg['ok'] = True
+                else:
+                    pg['ocr_error'] = (r.get('error') or 'empty result')[:200]
+            except Exception as e:
+                pg['ocr_error'] = str(e)[:200]
+            meta['ocr_done'] = meta.get('ocr_done', 0) + 1
+            _save_upload_meta(child, uid, meta)   # 每页落盘 → 前端轮询可见进度
+
+        done_pages = [p for p in pages if p.get('ok')]
+        if not done_pages:
+            raise RuntimeError('所有页 OCR 均失败')
+
+        full_text = '\n\n'.join(
+            f'--- page {p["no"]} ---\n{p["clean_text"]}' for p in done_pages
+        )
+        meta['full_text'] = full_text
+
+        # 3) 字段抽取（失败不阻塞）
+        meta['status'] = 'extract'
+        _save_upload_meta(child, uid, meta)
+        ext = _extract_upload_fields(full_text, child)
+        if ext:
+            meta['extract'] = ext
+            meta['extract_status'] = 'done'
+        else:
+            meta['extract'] = {}
+            meta['extract_status'] = 'failed'
+
+        meta['status'] = 'done'
+        _save_upload_meta(child, uid, meta)
+        e = meta.get('extract') or {}
+        _index_upsert(child, uid, {
+            'id': uid, 'child': child,
+            'original_name': meta.get('original_name', ''),
+            'doc_type': e.get('doc_type') or meta.get('doc_type') or 'homework',
+            'subject': e.get('subject') or meta.get('subject') or 'Other',
+            'title': e.get('title') or meta.get('original_name', ''),
+            'date': e.get('date') or meta.get('created', '')[:10],
+            'score': e.get('score'),
+            'topics': e.get('topics') or [],
+            'page_count': meta.get('page_count', 1),
+            'size': meta.get('size', 0),
+            'status': 'done',
+            'ocr_status': 'done',
+            'extract_status': meta.get('extract_status', 'failed'),
+            'created': meta.get('created', ''),
+            'updated': meta.get('updated', ''),
+        })
+    except Exception as e:
+        try:
+            meta['status'] = 'failed'
+            meta['error'] = str(e)[:300]
+            meta['retry_count'] = meta.get('retry_count', 0)
+            _save_upload_meta(child, uid, meta)
+            _index_upsert(child, uid, {'id': uid, 'child': child, 'status': 'failed',
+                                       'error': meta['error'], 'updated': meta['updated']})
+        except Exception:
+            pass
+        app.logger.exception('upload pipeline failed %s/%s', child, uid)
+
+
+@app.errorhandler(413)
+def _upload_too_large(_e):
+    resp = jsonify({'error': '文件超过 35MB 限制'})
+    _set_cors(resp)
+    return resp, 413
+
+
+@app.route('/api/upload/<child>', methods=['POST', 'OPTIONS'])
+def upload_api(child):
+    """上传作业/报告（multipart）。SHA-256 硬去重，成功后异步进入 OCR 管线。"""
+    if request.method == 'OPTIONS':
+        return _cors()
+    if child not in UPLOAD_CHILDREN:
+        return jsonify({'error': f'未知的孩子: {child}'}), 400
+
+    # 频率限制：30 文件/小时/IP
+    now = time.time()
+    with _upload_lock:
+        bucket = _upload_rate.get(request.remote_addr or '?', [])
+        bucket = [t for t in bucket if now - t < 3600]
+        if len(bucket) >= 30:
+            return jsonify({'error': '上传过于频繁（每小时限 30 个文件），请稍后再试'}), 429
+        bucket.append(now)
+        _upload_rate[request.remote_addr or '?'] = bucket
+
+    f = request.files.get('file')
+    if not f or not f.filename:
+        return jsonify({'error': '缺少文件（multipart 字段名应为 file）'}), 400
+    data = f.read()
+    if not data:
+        return jsonify({'error': '空文件'}), 400
+
+    kind, ext = _sniff_upload(data, f.filename)
+    if kind is None:
+        return jsonify({'error': ext}), 400
+    limit = UPLOAD_MAX_PDF if kind == 'pdf' else UPLOAD_MAX_IMG
+    if len(data) > limit:
+        return jsonify({'error': f'{"PDF" if kind == "pdf" else "图片"}大小超过限制（{limit // 1024 // 1024}MB）'}), 413
+
+    sha = hashlib.sha256(data).hexdigest()
+    force = request.form.get('force') == '1'
+    # 硬去重：同 child 同内容直接返回已存在条目
+    for e in _load_upload_index():
+        if e.get('child') == child and e.get('sha256') == sha:
+            if not force:
+                return jsonify({'error': '重复上传', 'duplicate_of': e.get('id'),
+                                'hint': '文件内容相同，已存在；传 force=1 可强制重新识别'}), 409
+            break
+
+    uid = datetime.now().strftime('%Y%m%d-%H%M%S-') + uuid.uuid4().hex[:6]
+    d = _upload_dir(child, uid)
+    os.makedirs(d, exist_ok=True)
+    stored_name = 'original' + ext
+    with open(os.path.join(d, stored_name), 'wb') as fp:
+        fp.write(data)
+
+    meta = {
+        'id': uid, 'child': child,
+        'original_name': f.filename,
+        'stored_name': stored_name,
+        'mime': {'pdf': 'application/pdf'}.get(kind, f'image/{ext[1:]}'),
+        'kind': kind, 'size': len(data), 'sha256': sha,
+        'doc_type': (request.form.get('doc_type') or '').strip() or None,
+        'subject': (request.form.get('subject') or '').strip() or None,
+        'status': 'queued', 'retry_count': 0, 'error': None,
+        'created': datetime.now().isoformat(timespec='seconds'),
+        'updated': datetime.now().isoformat(timespec='seconds'),
+    }
+    _save_upload_meta(child, uid, meta)
+    _index_upsert(child, uid, {
+        'id': uid, 'child': child, 'original_name': f.filename, 'sha256': sha,
+        'status': 'queued', 'size': len(data), 'page_count': 0,
+        'created': meta['created'], 'updated': meta['updated'],
+    })
+    _upload_pool.submit(_process_upload, child, uid)
+    resp = jsonify({'ok': True, 'id': uid, 'status': 'queued'})
+    _set_cors(resp)
+    return resp, 202
+
+
+@app.route('/api/uploads/<child>', methods=['GET', 'OPTIONS'])
+def uploads_list(child):
+    if request.method == 'OPTIONS':
+        return _cors()
+    if child not in UPLOAD_CHILDREN:
+        return jsonify({'error': f'未知的孩子: {child}'}), 400
+    q_status = request.args.get('status')
+    q_subject = request.args.get('subject')
+    entries = [e for e in _load_upload_index() if e.get('child') == child]
+    if q_status:
+        entries = [e for e in entries if e.get('status') == q_status]
+    if q_subject:
+        entries = [e for e in entries if e.get('subject') == q_subject]
+    entries.sort(key=lambda e: e.get('created', ''), reverse=True)
+    return jsonify(entries)
+
+
+@app.route('/api/uploads/<child>/<uid>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+def upload_detail(child, uid):
+    if request.method == 'OPTIONS':
+        return _cors()
+    if child not in UPLOAD_CHILDREN:
+        return jsonify({'error': f'未知的孩子: {child}'}), 400
+    if not re.fullmatch(r'\d{8}-\d{6}-[0-9a-f]{6}', uid or ''):
+        return jsonify({'error': '非法的 upload id'}), 400
+    meta = _load_upload_meta(child, uid)
+    if not meta:
+        return jsonify({'error': 'not found'}), 404
+
+    if request.method == 'GET':
+        # 列表/详情分离：meta 的 raw_text 可截断返回以省带宽（full_text 保留）
+        out = dict(meta)
+        out.pop('sha256', None)
+        return jsonify(out)
+
+    if request.method == 'PUT':
+        data = request.get_json(force=True, silent=True) or {}
+        action = data.get('action')
+        if action == 'retry_ocr':
+            # 重置失败页，重新排队
+            meta['status'] = 'queued'
+            meta['error'] = None
+            meta['retry_count'] = meta.get('retry_count', 0) + 1
+            meta.pop('extract', None)
+            _save_upload_meta(child, uid, meta)
+            _upload_pool.submit(_process_upload, child, uid)
+            return jsonify({'ok': True, 'status': 'queued', 'retry_count': meta['retry_count']})
+        if action == 'retry_extract':
+            if not meta.get('full_text'):
+                return jsonify({'error': '尚无 OCR 文本，无法抽取'}), 400
+            ext = _extract_upload_fields(meta['full_text'], child)
+            if ext:
+                meta['extract'] = ext
+                meta['extract_status'] = 'done'
+            else:
+                meta['extract_status'] = 'failed'
+            _save_upload_meta(child, uid, meta)
+            return jsonify({'ok': bool(ext), 'extract_status': meta['extract_status']})
+        # 手工修正字段
+        extract = meta.setdefault('extract', {})
+        for k in ('subject', 'doc_type', 'title', 'date', 'topics'):
+            if k in data:
+                extract[k] = data[k]
+        if 'score' in data:
+            extract['score'] = data['score']
+        if extract:
+            meta['extract_status'] = 'manual'
+        _save_upload_meta(child, uid, meta)
+        e = meta.get('extract') or {}
+        _index_upsert(child, uid, {
+            'id': uid, 'child': child,
+            'subject': e.get('subject') or 'Other',
+            'doc_type': e.get('doc_type') or 'homework',
+            'title': e.get('title') or meta.get('original_name', ''),
+            'date': e.get('date') or meta.get('created', '')[:10],
+            'score': e.get('score'), 'topics': e.get('topics') or [],
+            'updated': meta['updated'],
+        })
+        return jsonify({'ok': True})
+
+    # DELETE：删目录 + 索引
+    import shutil as _shutil
+    try:
+        _shutil.rmtree(_upload_dir(child, uid), ignore_errors=True)
+    except Exception:
+        pass
+    _index_remove(child, uid)
+    return jsonify({'ok': True})
+
+
+_UPLOAD_FILE_RE = re.compile(r'^(original\.(pdf|png|jpe?g|webp)|page-\d{2}\.png)$')
+
+@app.route('/api/uploads/<child>/<uid>/file/<name>', methods=['GET', 'OPTIONS'])
+def upload_file(child, uid, name):
+    """页图/原文件预览。文件名白名单 + 目录限制，防路径穿越。"""
+    if request.method == 'OPTIONS':
+        return _cors()
+    if child not in UPLOAD_CHILDREN:
+        return jsonify({'error': f'未知的孩子: {child}'}), 400
+    if not re.fullmatch(r'\d{8}-\d{6}-[0-9a-f]{6}', uid or '') or not _UPLOAD_FILE_RE.fullmatch(name or ''):
+        return jsonify({'error': '非法请求'}), 400
+    path = os.path.join(_upload_dir(child, uid), name)
+    if not os.path.isfile(path):
+        return jsonify({'error': 'not found'}), 404
+    mimes = {'.pdf': 'application/pdf', '.png': 'image/png', '.jpg': 'image/jpeg',
+             '.jpeg': 'image/jpeg', '.webp': 'image/webp'}
+    mime = mimes.get(os.path.splitext(name)[1], 'application/octet-stream')
+    from flask import send_file
+    return send_file(path, mimetype=mime)
+
+
+@app.route('/api/uploads/<child>/<uid>/to-errors', methods=['POST', 'OPTIONS'])
+def upload_to_errors(child, uid):
+    """把抽取的 mistakes[] 批量转为错题本条目（复用 errors_<child>.json 结构）。"""
+    if request.method == 'OPTIONS':
+        return _cors()
+    if child not in UPLOAD_CHILDREN:
+        return jsonify({'error': f'未知的孩子: {child}'}), 400
+    meta = _load_upload_meta(child, uid)
+    if not meta:
+        return jsonify({'error': 'not found'}), 404
+    mistakes = ((meta.get('extract') or {}).get('mistakes')) or []
+    if not mistakes:
+        return jsonify({'ok': True, 'added': 0, 'note': '无错题可导入'})
+
+    err_file = os.path.join(DATA_DIR, f'errors_{child}.json')
+    errs = safe_load(err_file, default=[])
+    existing = {e.get('id') for e in errs}
+    added = 0
+    title = (meta.get('extract') or {}).get('title') or meta.get('original_name', '')
+    subject = (meta.get('extract') or {}).get('subject') or 'Other'
+    for i, m in enumerate(mistakes):
+        eid = f'upload-{uid}-{i + 1}'
+        if eid in existing:
+            continue
+        qn = str(m.get('question_no') or f'Q{i + 1}')
+        errs.append({
+            'id': eid,
+            'subject': subject,
+            'question': f'{qn}（{title}）',
+            'original_question': qn,
+            f'{child}_answer': str(m.get('wrong_answer') or ''),
+            'diya_answer': str(m.get('wrong_answer') or ''),   # 前端 app.html 读 diya_answer
+            'score': '',
+            'strengths': '',
+            'weaknesses': str(m.get('reason') or ''),
+            'correct_solution': str(m.get('correct_answer') or ''),
+            'error_type': 'homework',
+            'priority': 'p1',
+            'tags': (meta.get('extract') or {}).get('topics') or [],
+            'type': 'upload',
+            'source': f'上传识别：{meta.get("original_name", "")}',
+            'date': meta.get('created', ''),
+            'enriched': False,
+        })
+        added += 1
+    atomic_write(err_file, errs, indent=2)
+    return jsonify({'ok': True, 'added': added, 'total_errors': len(errs)})
 
 
 # ── Homework API ──────────────────────────────────────────────────

@@ -350,6 +350,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <li><a href="#" data-tab="weekly-review" onclick="switchTab('weekly-review');return false">📋 Weekly Review</a></li>
 <li><a href="#" data-tab="chat" onclick="switchTab('chat');return false">💬 AI Chat</a></li>
 <li><a href="#" data-tab="errors" onclick="switchTab('errors');return false">❌ Error Book</a></li>
+<li><a href="#" data-tab="upload" onclick="switchTab('upload');return false">📤 Upload</a></li>
 </ul>
 <div class="sidebar-bottom">
 <div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Planning Docs</div>
@@ -713,6 +714,25 @@ Benchmark sister's path, but start from her own strengths
 <span id="error-count" style="font-size:12px;color:var(--text2);margin-left:8px"></span>
 </div>
 <div id="error-list"><div class="error-empty">Loading...</div></div>
+</div>
+
+<div id="tab-upload" class="tab-panel">
+<div class="panel-title">📤 上传作业 / 报告 <span style="font-size:11px;color:var(--accent2);margin-left:8px">Jemma</span></div>
+<div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">
+  支持截图（PNG/JPG/WEBP ≤10MB）与 PDF（≤30MB、≤20 页）。上传后自动 OCR 识别 → 结构化抽取（科目/分数/错题），可一键存入错题本。
+</div>
+<div id="upload-drop" style="border:2px dashed var(--border);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .15s">
+  <div style="font-size:32px;margin-bottom:8px">📄</div>
+  <div style="font-size:14px;font-weight:600;margin-bottom:4px">拖拽文件到此处，或点击选择</div>
+  <div style="font-size:11px;color:var(--text2)">可多选批量上传 · 逐文件独立识别</div>
+  <input type="file" id="upload-input" multiple accept=".png,.jpg,.jpeg,.webp,.pdf" style="display:none">
+</div>
+<div id="upload-queue" style="margin-top:16px"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px">
+  <div class="section-title" style="margin-bottom:0">历史记录</div>
+  <button class="btn btn-sm" onclick="refreshUploadList()">刷新</button>
+</div>
+<div id="upload-list"><div class="error-empty">Loading...</div></div>
 </div>
 <div id="tab-notes" class="tab-panel">
 <div class="panel-title"> Notes</div>
@@ -1969,6 +1989,228 @@ function updateStreak(){
  p.streak=filledDays; p.level=lv; localStorage.setItem('profile_jemma',JSON.stringify(p));
 }
 
+// ── Upload（作业上传与识别入库，child=jemma）──────────────────
+const UPLOAD_CHILD = 'jemma';
+
+function uploadStatusBadge(s){
+  const map = {
+    queued:['排队中','var(--text2)'], rendering:['渲染中','var(--accent)'],
+    ocr:['识别中','var(--accent)'], extract:['抽取中','var(--accent)'],
+    done:['完成','var(--accent2)'], failed:['失败','var(--red)'],
+  };
+  const [txt,color] = map[s] || [s||'未知','var(--text2)'];
+  return `<span style="font-size:10px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.5px">${txt}</span>`;
+}
+function escHtmlJ(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+
+function setupUploadZone(){
+  const drop = document.getElementById('upload-drop');
+  const input = document.getElementById('upload-input');
+  if(!drop || !input) return;
+  drop.addEventListener('click', ()=>input.click());
+  drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.style.borderColor='var(--accent)'; });
+  drop.addEventListener('dragleave', ()=>{ drop.style.borderColor='var(--border)'; });
+  drop.addEventListener('drop', e=>{
+    e.preventDefault(); drop.style.borderColor='var(--border)';
+    handleUploadFiles([...e.dataTransfer.files]);
+  });
+  input.addEventListener('change', ()=>{ handleUploadFiles([...input.files]); input.value=''; });
+}
+
+async function handleUploadFiles(files){
+  if(!files.length) return;
+  for(const f of files){
+    const uid = 'tmp-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+    renderUploadQueueItem({id:uid, original_name:f.name, status:'uploading', size:f.size, page_count:0});
+    try{
+      const fd = new FormData(); fd.append('file', f);
+      const r = await fetch(`/api/upload/${UPLOAD_CHILD}`, {method:'POST', body:fd});
+      const d = await r.json().catch(()=>({}));
+      if(r.status === 409 && d.duplicate_of){
+        updateUploadQueueItem(uid, {status:'failed', error:'重复上传（内容相同）'});
+        toast('⚠️ '+f.name+' 已上传过');
+      }else if(!r.ok){
+        updateUploadQueueItem(uid, {status:'failed', error:d.error||('HTTP '+r.status)});
+        toast('❌ '+f.name+': '+(d.error||'上传失败'));
+      }else{
+        updateUploadQueueItem(uid, {id:d.id, status:'queued'});
+        toast('✅ '+f.name+' 已上传，开始识别');
+        pollUploadStatus(d.id);
+      }
+    }catch(e){ updateUploadQueueItem(uid, {status:'failed', error:'网络错误：'+e.message}); }
+  }
+  setTimeout(refreshUploadList, 1500);
+}
+
+function renderUploadQueueItem(it){
+  const q = document.getElementById('upload-queue');
+  if(!q) return;
+  const div = document.createElement('div');
+  div.id = 'uq-' + it.id;
+  div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px';
+  div.innerHTML = uploadItemInner(it);
+  q.prepend(div);
+}
+
+function uploadItemInner(it){
+  const pct = it.progress != null ? Math.round(it.progress*100) : null;
+  const sizeKb = it.size ? Math.round(it.size/1024) : 0;
+  return `
+    <span style="font-size:18px">${(it.original_name||'').toLowerCase().endsWith('.pdf') ? '📕' : '🖼️'}</span>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtmlJ(it.original_name||'')}</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px">
+        ${sizeKb}KB ${it.page_count?'· '+it.page_count+' 页':''} ${it.ocr_done!=null&&it.status==='ocr'?'· 识别 '+it.ocr_done+'/'+(it.page_count||'?')+' 页':''}
+        ${it.error?'<span style="color:var(--red)">· '+escHtmlJ(String(it.error).slice(0,80))+'</span>':''}
+      </div>
+      ${pct!=null?`<div style="height:3px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent);transition:width .3s"></div></div>`:''}
+    </div>
+    ${uploadStatusBadge(it.status)}
+    ${it.status==='done'?`<button class="btn-sm" onclick="openUploadDetail('${it.id}')">查看</button>`:''}
+    ${it.status==='failed'?`<button class="btn-sm" onclick="retryUpload('${it.id}')">重试</button>`:''}
+  `;
+}
+
+function updateUploadQueueItem(uid, patch){
+  const el = document.getElementById('uq-' + uid);
+  if(!el) return;
+  if(patch.id && patch.id !== uid){ el.id = 'uq-' + patch.id; }
+  const next = Object.assign({}, el._data||{}, patch);
+  el._data = next;
+  el.innerHTML = uploadItemInner(next);
+}
+
+function pollUploadStatus(uid){
+  const t0 = Date.now();
+  const timer = setInterval(async ()=>{
+    try{
+      const r = await fetch(`/api/uploads/${UPLOAD_CHILD}/${uid}`);
+      if(!r.ok){ clearInterval(timer); return; }
+      const m = await r.json();
+      updateUploadQueueItem(uid, {
+        id:m.id, status:m.status, page_count:m.page_count||0, ocr_done:m.ocr_done, error:m.error,
+        progress: m.status==='ocr'&&m.page_count ? (m.ocr_done||0)/m.page_count : (m.status==='done'?1:null),
+      });
+      if(m.status==='done'||m.status==='failed'){
+        clearInterval(timer);
+        if(m.status==='done') toast('✅ '+m.original_name+' 识别完成');
+        refreshUploadList();
+      }
+      if(Date.now()-t0 > 15*60*1000) clearInterval(timer);
+    }catch(_){}
+  }, 2500);
+}
+
+async function retryUpload(uid){
+  try{
+    const r = await fetch(`/api/uploads/${UPLOAD_CHILD}/${uid}`, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'retry_ocr'})});
+    const d = await r.json();
+    if(d.ok){ updateUploadQueueItem(uid,{status:'queued',error:null}); pollUploadStatus(uid); toast('已重新排队识别'); }
+    else toast('❌ '+(d.error||'重试失败'));
+  }catch(e){ toast('❌ 网络错误'); }
+}
+
+async function refreshUploadList(){
+  const box = document.getElementById('upload-list');
+  if(!box) return;
+  try{
+    const r = await fetch(`/api/uploads/${UPLOAD_CHILD}`);
+    if(!r.ok){ box.innerHTML='<div class="error-empty">加载失败</div>'; return; }
+    const list = await r.json();
+    if(!list.length){ box.innerHTML='<div class="error-empty">还没有上传记录。拖一个文件到上方开始吧。</div>'; return; }
+    box.innerHTML = list.map(e=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
+        <span style="font-size:16px">${(e.original_name||'').toLowerCase().endsWith('.pdf')?'📕':'🖼️'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtmlJ(e.title||e.original_name||'')}</div>
+          <div style="font-size:10px;color:var(--text2);margin-top:2px">
+            ${escHtmlJ(e.subject||'—')} · ${escHtmlJ(e.doc_type||'')} ${e.score&&e.score.total?`· ${e.score.got}/${e.score.total}`:''} ${e.page_count?'· '+e.page_count+'页':''} · ${(e.created||'').slice(0,10)}
+          </div>
+        </div>
+        ${uploadStatusBadge(e.status)}
+        ${e.status==='done'?`<button class="btn-sm" onclick="openUploadDetail('${e.id}')">查看</button>`:''}
+        ${e.status==='failed'?`<button class="btn-sm" onclick="retryUpload('${e.id}')">重试</button>`:''}
+        <button class="btn-sm" style="color:var(--red)" onclick="deleteUpload('${e.id}','${escHtmlJ(e.original_name||'')}')">删除</button>
+      </div>
+    `).join('');
+  }catch(e){ box.innerHTML='<div class="error-empty">网络错误</div>'; }
+}
+
+async function deleteUpload(uid, name){
+  if(!confirm('确定删除「'+name+'」？原文件与识别结果将一并删除。')) return;
+  try{
+    const r = await fetch(`/api/uploads/${UPLOAD_CHILD}/${uid}`, {method:'DELETE'});
+    if(r.ok){ toast('已删除'); refreshUploadList(); } else toast('❌ 删除失败');
+  }catch(e){ toast('❌ 网络错误'); }
+}
+
+async function openUploadDetail(uid){
+  let m;
+  try{
+    const r = await fetch(`/api/uploads/${UPLOAD_CHILD}/${uid}`);
+    if(!r.ok){ toast('加载失败'); return; }
+    m = await r.json();
+  }catch(e){ toast('网络错误'); return; }
+  const e = m.extract || {};
+  const mistakes = e.mistakes || [];
+  const pagesHtml = (m.pages||[]).map(p=>`
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase">Page ${p.no}</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        ${p.image?`<img src="/api/uploads/${UPLOAD_CHILD}/${uid}/file/${p.image}" style="max-width:280px;border:1px solid var(--border);border-radius:8px">`:'<div style="color:var(--text2);font-size:11px">渲染失败</div>'}
+        <div style="flex:1;min-width:220px">
+          <textarea readonly style="width:100%;min-height:130px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;padding:8px;line-height:1.5;resize:vertical;font-family:inherit">${escHtmlJ(p.clean_text||p.ocr_error||'(无文本)')}</textarea>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('upload-detail-body').innerHTML = `
+    <div style="margin-bottom:14px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;line-height:1.9">
+      <div><b>科目：</b>${escHtmlJ(e.subject||'—')} · <b>类型：</b>${escHtmlJ(e.doc_type||'—')} · <b>日期：</b>${escHtmlJ(e.date||'—')} ${e.score&&e.score.total?`· <b>分数：</b>${e.score.got}/${e.score.total}`:''}</div>
+      <div><b>知识点：</b>${(e.topics||[]).map(escHtmlJ).join('、')||'—'}</div>
+      ${e.weakness_summary?`<div><b>弱点：</b>${escHtmlJ(e.weakness_summary)}</div>`:''}
+    </div>
+    ${mistakes.length?`
+      <div style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px">识别出错题 ${mistakes.length} 道
+          <button class="btn-sm" style="margin-left:8px" onclick="uploadToErrors('${uid}')">📥 全部存入错题本</button>
+        </div>
+        ${mistakes.map((x,i)=>`
+          <div style="padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;font-size:11px;line-height:1.7">
+            <b>${escHtmlJ(String(x.question_no||('Q'+(i+1))))}</b>
+            学生答案：<span style="color:var(--red)">${escHtmlJ(String(x.wrong_answer||'—'))}</span>
+            正确：<span style="color:var(--accent2)">${escHtmlJ(String(x.correct_answer||'—'))}</span>
+            ${x.reason?`<div style="color:var(--text2)">原因：${escHtmlJ(String(x.reason))}</div>`:''}
+          </div>
+        `).join('')}
+      </div>`:'<div style="font-size:11px;color:var(--text2);margin-bottom:14px">未识别出错题（或抽取失败）</div>'}
+    ${m.extract_status==='failed'?`<button class="btn-sm" onclick="retryExtract('${uid}')" style="margin-bottom:14px">🔄 重新抽取字段</button>`:''}
+    <div style="max-height:340px;overflow-y:auto;padding-right:4px">${pagesHtml}</div>
+  `;
+  document.getElementById('upload-detail-title').textContent = e.title || m.original_name || '上传详情';
+  document.getElementById('upload-detail-modal').classList.add('open');
+}
+
+function closeUploadDetail(){
+  document.getElementById('upload-detail-modal').classList.remove('open');
+}
+
+async function uploadToErrors(uid){
+  try{
+    const r = await fetch(`/api/uploads/${UPLOAD_CHILD}/${uid}/to-errors`, {method:'POST'});
+    const d = await r.json();
+    if(d.ok){ toast('✅ 已导入 '+d.added+' 道错题'); } else toast('❌ '+(d.error||'导入失败'));
+  }catch(e){ toast('❌ 网络错误'); }
+}
+
+async function retryExtract(uid){
+  try{
+    const r = await fetch(`/api/uploads/${UPLOAD_CHILD}/${uid}`, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'retry_extract'})});
+    const d = await r.json();
+    if(d.ok){ toast('✅ 抽取成功'); openUploadDetail(uid); } else toast('❌ '+(d.error||'抽取失败'));
+  }catch(e){ toast('❌ 网络错误'); }
+}
+
 function logout(){
  sessionStorage.removeItem('jemma_auth');
  try{
@@ -2008,6 +2250,7 @@ function renderCountdown(){
 document.addEventListener('DOMContentLoaded',()=>{
  loadProfile();
  loadDashboard();
+ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
 });
 </script>
 
@@ -2072,6 +2315,16 @@ document.addEventListener('DOMContentLoaded',()=>{
 <div class="avatar-picker" id="avatar-picker-grid"></div>
 <div class="modal-actions">
 <button class="btn-sm" onclick="document.getElementById('avatar-modal').classList.remove('open')">Close</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="upload-detail-modal">
+<div class="modal" style="width:720px;max-width:94vw">
+<h3 id="upload-detail-title" style="display:flex;justify-content:space-between;align-items:center">上传详情</h3>
+<div id="upload-detail-body" style="font-size:13px"></div>
+<div class="modal-actions">
+  <button class="btn" onclick="closeUploadDetail()">关闭</button>
 </div>
 </div>
 </div>
