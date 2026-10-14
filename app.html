@@ -1767,38 +1767,38 @@ async function loadDashboard(){
  }catch(e){console.error('dash load err',e)}
  // Load error book stats
  try{
- const er = await fetch('/api/errors/diya').then(r=>r.json()).catch(()=>[]);
- const errors = Array.isArray(er)?er:(er.errors||er.entries||[]);
- const errEl = document.getElementById('dash-error-count');
- const errSub = document.getElementById('dash-error-sub');
- if(errEl) errEl.textContent = errors.length;
- if(errSub) errSub.textContent = 'tracked errors';
- // Subject breakdown bars
- const barsEl = document.getElementById('error-breakdown-bars');
- if(barsEl && errors.length>0){
-  const subjCount = {};
-  errors.forEach(e=>{ const s=e.subject||'Other'; subjCount[s]=(subjCount[s]||0)+1; });
-  const maxCount = Math.max(...Object.values(subjCount));
-  const sorted = Object.entries(subjCount).sort((a,b)=>b[1]-a[1]);
-  const colors = {Chemistry:'#059669',Physics:'#06B6D4',Maths:'#3B82F6','English Language':'#7C3AED','English Literature':'#7C3AED'};
-  barsEl.innerHTML = sorted.map(([s,c])=>`
-   <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-    <div style="width:90px;font-size:12px;color:var(--text2);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(s)}</div>
-    <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
-     <div style="height:100%;width:${(c/maxCount*100)}%;background:${colors[s]||'var(--accent)'};border-radius:4px"></div>
-    </div>
-    <div style="font-size:12px;font-weight:600;color:var(--text);width:24px;text-align:right">${c}</div>
-   </div>
-  `).join('');
- } else if(barsEl){
-  barsEl.innerHTML = '<div style="font-size:12px;color:var(--text2)">No errors tracked</div>';
- }
+    const er = await fetch('/api/errors/diya?stats=1').then(r=>r.json()).catch(()=>({total:0,by_subject:{}}));
+    const total = er.total || 0;
+    const bySubject = er.by_subject || {};
+    const errEl = document.getElementById('dash-error-count');
+    const errSub = document.getElementById('dash-error-sub');
+    if(errEl) errEl.textContent = total;
+    if(errSub) errSub.textContent = 'tracked errors';
+    // Subject breakdown bars (server already aggregated by subject — avoids shipping the full ~276KB file)
+    const barsEl = document.getElementById('error-breakdown-bars');
+    if(barsEl && total>0){
+     const maxCount = Math.max(...Object.values(bySubject), 1);
+     const sorted = Object.entries(bySubject).sort((a,b)=>b[1]-a[1]);
+     const colors = {Chemistry:'#059669',Physics:'#06B6D4',Maths:'#3B82F6','English Language':'#7C3AED','English Literature':'#7C3AED'};
+     barsEl.innerHTML = sorted.map(([s,c])=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+       <div style="width:90px;font-size:12px;color:var(--text2);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(s)}</div>
+       <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${(c/maxCount*100)}%;background:${colors[s]||'var(--accent)'};border-radius:4px"></div>
+       </div>
+       <div style="font-size:12px;font-weight:600;color:var(--text);width:24px;text-align:right">${c}</div>
+      </div>
+     `).join('');
+    } else if(barsEl){
+     barsEl.innerHTML = '<div style="font-size:12px;color:var(--text2)">No errors tracked</div>';
+    }
  }catch(e){}
  initDiyaGrades();
  drawMainRadar();
  renderCountdownStrip();
  updateCountdownStrip();
- setInterval(updateCountdownStrip, 60000);
+ if (window.__dashTimer) clearInterval(window.__dashTimer);
+    window.__dashTimer = setInterval(updateCountdownStrip, 60000);
  loadStudyTips();
  loadTasks('diya');
  loadSMCProgress();

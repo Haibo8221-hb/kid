@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, Response, stream_with_context
 import httpx, time
 
 app = Flask(__name__)
-DATA_DIR = os.environ.get('DATA_DIR', '/var/www/plan/data')
+DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(__file__), 'data'))
 os.makedirs(DATA_DIR, exist_ok=True)
 # P1-4: 聊天上下文窗口上限，避免历史无限增长导致 token 超限
 CHAT_MAX_HISTORY = int(os.environ.get('CHAT_MAX_HISTORY', '20'))
@@ -57,6 +57,22 @@ def safe_load(path, default=None):
             pass
         app.logger.error('load failed %s: %s; kept corrupt copy at %s', path, e, corrupt)
         return default
+
+# In-memory JSON read cache (mtime + TTL) — reduces repeat disk IO on hot read paths
+_json_cache = {}  # path -> (data, cached_at, mtime)
+def _cached_json_read(path, ttl=15, default=None):
+    """Read JSON with a short-lived, mtime-aware cache. Falls back to default on missing/corrupt."""
+    try:
+        mtime = os.path.getmtime(path)
+    except OSError:
+        return default
+    cached = _json_cache.get(path)
+    now = time.time()
+    if cached and cached[2] == mtime and now - cached[1] < ttl:
+        return cached[0]
+    data = safe_load(path, default)
+    _json_cache[path] = (data, now, mtime)
+    return data
 
 # ── Planner (cloud sync) ──────────────────────────────────────────
 @app.route('/api/planner', methods=['GET', 'POST', 'OPTIONS'])
@@ -154,7 +170,7 @@ def _chat_handler(child):
     else:
         conv = []
 
-    plan_info = _load_plan_context(child)
+    plan_info = _load_plan_context_cached(child)
     conv.append({'role': 'user', 'content': user_msg, 'time': datetime.now().isoformat()})
     ai_resp = _call_llm(conv, child, plan_info)
     conv.append({'role': 'assistant', 'content': ai_resp, 'time': datetime.now().isoformat()})
@@ -508,30 +524,20 @@ def dashboard_api(child=None):
 
     child = child or request.args.get('child', 'diya')
 
-    # Load wiki entries
+    # Load wiki entries (cached)
     wiki_path = os.path.join(DATA_DIR, f'wiki_{child}.json')
-    wiki_entries = []
-    if os.path.exists(wiki_path):
-        with open(wiki_path) as f:
-            wiki_entries = json.load(f)
+    wiki_entries = _cached_json_read(wiki_path, ttl=15) or []
 
     # Load chat messages (last 6)
     chat_path = os.path.join(DATA_DIR, f'chat_{child}.json')
-    chat_recent = []
-    if os.path.exists(chat_path):
-        with open(chat_path) as f:
-            messages = json.load(f)
-            chat_recent = messages[-6:] if messages else []
+    messages = _cached_json_read(chat_path, ttl=15) or []
+    chat_recent = messages[-6:] if messages else []
 
     # Load tasks
     tasks_path = os.path.join(DATA_DIR, f'tasks_{child}.json')
-    tasks_done = 0
-    tasks_total = 0
-    if os.path.exists(tasks_path):
-        with open(tasks_path) as f:
-            tasks = json.load(f)
-            tasks_total = len(tasks)
-            tasks_done = sum(1 for v in tasks.values() if (v if isinstance(v, bool) else v.get('done', False)))
+    tasks = _cached_json_read(tasks_path, ttl=15) or {}
+    tasks_total = len(tasks)
+    tasks_done = sum(1 for v in tasks.values() if (v if isinstance(v, bool) else v.get('done', False)))
 
     # Summarize wiki entries (last 5)
     recent_wiki = [
@@ -546,19 +552,6 @@ def dashboard_api(child=None):
     ]
 
 # Summarize chat (last 3 exchanges = 6 messages)
-    def _strip(t):
-        # Remove all common LLM thinking/reasoning tags and their content
-        # MiniMax format: <think>\n<thinking>\n[/think]\n\n<actual response>
-        t = re.sub(r'<think>\n[\s\S]*?</think>\n\n', '', t)
-        # Handle single newline after [/think]: <think>\n...\n[/think]\n
-        t = re.sub(r'<think>\n[\s\S]*?</think>\n', '', t)
-        # Handle single-line <think>... or malformed <think>...[/think]
-        t = re.sub(r'<think>[\s\S]*?</think>', '', t)
-        # Handle Chinese variant [撮要\n...\n[/撮要]\n\n
-        t = re.sub(r'\[撮要\n[\s\S]*?\[/撮要\]\n\n', '', t)
-        t = re.sub(r'\[撮要\n[\s\S]*?\[/撮要\]\n', '', t)
-        t = re.sub(r'\[撮要[^\]]*\][\s\S]*?\]', '', t)
-        return t.strip()
     chat_summaries = []
     for i in range(0, len(chat_recent)-1, 2):
         if i+1 < len(chat_recent):
@@ -647,7 +640,8 @@ def _strip(t):
 
 def _sync_chat_to_md(child, conv):
     """Sync unsynced chat exchanges to the child's MD planning file."""
-    plan_file = os.path.join('/mnt/d/MyAI', f'{child.capitalize()}_Plan.md')
+    plan_base = os.environ.get('PLAN_MD_PATH', os.path.join(DATA_DIR, 'plan_context'))
+    plan_file = os.path.join(plan_base, f'{child.capitalize()}_Plan.md')
     if not os.path.exists(plan_file):
         return
 
@@ -736,7 +730,8 @@ def activity_api(child):
         resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return resp
 
-    plan_file = os.path.join('/mnt/d/MyAI', f'{child.capitalize()}_Plan.md')
+    plan_base = os.environ.get('PLAN_MD_PATH', os.path.join(DATA_DIR, 'plan_context'))
+    plan_file = os.path.join(plan_base, f'{child.capitalize()}_Plan.md')
     if not os.path.exists(plan_file):
         return jsonify({'entries': [], 'child': child})
 
@@ -1062,14 +1057,17 @@ def get_errors(child):
         child = 'diya'
 
     path = os.path.join(DATA_DIR, f'errors_{child}.json')
-    errors = []
-    if os.path.exists(path):
-        try:
-            with open(path) as f:
-                errors = json.load(f)
-        except Exception:
-            errors = safe_load(path, [])
-    resp = jsonify({'child': child, 'errors': errors, 'total': len(errors)})
+    errors = _cached_json_read(path, ttl=15) or []
+
+    # Aggregate mode for dashboard (avoids shipping the full ~276KB file to the client)
+    if request.args.get('stats') == '1':
+        by_subject = {}
+        for e in errors:
+            s = e.get('subject', 'Other') if isinstance(e, dict) else 'Other'
+            by_subject[s] = by_subject.get(s, 0) + 1
+        resp = jsonify({'child': child, 'total': len(errors), 'by_subject': by_subject})
+    else:
+        resp = jsonify({'child': child, 'errors': errors, 'total': len(errors)})
     _set_cors(resp)
     return resp
 
