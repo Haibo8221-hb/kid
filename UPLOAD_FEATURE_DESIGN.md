@@ -74,30 +74,39 @@ $DATA_DIR/
 
 ## 3. OCR 调用与文本清洗策略（含任务 1 结论）
 
-### 3.1 现状结论（2026-10-14 实测）
+### 3.1 现状结论（2026-10-14 实测，两轮）
 
 | 项 | 现状 |
 |---|---|
-| 后端实现 | `api_server.py` `/api/ocr` + `_call_vision_ocr()`：OpenRouter 4 模型级联（ernie-4.5-vl → seed-2.0-lite → llama-4-maverick → qianfan-ocr-fast） |
-| **线上状态** | **已全挂**。实测一张 190KB 化学作业图，35.6s 后返回空文本，最终错误 `baidu/qianfan-ocr-fast: 404`（模型下线，前 3 个模型也接连失败） |
-| 前端接入 | **0 处调用**（app.html 无任何 `/api/ocr` 引用）——OCR 此前只被旧服务器脚本（`/root/.hermes/image_cache`）使用 |
-| 历史质量 | `diya_chem_ocr_results.json`（20 页 GCSE 化学卷，ernie-4.5-vl 识别）：单页 259–1124 字符，**8/20 页输出带"The image is a transcription of..."等解释性前言污染**，需清洗 |
-| 主 LLM | 阿里百炼 `qwen3.8-flash`（OpenAI 兼容模式，`token-plan.maas.qianwenaiapi.com`），文本正常；**该资源包下所有 qwen VL 视觉模型实测 404 未开通** |
+| 旧实现 | `api_server.py` `/api/ocr`：OpenRouter 4 模型级联（ernie-4.5-vl → seed-2.0-lite → llama-4-maverick → qianfan-ocr-fast） |
+| 旧实现线上状态 | **已全挂**。实测 190KB 化学作业图，35.6s 返回空文本，`baidu/qianfan-ocr-fast: 404`（模型下线） |
+| 前端接入 | **0 处调用**（app.html 无任何 `/api/ocr` 引用）——OCR 此前只被旧服务器脚本使用 |
+| 历史质量 | ernie-4.5-vl 识别 20 页 GCSE 化学卷：单页 259–1124 字符，**8/20 页带"The image is a transcription of..."前言污染** |
+| LLM 资源 | 用户确认：qwen coding plan key（`token-plan.maas.qianwenaiapi.com`）可用模型含 qwen3.8-max/3.7-plus/3.7-max/3.6-flash、deepseek-v4 系、glm-5.x、audio/image/video 生成系（实测 9 个 chat 模型全部可用；qwen-image/wan 为**生成**模型，非理解模型） |
 
-### 3.2 推荐方案（采纳"qwen 方向"+ 免单独配置）
+### 3.2 定案：方案 A 已实测打通（2026-10-14 第二轮实测 ✅）
 
-**方案 A（首选）：百炼 qwen-vl 系列，复用主 LLM 凭据**
+**OCR 复用主 LLM 端点与 key，`qwen3.8-max` 原生支持视觉输入——无需开通任何新模型，UI 无需 OCR 配置项。**
 
-- OCR 端点与主 LLM 相同（compatible-mode/v1），**复用 `llm_config.json` 的 api_key** —— 满足"LLM 设置对话框不需要单独填写 OCR 模型"。
-- OCR 模型名不进 UI：后端常量 `OCR_MODEL`，env 可覆盖（默认 `qwen-vl-plus`），前端无感。
-- **前置动作（需要你操作）**：当前百炼资源包未含视觉模型（实测 404）。需在阿里云百炼控制台为该 key 开通 `qwen-vl-plus`（便宜、够用）或 `qwen-vl-max`（更强手写识别）。**开通前 OCR 功能保持灰置**。
-- 备选镜像：若百炼开通受限，同代码兼容 DashScope 国际版 / OpenRouter 的 `qwen/qwen2.5-vl-72b-instruct`（仅换 base_url + 模型名 + 走已有 openrouter_key），切换只需改 env。
+实测（线上 `/api/ocr`，190KB GCSE 化学作业截图）：
 
-**方案 B（兜底，零新增开通）：OpenRouter 修复级联**
+| 指标 | 结果 |
+|---|---|
+| 模型 / 通道 | `qwen3.8-max` / main（coding plan key，与聊天共用） |
+| 耗时 | 25.6s |
+| 输出 | 902 字符，题号（01.1）、`[1 mark]` 标记、印刷题干、**手写答案**全部正确转写，无前言污染 |
+| tokens | 3569 |
 
-- 仅当方案 A 未开通时临时启用：把级联表换成 OpenRouter 上存活的 VL 模型（`qwen/qwen2.5-vl-72b-instruct` → `google/gemini-2.0-flash-exp:free`），并加 **401/402/429 时直接跳过后续重试**的快速失败（现状是 4 个模型串行 35s 全失败，体验极差）。
+已落地代码（commit e8c6163）：
 
-### 3.3 识别管线（方案 A 落地后的调用流程）
+- `_call_vision_ocr()` 重构：主 LLM 端点优先（复用 `llm_config` 的 key），模型链 `OCR_MODELS` env 可配（默认 `qwen3.8-max,qwen3.7-plus,qwen3.8-flash`，第一个成功即返回）；失败降级 OpenRouter（`OCR_MODELS_OPENROUTER`：qwen2.5-vl-72b / ernie-4.5-vl，需 openrouter_key）。
+- 错误保留响应体摘要 + `attempts` 诊断链；`temperature=0`；PNG/JPEG 魔数识别 mime。
+- `_strip_ocr_preamble()`：剥解释性前言（6 例单测 `tools/test_ocr_clean.py` 全过，<80 字符短文本保护不误伤）。
+- 默认 prompt 升级为强约束转写模板（禁 preamble/描述/翻译）。
+
+**运维注意**：qwen3.8-max 单页 ~25s（3569 tokens）。批量 PDF（20 页）单线程 ~8 分钟 → 设计稿 §7 的异步线程池 + 页级进度反馈为**必选项**；如需提速可在 env 把链换为 `qwen3.8-flash`（若其视觉能力实测可用，速度更快）。
+
+### 3.3 识别管线（现行）
 
 ```
 PDF  → pypdfium2 逐页渲染 200dpi PNG          （纯 pip 依赖，免系统 poppler）
@@ -293,8 +302,8 @@ queued → ocr → extract → done
 | 阶段 | 内容 | 依赖 |
 |---|---|---|
 | M1 | 上传/存储/列表/详情/删除 + 重复检测（无 OCR，文件可传可看） | 无 |
-| M2 | OCR 管线（PDF 渲染 + VL 识别 + 清洗）+ 异步线程池 + 进度轮询 | **百炼开通 qwen-vl**（方案 A）或切换方案 B |
+| M2 | OCR 管线（PDF 渲染 + VL 识别 + 清洗）+ 异步线程池 + 进度轮询 | **已解除**——qwen3.8-max 实测可用（§3.2），仅需 `pip install pypdfium2` |
 | M3 | 字段抽取 + 错题本联动 + 前端结果预览表单 | M2 |
 | M4 | jemma.html 对齐 + 备份策略调整 + nginx 调整 | M1–M3 |
 
-**M2 前置阻塞项**：需要你在阿里云百炼控制台确认该 API key 可开通视觉模型（当前实测全部 404）。开通前可先用方案 B（OpenRouter qwen2.5-vl）跑通全链路，随后一行 env 切回百炼。
+**M2 前置阻塞项已解除（2026-10-14）**：原以为需开通 qwen-vl 系列，实测 `qwen3.8-max` 原生支持视觉输入且已接入 `/api/ocr`（commit e8c6163）。M2 只剩 PDF 渲染（pypdfium2）与异步管线工程，可直接开工。
