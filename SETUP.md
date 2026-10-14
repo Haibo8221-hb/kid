@@ -96,12 +96,14 @@ which rsync || (apt-get update && apt-get install -y rsync)   # Debian/Ubuntu
    - 启动命令：`gunicorn -w 4 -b 127.0.0.1:5000 api_server:app`
    - 端口：`5000`
    - 勾选 **安装模块依赖**（自动 `pip install -r requirements.txt`）
-3. 启动后点「设置 → 环境变量」加上（关键，否则数据写错目录、跨域被拦）：
+3. 启动后点「设置 → 环境变量」加上（关键，否则数据写错目录、跨域被拦、登录用默认密码）：
    ```
    DATA_DIR=/www/wwwroot/kid/data
    ALLOWED_ORIGINS=*            # 生产改成你的真实域名，如 https://kid.你的域名.com
    HERMES_HOME=/www/wwwroot/kid/.hermes
    CHAT_MAX_HISTORY=20
+   APP_PASSWORD=<你的访问密码>    # 应用层登录密码（默认 haibo2026，务必修改！）
+   # APP_SECRET=<随机串>         # 可选；留空则从密码派生（改密码=吊销全部会话）
    ```
 
 ### 3.3 备选：supervisor 直接托管（宝塔管理器不顺手时用）

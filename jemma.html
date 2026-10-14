@@ -741,6 +741,34 @@ Benchmark sister's path, but start from her own strengths
 <div id="toast"></div>
 
 <script>
+// ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
+(function(){
+  'use strict';
+  var _redirecting = false;
+  function toLogin(){
+    if(_redirecting) return;
+    _redirecting = true;
+    var next = location.pathname.split('/').pop() || 'jemma.html';
+    location.replace('login.html?next=' + encodeURIComponent(next));
+  }
+  var _origFetch = window.fetch;
+  window.fetch = function(input, init){
+    return _origFetch.apply(this, arguments).then(function(res){
+      try{
+        var url = (typeof input === 'string') ? input : (input && input.url) || '';
+        if(res.status === 401 && url.indexOf('/api/') === 0 && url.indexOf('/api/auth/') !== 0){
+          toLogin();
+        }
+      }catch(_){}
+      return res;
+    });
+  };
+  try{
+    _origFetch('/api/auth/status', {credentials:'same-origin'})
+      .then(function(r){ if(r.status === 401) toLogin(); })
+      .catch(function(){});
+  }catch(_){}
+})();
 // Error Book
 let errorsData = [], errorFilter = 'all';
 function formatRelativeDate(dateStr){
@@ -1943,7 +1971,10 @@ function updateStreak(){
 
 function logout(){
  sessionStorage.removeItem('jemma_auth');
- window.location.replace('index.html');
+ try{
+   fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})
+     .catch(()=>{}).finally(()=>{ window.location.replace('index.html'); });
+ }catch(e){ window.location.replace('index.html'); }
 }
 
 // Countdown 

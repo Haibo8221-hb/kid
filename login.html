@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>登录 · Study Compass</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f1117;--surface:#1a1d28;--surface2:#232736;--border:#2a2f42;--text:#e2e6f0;--text2:#8892b0;--accent:#4f8cff;--red:#ff6b6b}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:36px 32px;width:100%;max-width:380px}
+.icon{text-align:center;font-size:40px;display:block;margin-bottom:10px}
+h1{font-size:20px;font-weight:700;text-align:center;margin-bottom:6px}
+.sub{font-size:12px;color:var(--text2);text-align:center;margin-bottom:24px}
+label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px}
+input{width:100%;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);outline:none;box-sizing:border-box}
+input:focus{border-color:var(--accent)}
+button{width:100%;margin-top:16px;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}
+button:hover{background:#7aa5ff}
+button:disabled{opacity:.6;cursor:wait}
+.err{margin-top:12px;padding:9px 12px;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.4);border-radius:8px;font-size:12px;color:var(--red);display:none}
+.err.show{display:block}
+.hint{margin-top:18px;font-size:11px;color:var(--text2);text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="card">
+  <span class="icon">🔐</span>
+  <h1>Study Compass</h1>
+  <div class="sub">Diya (Y10) · Jemma (Y8) · Headington School</div>
+  <form id="f" autocomplete="off">
+    <label for="pwd">访问密码</label>
+    <input type="password" id="pwd" placeholder="请输入访问密码" autofocus required>
+    <button type="submit" id="btn">登 录</button>
+    <div class="err" id="err"></div>
+  </form>
+  <div class="hint">登录后 30 天内免密访问<br>忘记密码请联系管理员（服务器 APP_PASSWORD 环境变量）</div>
+</div>
+<script>
+const errBox = document.getElementById('err');
+const btn = document.getElementById('btn');
+function showErr(msg){
+  errBox.textContent = msg;
+  errBox.classList.add('show');
+}
+document.getElementById('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errBox.classList.remove('show');
+  btn.disabled = true; btn.textContent = '登录中…';
+  const pwd = document.getElementById('pwd').value;
+  try{
+    const r = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({password: pwd}),
+    });
+    const d = await r.json().catch(() => ({}));
+    if(r.ok && d.ok){
+      btn.textContent = '✓ 登录成功，跳转中…';
+      // 回跳来源页（仅允许本站相对路径，防开放跳转）
+      let next = new URLSearchParams(location.search).get('next') || 'index.html';
+      if(!/^\/[^/]|^[^:/]+\.html|^index\.html/.test(next) || next.includes('//') || next.includes(':')) next = 'index.html';
+      location.replace(next);
+    }else{
+      showErr(d.error || ('登录失败 (HTTP ' + r.status + ')'));
+      btn.disabled = false; btn.textContent = '登 录';
+    }
+  }catch(ex){
+    showErr('网络错误：' + ex.message);
+    btn.disabled = false; btn.textContent = '登 录';
+  }
+});
+</script>
+</body>
+</html>

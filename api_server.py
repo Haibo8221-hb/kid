@@ -1,15 +1,135 @@
 #!/usr/bin/env python3
 """Flask API for planner data storage + AI chat + wiki logs"""
-import json, os, re, uuid
+import hashlib, hmac, json, os, re, time, uuid
 from datetime import datetime
 from flask import Flask, request, jsonify, Response, stream_with_context
-import httpx, time
+import httpx
 
 app = Flask(__name__)
 DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(__file__), 'data'))
 os.makedirs(DATA_DIR, exist_ok=True)
 # P1-4: 聊天上下文窗口上限，避免历史无限增长导致 token 超限
 CHAT_MAX_HISTORY = int(os.environ.get('CHAT_MAX_HISTORY', '20'))
+
+# ── 应用层鉴权（P0：登录态从 nginx basic auth 上移到应用层）──────────────
+# 设计：
+#   - 无状态 HMAC token（exp + sig），gunicorn 多 worker / 重启均有效
+#   - 密码来自环境变量 APP_PASSWORD（未设置时用默认值，生产务必修改）
+#   - token 存于 httpOnly cookie（SameSite=Lax），前端 JS 不可读，防 XSS 窃取
+#   - 修改 APP_PASSWORD 会使所有已发 token 立即失效（secret 派生自密码）
+AUTH_COOKIE = 'kid_auth'
+AUTH_TTL = 30 * 24 * 3600            # token 有效期 30 天
+AUTH_RENEW = 15 * 24 * 3600          # 剩余不足 15 天时滚动续期
+APP_PASSWORD = os.environ.get('APP_PASSWORD', 'haibo2026')
+
+def _auth_secret():
+    """签名密钥：显式 APP_SECRET 优先；否则从密码派生（改密码=吊销全部会话）"""
+    s = os.environ.get('APP_SECRET', '')
+    if s:
+        return s.encode()
+    return hmac.new(b'kid-main-auth-v1', APP_PASSWORD.encode(), hashlib.sha256).digest()
+
+def _make_token(now=None):
+    now = int(now or time.time())
+    exp = now + AUTH_TTL
+    sig = hmac.new(_auth_secret(), str(exp).encode(), hashlib.sha256).hexdigest()[:32]
+    return f'{exp}.{sig}'
+
+def _verify_token(tok):
+    """校验 token；有效返回 True。过期/签名不符均拒绝（恒定时间比较）。"""
+    if not tok or '.' not in tok:
+        return False
+    try:
+        exp_s, sig = tok.split('.', 1)
+        exp = int(exp_s)
+    except ValueError:
+        return False
+    good = hmac.new(_auth_secret(), str(exp).encode(), hashlib.sha256).hexdigest()[:32]
+    if not hmac.compare_digest(sig, good):
+        return False
+    return exp > time.time()
+
+def _auth_token_from_request():
+    # 优先 cookie；兼容 Authorization: Bearer <token>（非浏览器/测试场景）
+    tok = request.cookies.get(AUTH_COOKIE)
+    if tok:
+        return tok
+    h = request.headers.get('Authorization', '')
+    if h.startswith('Bearer '):
+        return h[7:].strip()
+    return None
+
+def _is_public_api_path():
+    """无需登录即可访问的 API：登录/登出/状态检查 + 全部 CORS 预检"""
+    p = request.path
+    if request.method == 'OPTIONS':
+        return True
+    return p in ('/api/auth/login', '/api/auth/logout', '/api/auth/status')
+
+@app.before_request
+def _auth_gate():
+    """统一入口拦截：所有 /api/* 需要有效会话（静态页面由前端 401 跳转兜底）"""
+    if not request.path.startswith('/api/'):
+        return None
+    if _is_public_api_path():
+        return None
+    if _verify_token(_auth_token_from_request()):
+        return None
+    resp = jsonify({'error': 'unauthorized', 'hint': '请先登录'})
+    _set_cors(resp)
+    return resp, 401
+
+@app.route('/api/auth/login', methods=['POST', 'OPTIONS'])
+def auth_login():
+    """校验密码，签发会话 cookie。错误响应不区分「密码错」与「用户不存在」（单用户场景只有前者）。"""
+    if request.method == 'OPTIONS':
+        return _cors()
+    data = request.get_json(force=True, silent=True) or {}
+    pwd = str(data.get('password') or '')
+    if not hmac.compare_digest(pwd.encode(), APP_PASSWORD.encode()):
+        time.sleep(0.4)  # 恒定延迟，抬高暴力破解成本
+        resp = jsonify({'ok': False, 'error': '密码错误'})
+        _set_cors(resp)
+        return resp, 401
+    tok = _make_token()
+    resp = jsonify({'ok': True, 'expires_in': AUTH_TTL})
+    resp.set_cookie(AUTH_COOKIE, tok, max_age=AUTH_TTL, httponly=True,
+                    samesite='Lax', path='/')
+    _set_cors(resp)
+    return resp
+
+@app.route('/api/auth/logout', methods=['POST', 'OPTIONS'])
+def auth_logout():
+    """清除会话 cookie（无状态 token 无服务端会话可吊销，靠短 TTL 自然过期）"""
+    if request.method == 'OPTIONS':
+        return _cors()
+    resp = jsonify({'ok': True})
+    resp.set_cookie(AUTH_COOKIE, '', max_age=0, httponly=True, samesite='Lax', path='/')
+    _set_cors(resp)
+    return resp
+
+@app.route('/api/auth/status', methods=['GET', 'OPTIONS'])
+def auth_status():
+    """前端页面加载时探活；会话剩余不足 15 天时滚动续期。"""
+    if request.method == 'OPTIONS':
+        return _cors()
+    tok = _auth_token_from_request()
+    if not _verify_token(tok):
+        resp = jsonify({'authenticated': False})
+        _set_cors(resp)
+        return resp, 401
+    resp = jsonify({'authenticated': True})
+    # 滑动续期：登录态活跃用户可长期免密
+    try:
+        exp = int(tok.split('.', 1)[0])
+        if exp - time.time() < AUTH_RENEW:
+            resp.set_cookie(AUTH_COOKIE, _make_token(), max_age=AUTH_TTL,
+                            httponly=True, samesite='Lax', path='/')
+    except (ValueError, AttributeError):
+        pass
+    _set_cors(resp)
+    return resp
+
 
 # ── 安全 / 健壮性 helper（P0 改造：CORS 收紧、原子写、防静默清空） ──
 ALLOWED_ORIGINS = [o.strip() for o in os.environ.get('ALLOWED_ORIGINS', 'https://grow-consultant.com').split(',') if o.strip()]

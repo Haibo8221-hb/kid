@@ -1036,6 +1036,36 @@ Hong Kong parallel: HKUST+PolyU
 <div id="ver-badge" style="position:fixed;left:6px;bottom:6px;z-index:400;font-size:10px;color:var(--text2);opacity:0.5;pointer-events:none;font-family:monospace"></div>
 
 <script>
+// ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
+(function(){
+  'use strict';
+  var _redirecting = false;
+  function toLogin(){
+    if(_redirecting) return;
+    _redirecting = true;
+    var next = location.pathname.split('/').pop() || 'app.html';
+    location.replace('login.html?next=' + encodeURIComponent(next));
+  }
+  // 包装全局 fetch：统一拦截 API 401（会话过期/未登录）
+  var _origFetch = window.fetch;
+  window.fetch = function(input, init){
+    return _origFetch.apply(this, arguments).then(function(res){
+      try{
+        var url = (typeof input === 'string') ? input : (input && input.url) || '';
+        if(res.status === 401 && url.indexOf('/api/') === 0 && url.indexOf('/api/auth/') !== 0){
+          toLogin();
+        }
+      }catch(_){}
+      return res;
+    });
+  };
+  // 页面加载探活：已登录则顺带完成滚动续期；未登录立即跳登录页
+  try{
+    _origFetch('/api/auth/status', {credentials:'same-origin'})
+      .then(function(r){ if(r.status === 401) toLogin(); })
+      .catch(function(){ /* 后端不可达时不拦截页面（离线查看场景） */ });
+  }catch(_){}
+})();
 // ── 全局错误捕获（诊断用：任何 JS 错误都显示到页面，避免“静默无反应”）──
 window.addEventListener('error', function(e){
   try{
@@ -3025,7 +3055,11 @@ renderTasks = renderTasksEnhanced;
 
 // Logout 
 function logout(){
- window.location.replace('index.html');
+ // 应用层登出：清会话 cookie 后回入口页（后端不可达也照样跳转）
+ try{
+   fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})
+     .catch(()=>{}).finally(()=>{ window.location.replace('index.html'); });
+ }catch(e){ window.location.replace('index.html'); }
 }
 
 // Study Tips Rotator — Updated 01 Sep 2026: 8 tips — English analysis weighting + spaced repetition 2357 + RAG + SMC banker marks + bridge
