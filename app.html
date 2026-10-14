@@ -523,7 +523,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <a href="/Diya_Plan.html" target="_blank">Diya Plan</a>
 <a href="/Diya_Jemma_Oxbridge_Plan.html" target="_blank">Route Overview</a>
 <a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">Summer Guide</a>
-<a href="#" onclick="openLLMSettings();return false" title="配置 LLM 端点 / API Key / 模型">⚙️ LLM 设置</a>
+<a href="#" onclick="try{openLLMSettings();}catch(e){alert('LLM设置打开失败: '+((e&&e.message)||e));console.error(e);}return false" title="配置 LLM 端点 / API Key / 模型">⚙️ LLM 设置</a>
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
@@ -1032,6 +1032,13 @@ Hong Kong parallel: HKUST+PolyU
 <div id="toast"></div>
 
 <script>
+// ── 全局错误捕获（诊断用：任何 JS 错误都显示到页面，避免“静默无反应”）──
+window.addEventListener('error', function(e){
+  try{
+    var t=document.getElementById('toast');
+    if(t){ t.textContent='JS错误: '+((e&&e.message)||(e&&e.error)||'unknown')+(e&&e.lineno?(' @'+e.lineno):''); t.style.background='#e11d48'; t.classList.add('show'); setTimeout(function(){t.classList.remove('show'); t.style.background='';}, 8000); }
+  }catch(_){}
+});
 // State 
 let currentChild = 'diya';
 let plannerWeeks = {diya:0};
