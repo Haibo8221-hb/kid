@@ -81,12 +81,63 @@ which rsync || (apt-get update && apt-get install -y rsync)   # Debian/Ubuntu
 
 ## 3. 宝塔建站 + 后端服务
 
-1. **网站 → 添加站点**：站点名/域名填 `kid` → 根目录自动为 `/www/wwwroot/kid`（与 SITE_ROOT 一致）。
-2. **起后端**：用「Python 项目」或 supervisor 跑 `api_server.py`（gunicorn 在 nginx 后）。
-   - 记下你取的服务名（如 `plan-api`），这就是 GitHub Secret `SERVICE` 的值。
-3. **nginx 反代**：站点设置里把 `/api/` 反代到 gunicorn 端口（如 127.0.0.1:8000）。
-4. **安全屏蔽**：把仓库里的 `nginx-git-protect.conf` 内容贴进站点 nginx 配置 `server{}` 内（防 `.git`/`.env` 被公网下载），保存并重载。
-5. **建好空目录**：`mkdir -p /www/wwwroot/kid && chown www:www /www/wwwroot/kid`
+> 应用入口：`api_server.py` 里 `app = Flask(__name__)`，直接运行默认监听 `127.0.0.1:5000`。
+> 依赖：`flask` + `httpx` + `gunicorn`（运行用）+ `pyyaml`（部分功能），已写入仓库 `requirements.txt`。
+
+### 3.1 添加站点
+**网站 → 添加站点**：站点名/域名填 `kid` → 根目录自动为 `/www/wwwroot/kid`（与 SITE_ROOT 一致）。
+
+### 3.2 起后端（宝塔「Python 项目」管理器，推荐）
+1. 软件商店安装 **Python 项目**（Python 项目管理器）；并安装一个 Python 3.x 版本。
+2. **添加项目**：
+   - 项目名称：`kid-api`（这串就是后面 Secrets 的 `SERVICE` 值，建议就叫 `kid-api`）
+   - 项目路径：`/www/wwwroot/kid`
+   - 启动方式：**gunicorn**
+   - 启动命令：`gunicorn -w 4 -b 127.0.0.1:5000 api_server:app`
+   - 端口：`5000`
+   - 勾选 **安装模块依赖**（自动 `pip install -r requirements.txt`）
+3. 启动后点「设置 → 环境变量」加上（关键，否则数据写错目录、跨域被拦）：
+   ```
+   DATA_DIR=/www/wwwroot/kid/data
+   ALLOWED_ORIGINS=*            # 生产改成你的真实域名，如 https://kid.你的域名.com
+   HERMES_HOME=/www/wwwroot/kid/.hermes
+   CHAT_MAX_HISTORY=20
+   ```
+
+### 3.3 备选：supervisor 直接托管（宝塔管理器不顺手时用）
+把仓库里的 `deploy/supervisor-kid-api.conf` 传到 ECS：
+```bash
+cp /www/wwwroot/kid/deploy/supervisor-kid-api.conf /etc/supervisor/conf.d/kid-api.conf
+supervisorctl reread && supervisorctl update && supervisorctl restart kid-api
+```
+此时 `SERVICE=kid-api`。
+
+### 3.4 确认 SERVICE 名（用于 Secrets）
+ECS 上执行：
+```bash
+supervisorctl status
+```
+输出里 `kid-api  RUNNING ...` 的 `kid-api` 就是 `SERVICE` 的确切值（宝塔管理器起的名字可能带前缀，以这里显示为准）。
+
+### 3.5 nginx 反代 /api/
+站点 → 设置 → 配置文件，在 `server{}` 内加：
+```nginx
+location /api/ {
+    proxy_pass http://127.0.0.1:5000/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+```
+
+### 3.6 安全屏蔽
+把仓库里的 `nginx-git-protect.conf` 内容贴进站点 nginx 配置 `server{}` 内（防 `.git`/`.env` 被公网下载），保存并重载。
+
+### 3.7 权限与目录
+```bash
+mkdir -p /www/wwwroot/kid/data /www/wwwroot/kid/logs /www/wwwroot/kid/.hermes
+chown -R www:www /www/wwwroot/kid
+```
 
 ---
 

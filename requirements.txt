@@ -1,0 +1,8 @@
+# kid-main 后端依赖（宝塔 Python 项目 / pip install -r 用）
+flask>=2.3
+httpx>=0.24
+gunicorn>=21.0
+pyyaml>=6.0
+
+# 可选（仅高级功能用到，按需取消注释）：
+# pdfplumber>=3.0     # PDF 解析相关接口
