@@ -2828,24 +2828,27 @@ function showAvatarPicker(){
 
 // ── LLM Settings (UI) ──────────────────────────────────
 function openLLMSettings(){
+  // 先无条件打开弹窗，任何后续异常都不应阻止它显示
   const m = document.getElementById('llm-settings-modal');
-  const st = document.getElementById('llm-status');
-  st.textContent=''; st.className='llmset-status';
-  fetch('/api/settings/llm').then(r=>r.ok?r.json():{}).then(d=>{
-    document.getElementById('llm-endpoint').value = d.endpoint||'';
-    document.getElementById('llm-model').value = d.model||'';
-    const t = (d.temperature!=null?d.temperature:0.7);
-    document.getElementById('llm-temp').value = t;
-    document.getElementById('llm-temp-val').textContent = t;
-    // 安全：不回显明文 key，仅告知是否已配置
-    document.getElementById('llm-apikey').value = '';
-    document.getElementById('llm-openrouter').value = '';
-    const kh = document.getElementById('llm-keyhint');
-    kh.textContent = d.has_key
-      ? ('当前已配置 Key：'+(d.key_masked||'****')+'（如要更换请在上方填写新 Key，留空则保留）')
-      : '未配置 Key：聊天与错题解析将无法使用，请在上方填写。';
-  }).catch(()=>{});
-  m.classList.add('open');
+  if(m) m.classList.add('open');
+  try{
+    const st = document.getElementById('llm-status');
+    if(st){ st.textContent=''; st.className='llmset-status'; }
+    fetch('/api/settings/llm').then(r=>r.ok?r.json():{}).then(d=>{
+      const setv=(id,v)=>{const e=document.getElementById(id); if(e) e.value=(v==null?'':v);};
+      setv('llm-endpoint', d.endpoint);
+      setv('llm-model', d.model);
+      const t=(d.temperature!=null?d.temperature:0.7);
+      setv('llm-temp', t);
+      const tv=document.getElementById('llm-temp-val'); if(tv) tv.textContent=t;
+      // 安全：不回显明文 key，仅告知是否已配置
+      setv('llm-apikey',''); setv('llm-openrouter','');
+      const kh=document.getElementById('llm-keyhint');
+      if(kh) kh.textContent = d.has_key
+        ? ('当前已配置 Key：'+(d.key_masked||'****')+'（如要更换请在上方填写新 Key，留空则保留）')
+        : '未配置 Key：聊天与错题解析将无法使用，请在上方填写。';
+    }).catch(()=>{});
+  }catch(e){ /* 弹窗已打开，忽略填充异常 */ }
 }
 
 function llmToggleKey(id, btn){
