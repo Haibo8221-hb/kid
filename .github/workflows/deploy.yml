@@ -1,0 +1,27 @@
+name: Deploy to Alibaba ECS (112.74.40.8)
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into ECS and deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            set -e
+            cd "${{ secrets.SITE_ROOT }}"
+            git config --global --add safe.directory "${{ secrets.SITE_ROOT }}"
+            git fetch origin
+            git reset --hard origin/master
+            chown -R www:www "${{ secrets.SITE_ROOT }}"
+            supervisorctl restart "${{ secrets.SERVICE }}" || true
+            echo "==> deploy done"
