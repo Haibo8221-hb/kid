@@ -2,7 +2,7 @@ name: Deploy to Alibaba ECS (112.74.40.8)
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
             cd "${{ secrets.SITE_ROOT }}"
             git config --global --add safe.directory "${{ secrets.SITE_ROOT }}"
             git fetch origin
-            git reset --hard origin/master
+            git reset --hard origin/main
             chown -R www:www "${{ secrets.SITE_ROOT }}"
             supervisorctl restart "${{ secrets.SERVICE }}" || true
             echo "==> deploy done"

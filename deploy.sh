@@ -11,7 +11,7 @@ SERVICE="${SERVICE:-plan-api}"
 cd "$SITE_ROOT"
 git config --global --add safe.directory "$SITE_ROOT"
 git fetch origin
-git reset --hard origin/master
+git reset --hard origin/main
 chown -R www:www "$SITE_ROOT"
 supervisorctl restart "$SERVICE" || true
 echo "==> deploy done"
