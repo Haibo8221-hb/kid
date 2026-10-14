@@ -1397,9 +1397,108 @@ def smc_records_api():
 
 
 # ── Image OCR (Vision LLM) ────────────────────────────────────
+# OCR 模型链（方案 A：优先复用主 LLM 端点与 key，UI 无需单独配置 OCR 模型）
+# 默认链 = coding plan 内最强→次强旗舰：若为原生多模态则一步到位，否则错误信息会明确提示不支持图像
+OCR_MODELS_MAIN = [m.strip() for m in os.environ.get(
+    'OCR_MODELS', 'qwen3.8-max,qwen3.7-plus,qwen3.8-flash').split(',') if m.strip()]
+# 降级链：OpenRouter 上已知存活的 VL 模型（需 openrouter_key）
+OCR_MODELS_OPENROUTER = [m.strip() for m in os.environ.get(
+    'OCR_MODELS_OPENROUTER', 'qwen/qwen2.5-vl-72b-instruct,baidu/ernie-4.5-vl-424b-a47b').split(',') if m.strip()]
+
+OCR_PROMPT_DEFAULT = (
+    'You are an OCR engine. Transcribe ALL text in this exam/homework page word-for-word: '
+    'printed questions, answer options, marks like [3 marks], and ALL handwritten answers. '
+    'Keep original order, question numbers, line breaks and math symbols. '
+    'Do NOT describe the image. Do NOT add any preamble, comment, or translation. '
+    'Output ONLY the transcription.'
+)
+
+# 历史实测（ernie-4.5-vl）：8/20 页输出以 "The image is a transcription of..." 开头，污染转写结果
+_OCR_PREAMBLE_RE = re.compile(
+    r"^\s*(?:the (?:image|page|photo)s?\b|here (?:is|are)\b|this (?:image|page|photo)s?\b"
+    r"|sure\b|okay\b|i(?:'ll| will| can)\b)[^\n]*\n+", re.I)
+
+def _strip_ocr_preamble(text):
+    """剥除 VL 模型的解释性前言（最多剥两行，防止误伤正文）"""
+    for _ in range(2):
+        if not text or len(text) < 80:
+            break
+        m = _OCR_PREAMBLE_RE.match(text)
+        if not m:
+            break
+        text = text[m.end():]
+    return (text or '').strip()
+
+def _ocr_call_compat(base_url, api_key, model, image_b64, prompt, extra_headers=None, timeout=90):
+    """单模型 OpenAI 兼容带图调用。错误时保留响应体摘要——用于诊断「模型不支持图像输入」。"""
+    mime = 'image/png' if image_b64[:8] == 'iVBORw0K' else 'image/jpeg'
+    payload = {
+        'model': model,
+        'messages': [{
+            'role': 'user',
+            'content': [
+                {'type': 'text', 'text': prompt},
+                {'type': 'image_url', 'image_url': {'url': f'data:{mime};base64,{image_b64}'}}
+            ]
+        }],
+        'max_tokens': 4000,
+        'temperature': 0,
+    }
+    headers = {'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
+    if extra_headers:
+        headers.update(extra_headers)
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            resp = client.post(f'{base_url}/chat/completions', headers=headers, json=payload)
+        if resp.status_code == 200:
+            r = resp.json()
+            text = (r.get('choices') or [{}])[0].get('message', {}).get('content', '')
+            usage = r.get('usage', {}) or {}
+            return {'ok': True, 'text': _strip_ocr_preamble(text), 'tokens': usage.get('total_tokens', 0)}
+        # 401/402/429 属于配额/凭据问题，响应体保留原始信息便于定位
+        return {'ok': False, 'error': f'HTTP {resp.status_code}: {resp.text[:150]}'}
+    except Exception as e:
+        return {'ok': False, 'error': f'{type(e).__name__}: {str(e)[:120]}'}
+
+def _call_vision_ocr(image_b64, prompt):
+    """OCR 调用：主 LLM 端点（coding plan key）→ OpenRouter 降级。返回带 attempts 诊断链。"""
+    attempts = []
+    cfg = {}
+    try:
+        cfg = _load_llm_config()
+    except Exception:
+        pass
+
+    # 1) 主 LLM 端点：与聊天共用 endpoint + api_key，OCR 模型链可由 OCR_MODELS env 覆盖
+    if cfg.get('base_url') and cfg.get('api_key'):
+        for model in OCR_MODELS_MAIN:
+            r = _ocr_call_compat(cfg['base_url'], cfg['api_key'], model, image_b64, prompt)
+            if r.get('ok'):
+                r.update(model=model, provider='main', attempts=attempts)
+                return r
+            attempts.append(f'[main] {model}: {r.get("error", "")}')
+
+    # 2) OpenRouter 降级（VL 专用模型，需 openrouter_key）
+    or_key = os.environ.get('OPENROUTER_API_KEY', '') or (cfg.get('openrouter_key') or '')
+    if or_key:
+        for model in OCR_MODELS_OPENROUTER:
+            r = _ocr_call_compat(
+                'https://openrouter.ai/api/v1', or_key, model, image_b64, prompt,
+                extra_headers={'HTTP-Referer': 'https://grow-consultant.com', 'X-Title': 'Study Compass OCR'},
+                timeout=120)
+            if r.get('ok'):
+                r.update(model=model, provider='openrouter', attempts=attempts)
+                return r
+            attempts.append(f'[openrouter] {model}: {r.get("error", "")}')
+
+    if not attempts:
+        return {'error': 'no OCR provider configured (need main LLM key or OPENROUTER key)', 'text': '', 'attempts': []}
+    return {'error': '; '.join(attempts[-3:]), 'text': '', 'attempts': attempts}
+
+
 @app.route('/api/ocr', methods=['POST', 'OPTIONS'])
 def ocr_api():
-    """Recognize text from uploaded images. Uses OpenRouter vision models."""
+    """Recognize text from uploaded images."""
     if request.method == 'OPTIONS':
         resp = jsonify({})
         _set_cors(resp)
@@ -1409,84 +1508,13 @@ def ocr_api():
 
     data = request.get_json(force=True, silent=True) or {}
     image_b64 = data.get('image', '')
-    child = data.get('child', 'diya')
-    prompt = data.get('prompt', 'Transcribe all text in this image word-for-word. Preserve line breaks. Output ONLY the transcription.')
+    prompt = data.get('prompt') or OCR_PROMPT_DEFAULT
 
     if not image_b64:
         return jsonify({'error': 'no image data'}), 400
 
     result = _call_vision_ocr(image_b64, prompt)
     return jsonify(result)
-
-
-def _call_vision_ocr(image_b64, prompt):
-    """Call OpenRouter vision model for OCR. Falls back through models."""
-    api_key = os.environ.get('OPENROUTER_API_KEY', '')
-    if not api_key:
-        # Try from persistent LLM config (UI 设置)
-        try:
-            api_key = _load_llm_config().get('openrouter_key', '')
-        except Exception:
-            pass
-
-    if not api_key:
-        return {'error': 'OpenRouter API key not configured', 'text': ''}
-
-    # Model fallback chain: best → good → cheap → pure OCR
-    models = [
-        'baidu/ernie-4.5-vl-424b-a47b',    # 🥇 百度文心VL：最强OCR，1048字符/张
-        'bytedance-seed/seed-2.0-lite',    # 🥈 豆包：768字符，稳定
-        'meta-llama/llama-4-maverick',     # 🥉 Llama：647字符，便宜
-        'baidu/qianfan-ocr-fast',          # 纯OCR兜底
-    ]
-
-    last_error = ''
-    for model in models:
-        try:
-            payload = {
-                'model': model,
-                'messages': [{
-                    'role': 'user',
-                    'content': [
-                        {'type': 'text', 'text': prompt},
-                        {'type': 'image_url', 'image_url': {
-                            'url': f'data:image/jpeg;base64,{image_b64}'
-                        }}
-                    ]
-                }],
-                'max_tokens': 3000
-            }
-
-            import httpx as _httpx
-            resp = _httpx.post(
-                'https://openrouter.ai/api/v1/chat/completions',
-                headers={
-                    'Authorization': f'Bearer {api_key}',
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://xmemory.work',
-                    'X-Title': 'Cloud Hermes OCR'
-                },
-                json=payload,
-                timeout=120.0
-            )
-
-            if resp.status_code == 200:
-                r = resp.json()
-                text = r['choices'][0]['message']['content']
-                cost = float(r.get('usage', {}).get('cost', 0))
-                return {
-                    'text': text,
-                    'model': model,
-                    'cost': cost,
-                    'tokens': r.get('usage', {}).get('total_tokens', 0)
-                }
-            else:
-                last_error = f'{model}: {resp.status_code}'
-        except Exception as e:
-            last_error = f'{model}: {str(e)[:100]}'
-            continue
-
-    return {'error': last_error, 'text': ''}
 
 
 # ── Homework API ──────────────────────────────────────────────────
