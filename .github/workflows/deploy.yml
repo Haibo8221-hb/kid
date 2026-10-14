@@ -38,5 +38,5 @@ jobs:
           key: ${{ secrets.ECS_SSH_KEY }}
           script: |
             chown -R www:www "${{ secrets.SITE_ROOT }}"
-            supervisorctl restart "${{ secrets.SERVICE }}" || true
+            systemctl restart plan-api
             echo "==> deploy done"

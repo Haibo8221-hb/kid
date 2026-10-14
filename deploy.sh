@@ -7,7 +7,7 @@
 set -e
 SITE_ROOT="${SITE_ROOT:-/www/wwwroot/kid}"
 ECS_HOST="${ECS_HOST:-112.74.40.8}"
-ECS_PORT="${ECS_PORT:-443}"
+ECS_PORT="${ECS_PORT:-22}"
 ECS_USER="${ECS_USER:-root}"
 KEY="${KEY:-$HOME/.ssh/id_ed25519}"
 SERVICE="${SERVICE:-plan-api}"
@@ -20,4 +20,4 @@ rsync -az --delete \
   ./ "$ECS_USER@$ECS_HOST:$SITE_ROOT/"
 
 echo "==> rsync 完成。需要重启后端请执行："
-echo "   ssh -p $ECS_PORT $ECS_USER@$ECS_HOST 'supervisorctl restart $SERVICE'"
+echo "   ssh -p $ECS_PORT $ECS_USER@$ECS_HOST 'systemctl restart $SERVICE'"
