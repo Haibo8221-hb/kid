@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>Focus and try your best · Diya</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -523,7 +525,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <a href="/Diya_Plan.html" target="_blank">Diya Plan</a>
 <a href="/Diya_Jemma_Oxbridge_Plan.html" target="_blank">Route Overview</a>
 <a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">Summer Guide</a>
-<a href="#" onclick="try{openLLMSettings();}catch(e){alert('LLM设置打开失败: '+((e&&e.message)||e));console.error(e);}return false" title="配置 LLM 端点 / API Key / 模型">⚙️ LLM 设置</a>
+<a href="#" id="llm-settings-btn" title="配置 LLM 端点 / API Key / 模型">⚙️ LLM 设置</a>
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
@@ -1039,6 +1041,25 @@ window.addEventListener('error', function(e){
     if(t){ t.textContent='JS错误: '+((e&&e.message)||(e&&e.error)||'unknown')+(e&&e.lineno?(' @'+e.lineno):''); t.style.background='#e11d48'; t.classList.add('show'); setTimeout(function(){t.classList.remove('show'); t.style.background='';}, 8000); }
   }catch(_){}
 });
+// ── LLM 设置按钮绑定：放在脚本最前面注册，不依赖后续代码是否执行完毕 ──
+// 用 addEventListener 而非内联 onclick：兼容 CSP，且函数声明会被提升，点击时必定可用
+(function(){
+  try{
+    var b=document.getElementById('llm-settings-btn');
+    if(!b) return;
+    b.addEventListener('click', function(e){
+      e.preventDefault();
+      var err=null;
+      try{ openLLMSettings(); }catch(ex){ err=ex; }
+      var m=document.getElementById('llm-settings-modal');
+      // 只有当真的没打开时才打扰用户；正常情况静默
+      if(err||!m||!m.classList.contains('open')){
+        alert('LLM设置未能打开：'+(err?(err.message||err):'弹窗未显示，请硬刷新页面 Ctrl+Shift+R'));
+        if(window.console) console.error('openLLMSettings failed', err);
+      }
+    });
+  }catch(_){}
+})();
 // State 
 let currentChild = 'diya';
 let plannerWeeks = {diya:0};
@@ -2901,12 +2922,6 @@ function llmTestSettings(){
 }
 
 // Toast 
-function toast(msg,dur=2500){
- const t=document.getElementById('toast');
- t.textContent=msg;t.classList.add('show');
- setTimeout(()=>t.classList.remove('show'),dur);
-}
-
 // Enhanced Task Render — minimalist list + collapsible completed
 const _esc=s=>String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
 function renderTasksEnhanced(child){
