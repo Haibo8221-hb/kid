@@ -1032,6 +1032,7 @@ Hong Kong parallel: HKUST+PolyU
 </main>
 
 <div id="toast"></div>
+<div id="ver-badge" style="position:fixed;left:6px;bottom:6px;z-index:400;font-size:10px;color:var(--text2);opacity:0.5;pointer-events:none;font-family:monospace"></div>
 
 <script>
 // ── 全局错误捕获（诊断用：任何 JS 错误都显示到页面，避免“静默无反应”）──
@@ -1062,8 +1063,9 @@ window.addEventListener('error', function(e){
 })();
 // State 
 let currentChild = 'diya';
-// 版本号（即部署 commit 短哈希）；用于诊断“缓存了旧版 app.html”
-const APP_VERSION = '4895408';
+// 版本号（构建标识）；用于诊断“缓存了旧版 app.html”——页面左下角徽标会显示它
+const APP_VERSION = '20261014-llm-fix2';
+try{ const vb=document.getElementById('ver-badge'); if(vb) vb.textContent='build '+APP_VERSION; }catch(_){}
 let plannerWeeks = {diya:0};
 let plannerData = {diya:{}};
 let tasksData = {diya:{}};
@@ -2858,9 +2860,17 @@ function showAvatarPicker(){
 
 // ── LLM Settings (UI) ──────────────────────────────────
 function openLLMSettings(){
-  // 先无条件打开弹窗，任何后续异常都不应阻止它显示
+  // 1) 先无条件打开弹窗；用内联样式强制可见，绕过任何可能压制 .open 类的 CSS / 祖先裁剪
   const m = document.getElementById('llm-settings-modal');
-  if(m) m.classList.add('open');
+  if(m){
+    m.classList.add('open');
+    m.style.cssText = 'display:flex!important;position:fixed!important;inset:0!important;'
+      + 'background:rgba(0,0,0,0.6)!important;z-index:2147483647!important;'
+      + 'align-items:center;justify-content:center';
+  }
+  // 2) 必定反馈：让用户确认点击已触发（若连这个都看不到，说明 handler 没执行=旧文件/CSP）
+  try{ toast('⚙️ LLM 设置已打开'); }catch(_){}
+  // 3) 再异步填充（后端不可达也不影响弹窗）
   try{
     const st = document.getElementById('llm-status');
     if(st){ st.textContent=''; st.className='llmset-status'; }
