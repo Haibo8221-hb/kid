@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
 # =============================================================================
-# deploy.sh —— 在阿里云 ECS 上拉取 GitHub 最新并重启后端。
-# 可被 GitHub Actions 调用，也可在 ECS 终端手动执行（排障/立即生效时用）。
-# 与 .github/workflows/deploy.yml 内的命令一致。
+# deploy.sh —— 本机把 kid-main 通过 rsync 推送到阿里云 ECS（方案 B 手动通道）
+# 不依赖 GitHub Actions，适合紧急修复不想走 commit 时直接用。
+# 前提：本机 ~/.ssh/config 已配 112.74.40.8 走公司代理（见 ~/.ssh/config）。
 # =============================================================================
 set -e
 SITE_ROOT="${SITE_ROOT:-/www/wwwroot/kid-site}"
+ECS_HOST="${ECS_HOST:-112.74.40.8}"
+ECS_PORT="${ECS_PORT:-443}"
+ECS_USER="${ECS_USER:-root}"
+KEY="${KEY:-$HOME/.ssh/id_ed25519}"
 SERVICE="${SERVICE:-plan-api}"
 
-cd "$SITE_ROOT"
-git config --global --add safe.directory "$SITE_ROOT"
-git fetch origin
-git reset --hard origin/main
-chown -R www:www "$SITE_ROOT"
-supervisorctl restart "$SERVICE" || true
-echo "==> deploy done"
+rsync -az --delete \
+  --exclude='.git/' --exclude='.github/' --exclude='downloads/' \
+  --exclude='resources/' --exclude='backups/' \
+  --exclude='research_collector.py' --exclude='deploy.sh' \
+  -e "ssh -p $ECS_PORT -i $KEY -o StrictHostKeyChecking=no" \
+  ./ "$ECS_USER@$ECS_HOST:$SITE_ROOT/"
+
+echo "==> rsync 完成。需要重启后端请执行："
+echo "   ssh -p $ECS_PORT $ECS_USER@$ECS_HOST 'supervisorctl restart $SERVICE'"

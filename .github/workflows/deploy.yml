@@ -9,7 +9,27 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH into ECS and deploy
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Rsync code to ECS (push mode — ECS does NOT pull GitHub)
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          echo "$KEY" > key.pem
+          chmod 600 key.pem
+          rsync -az --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='downloads/' \
+            --exclude='resources/' \
+            --exclude='backups/' \
+            --exclude='research_collector.py' \
+            --exclude='deploy.sh' \
+            -e "ssh -p ${{ secrets.ECS_PORT }} -i key.pem -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:${{ secrets.SITE_ROOT }}/
+
+      - name: Fix ownership and restart backend
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.ECS_HOST }}
@@ -17,11 +37,6 @@ jobs:
           username: ${{ secrets.ECS_USER }}
           key: ${{ secrets.ECS_SSH_KEY }}
           script: |
-            set -e
-            cd "${{ secrets.SITE_ROOT }}"
-            git config --global --add safe.directory "${{ secrets.SITE_ROOT }}"
-            git fetch origin
-            git reset --hard origin/main
             chown -R www:www "${{ secrets.SITE_ROOT }}"
             supervisorctl restart "${{ secrets.SERVICE }}" || true
             echo "==> deploy done"
