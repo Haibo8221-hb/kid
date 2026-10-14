@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>An Inspector Calls · Key Quotations Flashcards</title>
+<style>
+:root{--bg:#0d1117;--card-bg:#161b22;--border:#30363d;--text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--green:#3fb950;--red:#f85149;--purple:#bc8cff;--orange:#d2991d;--pink:#f778ba;--teal:#39d353;--crimson:#da3633}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;gap:10px;flex-wrap:wrap}
+.topbar h1{font-size:16px;white-space:nowrap}
+.topbar .count{font-size:12px;color:var(--text2)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{padding:4px 10px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);color:var(--text2);cursor:pointer;font-size:11px;transition:all 0.15s;white-space:nowrap}
+.filter-btn:hover,.filter-btn.active{color:#fff}
+.filter-btn[data-filter="Responsibility"].active,.filter-btn[data-filter="Responsibility"]:hover{background:var(--green);border-color:var(--green)}
+.filter-btn[data-filter="Class"].active,.filter-btn[data-filter="Class"]:hover{background:var(--orange);border-color:var(--orange)}
+.filter-btn[data-filter="Gender"].active,.filter-btn[data-filter="Gender"]:hover{background:var(--pink);border-color:var(--pink)}
+.filter-btn[data-filter="Age"].active,.filter-btn[data-filter="Age"]:hover{background:var(--accent);border-color:var(--accent)}
+.filter-btn[data-filter="Power"].active,.filter-btn[data-filter="Power"]:hover{background:var(--crimson);border-color:var(--crimson)}
+.filter-btn[data-filter="Guilt"].active,.filter-btn[data-filter="Guilt"]:hover{background:var(--purple);border-color:var(--purple)}
+
+.card-area{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;perspective:1200px;min-height:0}
+.card-container{width:100%;max-width:600px;height:100%;max-height:500px;position:relative}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);cursor:pointer}
+.card-inner.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px;border:1px solid var(--border);background:var(--card-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;overflow-y:auto}
+.card-back{transform:rotateY(180deg)}
+
+.card-front .theme-badge{position:absolute;top:14px;left:14px;font-size:10px;padding:3px 10px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.badge-Responsibility{background:#3fb95022;color:var(--green)}
+.badge-Class{background:#d2991d22;color:var(--orange)}
+.badge-Gender{background:#f778ba22;color:var(--pink)}
+.badge-Age{background:#58a6ff22;color:var(--accent)}
+.badge-Power{background:#da363322;color:var(--crimson)}
+.badge-Guilt{background:#bc8cff22;color:var(--purple)}
+
+.card-front .quote-text{font-size:22px;font-weight:700;font-style:italic;line-height:1.4;text-align:center;color:var(--green);margin-bottom:16px}
+.card-front .speaker-text{font-size:14px;color:var(--accent);margin-bottom:6px}
+.card-front .context-text{font-size:13px;color:var(--text2);text-align:center}
+.card-front .tap-hint{position:absolute;bottom:14px;font-size:11px;color:var(--text2);opacity:0.5}
+.card-front .card-number{position:absolute;top:14px;right:14px;font-size:11px;color:var(--text2)}
+
+.card-back .theme-badge{position:absolute;top:14px;left:14px;font-size:10px;padding:3px 10px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.card-back .quote-mini{font-size:13px;font-style:italic;color:var(--green);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);text-align:center;width:100%}
+.card-back .analysis-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.card-back .analysis-text{font-size:14px;line-height:1.7;text-align:left;width:100%}
+.card-back .card-number{position:absolute;top:14px;right:14px;font-size:11px;color:var(--text2)}
+.card-back .tap-hint{position:absolute;bottom:14px;font-size:11px;color:var(--text2);opacity:0.5}
+
+.nav-bar{display:flex;align-items:center;justify-content:center;gap:20px;padding:10px 16px;border-top:1px solid var(--border);flex-shrink:0}
+.nav-btn{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);cursor:pointer;font-size:13px;transition:all 0.15s;min-width:80px}
+.nav-btn:hover{background:var(--border)}
+.nav-btn:disabled{opacity:0.3;cursor:default}
+.nav-btn.flip-btn{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.nav-btn.flip-btn:hover{opacity:0.85}
+.nav-dots{display:flex;gap:4px;align-items:center}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all 0.2s}
+.nav-dot.active{background:var(--accent);width:18px;border-radius:3px}
+.nav-dot.reviewed{background:var(--green)}
+
+@media(max-width:500px){
+  .card-front .quote-text{font-size:17px}
+  .card-back .analysis-text{font-size:12px}
+  .filters{gap:4px}
+  .filter-btn{padding:3px 7px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <h1>🔍 An Inspector Calls</h1>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="filters" id="filters"></div>
+</div>
+
+<div class="card-area" id="cardArea">
+  <div class="card-container">
+    <div class="card-inner" id="cardInner" onclick="flipCard()">
+      <div class="card-face card-front" id="cardFront"></div>
+      <div class="card-face card-back" id="cardBack"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn" id="prevBtn" onclick="prevCard()">◀ Prev</button>
+  <div class="nav-dots" id="navDots"></div>
+  <button class="nav-btn flip-btn" onclick="flipCard()">↻ Flip</button>
+  <button class="nav-btn" id="nextBtn" onclick="nextCard()">Next ▶</button>
+</div>
+
+<script>
+const quotes = [
+  // ═══════ RESPONSIBILITY ═══════
+  {q:"We don't live alone. We are members of one body. We are responsible for each other", speaker:"Inspector Goole", act:"Act 3", context:"Final speech — the Inspector's moral message to the Birlings", theme:"Responsibility", analysis:"THE thesis statement of the play. 'One body' = organic metaphor echoing Christian socialism (1 Corinthians 12). The triple structure builds rhetorical force: assertion → explanation → commandment. Priestley is directly challenging capitalist individualism. The Inspector uses 'we' — he INCLUDES himself, unlike the Birlings who use 'I' and 'you'. This is the moral centre of the play: social responsibility is not optional, it's fundamental."},
+  {q:"A man has to make his own way — has to look after himself", speaker:"Mr Birling", act:"Act 1", context:"Birling's speech about business and life philosophy", theme:"Responsibility", analysis:"Individualism vs collectivism — this quote is WRONG in Priestley's world. 'Has to' = Birling states this as universal truth, not opinion. Dramatic irony: 1912 audience knows WWI and WWII are coming — BIRLING is the one who's wrong. The repetition of 'has to' is dogmatic, closed to debate. Priestley sets up Birling as the wrong philosophy so the Inspector can demolish it. Key for essays: this quote represents everything Priestley opposes."},
+  {q:"One Eva Smith has gone... but there are millions and millions of Eva Smiths and John Smiths", speaker:"Inspector Goole", act:"Act 3", context:"Broadening the case beyond one girl to society", theme:"Responsibility", analysis:"Eva Smith is now a SYMBOL, not a person. 'Millions and millions' — the scale shifts from individual guilt to systemic failure. 'Eva Smiths and John Smiths' — gendered AND universal: this affects everyone. 'Smith' is the most common English surname — she's Everywoman. Priestley transforms one suicide into an indictment of an entire social system. Key structural moment: the Inspector leaves the specific case behind."},
+  {q:"If men will not learn that lesson, they will be taught it in fire and blood and anguish", speaker:"Inspector Goole", act:"Act 3", context:"Ominous final warning — apocalyptic prophecy", theme:"Responsibility", analysis:"Direct historical reference: Priestley wrote this in 1945, after two world wars. 'Fire and blood and anguish' = the wars themselves — the 'lesson' society refused to learn. 'Taught it' — apocalyptic education. 'Men' is gendered but universalising; 'they' distances the guilty from the warning. For 1945 audience watching in London's rubble, this wasn't prophecy — it was memory. The ultimate stake: learn social responsibility or face destruction."},
+  {q:"Public men, Mr Birling, have responsibilities as well as privileges", speaker:"Inspector Goole", act:"Act 2", context:"Confronting Birling's abuse of his position", theme:"Responsibility", analysis:"Direct challenge to Birling's worldview. 'Public men' = those with power, wealth, status. 'As well as' — not INSTEAD of privileges, but ALONGSIDE them. The Inspector isn't anti-capitalist per se — he's anti-IRRESPONSIBLE-capitalist. The framing is reasonable, almost gentle — which makes Birling's refusal to accept it more damning. Key nuance: Priestley accepts hierarchy exists but demands it carries moral obligation."},
+
+  // ═══════ CLASS ═══════
+  {q:"But these girls aren't cheap labour — they're people", speaker:"Sheila Birling", act:"Act 1", context:"Reacting to her father's dismissal of Eva Smith", theme:"Class", analysis:"Sheila's MORAL awakening begins here. 'Cheap labour' vs 'people' — she exposes the dehumanising language of capitalism. The dash creates dramatic pause: she's thinking in real time, evolving. Crucially, Sheila says 'girls' not 'Eva' at first — she's starting to see the SYSTEM, not just the individual. This is the moment Sheila separates from her parents' values. For essays: Sheila's arc from privilege to awareness starts with this line."},
+  {q:"Girls of that class", speaker:"Mrs Birling", act:"Act 2", context:"Dismissing Eva Smith's situation with casual condescension", theme:"Class", analysis:"'That class' — not even worthy of naming. The determiner 'that' creates distance: not 'these girls' (near, human) but 'that' (far, alien). Mrs Birling never uses Eva's name — she uses 'girl', 'that class', 'a girl of that sort'. Language as weapon of class hierarchy. For the 'comfortable' middle class, working-class people are a category, not individuals. This casual cruelty is more damning than Mr Birling's explicit greed."},
+  {q:"I was in that state when a chap easily turns nasty", speaker:"Eric Birling", act:"Act 3", context:"Explaining his assault on Eva while drunk", theme:"Class", analysis:"Eric is brutally honest about his own abuse of power. 'That state' = drunk, but also: in the state of privileged entitlement. 'A chap' — he's still middle-class self-mythologising, but he's AWAKE to it. 'Easily turns nasty' — key word 'easily': power corrupts effortlessly. Eric is Priestley's complex moral figure: he DID the worst thing but he ADMITS it. The younger generation can be redeemed BECAUSE they face the truth."},
+  {q:"She was very pretty — soft brown hair and big dark eyes", speaker:"Gerald Croft", act:"Act 1", context:"Describing Eva Smith / Daisy Renton — revealing his affair", theme:"Class", analysis:"Gerald sees Eva as aesthetic object. The description is romanticised: 'soft', 'big dark' — a picture he's framed for himself. He's the most ambiguous character: helped her (gave her money) but also USED her. 'Pretty' — surface-level observation; he never describes her character, her intelligence, her pain. For Priestley, Gerald represents the charming face of patriarchy: kinder than Birling, but ultimately the same power structure."},
+  {q:"I didn't install her there so that I could make love to her", speaker:"Gerald Croft", act:"Act 2", context:"Defending his affair — claiming he acted from pity", theme:"Class", analysis:"Gerald's self-justification: he frames his affair as accidental charity. 'Install her there' — transactional language, as if Eva is an appliance. 'Make love to her' — romanticises exploitation. The whole line is defensive architecture: he entered with good intentions, so the exploitation wasn't planned. Priestley exposes how the powerful reframe predation as protection. Gerald believes his own story — that's the tragedy of his class."},
+
+  // ═══════ GENDER ═══════
+  {q:"I was in a palace... I did nothing I'm ashamed of", speaker:"Mrs Birling", act:"Act 2", context:"Refusing to accept responsibility for turning Eva away from her charity", theme:"Gender", analysis:"Mrs Birling is Priestley's most interesting villain: a woman who upholds patriarchy against other women. 'Palace' — the charity is her kingdom, she rules it with class prejudice. 'I did nothing' — the active refusal of guilt. But she DID do something: she used her institutional power to harm Eva. The double standard: she polices 'girls of that class' while protecting her son (Eric). Feminism AND class intersect: she's oppressor AND oppressed in the gender system."},
+  {q:"I didn't feel about her as she felt about me", speaker:"Gerald Croft", act:"Act 2", context:"Admitting his emotional detachment from Daisy Renton / Eva Smith", theme:"Gender", analysis:"Gerald's honesty reveals the gendered power imbalance. He 'didn't feel' — emotional asymmetry is structural, not personal. Eva loved him (or needed to believe she did); he saw her as a temporary refuge from Sheila. The line is almost pathetic in its honesty. Priestley shows how class and gender intersect: Gerald's emotional distance is a privilege he can afford; Eva's emotional investment is her vulnerability."},
+  {q:"She was young and pretty and warm-hearted — and intensely grateful", speaker:"Gerald Croft", act:"Act 1", context:"Describing Daisy Renton's situation when they met", theme:"Gender", analysis:"Gerald catalogues Eva's qualities as if appraising goods. 'Young, pretty, warm-hearted' — commodification language. But the telling word is 'grateful': her gratitude is what attracted him. He liked being the rescuer, the powerful one. This is the gender dynamic Priestley critiques: men offer protection in exchange for subordination. 'Intensely' — she was desperate enough to be truly grateful, which makes his exploitation worse."},
+
+  // ═══════ AGE / GENERATION ═══════
+  {q:"You're beginning to pretend now that nothing's really happened", speaker:"Sheila Birling", act:"Act 3", context:"After the Inspector leaves — the family tries to dismiss everything", theme:"Age", analysis:"Sheila is AWAKE while her parents go back to sleep. 'Pretend' — she sees through their self-deception. The present continuous 'beginning to' shows she's watching them regress in real time. This is Priestley's hope: the young WILL see the truth, even if the old refuse. Sheila has transformed from a spoiled child into the play's moral compass. The generation gap is Priestley's message: change won't come from above — it comes from the young."},
+  {q:"You're squiffy", speaker:"Sheila Birling", act:"Act 1", context:"Early in the play — informal, childish exchange with Eric", theme:"Age", analysis:"The BEFORE picture. 'Squiffy' = slightly drunk, childish slang. This is Sheila pre-awakening: trivial, sheltered, focused on the party. The word choice is deliberately immature — Priestley shows where she STARTS to make her transformation dramatic. The contrast with her later moral maturity ('But these girls aren't cheap labour — they're people') shows the arc of the play compressed into one character."},
+  {q:"You killed her — and the child she'd have had too — my child", speaker:"Eric Birling", act:"Act 3", context:"Exploding at his mother for refusing Eva help — revealing he's the father", theme:"Age", analysis:"The play's emotional climax. Eric uses 'killed' — the starkest word possible, refusing euphemism. 'The child she'd have had' — he humanises the unborn baby before claiming it as 'my child'. The dashes show his struggle to speak through emotion. He's confronting his MOTHER: the generational confrontation Priestley wants the audience to feel. Mrs Birling judged 'the father' of Eva's child without knowing it was Eric — her own prejudice destroys her own grandchild."},
+  {q:"Everything's all right now, Sheila. What about this ring?", speaker:"Gerald Croft", act:"Act 3", context:"After the phone call — trying to pretend nothing changed", theme:"Age", analysis:"Gerald tries to hit RESET. 'Everything's all right NOW' — the word 'now' betrays him: he's desperate to return to Before. The ring symbolises their engagement, their old world, their old innocence. But Sheila has changed — she can't un-see what she's seen. For Priestley, Gerald represents the middle generation: young enough to almost understand, old enough to want to go back. He's the cautionary figure: understanding without action is complicity."},
+
+  // ═══════ POWER & WEALTH ═══════
+  {q:"I was almost certain for a knighthood", speaker:"Mr Birling", act:"Act 1", context:"Sharing his ambitions with Gerald and the family", theme:"Power", analysis:"Birling's values exposed: status, not substance. 'Almost certain' — smug self-satisfaction, and dramatic irony (he won't get it). A knighthood = public recognition of power. He doesn't care about being GOOD; he cares about being SEEN as important. The juxtaposition with the Inspector (who has no social rank but supreme moral authority) is Priestley's point: real power is moral, not titular. Birling's knighthood obsession symbolises everything wrong with Edwardian society."},
+  {q:"Lower costs and higher prices", speaker:"Mr Birling", act:"Act 1", context:"Explaining his business philosophy — why he fired Eva", theme:"Power", analysis:"Capitalism in six words. 'Lower costs' = pay workers less. 'Higher prices' = charge customers more. Both hurt the same class. Birling says this PROUDLY — he's not hiding his greed. For Priestley, the capitalist equation IS unmasked exploitation. The fact that this seems 'obvious' to Birling is the indictment: the system trains people not to see its cruelty. Eva Smith's life was worth 2.5 shillings to him."},
+  {q:"It's my duty to keep labour costs down", speaker:"Mr Birling", act:"Act 1", context:"Justifying the strike-breaking that preceded Eva's dismissal", theme:"Power", analysis:"Language of duty weaponised. 'Duty' is the Inspector's word — Birling steals moral language to justify exploitation. He frames crushing workers as RESPONSIBILITY. Priestley shows how the powerful use moral vocabulary to disguise immoral action. 'Labour costs' — humans reduced to a line item. The Inspector will later redefine 'duty' entirely, reclaiming the word for social responsibility."},
+
+  // ═══════ GUILT ═══════
+  {q:"I did nothing I'm ashamed of. That's what I said to the Inspector", speaker:"Mrs Birling", act:"Act 3", context:"Doubling down after the Inspector leaves — refusing to change", theme:"Guilt", analysis:"Mrs Birling's moral rigidity is her tragedy. She repeats her defence to the Inspector — she's not reflecting, she's PROTECTING. 'Nothing I'm ashamed of' = her conscience is perfectly calibrated to her class privilege. For Priestley, this is the DANGER of the older generation: they're not evil — they genuinely believe they're right. The inability to feel guilt is what condemns them. Contrast with Eric and Sheila who FEEL shame."},
+  {q:"It's the only time I've ever done anything like that", speaker:"Eric Birling", act:"Act 3", context:"Trying to distance himself from his worst action", theme:"Guilt", analysis:"Eric's attempt at self-exoneration. 'Only time' = it was an exception, not who I am. But the play's message is that ONE action in a system of power IS who you are. Priestley refuses easy redemption — Eric DID assault Eva, full stop. Yet his guilt is REAL: he's not denying, he's confronting. The contrast with his mother's 'I did nothing I'm ashamed of' is the play's moral spectrum: Eric's guilty honesty vs Mrs Birling's innocent denial."},
+  {q:"You mustn't try to build up a kind of wall between us and that girl", speaker:"Sheila Birling", act:"Act 2", context:"Calling out her family's attempts to distance themselves from Eva", theme:"Guilt", analysis:"Sheila identifies the psychological defence mechanism: the 'wall' of class, of otherness, of 'not-my-problem'. 'Us and that girl' — she knows her family's thinking and REJECTS it. The wall metaphor is spatial: guilt is about distance; the closer you let Eva come, the harder it is to deny responsibility. Sheila is actively dismantling her own privilege. This is the moral work her parents refuse."},
+];
+const themes = ['All','Responsibility','Class','Gender','Age','Power','Guilt'];
+const themeColors = {'Responsibility':'var(--green)','Class':'var(--orange)','Gender':'var(--pink)','Age':'var(--accent)','Power':'var(--crimson)','Guilt':'var(--purple)'};
+
+let currentFilter = 'All';
+let currentIndex = 0;
+let flipped = false;
+let reviewed = {};
+
+function getFiltered(){
+  return currentFilter === 'All' ? quotes : quotes.filter(q => q.theme === currentFilter);
+}
+
+function filter(theme){
+  currentFilter = theme;
+  currentIndex = 0;
+  flipped = false;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-filter="${theme}"]`).classList.add('active');
+  renderCard();
+  renderNav();
+}
+
+function flipCard(){
+  const filtered = getFiltered();
+  if(!filtered.length) return;
+  flipped = !flipped;
+  if(flipped) reviewed[quotes.indexOf(filtered[currentIndex])] = true;
+  document.getElementById('cardInner').classList.toggle('flipped', flipped);
+  renderNav();
+}
+
+function prevCard(){
+  const filtered = getFiltered();
+  if(!filtered.length) return;
+  currentIndex = (currentIndex - 1 + filtered.length) % filtered.length;
+  flipped = false;
+  document.getElementById('cardInner').classList.remove('flipped');
+  renderCard();
+  renderNav();
+}
+
+function nextCard(){
+  const filtered = getFiltered();
+  if(!filtered.length) return;
+  currentIndex = (currentIndex + 1) % filtered.length;
+  flipped = false;
+  document.getElementById('cardInner').classList.remove('flipped');
+  renderCard();
+  renderNav();
+}
+
+function renderCard(){
+  const filtered = getFiltered();
+  if(!filtered.length){document.getElementById('cardFront').innerHTML='<p style="color:var(--text2)">No cards</p>';document.getElementById('cardBack').innerHTML='';return}
+  const q = filtered[currentIndex];
+  const idx = quotes.indexOf(q);
+  document.getElementById('cardFront').innerHTML = 
+    `<div class="theme-badge badge-${q.theme}">${q.theme}</div>
+     <div class="card-number">${idx+1}/${quotes.length}</div>
+     <div class="speaker-text">${q.speaker} · ${q.act}</div>
+     <div class="quote-text">"${q.q}"</div>
+     <div class="context-text">${q.context}</div>
+     <div class="tap-hint">Tap to flip</div>`;
+  document.getElementById('cardBack').innerHTML = 
+    `<div class="theme-badge badge-${q.theme}">${q.theme}</div>
+     <div class="card-number">${idx+1}/${quotes.length}</div>
+     <div class="quote-mini">"${q.q}" — ${q.speaker}</div>
+     <div class="analysis-title">analysis</div>
+     <div class="analysis-text">${q.analysis}</div>
+     <div class="tap-hint">Tap to flip back</div>`;
+}
+
+function renderNav(){
+  const filtered = getFiltered();
+  document.getElementById('count').textContent = 
+    currentFilter==='All' ? `${quotes.length} quotes · 6 themes` : `${filtered.length} quotes · ${currentFilter}`;
+  let dots = '';
+  for(let i=0;i<filtered.length;i++){
+    const q = filtered[i]; const idx = quotes.indexOf(q);
+    dots += `<div class="nav-dot${i===currentIndex?' active':''}${reviewed[idx]?' reviewed':''}"></div>`;
+  }
+  document.getElementById('navDots').innerHTML = dots;
+  document.getElementById('prevBtn').disabled = filtered.length <= 1;
+  document.getElementById('nextBtn').disabled = filtered.length <= 1;
+}
+
+// Build filter buttons
+const filterDiv = document.getElementById('filters');
+themes.forEach(t => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn' + (t==='All'?' active':'');
+  btn.textContent = t==='All'?'📋 All':t;
+  btn.setAttribute('data-filter', t);
+  btn.onclick = () => filter(t);
+  filterDiv.appendChild(btn);
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowLeft') prevCard();
+  else if(e.key === 'ArrowRight') nextCard();
+  else if(e.key === ' ' || e.key === 'Enter'){e.preventDefault();flipCard();}
+});
+
+renderCard();
+renderNav();
+</script>
+</body>
+</html>

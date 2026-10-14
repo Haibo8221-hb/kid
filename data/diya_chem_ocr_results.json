@@ -1,0 +1,122 @@
+[
+  {
+    "idx": 0,
+    "file": "/root/.hermes/image_cache/img_cde378d098e8.jpg",
+    "text": "◻ **0 3 . 3** Chadwick's experiments showed the existence of neutrons in an atom.\nThis led to an understanding of isotopes.\n\nDefine the term 'isotopes'.\nRefer to subatomic particles in your answer. [2 marks]\n\nIsotopes is when you have the same number\nof protons and different number of protons (sic, should be 'neutrons').\n\nTurn over for the next question",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 1,
+    "file": "/root/.hermes/image_cache/img_1e3ab91e43b8.jpg",
+    "text": "A student investigated the energy change of the reaction between zinc and copper sulfate solution.\nThis is the method used.\n1. Measure 25 cm³ of copper sulfate solution into a polystyrene cup.\n2. Measure the temperature of the copper sulfate solution.\n3. Add 0.20 g of zinc powder to the copper sulfate solution.\n4. Stir the reaction mixture.\n5. Record the highest temperature reached.\n6. Repeat steps 1 to 5 with different masses of zinc powder.\nFigure 3 shows the results.\n[Graph with axis labeled \"Highest temperature reached in °C\" and \"Mass of zinc in grams\"]",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 2,
+    "file": "/root/.hermes/image_cache/img_7bb1e1137a48.jpg",
+    "text": "The image is a transcription of a GCSE Chemistry exam paper with student answers:\n**04.1**  \nDraw two lines of best fit on Figure 3.  \nThe lines should cross.  \n[2 marks]  \n\n**04.2**  \nExplain the results shown in Figure 3.  \nDo not refer to anomalous points.  \nUse data from Figure 3.  \n[4 marks]  \nAs the mass of the Zinc increases, the highest temperature increases. Until it has reach to its maximum and stays within its high temperature range.  \n\n**04.3**  \nExplain why using a polystyrene cup gives more accurate results than using a glass beaker.  \n[2 marks]  \nGlass beakers may conduct some heat during the process, making the results slightly higher, whereas polystyrene does not.  \n\n**04.4**  \nComplete the ionic equation for the reaction between zinc and copper sulfate solution.  \nInclude state symbols.  \n[2 marks]  \n$ \\text{Zn(s)} + \\text{Cu}^{2+}\\text{(aq)} \\rightarrow \\text{Zn}^{2+}\\text{(aq)} + \\text{Cu (s)} $",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 3,
+    "file": "/root/.hermes/image_cache/img_cf12f63869c4.jpg",
+    "text": "A different student repeated steps 1 to 5 of the method four times using 0.50 g of zinc powder.\nTable 2 shows the results.\n\n|          | Trial 1 | Trial 2 | Trial 3 | Trial 4 |\n|----------|---------|---------|---------|---------|\n| Highest temperature reached in °C | 37.6    | 37.2    | 37.8    | 37.4    |\n\n04.5 Calculate the mean highest temperature reached.\nInclude the uncertainty in your answer. [3 marks]\n\n$\\frac{37.6+37.2+37.8+37.4}{4} = 37.5$\n\nMean highest temperature reached = $37.5 \\pm 0.5$ °C\n\n04.6 The results show random errors.\nThe student did not make any measuring errors.\nSuggest one reason for the random errors in this experiment. [1 mark]\nImpurities",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 4,
+    "file": "/root/.hermes/image_cache/img_b1ab5b101e7f.jpg",
+    "text": "The image shows a page from a GCSE Chemistry exam about ionic compounds and electrolysis. Below is the transcription of all text, including question numbers, question text, student's handwritten answers, any teacher marks (✓, ✗, scores), cross-outs, and corrections. Line breaks are preserved.\n\n---\n\n**05**\nThis question is about ionic compounds and electrolysis.\n\nCalcium chloride is an ionic compound.\n\n**05.1**\nCalcium and chlorine react to produce calcium chloride.\nDescribe what happens to calcium atoms and chlorine atoms when the ionic compound calcium chloride is formed. [4 marks]\n\n*Calcium atoms goes to the anode and chlorine atoms goes to the cathode.*\n\n**05.2**\nSolid calcium chloride cannot be electrolysed.\nGive one reason why. [1 mark]\n\n*The melting point is too high.*\n\n**05.3**\nName the product formed at the negative electrode when aqueous calcium chloride solution is electrolysed. [1 mark]\n\n*anions.* (This appears to be an error; likely intended to write \"anode\" but wrote \"anions\" instead; correct product would be hydrogen gas or calcium metal depending on context, but \"anions\" is incorrect.)  \n\n---",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 5,
+    "file": "/root/.hermes/image_cache/img_8cc543fc544a.jpg",
+    "text": "15\n\n0 5 . 4 What is the half equation for the reaction at the positive electrode when aqueous calcium chloride solution is electrolysed? [1 mark]\n\nTick (✓) one box.\n\n2Cl⁻ → Cl₂ + 2e⁻ ✓\n\nCl₂ + 2e⁻ → 2Cl⁻ \n\n4OH⁻ → O₂ + 2H₂O + 4e⁻ \n\nO₂ + 2H₂O + 4e⁻ → 4OH⁻ \n\nQuestion 5 continues on the next page",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 6,
+    "file": "/root/.hermes/image_cache/img_afeef260e261.jpg",
+    "text": "05.5 A student investigated the electrolysis of green copper chromate solution.\n\nFigure 4 shows the apparatus.\n\n[Diagram labeled Figure 4 showing a power supply connected to a container with a drop of green copper chromate solution on filter paper soaked in an electrolyte solution. The container has a negative electrode on the left and a positive electrode on the right.]\n\nFigure 5 shows the results.\n\n[Diagram labeled Figure 5 showing a similar setup as Figure 4, but with the filter paper showing a blue colour near the negative electrode and a yellow colour near the positive electrode.]\n\nNegative electrode\nFilter paper soaked in an electrolyte solution\nBlue colour\n\nPositive electrode\nYellow colour",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 7,
+    "file": "/root/.hermes/image_cache/img_868f92ba647a.jpg",
+    "text": "17\nCopper chromate solution contains the ions Cu²⁺ and CrO₄²⁻\n[3 marks]\nExplain the results shown in Figure 5.\nThe negative CrO₄²⁻ went to the anode\nwhereas the positive Cu²⁺ went to the cathode,\nCreating two separate colours.\n\nTurn over for the next question",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 8,
+    "file": "/root/.hermes/image_cache/img_22d61159442d.jpg",
+    "text": "A student investigated the voltage produced by different pairs of metal electrodes in a chemical cell.\nFigure 6 shows the apparatus. \n[Figure 6: A diagram of a voltmeter connected to a nickel electrode and Electrode A, both immersed in 1.0 mol/dm³ sodium chloride solution.]\nThis is the method used.\n1. Place a nickel electrode and an electrode made from a different metal (electrode A) in 1.0 mol/dm³ sodium chloride solution.\n2. Measure the voltage produced.\n3. Repeat using different metals for electrode A.\nTable 3 shows the results.\nTable 3\n| Electrode A | Symbol of metal | Voltage in volts |\n| --- | --- | --- |\n| Copper | Cu | -0.59 |\n| Magnesium | Mg | 2.12 |\n| Nickel | Ni | 0.00 |\n| Silver | Ag | -1.05 |\n| Zinc | Zn | 0.51 |",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 9,
+    "file": "/root/.hermes/image_cache/img_e69c68e70c2e.jpg",
+    "text": "The image is a page from a GCSE Chemistry exam paper and student's answer sheet. Here is the word-for-word transcription:\n\n**06.1** Write the symbols of the five metals in Table 3 in order of reactivity.  \nJustify your answer.  [3 marks]  \nMost reactive Mg Zn Ni Cu Ag Least reactive  \nJustification Magnisium has the highest voltage released, whereas Sliver has the lowest.  \n\n**06.2** The voltage produced by a chemical cell depends on the concentration of the electrolyte solution.  \nPlan an experiment to investigate how the voltage produced by a chemical cell varies with the concentration of the electrolyte solution.  \nThe following substances are available:  \n- the metal electrodes in Table 3  \n- 1.0 mol/dm³ sodium chloride solution  \n- pure water.  [6 marks]  \n\nSet up the electrodes within a beaker containing 1.0 mol/dm³ Sodium Chloride Solution.  \nConnect the electrodes with the voltage. Test out the voltage with one type of metal.  \nWrite down the results for the first concentration. Add 10 ml of water each time to get a more diluted solution and write down each time the voltage with the same piece of metal. Repeat its process until the results are repeating the same results.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 10,
+    "file": "/root/.hermes/image_cache/img_fe034ac90182.jpg",
+    "text": "A close-up of a student's exam paper is shown, focusing on a single question. The page number \"20\" is visible at the top. The question is labeled as \"06.3\" and reads: \"Describe how a hydrogen fuel cell produces a potential difference. [2 marks]\"\n\nBelow the question, the student has written in handwriting: \"I haven't learnt hydrogen fuel cells yet :)\"\n\nOn the right side of the page, there is a small notation that says, \"Do not write outside the box,\" and the number \"11\" is visible in a box, likely indicating a page or question reference. No teacher marks, such as ticks or crosses, are present on this part of the paper.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 11,
+    "file": "/root/.hermes/image_cache/img_c083f59c87e0.jpg",
+    "text": "This is a grading task for a GCSE Chemistry exam, here is the transcribed text from the image:\n**0 7** This question is about iron.\n**0 7.1** Iron is a metal.\nDescribe how iron conducts thermal energy. [2 marks]\nThe heat can pass through the particles of the iron metal.\n\n**0 7.2** Pure iron is too soft for many uses.\nExplain why mixing iron with other metals makes alloys which are harder than pure iron. [3 marks]\nThe different sizes of metal particles can prevent the particles sliding over each-\nother when it only contains iron particles. Making it harder than pure iron.\n\nQuestion 7 continues on the next page",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 12,
+    "file": "/root/.hermes/image_cache/img_4b54626eef99.jpg",
+    "text": "The image is a scanned page from a GCSE Chemistry exam paper, featuring two multiple-choice questions (07.3 and 07.4) with student responses. Below is a word-for-word transcription of all text, marks, and annotations. Line breaks and formatting are preserved as in the original.\n\n---\n\n**Page 22**  \n*(Top-right corner: \"Do not write outside the box\")*\n\n### Question 07.3\n**When iron reacts with chlorine, 0.12 mol of iron reacts with 0.18 mol of chlorine (Cl₂).  \nWhich is the correct equation for the reaction? [1 mark]**  \n*Tick (✓) one box.*  \n\n- Fe + Cl₂ → FeCl₂ ☐  \n- Fe + 3Cl₂ → FeCl₆ ☐  \n- 2Fe + Cl₂ → 2FeCl ☐  \n- **2Fe + 3Cl₂ → 2FeCl₃ ☑** *(Student tick and teacher's check mark)*  \n\n**The most common oxides of iron are Fe₂O₃ and Fe₃O₄.**  \n\n---\n\n### Question 07.4\n**What is the ratio of the numbers of ions in Fe₃O₄? [1 mark]**  \n*Tick (✓) one box.*  \n\n- 2 Fe²⁺ : 1 Fe³⁺ : 4 O²⁻ ☐  \n- 1 Fe²⁺ : 2 Fe³⁺ : 4 O²⁻ ☐  \n- 3 Fe²⁺ : 4 O²⁻ ☐  \n- **3 Fe³⁺ : 4 O²⁻ ☑** *(Student tick and teacher's check mark)*  \n\n---\n\n### Additional Observations:\n- The student hand-ticked the correct options for both questions (2Fe + 3Cl₂ → 2FeCl₃ and 3 Fe³⁺ : 4 O²⁻).  \n- The teacher confirmed the correctness of both answers with check marks (✓).  \n- No cross-outs or corrections are visible in the student's responses.  \n- The exam instructions and question numbers are preserved exactly as printed.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 13,
+    "file": "/root/.hermes/image_cache/img_f1ea05a04717.jpg",
+    "text": "The image is a scanned page from a GCSE Chemistry exam script. Here is the word-for-word transcription:\n\n---\n\n**23**\n\n**07.5** Calculate the percentage (%) by mass of iron in Fe₃O₄.  \nRelative atomic masses (Aᵣ): O = 16 Fe = 56  \n[3 marks]\n\n56×3 + 16×4 = 232  \n\n*Handwritten student note:* \"I didn't learn about percentage by mass :)\"  \nPercentage by mass of iron = ______ %  \n\n**07.6** Fe₂O₃ reacts with carbon to produce carbon dioxide.  \nThe equation for the reaction is:  \n2Fe₂O₃(s) + 3C(s) → 4Fe(s) + 3CO₂(g)  \n40 kg 375 mol  \nCalculate the volume of carbon dioxide gas at room temperature and pressure that is produced from 40.0 kg of Fe₂O₃ using excess carbon.  \nRelative formula mass (Mᵣ): Fe₂O₃ = 160  \n\nThe volume of 1 mole of any gas at room temperature and pressure is 24 dm³.  \n[5 marks]\n\n40 Kg = 40000 g  \n40000 / 160 = 250  \nRatio: 2 : 3  \n250 : 375  \n375 × 24 = 9000  \n\nVolume of carbon dioxide = **9000 dm³**  \n\n---\n\n**Teacher marks/Corrections:**  \nNo explicit teacher marks (✓ or ✗) or scores are visible on this page. The handwritten calculation for 07.6 appears to be fully worked, but without explicit scoring marks.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 14,
+    "file": "/root/.hermes/image_cache/img_928b03ad29b3.jpg",
+    "text": "This image shows a page from a GCSE Chemistry exam. Here is a transcription of all the text, including question numbers, question text, student's handwritten answers, any teacher marks, cross-outs, and corrections:\n\n---\n\n**08** This question is about propane (C₃H₈).\n\nFigure 7 shows the displayed structural formula of propane.\n\n**Figure 7**\n\n      H   H   H\n      |   |   |\nH — C — C — C — H\n      |   |   |\n      H   H   H\n\n**08.1** Explain why propane has a low boiling point. [3 marks]\n\nThe bonds within the hydrogen and carbon are very weak and needs less energy for them to break.\n\n---\n\nThere are no teacher marks, cross-outs, or corrections visible in this image.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 15,
+    "file": "/root/.hermes/image_cache/img_d190d28c0db6.jpg",
+    "text": "25\nPropane reacts with oxygen to produce carbon dioxide and water.\nThe reaction is exothermic.\n\n0 8 . 2 Figure 8 shows four reaction profiles.\n\nFigure 8\n\n[Graph A: A graph with \"Energy\" on the y-axis and \"Progress of reaction\" on the x-axis. There is a curve starting high, peaking, then ending lower. \"Overall energy change\" is labeled as a downward arrow from start to end.]\n\n[Graph B: A graph with \"Energy\" on the y-axis and \"Progress of reaction\" on the x-axis. There is a curve starting at a medium height, peaking, then ending lower but higher than the start. \"Overall energy change\" is labeled as a small downward arrow from start to end.]\n\n[Graph C: A graph with \"Energy\" on the y-axis and \"Progress of reaction\" on the x-axis. There is a curve starting high, peaking, then ending at the same height as the start. \"Overall energy change\" is labeled with a dotted line showing no change from start to end.]\n\n[Graph D: A graph with \"Energy\" on the y-axis and \"Progress of reaction\" on the x-axis. There is a curve starting at a low height, peaking, then ending lower. \"Overall energy change\" is labeled as a small downward arrow from start to end.]\n\nWhich is the correct reaction profile and labels for the reaction between propane and oxygen?\nTick (✓) one box. [1 mark]\n\nA [ ] \nB [✓] \nC [ ] \nD [ ]\n\nQuestion 8 continues on the next page\n\nTurn over ▶",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 16,
+    "file": "/root/.hermes/image_cache/img_63393f87b396.jpg",
+    "text": "The image is a page from a GCSE Chemistry exam paper and a student's answer sheet. Here is the transcription:\n\n[Top of the page has the number \"26\" in the center.]\n[Question Box Start]\n**0 8 . 3** Figure 9 shows the displayed formula equation for the reaction between propane and oxygen.\n\n**Figure 9**\n\n    H   H   H\n    |   |   |\nH—C — C — C—H + 5O=O  →  3O=C=O + 4H—O—H\n    |   |   |\n    H   H   H\n\nThe overall energy change of this exothermic reaction is 2219 kJ/mol.\n\nTable 4 shows the bond energies of the bonds in the reaction.\n\n**Table 4**\n\n|        | C—C | C—H | O=O | C=O | O—H |\n|--------|------|------|-----|-----|-----|\n| Energy in kJ/mol | 347  | X    | 498 | 805 | 464 |\n\nCalculate the bond energy of the C—H bond (X). \n[5 marks]\n\n[Lines for answer]\n\n[Student's Handwritten Answer Start]\nHaven't (crossed out 'learn') learnt this calculations yet :)\n\nBond energy of the C—H bond (X) = ________________________ kJ/mol\n[Student's Handwritten Answer End]\n\n[Bottom of the page has the number \"2 6\" on the bottom left and a score box with the number \"9\" on the bottom right.]",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 17,
+    "file": "/root/.hermes/image_cache/img_48bc8d43738d.jpg",
+    "text": "This question is about acids and their reactions.\n\n09.1 What is meant by 'a weak acid'? [2 marks]\nThe pH level is higher than strong acids and the universal indicator is more yellow rather than red. And the acidity level is lower.\n\n09.2 Explain what happens to the pH of an acid as the acid is diluted with water. [2 marks]\nThe pH level increases as the acid is being diluted with water.\n\nQuestion 9 continues on the next page",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 18,
+    "file": "/root/.hermes/image_cache/img_05fb7db6d6b2.jpg",
+    "text": "The image shows a page from a GCSE Chemistry exam with questions and answers. Here is the transcription:\n\n**09.3**  \nA student does a titration to find the volume of acid needed to neutralise an alkali.  \nThe student fills a burette with the acid.  \nGive three more steps the student must do before adding the acid to the alkali from the burette.  \nYou should name any equipment used. [3 marks]  \n\n1. They should rinse the mole measure cup with water then with the acid to prevent dilute.  \n2. Use a beaker to contain the any overspill  \n3. Use a measuring cylinder to measure out the alkaline.  \n\n**09.4**  \nThe student titrated a solution containing 0.0045 moles of sodium hydroxide with 0.15 mol/dm³ hydrochloric acid.  \nThe equation for the reaction is:  \n\n\\[ \\text{NaOH} + \\text{HCl} \\rightarrow \\text{NaCl} + \\text{H}_2\\text{O} \\]  \n\nCalculate the volume of hydrochloric acid in cm³ needed in the titration. [2 marks]  \n\n\\[ \\frac{0.0045}{0.15} = 0.03 \\] (Correction from 0.045/0.15 to 0.0045/0.15)  \n\nVolume of acid = **0.03** cm³  \n\n(Handwritten note: \"We don't need to know the titration calculations in our yr10 summer exam ;)\")",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 19,
+    "file": "/root/.hermes/image_cache/img_1025d583438d.jpg",
+    "text": "29\n\n0 9. 5 A calcium atom is larger than a magnesium atom.\nExplain why calcium reacts more vigorously than magnesium with hydrochloric acid of\nthe same concentration. [3 marks]\n\nCalcium atom is unsaturated.\n\nHaven't learnt this yet :)\n\nEND OF QUESTIONS",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  }
+]

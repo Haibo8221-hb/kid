@@ -1,0 +1,79 @@
+[
+  {
+    "model": "bytedance-seed/seed-2.0-lite",
+    "status": "success",
+    "time_s": 23.7,
+    "cost_usd": 0.001562,
+    "chars": 768,
+    "lines": 29,
+    "words": 126,
+    "text_preview": "### Full transcription of the exam page, preserving all content and structure:\n---\nTop centre of page: `9`\nTop right of page:\nDo not write\noutside the\nbox\n\nLeft side question identifier: `0 3 . 3`\nQuestion text (line breaks preserved):\nChadwick's experiments showed the existence of neutrons in an at"
+  },
+  {
+    "model": "anthropic/claude-3.5-haiku",
+    "status": "error",
+    "time_s": 0.1,
+    "http_status": 403,
+    "error": "The request is prohibited due to a violation of provider Terms Of Service."
+  },
+  {
+    "model": "qwen/qwen3-vl-235b-a22b-instruct",
+    "status": "success",
+    "time_s": 3.5,
+    "cost_usd": 0.00044,
+    "chars": 354,
+    "lines": 17,
+    "words": 62,
+    "text_preview": "0 3 . 3 Chadwick’s experiments showed the existence of neutrons in an atom.\nThis led to an understanding of isotopes.\n\nDefine the term ‘isotopes’.\nRefer to subatomic particles in your answer.\n[2 marks]\n\nIsotopes is when you have the same number\nof protons and different number of protons.\n\n8\n\nDo not "
+  },
+  {
+    "model": "qwen/qwen3-vl-32b-instruct",
+    "status": "success",
+    "time_s": 1.6,
+    "cost_usd": 0.000173,
+    "chars": 376,
+    "lines": 17,
+    "words": 62,
+    "text_preview": "0 3 . 3 Chadwick’s experiments showed the existence of neutrons in an atom.  \nThis led to an understanding of isotopes.  \n\nDefine the term ‘isotopes’.  \nRefer to subatomic particles in your answer.  \n[2 marks]  \n\nIsotopes is when you have the same number  \nof protons and different number of protons."
+  },
+  {
+    "model": "mistralai/mistral-small-3.2-24b-instruct",
+    "status": "success",
+    "time_s": 2.1,
+    "cost_usd": 0.000207,
+    "chars": 476,
+    "lines": 25,
+    "words": 84,
+    "text_preview": "Sure, here is the transcription of the text in the image:\n\n---\n\n9\n\n0 3 3\n\nChadwick's experiments showed the existence of neutrons in an atom.\n\nThis led to an understanding of isotopes.\n\nDefine the term 'isotopes'.\n\nRefer to subatomic particles in your answer. [2 marks]\n\nIsotopes is when you have the"
+  },
+  {
+    "model": "meta-llama/llama-4-maverick",
+    "status": "success",
+    "time_s": 5.6,
+    "cost_usd": 0.000663,
+    "chars": 647,
+    "lines": 32,
+    "words": 111,
+    "text_preview": "## Transcription of the Image\n\n### Question Section\n\n9\n\n0 3 . 3 Chadwick's experiments showed the existence of neutrons in an atom.\n\nThis led to an understanding of isotopes.\n\nDefine the term 'isotopes'.\n\nRefer to subatomic particles in your answer. [2 marks]\n\n### Student's Answer\n\nIsotupes is when "
+  },
+  {
+    "model": "baidu/ernie-4.5-vl-424b-a47b",
+    "status": "success",
+    "time_s": 8.3,
+    "cost_usd": 0.00093,
+    "chars": 1048,
+    "lines": 21,
+    "words": 172,
+    "text_preview": "A digital image of a student's answer to a question from a GCSE Chemistry exam paper. The paper is placed on a wooden table, only a portion visible. Here is the transcription of all the text in the image, including question numbers, question text, student's handwritten answers, any teacher marks, cr"
+  },
+  {
+    "model": "z-ai/glm-4.5v",
+    "status": "success",
+    "time_s": 11.1,
+    "cost_usd": 0.001819,
+    "chars": 359,
+    "lines": 16,
+    "words": 64,
+    "text_preview": "\n9\n0 3 . 3 Chadwick’s experiments showed the existence of neutrons in an atom.\nThis led to an understanding of isotopes.\n\nDefine the term ‘isotopes’.\nRefer to subatomic particles in your answer. \n[2 marks]\n\nIsotopes is when you have the same number of protons and different number of protons.\n\n–\n8\n\nT"
+  }
+]

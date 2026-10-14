@@ -1,0 +1,24 @@
+[
+  {
+    "id": "smc-9fa2de55",
+    "date": "2026-09-01",
+    "paper": "SMC 2023 Mock",
+    "score": 47,
+    "correct": null,
+    "wrong": null,
+    "blank": null,
+    "weakness": "Clear regression from 70 (SMC 2024) — 23-point drop",
+    "notes": "Authoritative score from parent. Correct/wrong/blank breakdown not yet provided."
+  },
+  {
+    "id": "smc-2024-mock-1",
+    "date": "2026-08-31",
+    "paper": "SMC 2024 Mock",
+    "score": 70,
+    "correct": 13,
+    "wrong": 7,
+    "blank": 5,
+    "weakness": "Number theory + algebraic reasoning (Q9-13 collapse)",
+    "notes": "Easy Q1-8 88%, medium Q9-13 0/5, hard Q18-25 cautious. Silver tier, near Gold line."
+  }
+]

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Message in the Bottle — Jemma's Writing Analysis</title>
+<style>
+  :root {
+    --bg: #faf9f7;
+    --card: #ffffff;
+    --text: #2d2a26;
+    --text-secondary: #5c5752;
+    --accent: #7c6f64;
+    --accent-light: #e8e4df;
+    --strength: #4a7c59;
+    --strength-bg: #edf5ef;
+    --improve: #b85c38;
+    --improve-bg: #fdf3ee;
+    --grammar: #5b6e8a;
+    --grammar-bg: #f0f3f7;
+    --tip: #6b5b8a;
+    --tip-bg: #f5f2fa;
+    --border: #e0dcd7;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 10px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #3a3440 0%, #5c5268 40%, #7c6f84 100%);
+    color: #fff;
+    padding: 60px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 20%, rgba(180,200,220,0.08) 0%, transparent 50%);
+    animation: shimmer 8s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(2%, -1%); }
+  }
+  .header-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+  .header h1 {
+    font-size: 2.2em;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .header .subtitle {
+    font-size: 1.05em;
+    opacity: 0.8;
+    font-style: italic;
+    letter-spacing: 0.03em;
+  }
+  .header .meta {
+    margin-top: 20px;
+    font-size: 0.85em;
+    opacity: 0.65;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Container */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* Score Banner */
+  .score-banner {
+    display: flex;
+    gap: 20px;
+    margin-top: -30px;
+    position: relative;
+    z-index: 2;
+    flex-wrap: wrap;
+  }
+  .score-card {
+    flex: 1; min-width: 140px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 24px 20px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .score-card .label {
+    font-size: 0.78em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .score-card .value {
+    font-size: 2.4em;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+  .score-card .detail {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+  .score-card.star .value { color: #c9a84c; }
+
+  /* Section */
+  section {
+    margin-top: 48px;
+  }
+  .section-title {
+    font-size: 1.35em;
+    font-weight: 400;
+    color: var(--text);
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-light);
+    margin-bottom: 24px;
+    letter-spacing: 0.02em;
+  }
+  .section-title .icon {
+    margin-right: 10px;
+    font-size: 1.1em;
+  }
+
+  /* Quote Block */
+  .quote-block {
+    background: var(--card);
+    border-left: 4px solid var(--accent);
+    padding: 20px 24px;
+    margin: 20px 0;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    box-shadow: var(--shadow);
+    font-style: italic;
+    color: var(--text-secondary);
+    position: relative;
+  }
+  .quote-block::before {
+    content: '\201C';
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    font-size: 4em;
+    color: var(--accent-light);
+    line-height: 1;
+  }
+  .quote-block .text {
+    padding-left: 20px;
+    font-size: 1.02em;
+  }
+  .quote-block .tag {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.72em;
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+
+  /* Strength & Improvement Cards */
+  .card-grid {
+    display: grid;
+    gap: 18px;
+  }
+  .card-grid.two-col { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 24px;
+    border: 1px solid var(--border);
+  }
+  .card h4 {
+    font-size: 1.02em;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: 0.01em;
+  }
+  .card p, .card li {
+    font-size: 0.92em;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .card ul { padding-left: 20px; margin-top: 6px; }
+  .card li { margin-bottom: 4px; }
+
+  .card.strength { border-left: 4px solid var(--strength); }
+  .card.strength h4 { color: var(--strength); }
+  .card.improve { border-left: 4px solid var(--improve); }
+  .card.improve h4 { color: var(--improve); }
+  .card.grammar { border-left: 4px solid var(--grammar); }
+  .card.grammar h4 { color: var(--grammar); }
+  .card.tip { border-left: 4px solid var(--tip); }
+  .card.tip h4 { color: var(--tip); }
+
+  /* Before/After */
+  .before-after {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  @media (max-width: 600px) { .before-after { grid-template-columns: 1fr; } }
+  .ba-col {
+    padding: 16px;
+    border-radius: var(--radius);
+    font-size: 0.9em;
+    line-height: 1.7;
+  }
+  .ba-col.before { background: #fef5f2; border: 1px solid #f0d5cb; }
+  .ba-col.after { background: #f2f8f4; border: 1px solid #c8ddcf; }
+  .ba-col .ba-label {
+    font-size: 0.72em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .ba-col.before .ba-label { color: var(--improve); }
+  .ba-col.after .ba-label { color: var(--strength); }
+
+  /* Correction Table */
+  .correction-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    margin: 16px 0;
+  }
+  .correction-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 0.78em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border);
+    font-weight: 600;
+  }
+  .correction-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .correction-table tr:hover { background: #fafaf8; }
+  .correction-table .original { color: var(--improve); }
+  .correction-table .corrected { color: var(--strength); font-weight: 500; }
+  .correction-table .note { font-size: 0.85em; color: var(--text-secondary); }
+
+  /* Exercise Box */
+  .exercise-box {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin: 16px 0;
+    border: 1px solid var(--border);
+  }
+  .exercise-box .ex-num {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    font-size: 0.85em;
+    font-weight: 700;
+    margin-right: 12px;
+  }
+  .exercise-box h4 {
+    display: inline;
+    font-size: 1.05em;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+  .exercise-box .ex-desc {
+    margin-top: 12px;
+    font-size: 0.92em;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* Book List */
+  .book-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .book {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    border: 1px solid var(--border);
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .book .book-icon {
+    font-size: 2em;
+    flex-shrink: 0;
+  }
+  .book .book-info h4 {
+    font-size: 0.98em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .book .book-info .author {
+    font-size: 0.82em;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+  .book .book-info .why {
+    font-size: 0.82em;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* Overall Comment */
+  .overall {
+    background: linear-gradient(135deg, #f8f6f4 0%, #f0ede8 100%);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin: 32px 0;
+    border: 1px solid var(--border);
+  }
+  .overall h3 {
+    font-size: 1.15em;
+    font-weight: 400;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  .overall p {
+    font-size: 0.95em;
+    line-height: 1.8;
+    color: var(--text-secondary);
+  }
+  .overall .verdict {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 8px 20px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 20px;
+    font-size: 0.88em;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  /* Highlight text */
+  .hl { background: #fef3cd; padding: 1px 4px; border-radius: 3px; font-weight: 500; }
+  .hl-good { background: #d4edda; padding: 1px 4px; border-radius: 3px; }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-secondary);
+    font-size: 0.82em;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  /* Print */
+  @media print {
+    .header { padding: 30px 24px; }
+    .score-banner { margin-top: 0; }
+    .card, .book, .exercise-box { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-content">
+    <h1>"The Message in the Bottle"</h1>
+    <div class="subtitle">A Creative Writing Analysis for Jemma · Year 8 · Headington School</div>
+    <div class="meta">Analysed May 2026 &nbsp;|&nbsp; Creative Writing · Narrative Fiction</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- Score Banner -->
+<div class="score-banner">
+  <div class="score-card star">
+    <div class="label">Creativity &amp; Imagination</div>
+    <div class="value">9/10</div>
+    <div class="detail">Exceptional world-building</div>
+  </div>
+  <div class="score-card">
+    <div class="label">Vocabulary &amp; Imagery</div>
+    <div class="value">8/10</div>
+    <div class="detail">Strong sensory detail</div>
+  </div>
+  <div class="score-card">
+    <div class="label">Grammar &amp; Mechanics</div>
+    <div class="value">6/10</div>
+    <div class="detail">Some consistent errors</div>
+  </div>
+  <div class="score-card">
+    <div class="label">Structure &amp; Pacing</div>
+    <div class="value">8/10</div>
+    <div class="detail">Well-paced narrative arc</div>
+  </div>
+  <div class="score-card star">
+    <div class="label">Overall Assessment</div>
+    <div class="value">7.5</div>
+    <div class="detail">Well above Year 8 standard</div>
+  </div>
+</div>
+
+<!-- Overall Verdict -->
+<div class="overall">
+  <h3>Teacher's Overview</h3>
+  <p>
+    Jemma, this is <strong>impressive creative writing for Year 8</strong>. You have built a genuinely intriguing world — a pale-blue-skinned, white-haired exile on a deserted beach who discovers a message in a bottle. The sensory details are vivid, the narrative voice is distinctive, and the ending leaves the reader wanting more. Your instincts for pacing and atmosphere are strong.
+  </p>
+  <p style="margin-top:12px;">
+    The main areas to develop are <strong>grammar consistency</strong> (especially <em>lay vs. lie</em> and tense shifts), <strong>sentence structure variety</strong>, and <strong>polishing word choice</strong> in a few places where informal language breaks the mood. These are all normal for Year 8 and very fixable with practice.
+  </p>
+  <div class="verdict">Well Above Year 8 Standard — Strong Creative Voice</div>
+</div>
+
+<!-- ===== STRENGTHS ===== -->
+<section>
+  <div class="section-title"><span class="icon">&#9733;</span> What Works Brilliantly</div>
+
+  <div class="card-grid two-col">
+
+    <div class="card strength">
+      <h4>1. Distinctive First-Person Voice</h4>
+      <p>From the very first line, we are <em>inside</em> this character's head. The narrator has a personality — wry, self-aware, slightly bitter but also dreamy. Lines like <span class="hl-good">"I love being exiled"</span> immediately subvert expectations and make us curious.</p>
+    </div>
+
+    <div class="card strength">
+      <h4>2. Rich Sensory World-Building</h4>
+      <p>You engage multiple senses: touch (<span class="hl-good">"warmth spread across the sand warming up my beautiful pale blue hands"</span>), sight (<span class="hl-good">"silver-gray eyes"</span>, <span class="hl-good">"crystal-clear sky"</span>), temperature (<span class="hl-good">"cooling effect"</span>), and smell (<span class="hl-good">"hints of the smell of seawater"</span>). This is advanced technique.</p>
+    </div>
+
+    <div class="card strength">
+      <h4>3. Effective Pacing &amp; Tension</h4>
+      <p>You begin with peaceful calm, slowly introduce drowsiness, then use the splash of water as a turning point. The short sentence <span class="hl-good">"There was a message in a bottle."</span> lands with real impact because of the buildup before it.</p>
+    </div>
+
+    <div class="card strength">
+      <h4>4. Strong, Memorable Ending</h4>
+      <p>The final line — <span class="hl-good">"Sail across the water, my love. And find your kind."</span> — is a genuine hook. It re-contextualises the entire story, raises questions (who wrote it? are there others like her?), and makes the reader want a second chapter. This is exactly what good fiction does.</p>
+    </div>
+
+    <div class="card strength">
+      <h4>5. Physical Description of the Bottle</h4>
+      <p><span class="hl-good">"The bottle was clear and small with a slim neck and a big body; weirdly, the bottle was pristine without a single speck of moss or dirt."</span> The detail about it being <em>pristine</em> is excellent — it signals something supernatural or intentional, building mystery.</p>
+    </div>
+
+    <div class="card strength">
+      <h4>6. Sophisticated Sentence Variety (When It Works)</h4>
+      <p>You mix long flowing sentences with short punchy ones. <span class="hl-good">"I sat up."</span> after a longer descriptive paragraph is a textbook technique for emphasis. Your use of semicolons shows ambition beyond Year 8 level.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== AREAS FOR IMPROVEMENT ===== -->
+<section>
+  <div class="section-title"><span class="icon">&#9998;</span> Areas to Strengthen</div>
+
+  <div class="card-grid">
+
+    <div class="card improve">
+      <h4>1. Lay vs. Lie (Key Grammar Fix)</h4>
+      <p>This is your most consistent error and it appears in the very first paragraph.</p>
+      <div class="before-after">
+        <div class="ba-col before">
+          <div class="ba-label">&#10007; Original</div>
+          I <strong>laid</strong> down on my back, hands behind my head...
+        </div>
+        <div class="ba-col after">
+          <div class="ba-label">&#10003; Corrected</div>
+          I <strong>lay</strong> down on my back, hands behind my head...
+        </div>
+      </div>
+      <p style="font-size:0.85em; color: var(--text-secondary); margin-top:6px;">
+        <strong>Rule:</strong> <em>Lie</em> (past: <em>lay</em>) = to recline. <em>Lay</em> (past: <em>laid</em>) = to put something down.<br>
+        Since she is reclining herself, it's <em>lie → lay</em>. There is no direct object. If she were putting <em>something</em> down (e.g. "I laid the bottle on the sand"), then <em>laid</em> would be correct.
+      </p>
+    </div>
+
+    <div class="card improve">
+      <h4>2. Informal Language Breaks the Mood</h4>
+      <div class="before-after">
+        <div class="ba-col before">
+          <div class="ba-label">&#10007; Original</div>
+          ...get away from all the <strong>pain-in-the-ass</strong> of being the only white-head in this <strong>stupid</strong> world.
+        </div>
+        <div class="ba-col after">
+          <div class="ba-label">&#10003; Alternative</div>
+          ...escape the <strong>burden</strong> of being the only white-head in this <strong>cruel</strong> world.
+        </div>
+      </div>
+      <p style="font-size:0.85em; color: var(--text-secondary);">
+        "Pain-in-the-ass" is very casual — it feels like a modern teenager speaking, which breaks the haunting, timeless atmosphere you've built. "Stupid" is also a weak adjective here. Stronger words like <em>burden, lonely, indifferent, harsh, unkind</em> would serve the mood better.
+      </p>
+    </div>
+
+    <div class="card improve">
+      <h4>3. Tense Consistency</h4>
+      <p>You shift between past and present tense in a few places:</p>
+      <div class="before-after">
+        <div class="ba-col before">
+          <div class="ba-label">&#10007; Mixed Tenses</div>
+          I shook my sluggish head and lifted it, <strong>propping</strong> my elbow up and <strong>leaned</strong> forward...
+        </div>
+        <div class="ba-col after">
+          <div class="ba-label">&#10003; Consistent Past</div>
+          I shook my sluggish head and lifted it, <strong>propped</strong> my elbow up and <strong>leaned</strong> forward...
+        </div>
+      </div>
+      <p style="font-size:0.85em; color: var(--text-secondary);">
+        When you use <em>-ing</em> participles, make sure they match the tense of the main verb. Here, "shook" and "lifted" are past tense, so "propping" should be "propped."
+      </p>
+    </div>
+
+    <div class="card improve">
+      <h4>4. Word Choice &amp; Precision</h4>
+      <div class="before-after">
+        <div class="ba-col before">
+          <div class="ba-label">&#10007; Original</div>
+          A <strong>fool</strong> of pale white paper sat dry in the spotless chamber.
+        </div>
+        <div class="ba-col after">
+          <div class="ba-label">&#10003; Corrected</div>
+          A <strong>scroll</strong> of pale white paper sat dry in the spotless chamber.
+        </div>
+      </div>
+      <p style="font-size:0.85em; color: var(--text-secondary);">
+        "Fool" is a typo or vocabulary confusion — you likely meant <strong>"scroll"</strong> (a rolled-up piece of paper). Curiously, "foolscap" is an old British paper size, but "a fool of paper" is not standard usage. A scroll matches the message-in-a-bottle imagery perfectly.
+      </p>
+    </div>
+
+    <div class="card improve">
+      <h4>5. Repetitive Phrasing</h4>
+      <div class="before-after">
+        <div class="ba-col before">
+          <div class="ba-label">&#10007; Repetitive</div>
+          You <strong>get to get away</strong> from all the pain-in-the-ass...
+        </div>
+        <div class="ba-col after">
+          <div class="ba-label">&#10003; Smoother</div>
+          You <strong>can escape</strong> from all the burden...
+        </div>
+      </div>
+      <p style="font-size:0.85em; color: var(--text-secondary);">
+        "Get to get" is clunky. This is a first-draft issue — reading your work aloud helps catch these.
+      </p>
+    </div>
+
+    <div class="card improve">
+      <h4>6. Punctuation: Comma Splices &amp; Missing Commas</h4>
+      <p>Several sentences join independent clauses with just a comma where a semicolon or full stop is needed.</p>
+      <div class="before-after">
+        <div class="ba-col before">
+          <div class="ba-label">&#10007; Comma Splice</div>
+          I sat up.&nbsp; Stunned at the fact that there could be someone else at the end of the sea.
+        </div>
+        <div class="ba-col after">
+          <div class="ba-label">&#10003; Flowing</div>
+          I sat up, stunned at the thought that there could be someone else across the sea.
+        </div>
+      </div>
+      <p style="font-size:0.85em; color: var(--text-secondary);">
+        The full stop after "I sat up." followed by a fragment is stylistically bold but grammatically a fragment. Consider joining them. Also: <em>"at the end of the sea"</em> is slightly awkward — <em>"across the sea"</em> is more natural.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Full Correction Table -->
+<section>
+  <div class="section-title"><span class="icon">&#128221;</span> Complete Line-by-Line Corrections</div>
+
+  <div style="overflow-x: auto;">
+  <table class="correction-table">
+    <thead>
+      <tr><th style="width:30%">Original</th><th style="width:30%">Suggested Revision</th><th style="width:40%">Explanation</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="original">I <strong>laid</strong> down on my back</td>
+        <td class="corrected">I <strong>lay</strong> down on my back</td>
+        <td class="note"><strong>Lie/lay confusion.</strong> "Lie" (recline) → past tense "lay". "Lay" (put down) → past tense "laid". She is reclining, so: lie → lay.</td>
+      </tr>
+      <tr>
+        <td class="original">get away from all the <strong>pain-in-the-ass</strong></td>
+        <td class="corrected">escape the <strong>burden / misery</strong> of being</td>
+        <td class="note"><strong>Tone clash.</strong> The colloquial phrase breaks the haunting atmosphere. Choose vocabulary consistent with the mood.</td>
+      </tr>
+      <tr>
+        <td class="original">in this <strong>stupid</strong> world</td>
+        <td class="corrected">in this <strong>cruel / indifferent / lonely</strong> world</td>
+        <td class="note"><strong>Weak adjective.</strong> "Stupid" is vague. A more specific word strengthens the emotional weight.</td>
+      </tr>
+      <tr>
+        <td class="original">you <strong>get to get away</strong> from</td>
+        <td class="corrected">you <strong>can escape</strong> from</td>
+        <td class="note"><strong>Repetitive phrasing.</strong> The double "get" is clunky. Simplify.</td>
+      </tr>
+      <tr>
+        <td class="original">the same colour as my skin</td>
+        <td class="corrected">the same pale blue as my skin</td>
+        <td class="note"><strong>Minor consistency.</strong> Earlier you said her hands were "pale blue" — reinforcing the colour here strengthens the image.</td>
+      </tr>
+      <tr>
+        <td class="original">a hard, biting <strong>glass-something</strong> nudged my feet</td>
+        <td class="corrected">something hard and glassy nudged my feet</td>
+        <td class="note"><strong>Awkward phrasing.</strong> "Glass-something" sounds uncertain. Either commit to "glass bottle" or use a more descriptive phrase.</td>
+      </tr>
+      <tr>
+        <td class="original">I took the bottle <strong>without thinking</strong></td>
+        <td class="corrected">I <strong>reached for</strong> the bottle <strong>before I could stop myself</strong></td>
+        <td class="note"><strong>Show, don't tell.</strong> "Without thinking" tells us. Describing the involuntary motion shows us, and is more immersive.</td>
+      </tr>
+      <tr>
+        <td class="original">Stunned at the fact that there could be someone else <strong>at the end of the sea</strong></td>
+        <td class="corrected">Stunned at the thought that someone else might exist <strong>across the water</strong></td>
+        <td class="note"><strong>Preposition choice.</strong> "At the end of the sea" is slightly odd — the sea doesn't have a clear "end". "Across the sea/water" is more natural.</td>
+      </tr>
+      <tr>
+        <td class="original">in a <strong>100000</strong> kilometers radius</td>
+        <td class="corrected">within a <strong>hundred thousand</strong> kilometres</td>
+        <td class="note"><strong>Number formatting + preposition.</strong> Large numbers in fiction are usually written out. Also: "in a X radius" → "within X kilometres". But honestly, the hyperbole is effective — consider keeping it as a stylistic choice.</td>
+      </tr>
+      <tr>
+        <td class="original">A <strong>fool</strong> of pale white paper</td>
+        <td class="corrected">A <strong>scroll</strong> of pale white paper</td>
+        <td class="note"><strong>Word choice.</strong> Likely meant "scroll" — a rolled document. "Fool" does not work here.</td>
+      </tr>
+      <tr>
+        <td class="original">feeling a bit <strong>forbidding</strong> like a small child peeking at an adult's business</td>
+        <td class="corrected">feeling a bit <strong>forbidden</strong>, like a small child peeking at an adult's business</td>
+        <td class="note"><strong>Word confusion.</strong> "Forbidding" = unfriendly/threatening. "Forbidden" = not allowed. You meant the latter — she feels she shouldn't be reading it.</td>
+      </tr>
+      <tr>
+        <td class="original"><strong>with</strong> silver ink so faint that I could barely see the words</td>
+        <td class="corrected"><strong>written in</strong> silver ink so faint I could barely make out the words</td>
+        <td class="note"><strong>Preposition + verb choice.</strong> "Written in" is the standard collocation for ink. "Make out" is a more natural verb for struggling to read.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- The Revised Version -->
+<section>
+  <div class="section-title"><span class="icon">&#10024;</span> Polished Version (With Jemma's Voice Preserved)</div>
+
+  <div class="quote-block">
+    <div class="text">
+      <p>Under the bright sunlight, warmth spread across the sand, warming my pale blue hands. I lay on my back, fingers laced behind my head, feeling the white silky hair against my scalp. I love being exiled. It is so calm, so peaceful — you can escape the burden of being the only white-head in this indifferent world.</p>
+      <p style="margin-top:12px;">I stared up with my silver-grey eyes at the crystal-clear sky, the same pale blue as my skin, and wondered what life would be like with ordinary hair. I sighed. It was all I ever thought about — my whole life, really. I don't understand why the colour of my hair means I must be treated like an extinct species.</p>
+      <p style="margin-top:12px;">The sun was pleasant and drowsy; the sand was warm beneath my body. The air carried a cooling breath against the heat, laced with the sharp, clean smell of seawater.</p>
+      <p style="margin-top:12px;">Just as I was sinking into a sun-soaked stupor, a splash of cool water tickled my toes — and something hard, glassy, nudged my foot. I jerked my legs back, cursing the unfortunate moment the waves arrived. I shook my sluggish head and lifted it, propped myself up on one elbow, and leaned forward to see what had washed ashore.</p>
+      <p style="margin-top:12px;">There was a message in a bottle.</p>
+      <p style="margin-top:12px;">I sat up, stunned at the thought that someone else might exist across the water. Impossible. Foolish, even to consider it. This was a place of exile — there was no living thing within a hundred thousand kilometres.</p>
+      <p style="margin-top:12px;">The bottle was clear and small, with a slim neck and a round body. Strangely, it was pristine — not a single speck of moss or dirt. A scroll of pale white paper sat dry inside the spotless chamber. I reached for the bottle before I could stop myself; the cold, hard glass pressed against my warm palm. I popped the cork and slid my fingers down the narrow neck. Had my hand not been unusually slender, it never would have fit. I fumbled for a moment before catching hold of the paper.</p>
+      <p style="margin-top:12px;">I drew it out, feeling a little forbidden — like a child peeking at an adult's secret.</p>
+      <p style="margin-top:12px;">Unrolling it, I saw slim, slanted handwriting, written in silver ink so faint I could barely make out the words:</p>
+      <p style="margin-top:12px; font-style: italic; font-size: 1.05em; text-align: center; color: var(--accent);">"Sail across the water, my love. And find your kind."</p>
+    </div>
+    <div class="tag">Revised — preserving Jemma's original voice and imagery</div>
+  </div>
+</section>
+
+<!-- ===== WRITING EXERCISES ===== -->
+<section>
+  <div class="section-title"><span class="icon">&#9997;</span> Practice Exercises for Jemma</div>
+
+  <div class="exercise-box">
+    <span class="ex-num">1</span><h4>Grammar Drill: Lie / Lay / Laid</h4>
+    <div class="ex-desc">
+      <p>Fill in the blanks with <strong>lie, lay, lain, lay, laid</strong>:</p>
+      <ol style="margin-top:10px; padding-left:24px;">
+        <li>Yesterday, I _____ on the beach for hours. <em>(reclined)</em></li>
+        <li>She _____ the bottle on the sand and stepped back. <em>(placed)</em></li>
+        <li>He had _____ there since dawn, unmoving. <em>(been reclining)</em></li>
+        <li>The book still _____ where I had _____ it. <em>(was resting / placed)</em></li>
+      </ol>
+      <p style="margin-top:8px; font-size:0.82em; color: var(--text-secondary);">
+        <strong>Answers:</strong> 1. lay &nbsp;|&nbsp; 2. laid &nbsp;|&nbsp; 3. lain &nbsp;|&nbsp; 4. lay / laid
+      </p>
+    </div>
+  </div>
+
+  <div class="exercise-box">
+    <span class="ex-num">2</span><h4>Show, Don't Tell — Rewrite the Emotion</h4>
+    <div class="ex-desc">
+      <p>Take the sentence <em>"I was nervous about opening the bottle"</em> and rewrite it <strong>without using the word "nervous"</strong>. Instead, describe physical sensations, actions, or thoughts that <em>show</em> nervousness. Aim for 3-4 sentences.</p>
+      <p style="margin-top:8px; font-size:0.82em; color: var(--text-secondary);">
+        <strong>Example:</strong> "My fingers hovered over the cork. A pulse beat at my temple. What if there was nothing inside? What if there <em>was</em>?"
+      </p>
+    </div>
+  </div>
+
+  <div class="exercise-box">
+    <span class="ex-num">3</span><h4>Continue the Story: What Happens Next?</h4>
+    <div class="ex-desc">
+      <p>Write the next 300-400 words. <strong>Who wrote the message? Does she sail? What does she find?</strong> This is the perfect exercise because you already have momentum — the hardest part (starting) is done. Focus on maintaining the same narrative voice and sensory detail.</p>
+    </div>
+  </div>
+
+  <div class="exercise-box">
+    <span class="ex-num">4</span><h4>Mood Vocabulary Builder</h4>
+    <div class="ex-desc">
+      <p>Your story has a mood of <strong>lonely tranquillity shifting to mysterious hope</strong>. For each mood below, list 5 words you could use instead of the obvious choice:</p>
+      <ul style="margin-top:8px;">
+        <li><strong>Lonely</strong> but not sad: <em>solitary, remote, untethered, adrift, undisturbed...</em></li>
+        <li><strong>Peaceful</strong> but not boring: <em>_____</em> (fill in 5)</li>
+        <li><strong>Mysterious</strong> but not scary: <em>_____</em> (fill in 5)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="exercise-box">
+    <span class="ex-num">5</span><h4>Sentence Variety Audit</h4>
+    <div class="ex-desc">
+      <p>Print your story. Use three different coloured highlighters:</p>
+      <ul style="margin-top:8px;">
+        <li><strong>Yellow</strong> = short sentences (under 10 words)</li>
+        <li><strong>Green</strong> = medium sentences (10-25 words)</li>
+        <li><strong>Blue</strong> = long sentences (over 25 words)</li>
+      </ul>
+      <p style="margin-top:8px;">A good story has a <strong>mix of all three</strong>. If your page is all one colour, revise to add variety. This is a technique professional writers use.</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- Reading Recommendations -->
+<section>
+  <div class="section-title"><span class="icon">&#128218;</span> Books to Read — For a Writer Like You</div>
+  <p style="font-size:0.9em; color: var(--text-secondary); margin-bottom: 20px;">
+    These books match the kind of story you're writing: first-person narrators with distinctive voices, atmospheric settings, and a touch of the strange.
+  </p>
+
+  <div class="book-list">
+    <div class="book">
+      <div class="book-icon">&#128214;</div>
+      <div class="book-info">
+        <h4>The Girl Who Drank the Moon</h4>
+        <div class="author">Kelly Barnhill</div>
+        <div class="why"><strong>Why:</strong> Lyrical prose, a magical outcast protagonist, and masterful sensory description. The way Barnhill builds atmosphere is very similar to your style.</div>
+      </div>
+    </div>
+
+    <div class="book">
+      <div class="book-icon">&#128214;</div>
+      <div class="book-info">
+        <h4>The Ocean at the End of the Lane</h4>
+        <div class="author">Neil Gaiman</div>
+        <div class="why"><strong>Why:</strong> First-person narration, a haunting seaside/supernatural atmosphere, and a story that feels like a memory. Gaiman is a master of the "strange thing in an ordinary world" tone you're developing.</div>
+      </div>
+    </div>
+
+    <div class="book">
+      <div class="book-icon">&#128214;</div>
+      <div class="book-info">
+        <h4>Orphans of the Tide</h4>
+        <div class="author">Struan Murray</div>
+        <div class="why"><strong>Why:</strong> Opens with a mysterious figure washing ashore. Excellent world-building through small details, and a protagonist who feels like an outsider. Very close to your story's energy.</div>
+      </div>
+    </div>
+
+    <div class="book">
+      <div class="book-icon">&#128214;</div>
+      <div class="book-info">
+        <h4>A Wizard of Earthsea</h4>
+        <div class="author">Ursula K. Le Guin</div>
+        <div class="why"><strong>Why:</strong> The gold standard for spare, beautiful prose in fantasy. Le Guin says more in fewer words than almost anyone. Her island settings and sea journeys will resonate with your story.</div>
+      </div>
+    </div>
+
+    <div class="book">
+      <div class="book-icon">&#128214;</div>
+      <div class="book-info">
+        <h4>The Light Between Worlds</h4>
+        <div class="author">Laura E. Weymouth</div>
+        <div class="why"><strong>Why:</strong> A protagonist who longs for a world she was exiled from. Beautiful, melancholy first-person narration. The emotional register is very close to what you're writing.</div>
+      </div>
+    </div>
+
+    <div class="book">
+      <div class="book-icon">&#128214;</div>
+      <div class="book-info">
+        <h4>Nation</h4>
+        <div class="author">Terry Pratchett</div>
+        <div class="why"><strong>Why:</strong> A boy alone on an island after a disaster, a girl shipwrecked — two worlds colliding. Pratchett's island setting and themes of finding your people after loss match your story perfectly.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Reference Card -->
+<section>
+  <div class="section-title"><span class="icon">&#128203;</span> Quick Reference: Jemma's Writing Goals (Next 3 Months)</div>
+
+  <div class="card-grid two-col">
+    <div class="card grammar">
+      <h4>Grammar Priority</h4>
+      <ul>
+        <li>Master <strong>lie/lay/lain</strong> vs. <strong>lay/laid/laid</strong></li>
+        <li>Check every <em>-ing</em> participle matches the main verb tense</li>
+        <li>Avoid comma splices — use semicolons or full stops</li>
+        <li>"Written in ink" not "with ink"</li>
+      </ul>
+    </div>
+    <div class="card tip">
+      <h4>Style Priority</h4>
+      <ul>
+        <li>Read dialogue aloud to test for natural flow</li>
+        <li>Use <strong>specific adjectives</strong> instead of "stupid", "nice", "good"</li>
+        <li>Before submitting: highlight every "get/got" and replace half</li>
+        <li>Keep one "voice rule": would this character say it this way?</li>
+      </ul>
+    </div>
+    <div class="card strength">
+      <h4>Keep Doing This</h4>
+      <ul>
+        <li>Your sensory descriptions are excellent — keep layering them</li>
+        <li>Short sentences for impact — you use these naturally and well</li>
+        <li>First-person voice — this is your strength, lean into it</li>
+        <li>Endings that make the reader think — the silver ink message is perfect</li>
+      </ul>
+    </div>
+    <div class="card tip">
+      <h4>Next Creative Project</h4>
+      <ul>
+        <li>Write Part 2: What happens after she reads the message?</li>
+        <li>Try third-person limited narration (same closeness, different pronoun)</li>
+        <li>Write a "prequel" — the person who sent the bottle</li>
+        <li>Enter a young writers' competition (BBC Young Writers, Foyle Young Poets)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  Analysis prepared for Jemma &middot; Headington School, Year 8 &middot; May 2026<br>
+  <span style="font-size:0.85em;">All feedback aims to nurture Jemma's creative voice while building technical accuracy.</span>
+</footer>
+
+</body>
+</html>

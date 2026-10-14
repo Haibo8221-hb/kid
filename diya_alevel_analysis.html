@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diya A-Level Workload Analysis</title>
+<style>
+:root{--bg:#f8f9fb;--surface:#fff;--surface2:#f1f3f6;--text:#1a1a2e;--text2:#5a5f72;--accent:#2563eb;--accent2:#7c3aed;--red:#dc2626;--green:#16a34a;--border:#e2e4e9;--radius:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px;max-width:860px;margin:0 auto}
+h1{font-size:26px;margin-bottom:6px}
+h2{font-size:19px;margin:32px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--accent);display:inline-block}
+h3{font-size:15px;margin:20px 0 8px;color:var(--accent2)}
+.subtitle{color:var(--text2);font-size:13px;margin-bottom:28px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin:16px 0}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+th{background:var(--surface2);padding:8px 12px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-purple{background:#f3e8ff;color:#6b21a8}
+.code-block{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;font-family:'SF Mono',Consolas,monospace;font-size:12px;line-height:1.8;margin:10px 0;white-space:pre}
+.note{font-size:12px;color:var(--text2);margin:6px 0;padding:8px 12px;background:var(--surface2);border-radius:6px}
+.warn{font-size:12px;color:var(--red);margin:6px 0;padding:8px 12px;background:#fef2f2;border-radius:6px;border-left:3px solid var(--red)}
+.good{font-size:12px;color:var(--green);margin:6px 0;padding:8px 12px;background:#f0fdf4;border-radius:6px;border-left:3px solid var(--green)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
+.hero-stat{text-align:center;padding:16px}
+.hero-stat .num{font-size:36px;font-weight:800;color:var(--accent)}
+.hero-stat .label{font-size:12px;color:var(--text2);margin-top:2px}
+.history-section{margin-top:36px;padding-top:24px;border-top:3px solid var(--accent2)}
+.history-section h2{border-bottom-color:var(--accent2)}
+.q-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:10px 0;font-size:13px}
+.q-box .q-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;letter-spacing:.5px}
+</style>
+</head>
+<body>
+
+<h1>Diya's A-Level Workload Analysis</h1>
+<p class="subtitle">Based on Diya's handwritten notes (23 Jun 2026) — her own judgments preserved, structure clarified</p>
+
+<!-- Quick Stats -->
+<div class="grid2">
+  <div class="card hero-stat">
+    <div class="num">4</div>
+    <div class="label">A-level subjects planned</div>
+  </div>
+  <div class="card hero-stat">
+    <div class="num">~34h</div>
+    <div class="label">Weekly academic workload</div>
+  </div>
+</div>
+
+<!-- Structure First -->
+<h2>1. What 4 A-Levels Actually Means</h2>
+
+<div class="code-block">A-level Maths           = Course 1 (2 years, UCAS 56pts)
+A-level Further Maths   = Course 2 (2 years, UCAS 56pts)
+A-level Physics         = Course 3 (2 years, UCAS 56pts)
+A-level Chemistry       = Course 4 (2 years, UCAS 56pts)
+
+Total: 4 separate qualifications. Not "Maths + a bit extra."</div>
+
+<div class="warn">Diya wrote "Maths… Further Maths?" as if FMaths was an add-on. It's not — it's its own full A-level with its own syllabus, exams, and UCAS tariff.</div>
+
+<!-- Diya's Assessment -->
+<h2>2. Option A: Maths + FMaths + Physics + Chemistry</h2>
+<p class="subtitle">Diya's current plan. Her own difficulty ratings, preserved from her handwritten notes.</p>
+
+<div class="card">
+<table>
+  <tr><th></th><th>Maths</th><th>FMaths</th><th>Physics</th><th>Chemistry</th></tr>
+  <tr>
+    <td><strong>Her difficulty</strong></td>
+    <td><span class="badge badge-green">Moderate</span></td>
+    <td><span class="badge badge-red">Very High</span></td>
+    <td><span class="badge badge-yellow">High</span></td>
+    <td><span class="badge badge-yellow">High</span></td>
+  </tr>
+  <tr>
+    <td><strong>Work type</strong></td>
+    <td>"Key prep"</td>
+    <td>"Conceptual + Abstract"</td>
+    <td>"Maths + Theory"</td>
+    <td>"Memory + Data"</td>
+  </tr>
+  <tr>
+    <td><strong>Her lessons</strong></td>
+    <td>10 / 2 wks</td>
+    <td>20 / 2 wks</td>
+    <td>—</td>
+    <td>—</td>
+  </tr>
+  <tr>
+    <td><strong>GCSE now</strong></td>
+    <td>6/5 ↑</td>
+    <td>—</td>
+    <td>6/5 ↑</td>
+    <td>5 ↓ (was higher)</td>
+  </tr>
+  <tr>
+    <td><strong>Her verdict</strong></td>
+    <td>✅ Confident</td>
+    <td>⚠️ Aware of difficulty</td>
+    <td>✅ Confident</td>
+    <td>❓ Unsure</td>
+  </tr>
+</table>
+</div>
+
+<div class="good">Diya's instinct about FMaths being the hardest is correct. And her "Chemistry = Memory + Data" diagnosis is honest — she knows memorisation is her weaker suit.</div>
+
+<!-- Weekly Picture -->
+<h2>3. The Real Weekly Picture</h2>
+
+<div class="card">
+<table>
+  <tr><th></th><th>Lessons</th><th>Homework</th><th>Work Type</th><th>Energy</th></tr>
+  <tr><td><strong>Maths</strong></td><td>~5/wk</td><td>3–4h</td><td>Problem sets</td><td>Medium</td></tr>
+  <tr><td><strong>FMaths</strong></td><td>~5/wk</td><td>4–5h</td><td>Proofs, complex numbers</td><td>High</td></tr>
+  <tr><td><strong>Physics</strong></td><td>~5/wk</td><td>3–4h</td><td>Problems + lab reports</td><td>Med-High</td></tr>
+  <tr><td><strong>Chemistry</strong></td><td>~5/wk</td><td>4–5h</td><td>Memorisation + data + lab</td><td>High</td></tr>
+  <tr style="font-weight:700;background:var(--surface2)"><td><strong>Total</strong></td><td>~20/wk</td><td>~14–18h</td><td colspan="2">≈ 34–38h/week</td></tr>
+</table>
+</div>
+
+<div class="note">A full A-level week: ~15h contact time + ~15h homework = ~30h. Plus free periods, clubs, UCAS prep, and life. Diya's "2.14 lessons/day" calculation was close — this is a full timetable.</div>
+
+<!-- HISTORY VERSION PARALLEL -->
+<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid var(--accent2);border-radius:var(--radius);padding:20px;margin:24px 0">
+<h2 style="color:var(--accent2);border-bottom-color:var(--accent2);margin-top:0">📖 Option B: Maths + FMaths + Physics + History</h2>
+<p class="subtitle" style="margin-bottom:16px">Same core 3. Swap Chemistry for History. All numbers below are Diya's estimates applied to the different subject.</p>
+
+<h3>Diya's Assessment (History Edition)</h3>
+<div class="card">
+<table>
+  <tr><th></th><th>Maths</th><th>FMaths</th><th>Physics</th><th>History</th></tr>
+  <tr>
+    <td><strong>Difficulty</strong></td>
+    <td><span class="badge badge-green">Moderate</span></td>
+    <td><span class="badge badge-red">Very High</span></td>
+    <td><span class="badge badge-yellow">High</span></td>
+    <td><span class="badge badge-yellow">Moderate-High</span></td>
+  </tr>
+  <tr>
+    <td><strong>Work type</strong></td>
+    <td>"Key prep"</td>
+    <td>"Conceptual + Abstract"</td>
+    <td>"Maths + Theory"</td>
+    <td>"Reading + Essay + Source analysis"</td>
+  </tr>
+  <tr>
+    <td><strong>GCSE now</strong></td>
+    <td>6/5 ↑</td>
+    <td>—</td>
+    <td>6/5 ↑</td>
+    <td>5 (stable)</td>
+  </tr>
+  <tr>
+    <td><strong>Verdict</strong></td>
+    <td>✅ Confident</td>
+    <td>⚠️ Aware</td>
+    <td>✅ Confident</td>
+    <td>🆕 Worth a look</td>
+  </tr>
+</table>
+</div>
+
+<h3>Weekly Picture (History Edition)</h3>
+<div class="card">
+<table>
+  <tr><th></th><th>Lessons</th><th>Homework</th><th>Work Type</th><th>Energy</th></tr>
+  <tr><td><strong>Maths</strong></td><td>~5/wk</td><td>3–4h</td><td>Problem sets</td><td>Medium</td></tr>
+  <tr><td><strong>FMaths</strong></td><td>~5/wk</td><td>4–5h</td><td>Proofs, complex numbers</td><td>High</td></tr>
+  <tr><td><strong>Physics</strong></td><td>~5/wk</td><td>3–4h</td><td>Problems + lab reports</td><td>Med-High</td></tr>
+  <tr><td><strong>History</strong></td><td>~5/wk</td><td>4–5h</td><td>Reading + essay writing + source work</td><td>Medium</td></tr>
+  <tr style="font-weight:700;background:var(--surface2)"><td><strong>Total</strong></td><td>~20/wk</td><td>~14–18h</td><td colspan="2">≈ 34–38h/week (same total hours)</td></tr>
+</table>
+</div>
+
+<div class="good">Key difference from Chemistry: History's "energy" is Medium, not High — because it uses a DIFFERENT kind of thinking. After 3 hours of Physics problem-solving, reading about the English Civil War isn't "more work" — it's a mental reset. Chemistry is more of the same (logic + memorise), which stacks fatigue.</div>
+
+<h3>History Escape Plan</h3>
+<div class="code-block" style="border-color:var(--accent2)">Same backup as Chemistry:
+
+Year 12:  Maths + FMaths + Physics + History       (4 A-levels)
+               ↓
+          If it's too much...
+               ↓
+Year 13:  Maths + FMaths + Physics                  (3 A-levels)
+          + AS History certificate (UCAS 20pts)
+</div>
+
+<h3>💡 The Hidden Win: NEA = Built-in EPQ</h3>
+
+<div class="card" style="border-left:4px solid var(--accent2)">
+  <p style="font-size:14px;line-height:1.7">This is the single most overlooked reason to choose History. Let me break it down.</p>
+</div>
+
+<h4>What is an EPQ?</h4>
+<div class="card">
+  <table>
+    <tr><th></th><th>EPQ (Extended Project Qualification)</th></tr>
+    <tr><td><strong>What it is</strong></td><td>A standalone qualification — you pick any topic, research it independently, write 5,000 words</td></tr>
+    <tr><td><strong>UCAS value</strong></td><td>28 points (half an A-level)</td></tr>
+    <tr><td><strong>Who does it</strong></td><td>~40% of G5 applicants. Seen as a way to show "I can research"</td></tr>
+    <tr><td><strong>When</strong></td><td>Usually Year 12 summer → Year 13 autumn. Self-directed, minimal teacher input</td></tr>
+    <tr><td><strong>Workload</strong></td><td>~120 hours total (planning, research, writing, presenting)</td></tr>
+    <tr><td><strong>Grading</strong></td><td>A*–E, based on: research quality + analysis + evaluation + presentation</td></tr>
+  </table>
+</div>
+
+<h4>What is History's NEA?</h4>
+<div class="card">
+  <table>
+    <tr><th></th><th>NEA (Non-Exam Assessment / Personal Investigation)</th></tr>
+    <tr><td><strong>What it is</strong></td><td>A mandatory part of A-level History — you pick a historical topic, research it, write 3,500–4,500 words</td></tr>
+    <tr><td><strong>Weight</strong></td><td>20% of your A-level History grade. Graded A*–E as part of the subject</td></tr>
+    <tr><td><strong>When</strong></td><td>Year 13. Teacher-supervised with feedback cycles</td></tr>
+    <tr><td><strong>Workload</strong></td><td>~80–100 hours (spread over one year, not crammed)</td></tr>
+    <tr><td><strong>Topic freedom</strong></td><td>Anything historical — must not overlap with your exam topics, must cover ~100 years</td></tr>
+    <tr><td><strong>Grading</strong></td><td>A*–E, based on: source evaluation + analysis + argument structure + bibliography</td></tr>
+  </table>
+</div>
+
+<div class="card" style="background:var(--surface2);border:2px dashed var(--accent2)">
+  <p style="font-size:15px;font-weight:700;color:var(--accent2);margin-bottom:10px">Put them side by side:</p>
+  <table>
+    <tr><th></th><th>EPQ</th><th>History NEA</th><th>Overlap?</th></tr>
+    <tr><td>Independent research</td><td>✅</td><td>✅</td><td style="color:var(--accent2);font-weight:700">100% same</td></tr>
+    <tr><td>Long-form academic writing</td><td>✅ 5,000w</td><td>✅ 3,500–4,500w</td><td style="color:var(--accent2);font-weight:700">80% same</td></tr>
+    <tr><td>Source evaluation + bibliography</td><td>✅</td><td>✅</td><td style="color:var(--accent2);font-weight:700">100% same</td></tr>
+    <tr><td>Draft → feedback → revise</td><td>✅ (limited)</td><td>✅ (structured)</td><td style="color:var(--accent2);font-weight:700">History better</td></tr>
+    <tr><td>Appears on UCAS form</td><td>✅ Separate qual</td><td>✅ Inside A-level</td><td style="color:var(--accent2);font-weight:700">Both visible</td></tr>
+    <tr><td>Workload hours</td><td>~120h</td><td>~80–100h</td><td>You can't do both — too much</td></tr>
+  </table>
+</div>
+
+<h4>What this means for Diya in practice</h4>
+
+<div class="card">
+  <p style="font-size:14px;line-height:1.8"><strong>Scenario 1: She picks Chemistry as her 4th A-level</strong></p>
+  <p style="font-size:13px;color:var(--text2);margin:4px 0 12px 16px">
+    ➔ Has to decide: do an EPQ or not?<br>
+    ➔ If she does EPQ: extra 120h on top of 4 A-levels. Potentially unsustainable.<br>
+    ➔ If she skips EPQ: missing a UCAS differentiator that 40% of G5 applicants have.<br>
+    ➔ Chemistry's lab work doesn't fill the "independent research" gap.
+  </p>
+
+  <p style="font-size:14px;line-height:1.8;margin-top:16px"><strong>Scenario 2: She picks History as her 4th A-level</strong></p>
+  <p style="font-size:13px;color:var(--accent2);margin:4px 0 0 16px">
+    ➔ The NEA IS her independent research project. Graded, supervised, structured.<br>
+    ➔ No extra qualification to manage. It's built into a subject she's already taking.<br>
+    ➔ On UCAS: "A-level History (including Personal Investigation on [topic])" — same signal as EPQ.<br>
+    ➔ Total workload = 4 A-levels. Not 4 A-levels + EPQ.<br>
+    ➔ <strong>Net saving: ~120 hours + the mental overhead of managing a separate qualification.</strong>
+  </p>
+</div>
+
+<div class="good">This is the math: Chemistry + EPQ = 5 separate things to manage (4 A-levels + 1 EPQ). History = 4 things, but one of them already contains the EPQ inside it. For a student already worried about workload (like Diya), this difference is significant.</div>
+
+<h3>The Hidden Skill Transfer</h3>
+<div class="card">
+  <table>
+    <tr><th>History trains...</th><th>Which directly helps...</th></tr>
+    <tr><td>Structuring an argument from evidence</td><td>Personal Statement writing</td></tr>
+    <tr><td>Evaluating conflicting viewpoints</td><td>Oxford/Cambridge interview (they LOVE this)</td></tr>
+    <tr><td>Writing clear, concise prose under time</td><td>English Language GCSE retake / A-level</td></tr>
+    <tr><td>Independent research + bibliography</td><td>EPQ (if she skips EPQ, NEA covers it)</td></tr>
+    <tr><td>Reading dense text fast</td><td>Every STEM subject's exam questions</td></tr>
+  </table>
+</div>
+</div>
+
+<!-- Chemistry Escape Hatch -->
+<h2>4. Diya's Own Escape Plan</h2>
+
+<div class="code-block">What Diya sketched:
+
+Year 12:  Maths + FMaths + Physics + Chemistry    (4 A-levels)
+               ↓
+          If Chemistry is too much...
+               ↓
+Year 13:  Maths + FMaths + Physics                 (3 A-levels)
+          + AS Chemistry certificate (UCAS 20pts)
+
+This is VALID and COMMON. ~30% of 4-subject starters
+drop to 3 in Year 13. Universities don't penalise this.</div>
+
+<div class="good">The "Chemistry?" question mark she wrote isn't hesitation — it's a safety valve. Smart.</div>
+
+<!-- Questions for Headington -->
+<h2>5. Questions Diya Should Ask Headington</h2>
+
+<div class="card">
+<ol style="font-size:14px;padding-left:20px;line-height:2.2">
+  <li>"Do you teach Maths and Further Maths in parallel over two years, or Maths-first-then-FMaths?"</li>
+  <li>"If I start 4 A-levels and want to drop Chemistry to AS at the end of Year 12, is that allowed?"</li>
+  <li>"What's the actual free-period count in a 4 A-level timetable?"</li>
+</ol>
+</div>
+
+<!-- HISTORY SECTION -->
+<div class="history-section">
+<h2>6. A-Level History — What It Actually Looks Like</h2>
+<p class="subtitle">Based on AQA 7042 Specification (2015). If Diya considers History as her 4th A-level instead of Chemistry.</p>
+
+<h3>Three Components</h3>
+
+<div class="card">
+<table>
+  <tr><th>Component</th><th>What</th><th>Exam</th><th>Weight</th></tr>
+  <tr>
+    <td><strong>1: Breadth Study</strong></td>
+    <td>~100 years of historical change. Focus on themes and interpretations.</td>
+    <td>2h 30m written<br>3 questions (1 compulsory)</td>
+    <td><strong>40%</strong></td>
+  </tr>
+  <tr>
+    <td><strong>2: Depth Study</strong></td>
+    <td>A period of major change. Primary source analysis.</td>
+    <td>2h 30m written<br>3 questions (1 compulsory)</td>
+    <td><strong>40%</strong></td>
+  </tr>
+  <tr>
+    <td><strong>3: Personal Investigation</strong></td>
+    <td>Your own research project. Any topic you choose. 3,500–4,500 word essay.</td>
+    <td>No exam — marked by teacher, moderated by AQA</td>
+    <td><strong>20%</strong></td>
+  </tr>
+</table>
+</div>
+
+<h3>What a Real Exam Question Looks Like</h3>
+
+<div class="q-box">
+  <div class="q-label">Component 1 — Section A (Compulsory, 30 marks)</div>
+  <p style="font-size:14px;line-height:1.7">Using your understanding of the historical context, assess how convincing the arguments in <strong>Extract A, Extract B, and Extract C</strong> are in relation to <em>[a specific historical debate, e.g. "the reasons for the outbreak of the English Civil War in 1642"]</em>.</p>
+  <p style="font-size:11px;color:var(--text2);margin-top:8px">You get three short extracts from historians arguing different positions. You must evaluate each one — not summarise, but <em>judge</em>: what evidence supports it? what evidence contradicts it? how convincing is the argument?</p>
+</div>
+
+<div class="q-box">
+  <div class="q-label">Component 1 — Section B (Choose 2 of 3, 25 marks each)</div>
+  <p style="font-size:14px;line-height:1.7">"The personalities of rulers were the most important factor in shaping political change in Britain in the years 1625 to 1688."</p>
+  <p style="font-weight:600;margin-top:6px">Assess the validity of this view.</p>
+  <p style="font-size:11px;color:var(--text2);margin-top:8px">This is the classic A-level History essay. You must argue for AND against, weigh evidence, reach a balanced conclusion. ~45 minutes per essay.</p>
+</div>
+
+<h3>British History Topic Options (pick 1)</h3>
+
+<div class="grid2" style="font-size:12px">
+  <div class="card" style="padding:12px"><strong>1C The Tudors</strong><br>England, 1485–1603<br><span style="color:var(--text2)">Henry VII → Elizabeth I</span></div>
+  <div class="card" style="padding:12px"><strong>1D Stuart Britain</strong><br>Crisis of Monarchy, 1603–1702<br><span style="color:var(--text2)">James I → Civil War → Restoration</span></div>
+  <div class="card" style="padding:12px"><strong>1F Industrialisation</strong><br>Britain, c1783–1885<br><span style="color:var(--text2)">Industrial Revolution + reform</span></div>
+  <div class="card" style="padding:12px"><strong>1G Challenge & Transformation</strong><br>Britain, c1851–1964<br><span style="color:var(--text2)">Victorian → WW2 → post-war</span></div>
+</div>
+
+<h3>Non-British Options (pick 1 to pair)</h3>
+
+<div class="grid2" style="font-size:12px">
+  <div class="card" style="padding:12px"><strong>1H Tsarist & Communist Russia</strong><br>1855–1964</div>
+  <div class="card" style="padding:12px"><strong>1K USA: Superpower</strong><br>1865–1975</div>
+  <div class="card" style="padding:12px"><strong>1L Germany</strong><br>1871–1991</div>
+  <div class="card" style="padding:12px"><strong>1E Russia: Absolutism</strong><br>1682–1796</div>
+</div>
+
+<h3>The NEA: Your Own Research Project</h3>
+
+<div class="card">
+  <p style="font-size:14px;line-height:1.7">The Personal Investigation is <strong>3,500–4,500 words</strong> on a topic you choose. It must cover about 100 years, and must not overlap with your exam topics.</p>
+  <p style="font-size:13px;color:var(--text2);margin-top:8px">Example topics students have done: <em>"To what extent was Churchill's leadership the decisive factor in British victory in WWII?"</em> or <em>"How far did the Cold War originate from misunderstandings rather than deliberate aggression?"</em></p>
+  <p style="font-size:13px;margin-top:8px">The NEA is <strong>20% of your A-level</strong> — and it's done over one year, not in a single exam. You research, draft, get feedback, revise. It's the closest thing to university-style work in any A-level.</p>
+</div>
+
+<h3>History vs Chemistry: Diya's Decision</h3>
+
+<div class="card">
+<table>
+  <tr><th></th><th>Chemistry</th><th>History</th></tr>
+  <tr><td><strong>Work type</strong></td><td>Memorisation + calculations + lab</td><td>Reading + essay writing + source analysis</td></tr>
+  <tr><td><strong>Diya's GCSE base</strong></td><td>5 (declining)</td><td>5 (stable)</td></tr>
+  <tr><td><strong>Helps English?</strong></td><td>No</td><td><span class="badge badge-green">YES — massive boost</span></td></tr>
+  <tr><td><strong>Helps Oxford interview?</strong></td><td>Shows science breadth</td><td><span class="badge badge-purple">Shows you're not just a STEM robot</span></td></tr>
+  <tr><td><strong>Mental switch</strong></td><td>Same mode as core 3 (logic + memorise)</td><td>Different mode (argue + evaluate)</td></tr>
+  <tr><td><strong>Imperial view</strong></td><td>Highly valued</td><td>Not looked at — they only see core 3</td></tr>
+</table>
+</div>
+
+<div class="note" style="margin-top:16px">Source: AQA A-level History Specification 7042, version 1.6 (October 2021). Full spec at <a href="https://www.aqa.org.uk/subjects/history/as-and-a-level/history-7041-7042" target="_blank">aqa.org.uk/7042</a></div>
+
+</div>
+
+<!-- Bottom Line -->
+<h2>Bottom Line</h2>
+
+<div class="card">
+  <p style="font-size:15px;line-height:1.7">Diya's core 3 are solid. Chemistry is the variable — and her own question mark shows she's thinking about it realistically. The worst outcome isn't dropping Chemistry to AS — it's forcing Chemistry for two years and hating every minute.</p>
+  <p style="font-size:14px;color:var(--accent2);margin-top:10px"><strong>If she's even a little curious about History, it's worth looking at a sample lesson before deciding. It builds exactly the skills her English needs — and offers a thinking mode that none of her STEM subjects provide.</strong></p>
+</div>
+
+</body>
+</html>

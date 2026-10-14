@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Diya History — Graded Assessment</title>
+<style>
+  :root {
+    --bg: #f5f6fa; --card: #fff; --text: #1a1d2e; --text2: #5a5d6e;
+    --accent: #6c5ce7; --green: #20a87a; --red: #e0556a; --amber: #d48c2c;
+    --border: #dde1e8; --hl: #f0eeff; --code-bg: #e2e5ed;
+  }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,'Segoe UI',sans-serif;max-width:1000px;margin:0 auto;padding:24px;background:var(--bg);color:var(--text);line-height:1.75}
+  h1{font-size:1.7em;border-bottom:2px solid var(--accent);padding-bottom:8px}
+  h2{font-size:1.25em;margin-top:36px;color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:6px}
+  h3{font-size:1.05em;margin-top:24px;color:var(--text)}
+  h4{font-size:0.95em;margin:0 0 8px 0}
+
+  .score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0}
+  .score-card{background:var(--card);border-radius:10px;padding:16px 20px;text-align:center;border:1px solid var(--border)}
+  .score-card .num{font-size:2.2em;font-weight:700;line-height:1.1}
+  .score-card .label{font-size:0.82em;color:var(--text2);margin-top:4px}
+  .score-card.perfect{border-left:4px solid var(--green)}
+  .score-card.perfect .num{color:var(--green)}
+  .score-card.good{border-left:4px solid var(--amber)}
+  .score-card.good .num{color:var(--amber)}
+  .score-card.total{border-left:4px solid var(--accent)}
+  .score-card.total .num{color:var(--accent)}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin:16px 0}
+  .card.green{border-left:4px solid var(--green)}
+  .card.red{border-left:4px solid var(--red)}
+  .card.blue{border-left:4px solid var(--accent)}
+  .card h4{margin-top:0}
+
+  table{border-collapse:collapse;width:100%;margin:12px 0}
+  th,td{border:1px solid var(--border);padding:8px 14px;text-align:left;font-size:0.93em}
+  th{background:#f0f1f5;font-weight:600}
+
+  blockquote{background:var(--card);border-left:4px solid var(--accent);padding:14px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:0.93em}
+  blockquote.src{border-left-color:var(--green);background:#f8fdfa}
+  blockquote.srcB{border-left-color:#6c5ce7;background:#f8f7ff}
+  blockquote.srcC{border-left-color:#d48c2c;background:#fffcf5}
+
+  .annotated{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin:16px 0;font-size:0.94em;line-height:2.1}
+  .annotated p{margin:10px 0}
+  .tick{color:var(--green);font-weight:600}
+  .cross{color:var(--red);font-weight:600}
+  .comment{display:inline-block;background:var(--hl);color:var(--accent);font-size:0.82em;padding:2px 8px;border-radius:4px;margin-left:4px}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+  .compare .col{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+  .compare .col.now{border-left:4px solid var(--amber)}
+  .compare .col.better{border-left:4px solid var(--green)}
+
+  .nop-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+  .nop-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:0.9em}
+  .nop-card h4{margin-top:0;font-size:0.95em}
+  .nop-card .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.8em;font-weight:600;margin-right:4px}
+  .tag.n{background:#e0ecff;color:#4f6ef7}
+  .tag.o{background:#fff0e0;color:#d48c2c}
+  .tag.p{background:#ffe0e0;color:#e0556a}
+
+  .target-box{background:linear-gradient(135deg,#f0eeff,#f5f3ff);border:2px solid var(--accent);border-radius:10px;padding:20px 24px;margin:20px 0}
+
+  .nav-back{display:inline-block;margin-bottom:16px;color:var(--accent);text-decoration:none;font-size:0.9em}
+  .nav-back:hover{text-decoration:underline}
+
+  .spell-fix{text-decoration:line-through;color:var(--red)}
+  pre{background:#1a1d2e;color:#d4d8e8;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.9em;line-height:1.7}
+  pre strong{color:#ffb86c}
+  pre em{color:#8be9fd;font-style:normal}
+
+  .q-label{display:inline-block;background:var(--accent);color:#fff;font-size:0.78em;padding:2px 10px;border-radius:10px;font-weight:600;margin-right:6px}
+
+  @media(max-width:700px){.score-grid,.compare,.nop-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<a href="/app.html" class="nav-back">← Back to Diya Dashboard</a>
+
+<h1>Edexcel IGCSE History — Graded Assessment</h1>
+<p style="color:var(--text2);margin-top:-8px">Germany: Development of Dictatorship, 1918–45 &nbsp;·&nbsp; 30 May 2026</p>
+
+<!-- SCORE OVERVIEW -->
+<div class="score-grid">
+  <div class="score-card perfect">
+    <div class="num">4/4</div>
+    <div class="label">Q1 · Inference</div>
+    <div style="font-size:0.8em;color:var(--green);margin-top:4px">Perfect</div>
+  </div>
+  <div class="score-card good">
+    <div class="num">6/8</div>
+    <div class="label">Q3(a) · Source Utility</div>
+    <div style="font-size:0.8em;color:var(--amber);margin-top:4px">Level 2+</div>
+  </div>
+  <div class="score-card total">
+    <div class="num">10/12</div>
+    <div class="label">Total · 83%</div>
+    <div style="font-size:0.8em;color:var(--accent);margin-top:4px">≈ Grade A</div>
+  </div>
+</div>
+
+<!-- SECTION A: Q1 -->
+<h2>Section A · Question 1 <span style="font-weight:400;color:var(--text2);font-size:0.85em">(4 marks — Inference)</span></h2>
+
+<blockquote class="src">
+<p><strong>Source A:</strong> A photograph taken in 1938 showing members of the Hitler Youth preparing for a Nazi Party event.</p>
+<p style="font-size:0.85em;color:var(--text2)"><em>Infer: to make a guess based on the facts and observations.</em></p>
+</blockquote>
+
+<h3>Question</h3>
+<blockquote>Give <strong>two</strong> things you can infer from Source A about the Hitler Youth. <span style="float:right;font-weight:600">[4 marks]</span></blockquote>
+
+<h3>Diya's Answer — <span style="color:var(--green)">4/4 ✓ Perfect</span></h3>
+
+<table>
+  <tr>
+    <th style="width:60px">Inference</th>
+    <th>What Diya wrote</th>
+    <th style="width:100px">Mark</th>
+  </tr>
+  <tr>
+    <td style="font-weight:600">(i)</td>
+    <td>
+      <strong>Inference:</strong> The Nazis want total indoctrination, they gather young people and give them Nazi beliefs. Ranging different ages, shows the desire for total control.<br>
+      <strong>Detail from source:</strong> The youths are all wearing the Nazi youth uniform and the youngest of them all looks to only about 6 years old.
+    </td>
+    <td style="color:var(--green);font-weight:600;text-align:center">2/2</td>
+  </tr>
+  <tr>
+    <td style="font-weight:600">(ii)</td>
+    <td>
+      <strong>Inference:</strong> The Nazis wants to train young people in leadership, and wants to organise them easily.<br>
+      <strong>Detail from source:</strong> There are bigger kids within the younger ones, they are taking control over them. The youths are all standing very neatly.
+    </td>
+    <td style="color:var(--green);font-weight:600;text-align:center">2/2</td>
+  </tr>
+</table>
+
+<div class="card green">
+<h4 style="margin-top:0;color:var(--green)">Examiner's Comment</h4>
+<p>Both inferences are <strong>valid and well-supported</strong> by specific details from the source. Diya correctly distinguishes between the inference (what it <em>means</em>) and the supporting detail (what she <em>saw</em>). This is exactly what the mark scheme requires.</p>
+<ul>
+  <li>✓ Inference (i) captures the scale of indoctrination — from age 6 upward</li>
+  <li>✓ Inference (ii) identifies the hierarchical structure — older youth leading younger</li>
+  <li>✓ Both use precise source detail (uniform, age, neat rows)</li>
+</ul>
+</div>
+
+<!-- SECTION B: Q3(a) -->
+<h2>Section B · Question 3(a) <span style="font-weight:400;color:var(--text2);font-size:0.85em">(8 marks — Source Utility)</span></h2>
+
+<h3>The Sources</h3>
+
+<blockquote class="srcB">
+<p><strong>Source B:</strong> From <em>Inside the Third Reich</em>, the autobiography of <strong>Albert Speer</strong>, published in <strong>1970</strong>. Here Speer is recalling election rallies on 27 July 1932. At the time, he was a junior member of the Nazi Party. Speer later became a senior member of the Nazi government.</p>
+<p style="font-size:0.9em;color:var(--text2)"><em>"Our cars set out for the first stadium. I waited outside so I did not hear Hitler's speech, but I could hear thunderous applause from the crowd. ... At the Berlin Stadium the stands were packed with people and more were waiting outside. Hitler was very late but the crowd had still waited for hours. A roar of applause burst out when they heard Hitler was on his way."</em></p>
+</blockquote>
+
+<blockquote class="srcC">
+<p><strong>Source C:</strong> From the diary of <strong>Joachim von Ribbentrop</strong>, written in <strong>1933</strong>. Ribbentrop was a wealthy businessman and supporter of the Nazi Party.</p>
+<p style="font-size:0.9em;color:var(--text2)"><em>"<strong>27 Jan:</strong> I eventually convince von Papen that the only thing that makes sense is for Hindenburg to appoint Hitler as Chancellor. Von Papen is now absolutely in favour. I believe this is the turning point. <strong>28 Jan:</strong> Von Papen says he has had a long talk with Hindenburg. It is now possible Hindenburg could agree. <strong>30 Jan:</strong> Hitler is appointed Chancellor."</em></p>
+</blockquote>
+
+<h3>Question</h3>
+<blockquote>How <strong>useful</strong> are Sources B and C for an enquiry into the reasons why Hitler became Chancellor in 1933? Explain your answer, using Sources B and C <strong>and your knowledge</strong> of the historical context. <span style="float:right;font-weight:600">[8 marks]</span></blockquote>
+
+<h3>Diya's Answer — <span style="color:var(--amber)">6/8 · Level 2+</span></h3>
+
+<div class="annotated">
+
+<p><strong>Source B</strong> is useful because it is an insider autobiography on why Hitler became Chancellor in 1933. <span class="comment">✓ Identifies Nature (autobiography) and Origin (insider)</span></p>
+
+<p>In the autobiography from Albert Speer, he describes the event that happens on the day when Hitler came in, he got many applause and made several speeches in public. He also states that there were a lot of people in the stadium that day for Hitler's speeches. <span class="comment">✓ Summarises content accurately</span></p>
+
+<p>This is useful because it meets with my knowledge. In March 1932 Hindenburg stands for re-election, Hitler won 30%, however the re-election was held again due to the shortage of percentage. Hitler gained 6% more and saw it as a good sign. This fits the source as Speer mentions the rising popularity of Hitler in July 1932. <span class="comment">✓ Strong contextual knowledge — 1932 presidential elections, Hindenburg, % shifts</span></p>
+
+<p>This shows that popularity among the public was crucial for Hitler's rise in power. <span class="comment">✓ Valid conclusion linking source to enquiry</span></p>
+
+<p>Source B is a very useful source as the author Albert Speer was an insider of Nazi, so he is an eyewitness of this event. <span class="comment">✓ Good: recognises eyewitness value</span></p>
+
+<p>However, Speer being close with Hitler means that he might have biased opinions about Hitler's influences and how he became chancellor in 1932. <span class="comment">✓ Attempts bias evaluation — good instinct! ✗ But doesn't develop it: WHY is Speer biased? He wrote in 1970 to rehabilitate his image after Nuremberg</span></p>
+
+<p style="margin-top:20px;border-top:1px dashed var(--border);padding-top:12px"><strong>Source C</strong> is also useful because it is a personal diary written at the time when Hitler is becoming Chancellor. <span class="comment">✓ Identifies Nature (diary) and key strength: contemporary (written at the time)</span></p>
+
+<p>In the diary, Ribbentrop believes that Hitler should be appointed as chancellor and acts as a connection to Von Papen and Hindenburg. He states that he is succeeding on the 28th of January when Von Papen had a long talk with Hindenburg. <span class="comment">✓ Summarises content accurately</span></p>
+
+<p>This is useful because it agrees with my own information. Von Papen told Hindenburg that Hitler was fit for the place of the Chancellor. <span class="comment">✓ Links to contextual knowledge of von Papen's role</span></p>
+
+<p>This is a very useful source because of the total inside of the personal diary and it happening during the time. <span class="comment">✓ Reiterates the contemporary value</span></p>
+
+<p>However, the source provider isn't a first-hand witness, so the information is not 100% verified. <span class="comment">✗ This is partially wrong: Ribbentrop WAS involved in the discussions — he describes his own conversations with von Papen. ✗ Missing: Ribbentrop was a Nazi supporter with vested interest in Hitler's success — THAT is the real bias issue</span></p>
+
+</div>
+
+<!-- WHAT'S MISSING -->
+<h2>What's Missing — The Gap to Level 3 (7-8 marks)</h2>
+
+<div class="nop-grid">
+
+<div class="nop-card" style="border-left:4px solid var(--accent)">
+<h4>Source B — Speer's Autobiography</h4>
+<p><span class="tag n">Nature</span> Autobiography/memoir</p>
+<p><span class="tag o">Origin</span> Albert Speer, published 1970 (38 years after events)</p>
+<p><span class="tag p">Purpose</span> Written to <strong>rehabilitate his image</strong> after serving 20 years for war crimes at Nuremberg. Speer portrayed himself as an "apolitical technocrat" — this memoir is part of that self-defence.</p>
+<p style="margin-top:8px;font-size:0.85em;color:var(--text2)">✅ Useful: insider, witnessed events<br>⚠️ Limited: retrospective, self-serving, written to distance himself from Nazi crimes</p>
+</div>
+
+<div class="nop-card" style="border-left:4px solid var(--amber)">
+<h4>Source C — Ribbentrop's Diary</h4>
+<p><span class="tag n">Nature</span> Personal diary</p>
+<p><span class="tag o">Origin</span> Ribbentrop, wealthy Nazi supporter, Jan 1933 (contemporary)</p>
+<p><span class="tag p">Purpose</span> Personal record; but Ribbentrop had a <strong>vested interest</strong> in presenting Hitler's rise as inevitable and his own role as crucial. He later became Foreign Minister — the diary may <strong>exaggerate his influence</strong>.</p>
+<p style="margin-top:8px;font-size:0.85em;color:var(--text2)">✅ Useful: contemporary, shows backroom politics<br>⚠️ Limited: Nazi supporter, may inflate own importance</p>
+</div>
+
+</div>
+
+<!-- COMPARISON -->
+<h2>Diya vs Level 3 — Side by Side</h2>
+
+<div class="compare">
+  <div class="col now">
+    <h4>🔸 Diya (Level 2+ · 6/8)</h4>
+    <p style="font-size:0.88em">"However, Speer being close with Hitler means that he might have biased opinions about Hitler's influences and how he became chancellor."</p>
+    <p style="font-size:0.8em;color:var(--amber)"><strong>Good start:</strong> identifies potential bias. <strong>Missing:</strong> doesn't explain WHY — Speer's memoir was part of his post-Nuremberg self-rehabilitation. "Close with Hitler" is vague.</p>
+  </div>
+  <div class="col better">
+    <h4>🔹 Level 3 (7-8/8)</h4>
+    <p style="font-size:0.88em">"However, Source B's usefulness is <strong>limited</strong> by its provenance. Speer wrote this autobiography in <strong>1970</strong> — 38 years after the events and after serving a 20-year prison sentence at Nuremberg. His <strong>purpose</strong> was to rehabilitate his image by portraying himself as an apolitical technocrat rather than a committed Nazi. This means he may have <strong>selectively remembered</strong> or exaggerated Hitler's popularity to deflect responsibility. Nevertheless, as an insider who attended these rallies, his account of the crowds remains <strong>valuable</strong> when corroborated with other evidence."</p>
+  <p style="font-size:0.8em;color:var(--green)">Names the limitation precisely → Explains the purpose → Makes a balanced judgement.</p>
+  </div>
+</div>
+
+<div class="compare">
+  <div class="col now">
+    <h4>🔸 Diya (Level 2+)</h4>
+    <p style="font-size:0.88em">"However, the source provider isn't a first-hand witness, so the information is not 100% verified."</p>
+    <p style="font-size:0.8em;color:var(--red)"><strong>Problem:</strong> Ribbentrop WAS directly involved — he describes his own conversations. The real limitation is his <strong>Nazi bias</strong>, not distance from events.</p>
+  </div>
+  <div class="col better">
+    <h4>🔹 Level 3 (7-8/8)</h4>
+    <p style="font-size:0.88em">"Source C is useful because it is <strong>contemporary</strong> — written during the events of January 1933 — and provides an <strong>inside view</strong> of the backroom political negotiations between von Papen, Hindenburg, and the Nazis. However, its usefulness is <strong>limited</strong> by Ribbentrop's position as a <strong>committed Nazi supporter</strong> with a vested interest in presenting Hitler's appointment as inevitable and his own role as decisive. The diary may <strong>exaggerate</strong> his personal influence. A historian would need to <strong>corroborate</strong> his account with other sources from Hindenburg or von Papen's perspective."</p>
+  </div>
+</div>
+
+<!-- TARGET -->
+<div class="target-box">
+<h3 style="margin-top:0;color:var(--accent)">🎯 Next Step: The NOP Framework</h3>
+<p>For every source utility question, analyse <strong>each source</strong> through three lenses:</p>
+<table>
+  <tr><th style="width:80px">Lens</th><th>Questions to ask</th><th>Then say...</th></tr>
+  <tr>
+    <td><span class="tag n">Nature</span></td>
+    <td>What <em>type</em> of source is this? (diary, autobiography, speech, photograph, official document)</td>
+    <td>"This is useful because [type] provides..."</td>
+  </tr>
+  <tr>
+    <td><span class="tag o">Origin</span></td>
+    <td><em>Who</em> created it? <em>When</em>? What was their <em>position</em>? Contemporary or retrospective?</td>
+    <td>"However, it is limited because [author] was..."</td>
+  </tr>
+  <tr>
+    <td><span class="tag p">Purpose</span></td>
+    <td><em>Why</em> was it created? Who was the <em>audience</em>? What was the author trying to achieve?</td>
+    <td>"The author's purpose was to... This affects reliability because..."</td>
+  </tr>
+</table>
+<p style="margin-top:12px"><strong>Golden rule:</strong> End with a <strong>judgement</strong> — "Overall, Source X is more useful than Source Y for this enquiry because..."</p>
+</div>
+
+<!-- MARK SCHEME -->
+<h2>Mark Scheme Reference</h2>
+
+<table>
+  <tr><th>Level</th><th>Mark</th><th>Descriptor</th></tr>
+  <tr><td>3</td><td>6–8</td><td>Analyses BOTH sources' usefulness using NOP + contextual knowledge + evaluates limitations. Reaches a supported judgement.</td></tr>
+  <tr style="background:#fff9f0"><td>2</td><td>3–5</td><td>Explains usefulness with some provenance OR knowledge. Limited evaluation of limitations. <strong>← Diya is here (6: top of Level 2, near Level 3)</strong></td></tr>
+  <tr><td>1</td><td>1–2</td><td>Simple comments, generalised, little specific reference to sources.</td></tr>
+</table>
+
+<hr style="margin:32px 0">
+
+<p style="font-size:0.85em;color:var(--text2)">Graded by DeepSeek via OpenRouter · Edexcel IGCSE History (Germany: Development of Dictatorship, 1918–45)<br>
+<a href="/app.html">← Diya Dashboard</a></p>
+
+</body>
+</html>

@@ -1,0 +1,585 @@
+[
+  {
+    "id": "jemma_phys_q4_spark",
+    "subject": "Physics",
+    "question": "Q4: Explain why a charged object can cause a spark near a conductor",
+    "original_question": "Explain why a charged object can sometimes cause a spark when brought close to a conductor.",
+    "jemma_answer": "The charged object's static electricity is attracted towards the conductor and a conductor is magnetic so it attracts towards it.",
+    "score": {
+      "estimated": "1",
+      "out_of": 2
+    },
+    "strengths": [
+      "Understands that the charged object is attracted to the conductor"
+    ],
+    "weaknesses": [
+      "Thinks conductors are magnetic — they are not (that's a different topic)",
+      "Doesn't know that sparks are caused by electric field ionising air"
+    ],
+    "correct_solution": "The charged object has a strong electric field. When brought close to a conductor, the field can ionise (break down) the air between them, allowing electrons to jump across as a spark. This is an electrical effect, not magnetic.",
+    "error_type": "concept_confusion",
+    "priority": "medium",
+    "tags": [
+      "physics",
+      "year8_mock",
+      "Static Electricity"
+    ],
+    "type": "concept_confusion",
+    "source": "Year 8 Physics Mock Test (2026-05-26)",
+    "date": "2026-05-26",
+    "exam": "Year 8 Physics Mock Test",
+    "enriched": true,
+    "drill": "Write 3 sentences from memory: (1) A spark is caused by a strong _______ field. (2) The field ionises the ____. (3) This allows _______ to jump across. Fill in: electric, air, electrons.",
+    "question_image": "/error_images/jemma_phys_q4.jpg",
+    "raw": "The charged object's static electricity is attracted towards the conductor and a conductor is magnetic so it attracts towards it.",
+    "solution_display": "✅ Spark = electric field ionises air → electrons jump\n\nNOT magnetic. Conductors are not magnetic.\n\n📝 Drill: 'Sparks are ELECTRICAL, not magnetic. Electric field breaks down air.'\n\n🔍 Error type: concept_confusion — mixed up electricity and magnetism",
+    "score_display": "📊 1/2",
+    "strengths_display": "✅ Understands that the charged object is attracted to the conductor",
+    "weaknesses_display": "❌ Thinks conductors are magnetic — they are not (that's a different topic)\n❌ Doesn't know that sparks are caused by electric field ionising air"
+  },
+  {
+    "id": "jemma_phys_q13_ironcore",
+    "subject": "Physics",
+    "question": "Q13: List three ways to increase the strength of an electromagnet",
+    "original_question": "List three ways to increase the strength of an electromagnet.",
+    "jemma_answer": "- Increase the voltage\n- Increase number of turns\n- How close the wires are",
+    "score": {
+      "estimated": "2",
+      "out_of": 3
+    },
+    "strengths": [
+      "Correctly identified increasing voltage/current",
+      "Correctly identified more turns of wire"
+    ],
+    "weaknesses": [
+      "Missed the most important one: adding a soft iron core",
+      "'How close the wires are' is not a standard method"
+    ],
+    "correct_solution": "1. Increase the current (or voltage). 2. Increase the number of turns (coils) of wire. 3. Add a soft iron core inside the coil.",
+    "error_type": "knowledge_gap",
+    "priority": "low",
+    "tags": [
+      "physics",
+      "year8_mock",
+      "Electromagnets"
+    ],
+    "type": "knowledge_gap",
+    "source": "Year 8 Physics Mock Test (2026-05-26)",
+    "date": "2026-05-26",
+    "exam": "Year 8 Physics Mock Test",
+    "enriched": true,
+    "drill": "Memorise the 3 ways: (1) More current, (2) More turns, (3) Iron core. The iron core is the MOST important one — it concentrates the magnetic field.",
+    "question_image": "/error_images/jemma_phys_q13.jpg",
+    "raw": "- Increase the voltage\n- Increase number of turns\n- How close the wires are",
+    "solution_display": "✅ 3 ways: (1) Increase current/voltage, (2) More turns of wire, (3) Add SOFT IRON CORE\n\nThe iron core is the #1 most important method.\n\n📝 Drill: 'Iron core — concentrates the magnetic field'\n\n🔍 Error type: knowledge_gap",
+    "score_display": "📊 2/3",
+    "strengths_display": "✅ Correctly identified increasing voltage/current\n✅ Correctly identified more turns of wire",
+    "weaknesses_display": "❌ Missed the most important one: adding a soft iron core\n❌ 'How close the wires are' is not a standard method"
+  },
+  {
+    "id": "jemma_phys_q14_electromagnet_use",
+    "subject": "Physics",
+    "question": "Q14: Give one real-world use of an electromagnet and explain why a permanent magnet wouldn't work",
+    "original_question": "Give one real-world use of an electromagnet and explain why a permanent magnet would not work for this purpose.",
+    "jemma_answer": "(blank)",
+    "score": {
+      "estimated": "0",
+      "out_of": 2
+    },
+    "strengths": [],
+    "weaknesses": [
+      "Left blank — couldn't think of an example",
+      "Didn't connect the 'can turn on/off' property to a real use"
+    ],
+    "correct_solution": "Scrapyard crane: uses an electromagnet to lift cars. When the current is switched off, the magnet releases the car. A permanent magnet could NOT do this because it cannot be turned off — the car would stay stuck.",
+    "error_type": "knowledge_gap",
+    "priority": "low",
+    "tags": [
+      "physics",
+      "year8_mock",
+      "Electromagnets"
+    ],
+    "type": "knowledge_gap",
+    "source": "Year 8 Physics Mock Test (2026-05-26)",
+    "date": "2026-05-26",
+    "exam": "Year 8 Physics Mock Test",
+    "enriched": true,
+    "drill": "Learn 3 examples: (1) Scrapyard crane — lift and release, (2) Electric bell — hammer vibrates, (3) MRI machine — controlled magnetic field. For each: WHY must it be an electromagnet?",
+    "question_image": "/error_images/jemma_phys_q14.jpg",
+    "raw": "(blank)",
+    "solution_display": "✅ Scrapyard crane: electromagnet lifts cars, turn off → release. Permanent magnet = can't release.\n\nOther examples: electric doorbell, MRI scanner, relay switch\n\n📝 Drill: Learn 3 electromagnet uses + why they NEED to be switchable\n\n🔍 Error type: knowledge_gap — blank",
+    "score_display": "📊 0/2",
+    "strengths_display": "",
+    "weaknesses_display": "❌ Left blank — couldn't think of an example\n❌ Didn't connect the 'can turn on/off' property to a real use"
+  },
+  {
+    "id": "jemma_phys_q23_pressure_example",
+    "subject": "Physics",
+    "question": "Q23: Give one example of a liquid or gas exerting pressure in everyday life",
+    "original_question": "Give one example of a liquid or gas exerting pressure in everyday life.",
+    "jemma_answer": "(blank)",
+    "score": {
+      "estimated": "0",
+      "out_of": 1
+    },
+    "strengths": [],
+    "weaknesses": [
+      "Left blank — couldn't recall a real-life example"
+    ],
+    "correct_solution": "Examples: (1) Drinking through a straw — you lower pressure in your mouth, atmospheric pressure pushes the drink up. (2) A balloon inflating — air pressure pushes outward. (3) Scuba diver feeling pressure increase with depth. (4) Aerosol can — pressurised gas pushes out contents.",
+    "error_type": "knowledge_gap",
+    "priority": "low",
+    "tags": [
+      "physics",
+      "year8_mock",
+      "Pressure"
+    ],
+    "type": "knowledge_gap",
+    "source": "Year 8 Physics Mock Test (2026-05-26)",
+    "date": "2026-05-26",
+    "exam": "Year 8 Physics Mock Test",
+    "enriched": true,
+    "drill": "List 3 everyday examples of gas/liquid pressure: (1) straw, (2) balloon, (3) bike tyre. Explain HOW pressure works in each.",
+    "question_image": "/error_images/jemma_phys_q23.jpg",
+    "raw": "(blank)",
+    "solution_display": "✅ Examples: straw (atmospheric pressure pushes drink up), balloon (air pressure stretches rubber), bike tyre (compressed air supports weight)\n\n📝 Drill: Memorise 3 everyday pressure examples\n\n🔍 Error type: knowledge_gap — blank",
+    "score_display": "📊 0/1",
+    "strengths_display": "",
+    "weaknesses_display": "❌ Left blank — couldn't recall a real-life example"
+  },
+  {
+    "id": "jemma_phys_q37_cells_series",
+    "subject": "Physics",
+    "question": "Q37: Two identical cells are added in series. What happens to brightness and current?",
+    "original_question": "Two identical cells are added in series to a circuit containing one lamp. (a) What happens to brightness? (b) What happens to the current?",
+    "jemma_answer": "(a) The brightness decreased/dimmed because the resistance increased.\n(b) The current decreased as well because it's taking up more current and it's harder to flow.",
+    "score": {
+      "estimated": "1",
+      "out_of": 2
+    },
+    "strengths": [
+      "Trying to use resistance to explain the change — good scientific thinking"
+    ],
+    "weaknesses": [
+      "Got the effect BACKWARDS: more cells = MORE voltage, not less",
+      "Adding cells INCREASES current and brightness, not decreases",
+      "Confused: thought adding cells adds resistance"
+    ],
+    "correct_solution": "(a) The lamp gets BRIGHTER because the total voltage across it increases (2 cells instead of 1). (b) The current INCREASES because V = IR — if V doubles and R stays the same, I must double.",
+    "error_type": "concept_confusion",
+    "priority": "medium",
+    "tags": [
+      "physics",
+      "year8_mock",
+      "Circuits / Series"
+    ],
+    "type": "concept_confusion",
+    "source": "Year 8 Physics Mock Test (2026-05-26)",
+    "date": "2026-05-26",
+    "exam": "Year 8 Physics Mock Test",
+    "enriched": true,
+    "drill": "Draw a circuit with 1 cell → 1 lamp. Now add a second cell in series. Trace the energy: each cell provides 'push'. More cells = more 'push' = more current = brighter lamp. Use V=IR: if V↑ and R same, I↑.",
+    "question_image": "/error_images/jemma_phys_q37.jpg",
+    "raw": "(a) The brightness decreased/dimmed because the resistance increased.\n(b) The current decreased as well because it's taking up more current and it's harder to flow.",
+    "solution_display": "✅ Adding cells in series → MORE voltage → MORE current → BRIGHTER lamp\n\nNOT dimmer! More cells = more push, not more resistance.\n\n📝 Drill: V=IR. If V doubles, I doubles (R constant).\n\n🔍 Error type: concept_confusion — got the direction backwards",
+    "score_display": "📊 1/2",
+    "strengths_display": "✅ Trying to use resistance to explain the change — good scientific thinking",
+    "weaknesses_display": "❌ Got the effect BACKWARDS: more cells = MORE voltage, not less\n❌ Adding cells INCREASES current and brightness, not decreases\n❌ Confused: thought adding cells adds resistance"
+  },
+  {
+    "id": "jemma_phys_q38_series_resistance",
+    "subject": "Physics",
+    "question": "Q38: Explain why adding more components in series increases resistance and decreases current",
+    "original_question": "Explain why adding more components in series increases the total resistance of a circuit and decreases the current.",
+    "jemma_answer": "Adding more components increases the resistance because there is only one path for the current to flow. And because the voltage is higher, the more difficult it is for the current to flow.",
+    "score": {
+      "estimated": "1",
+      "out_of": 2
+    },
+    "strengths": [
+      "Correctly stated: adding components increases resistance",
+      "Correctly identified there's only one path in series"
+    ],
+    "weaknesses": [
+      "Said 'because the voltage is higher' — adding components does NOT increase voltage",
+      "The reason current decreases is increased resistance alone, not voltage"
+    ],
+    "correct_solution": "In a series circuit, there is only ONE path for current. Adding more components means the current must pass through more obstacles, so the total resistance increases. From V = IR, if V stays the same and R increases, the current I must decrease.",
+    "error_type": "concept_confusion",
+    "priority": "medium",
+    "tags": [
+      "physics",
+      "year8_mock",
+      "Circuits / Series"
+    ],
+    "type": "concept_confusion",
+    "source": "Year 8 Physics Mock Test (2026-05-26)",
+    "date": "2026-05-26",
+    "exam": "Year 8 Physics Mock Test",
+    "enriched": true,
+    "drill": "The chain: more components → more obstacles → higher R → (with same V) lower I. Use V=IR to check: if R↑ and V is unchanged, I↓. Voltage comes from the cell, not from components.",
+    "question_image": "/error_images/jemma_phys_q38.jpg",
+    "raw": "Adding more components increases the resistance because there is only one path for the current to flow. And because the voltage is higher, the more difficult it is for the current to flow.",
+    "solution_display": "✅ More components = more obstacles in the one path → higher resistance\n\nV stays the same (from cell). R increases → I decreases (V=IR).\n\n📝 Drill: 'Voltage comes from the CELL, not from adding components.'\n\n🔍 Error type: concept_confusion — thought adding components increases voltage",
+    "score_display": "📊 1/2",
+    "strengths_display": "✅ Correctly stated: adding components increases resistance\n✅ Correctly identified there's only one path in series",
+    "weaknesses_display": "❌ Said 'because the voltage is higher' — adding components does NOT increase voltage\n❌ The reason current decreases is increased resistance alone, not voltage"
+  },
+  {
+    "id": "jemma_Movement_and_Joints",
+    "subject": "Biology",
+    "question": "QMovement and Joints: Skeletal & Muscular Systems (4 marks)",
+    "original_question": "1 - C, 2 - B, 3 - A, 4 - D",
+    "diya_answer": "1 - C, 2 - B, 3 - A, 4 - D",
+    "score": {
+      "estimated": "2",
+      "out_of": 4
+    },
+    "weaknesses": [
+      "You have correctly matched Tendon (3-A) and Antagonistic Pairs (4-B). However, Cartilage (1) connects to D, not C, and Ligament (2) connects to C, not B. Review the specific functions of cartilage and ligaments."
+    ],
+    "correct_solution": "1 - D (Cartilage covers bone ends), 2 - C (Ligament connects bone to bone), 3 - A (Tendon connects muscle to bone), 4 - B (Antagonistic pairs work in tandem).",
+    "solution_display": "🔧 Cartilage = cushion/pad at bone ends → think of the smooth white stuff on chicken bones\n🔧 Ligament = bone-to-bone → think 'Ligament Locks bones together'\n🔧 Tendon = muscle-to-bone → think 'Tendon Tugs bone when muscle contracts'\n🔧 Antagonistic Pairs = biceps & triceps — one contracts, other relaxes\n\n🔧 Memory drill: draw a simple knee joint, label all three: cartilage (pad), ligament (bone-bone strap), tendon (muscle-bone cord)",
+    "score_display": "Score: 1/4 · Confused ligament/tendon/cartilage functions",
+    "weaknesses_display": "❌ Swapped ligament and tendon functions completely\n❌ Doesn't know cartilage's role in joints (thought it connects muscle to bone)\n❌ May not have learned these as a connected system — memorised in isolation",
+    "error_type": "skill_gap",
+    "priority": "low",
+    "tags": [
+      "skeletal_&_muscular_systems"
+    ],
+    "type": "skill_gap",
+    "source": "Jemma Exam (Ernie OCR + DeepSeek Grading)",
+    "raw": "QMovement and Joints: 1 - C, 2 - B, 3 - A, 4 - D",
+    "enriched": true,
+    "date": "2026-05-25",
+    "question_image": "/error_images/jemma_exam_jemma_Movement_and_Joints.jpg",
+    "page_number": 10,
+    "action_plan": [
+      {
+        "week": 1,
+        "task": "Draw and label a simple knee joint diagram with cartilage, ligament, tendon marked. Write 1 sentence for each: 'X does Y.'",
+        "deliverable": "Annotated diagram with 3 correct function sentences"
+      },
+      {
+        "week": 2,
+        "task": "Create flashcards: front = tissue name, back = 'connects ___ to ___, function is ___'. Test self 3 times this week.",
+        "deliverable": "4 flashcards, tested 3× with 100% accuracy by end of week"
+      },
+      {
+        "week": 3,
+        "task": "Answer 5 GCSE-level movement/joints questions from BBC Bitesize or CGP guide",
+        "deliverable": "≥4/5 correct"
+      }
+    ],
+    "comparisons_display": "🔬 #1 Cartilage: Jemma → A (connects muscle to bone) | Correct → D (covers bone ends for smooth gliding)\n🔬 #2 Ligament: Jemma → D (covers bone ends) | Correct → C (connects bone to bone for stability)\n🔬 #3 Tendon: Jemma → C (connects bone to bone) | Correct → A (connects muscle to bone for movement)\n🔬 #4 Antagonistic Pairs: Jemma → B ✅ correct\n\n🔬 Pattern: swapped ligament ↔ tendon functions entirely; cartilage also wrong",
+    "jemma_answer": "1→A, 2→D, 3→C, 4→B",
+    "correct_answer": "1→D, 2→C, 3→A, 4→B",
+    "exam": "KS3/GCSE Biology · Skeletal & Muscular Systems",
+    "strengths_display": "✅ Antagonistic Pairs → B is correct\n✅ Understands muscles work in pairs because they can't push"
+  },
+  {
+    "id": "jemma_Q11__d__i_",
+    "subject": "Chemistry",
+    "question": "QQ11 (d)(i): Chromatography (1 marks)",
+    "original_question": "Because it's going to spoil the experiment. Not spread into the water?",
+    "score": {
+      "estimated": "0",
+      "out_of": 1
+    },
+    "weaknesses": [
+      "Incorrect. The reason is that the dyes would dissolve directly into the solvent pool, rather than being drawn up the paper by capillary action, ruining the separation."
+    ],
+    "correct_solution": "If the solvent level is above the baseline, the samples will dissolve into the solvent in the beaker instead of being carried up the paper.",
+    "solution_display": "✅ If the solvent level is above the baseline, the samples will dissolve into the solvent in the beaker instead of being carried up the paper.\n\n📝 Incorrect. The reason is that the dyes would dissolve directly into the solvent pool, rather than being drawn up the paper by capillary action, ruining the separation.",
+    "score_display": "📊 0/1 — Chromatography",
+    "weaknesses_display": "Incorrect. The reason is that the dyes would dissolve directly into the solvent pool, rather than being drawn up the paper by capillary action, ruining the separation.",
+    "error_type": "skill_gap",
+    "priority": "high",
+    "tags": [
+      "chromatography"
+    ],
+    "type": "skill_gap",
+    "source": "Jemma Exam (Ernie OCR + DeepSeek Grading)",
+    "raw": "QQ11 (d)(i): Because it's going to spoil the experiment. Not spread into the water?",
+    "enriched": true,
+    "date": "2026-05-25",
+    "question_image": "/error_images/jemma_exam_jemma_Q11__d__i_.jpg",
+    "page_number": 9,
+    "jemma_answer": "Because it's going to spoil the experiment. Not spread into the water?"
+  },
+  {
+    "id": "jemma_Q11__a_",
+    "subject": "Chemistry",
+    "question": "QQ11 (a): Elements (1 marks)",
+    "original_question": "☒ A He ☒ B H₂",
+    "score": {
+      "estimated": "0",
+      "out_of": 1
+    },
+    "weaknesses": [
+      "Incorrect. You have selected two answers. He is the correct symbol for an element (helium). H₂ is the formula for a molecule of hydrogen, not the symbol for the element itself."
+    ],
+    "correct_solution": "A (He)",
+    "solution_display": "✅ A (He)\n\n📝 Incorrect. You have selected two answers. He is the correct symbol for an element (helium). H₂ is the formula for a molecule of hydrogen, not the symbol for the element itself.",
+    "score_display": "📊 0/1 — Elements",
+    "weaknesses_display": "Incorrect. You have selected two answers. He is the correct symbol for an element (helium). H₂ is the formula for a molecule of hydrogen, not the symbol for the element itself.",
+    "error_type": "skill_gap",
+    "priority": "high",
+    "tags": [
+      "elements"
+    ],
+    "type": "skill_gap",
+    "source": "Jemma Exam (Ernie OCR + DeepSeek Grading)",
+    "raw": "QQ11 (a): ☒ A He ☒ B H₂",
+    "enriched": true,
+    "date": "2026-05-25",
+    "question_image": "/error_images/jemma_exam_jemma_Q11__a_.jpg",
+    "page_number": 7,
+    "jemma_answer": "☒ A He ☒ B H₂"
+  },
+  {
+    "id": "jemma_Q7__b__iii_",
+    "subject": "Chemistry",
+    "question": "QQ7 (b)(iii): Crystallisation (1 marks)",
+    "original_question": "You can see the crystal at the bottom of the beaker",
+    "score": {
+      "estimated": "0",
+      "out_of": 1
+    },
+    "weaknesses": [
+      "Incorrect. The crystallisation point is reached *before* crystals form in the bulk solution. A common test is to dip a cold glass rod into the solution; if crystals form on the rod, the point has been reached."
+    ],
+    "correct_solution": "When a drop of the solution on a cold surface (e.g., a glass rod) forms crystals / when a crust forms on the surface of the solution.",
+    "solution_display": "✅ When a drop of the solution on a cold surface (e.g., a glass rod) forms crystals / when a crust forms on the surface of the solution.\n\n📝 Incorrect. The crystallisation point is reached *before* crystals form in the bulk solution. A common test is to dip a cold glass rod into the solution; if crystals form on the rod, the point has been reached.",
+    "score_display": "📊 0/1 — Crystallisation",
+    "weaknesses_display": "Incorrect. The crystallisation point is reached *before* crystals form in the bulk solution. A common test is to dip a cold glass rod into the solution; if crystals form on the rod, the point has been reached.",
+    "error_type": "skill_gap",
+    "priority": "high",
+    "tags": [
+      "crystallisation"
+    ],
+    "type": "skill_gap",
+    "source": "Jemma Exam (Ernie OCR + DeepSeek Grading)",
+    "raw": "QQ7 (b)(iii): You can see the crystal at the bottom of the beaker",
+    "enriched": true,
+    "date": "2026-05-25",
+    "question_image": "/error_images/jemma_exam_jemma_Q7__b__iii_.jpg",
+    "page_number": 6,
+    "jemma_answer": "You can see the crystal at the bottom of the beaker"
+  },
+  {
+    "id": "jemma_Q5__b_",
+    "subject": "Chemistry",
+    "question": "QQ5 (b): Chromatography (2 marks)",
+    "original_question": "The Incorrect result is **B** because **there isn't a colour that is not matching with red, yellow or blue.**",
+    "score": {
+      "estimated": "1",
+      "out_of": 2
+    },
+    "weaknesses": [
+      "You correctly identified dye B as the incorrect result. However, your explanation is unclear. You need to state that the yellow spot in B does not match the yellow spot in any of the other dyes (or that it is a different shade of yellow)."
+    ],
+    "correct_solution": "Dye B is incorrect because it shows a yellow spot, but yellow is not one of the primary colours (blue, red, yellow) used to make the other dyes, OR because the yellow spot in B does not match the yellow spot in any other dye.",
+    "solution_display": "✅ Dye B is incorrect because it shows a yellow spot, but yellow is not one of the primary colours (blue, red, yellow) used to make the other dyes, OR because the yellow spot in B does not match the yellow spot in any other dye.\n\n📝 You correctly identified dye B as the incorrect result. However, your explanation is unclear. You need to state that the yellow spot in B does not match the yellow spot in any of the other dyes (or that it is a different shade of yellow).",
+    "score_display": "📊 1/2 — Chromatography",
+    "weaknesses_display": "You correctly identified dye B as the incorrect result. However, your explanation is unclear. You need to state that the yellow spot in B does not match the yellow spot in any of the other dyes (or that it is a different shade of yellow).",
+    "error_type": "skill_gap",
+    "priority": "low",
+    "tags": [
+      "chromatography"
+    ],
+    "type": "skill_gap",
+    "source": "Jemma Exam (Ernie OCR + DeepSeek Grading)",
+    "raw": "QQ5 (b): The Incorrect result is **B** because **there isn't a colour that is not matching with red, yellow o",
+    "enriched": true,
+    "date": "2026-05-25",
+    "question_image": "/error_images/jemma_exam_jemma_Q5__b_.jpg",
+    "page_number": 5,
+    "jemma_answer": "The Incorrect result is **B** because **there isn't a colour that is not matching with red, yellow or blue.**"
+  },
+  {
+    "id": "jemma_Q2__a__i_",
+    "subject": "Chemistry",
+    "question": "QQ2 (a)(i): Atmosphere (1 marks)",
+    "original_question": "",
+    "score": {
+      "estimated": "0",
+      "out_of": 1
+    },
+    "weaknesses": [
+      "No label was written on the pie chart. The most abundant gas in air is nitrogen."
+    ],
+    "correct_solution": "Nitrogen",
+    "solution_display": "✅ Nitrogen\n\n📝 No label was written on the pie chart. The most abundant gas in air is nitrogen.",
+    "score_display": "📊 0/1 — Atmosphere",
+    "weaknesses_display": "No label was written on the pie chart. The most abundant gas in air is nitrogen.",
+    "error_type": "skill_gap",
+    "priority": "high",
+    "tags": [
+      "atmosphere"
+    ],
+    "type": "skill_gap",
+    "source": "Jemma Exam (Ernie OCR + DeepSeek Grading)",
+    "raw": "QQ2 (a)(i): ",
+    "enriched": true,
+    "date": "2026-05-25",
+    "question_image": "/error_images/jemma_exam_jemma_Q2__a__i_.jpg",
+    "page_number": 3,
+    "jemma_answer": ""
+  },
+  {
+    "id": "jemma_Q1__Functions_of_Skeletal_System_",
+    "subject": "Biology",
+    "question": "QQ1 (Functions of Skeletal System): Skeletal System (2 marks)",
+    "original_question": "",
+    "score": {
+      "estimated": "0",
+      "out_of": 2
+    },
+    "weaknesses": [
+      "No answer was provided for this question. You must attempt all parts of a question to gain marks."
+    ],
+    "correct_solution": "Functions: support, protection, movement, blood cell production, mineral storage. Aspects: bones (rigidity), joints (movement), marrow (blood cell production).",
+    "solution_display": "✅ Functions: support, protection, movement, blood cell production, mineral storage. Aspects: bones (rigidity), joints (movement), marrow (blood cell production).\n\n📝 No answer was provided for this question. You must attempt all parts of a question to gain marks.",
+    "score_display": "📊 0/2 — Skeletal System",
+    "weaknesses_display": "No answer was provided for this question. You must attempt all parts of a question to gain marks.",
+    "error_type": "skill_gap",
+    "priority": "high",
+    "tags": [
+      "skeletal_system"
+    ],
+    "type": "skill_gap",
+    "source": "Jemma Exam (Ernie OCR + DeepSeek Grading)",
+    "raw": "QQ1 (Functions of Skeletal System): ",
+    "enriched": true,
+    "date": "2026-05-25",
+    "question_image": "/error_images/jemma_exam_jemma_Q1__Functions_of_Skeletal_System_.jpg",
+    "page_number": 2,
+    "jemma_answer": ""
+  },
+  {
+    "id": "jemma_Q1__Endoskeleton_Exoskeleton_",
+    "subject": "Biology",
+    "question": "QQ1 (Endoskeleton/Exoskeleton): Skeletal System (2 marks)",
+    "original_question": "have bone (include endoskeleton is when you have bone) inside your skin. backbone/spine). Exoskeleton is when you have bone) outside your skin.",
+    "score": {
+      "estimated": "1",
+      "out_of": 2
+    },
+    "weaknesses": [
+      "You have the right idea about inside vs. outside, but the answer is poorly structured and contains repeated phrases. An exoskeleton is not made of 'bone' but of chitin (in insects) or calcium carbonate (in crustaceans)."
+    ],
+    "correct_solution": "An endoskeleton is an internal skeleton (e.g., bones inside the body). An exoskeleton is an external skeleton (e.g., shell on the outside of the body).",
+    "solution_display": "✅ An endoskeleton is an internal skeleton (e.g., bones inside the body). An exoskeleton is an external skeleton (e.g., shell on the outside of the body).\n\n📝 You have the right idea about inside vs. outside, but the answer is poorly structured and contains repeated phrases. An exoskeleton is not made of 'bone' but of chitin (in insects) or calcium carbonate (in crustaceans).",
+    "score_display": "📊 1/2 — Skeletal System",
+    "weaknesses_display": "You have the right idea about inside vs. outside, but the answer is poorly structured and contains repeated phrases. An exoskeleton is not made of 'bone' but of chitin (in insects) or calcium carbonate (in crustaceans).",
+    "error_type": "skill_gap",
+    "priority": "low",
+    "tags": [
+      "skeletal_system"
+    ],
+    "type": "skill_gap",
+    "source": "Jemma Exam (Ernie OCR + DeepSeek Grading)",
+    "raw": "QQ1 (Endoskeleton/Exoskeleton): have bone (include endoskeleton is when you have bone) inside your skin. backbone/spine). Exoskeleto",
+    "enriched": true,
+    "date": "2026-05-25",
+    "question_image": "/error_images/jemma_exam_jemma_Q1__Endoskeleton_Exoskeleton_.jpg",
+    "page_number": 1,
+    "jemma_answer": "have bone (include endoskeleton is when you have bone) inside your skin. backbone/spine). Exoskeleton is when you have bone) outside your skin."
+  },
+  {
+    "raw": "jemma 错题 化学\n\nFull Question: Pure dry crystals of magnesium nitrate from magnesium nitrate solution by crystallisation.\nSteps: A-cool, B-heat to evaporate, C-filter, D-dry, E-test with glass rod.\nMy answer: B → E → C → A → D\nCorrect: B → E → A → C → D\nError: filtered (C) before cooling (A) — no crystals existed yet to filter",
+    "subject": "Chemistry",
+    "type": "concept",
+    "solution": "Crystallisation requires heating to concentrate the solution (B), then cooling to form crystals (A), filtering to separate them (C), and finally drying (D). The glass rod test (E) is just for checking, not a main step.",
+    "source": "Email (jemma 错题 化学)",
+    "date": "2026-05-23T17:16:41.000000",
+    "enriched": true,
+    "score_display": "Score: 4/7 · Sorting error — correct concept, wrong order",
+    "strengths_display": "✅ Correctly identified B (heat to evaporate) as first step\n✅ Understood E (test with glass rod) comes early\n✅ Knows crystallisation involves evaporation → cooling → filtration → drying",
+    "comparisons_display": "🔬 My answer: B → E → C → A → D (filtered before cooling)\n🔬 Correct: B → E → A → C → D (cool before filter)\n🔬 Gap: filtered (C) before cooling (A) — but no crystals exist yet to filter!\n🔬 Root cause: didn't understand that crystals only form AFTER cooling",
+    "solution_display": "🔧 Crystallisation logic:\n🔧 1. Heat (B) → concentrate by evaporating water\n🔧 2. Test (E) → dip glass rod; if crystals form on rod, solution is saturated\n🔧 3. Cool (A) → solubility drops, excess solute forms pure crystals\n🔧 4. Filter (C) → separate solid crystals from liquid (impurities stay dissolved)\n🔧 5. Dry (D) → warm place, NOT direct heat (nitrates decompose!)\n🔧 Mnemonic: Heat → Test → Cool → Filter → Dry",
+    "weaknesses_display": "❌ Placed filtration (C) before cooling (A) — fundamental logic error\n❌ Did not check: \"are there crystals to filter yet?\" before step C\n❌ May confuse crystallisation with other separation techniques",
+    "weaknesses": [
+      {
+        "desc": "Placed filtration before cooling — fundamental logic error"
+      },
+      {
+        "desc": "Did not verify whether crystals exist before filtering"
+      },
+      {
+        "desc": "May confuse crystallisation with other separation techniques"
+      }
+    ],
+    "action_plan": [
+      {
+        "week": 1,
+        "task": "Draw a flowchart of crystallisation steps with WHY each step happens",
+        "deliverable": "Annotated flowchart with scientific reasons"
+      },
+      {
+        "week": 2,
+        "task": "Practice 3 separation technique questions (crystallisation vs filtration vs distillation), identify correct order for each",
+        "deliverable": "3 questions answered correctly"
+      },
+      {
+        "week": 3,
+        "task": "Write a \"common mistake\" note: NEVER filter before crystals form — check \"are there solids?\" before filtering",
+        "deliverable": "1-page revision note with diagrams"
+      }
+    ],
+    "original_question": "(b) Pure dry crystals of magnesium nitrate can be obtained from magnesium nitrate solution by crystallisation.\nThese steps describe the method, but the steps are in the wrong order.\n\nA - allow the solution to cool to room temperature\nB - heat the solution to evaporate some of the water\nC - pour the mixture of crystals and solution through filter paper\nD - put the crystals in a warm place to dry\nE - dip a glass rod into the solution to see if crystals form\n\nWrite a letter in each box to show the correct order.\n(First box already filled with B)  [Total = 7 marks]",
+    "exam": "GCSE Chemistry · Crystallisation",
+    "jemma_answer": "My answer: B → E → C → A → D",
+    "correct_answer": "Correct: B → E → A → C → D",
+    "exam_tips": "Never filter before cooling — crystals must form first. Final drying is \"warm place\" not direct heat (nitrates decompose). Mnemonic: Heat → Test → Cool → Filter → Dry.",
+    "id": "jemma_crystallisation_steps",
+    "question": "Crystallisation: Order the steps for magnesium nitrate (7 marks)",
+    "tags": [
+      "crystallisation",
+      "separation_techniques"
+    ]
+  },
+  {
+    "raw": "Bebras puzzle: binary tree traversal — I went left-first but should go root-left-right for preorder",
+    "subject": "Computing",
+    "type": "concept",
+    "solution": "Preorder traversal visits root first, then left subtree, then right. Remember: Root → Left → Right.",
+    "source": "UK Bebras Practice",
+    "date": "2026-05-20T15:00:00.000000",
+    "enriched": true,
+    "score_display": "Score: 6/10 · Mixed understanding",
+    "strengths_display": "✅ Could identify tree structure · ✅ Understood traversal concept",
+    "comparisons_display": "🔬 My answer: left-first traversal\n🔬 Correct: root-left-right (preorder)\n🔬 Gap: confused traversal order types",
+    "solution_display": "🔧 Step 1: Identify traversal type (preorder/inorder/postorder)\n🔧 Step 2: Start at root for preorder\n🔧 Drill: practice with small trees (3-4 nodes) labeling each visit",
+    "weaknesses_display": "❌ Confused preorder vs inorder traversal\n❌ Didn't check traversal type before solving",
+    "weaknesses": [
+      {
+        "desc": "Confused preorder vs inorder"
+      },
+      {
+        "desc": "Didn't verify traversal type"
+      }
+    ],
+    "action_plan": [
+      {
+        "week": 1,
+        "task": "Draw 5 small binary trees and trace preorder",
+        "deliverable": "5 hand-traced examples"
+      },
+      {
+        "week": 2,
+        "task": "Time yourself: 5 Bebras tree questions in 10 min",
+        "deliverable": "80% accuracy target"
+      }
+    ],
+    "original_question": "A binary tree has root node A, left child B (with children D, E), right child C (with children F, G). What is the preorder traversal?",
+    "id": "jemma_bebras_tree_traversal",
+    "question": "Bebras: Binary tree preorder traversal",
+    "tags": [
+      "binary_tree",
+      "traversal",
+      "bebras"
+    ]
+  }
+]

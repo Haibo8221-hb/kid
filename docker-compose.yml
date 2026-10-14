@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  plan:
+    build: .
+    container_name: plan-dashboard
+    ports:
+      - "8080:80"
+    volumes:
+      - ./data:/app/data
+      # Mount plan MD files if available (optional)
+      # - /mnt/d/MyAI:/mnt/d/MyAI:ro
+    env_file:
+      - .env.docker
+    restart: unless-stopped

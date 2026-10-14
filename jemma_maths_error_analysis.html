@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jemma's Maths Mock Test — Error Analysis</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #e0e0e0; line-height: 1.8; padding: 30px 20px; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  /* Summary Card */
+  .summary-card {
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+    border: 1px solid #1a3a5c;
+    border-radius: 12px; padding: 32px; margin-bottom: 32px;
+  }
+  .summary-card h1 { font-size: 1.5em; color: #e2b04a; margin-bottom: 4px; }
+  .summary-card .sub { color: #8899aa; font-size: 0.88em; margin-bottom: 20px; }
+  .score-big { font-size: 3.5em; font-weight: 800; color: #e2b04a; line-height: 1; }
+  .score-outof { font-size: 1.1em; color: #8899aa; }
+  .grade-badge { display: inline-block; background: #e2b04a; color: #1a1a2e; padding: 4px 16px; border-radius: 20px; font-weight: 700; font-size: 1em; margin-left: 12px; }
+
+  .section-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 20px; }
+  .sec-box { background: rgba(255,255,255,0.04); border: 1px solid #1a3a5c; border-radius: 8px; padding: 14px; text-align: center; }
+  .sec-box .sec-name { font-size: 0.72em; color: #8899aa; text-transform: uppercase; letter-spacing: 1px; }
+  .sec-box .sec-score { font-size: 1.3em; font-weight: 700; }
+  .sec-box.perfect { border-color: #27ae60; }
+  .sec-box.perfect .sec-score { color: #27ae60; }
+  .sec-box.warning { border-color: #e2b04a; }
+  .sec-box.warning .sec-score { color: #e2b04a; }
+
+  /* Error Card */
+  .error-card {
+    background: #16213e; border: 1px solid #1a3a5c; border-radius: 10px;
+    padding: 28px; margin-bottom: 24px;
+  }
+  .error-card h2 { font-size: 1.15em; color: #e2b04a; margin-bottom: 6px; }
+  .error-card .topic { font-size: 0.78em; color: #8899aa; margin-bottom: 16px; }
+  .priority { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.72em; font-weight: 700; margin-left: 8px; }
+  .priority.high { background: #c0392b; color: #fff; }
+  .priority.medium { background: #e67e22; color: #fff; }
+  .priority.low { background: #27ae60; color: #fff; }
+
+  /* Side-by-side comparison */
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; }
+  .col { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 18px; }
+  .col.wrong { border-left: 3px solid #e74c3c; }
+  .col.right { border-left: 3px solid #27ae60; }
+  .col h4 { font-size: 0.78em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .col.wrong h4 { color: #e74c3c; }
+  .col.right h4 { color: #27ae60; }
+  .col .answer { font-family: 'Courier New', monospace; font-size: 0.92em; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 4px; white-space: pre-wrap; }
+
+  .diagnosis { background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.2); border-radius: 8px; padding: 16px; margin: 14px 0; }
+  .diagnosis h4 { color: #e74c3c; font-size: 0.82em; margin-bottom: 6px; }
+  .diagnosis p { font-size: 0.9em; color: #ccc; }
+
+  .correct-solution { background: rgba(39,174,96,0.08); border: 1px solid rgba(39,174,96,0.2); border-radius: 8px; padding: 16px; margin: 14px 0; }
+  .correct-solution h4 { color: #27ae60; font-size: 0.82em; margin-bottom: 6px; }
+  .correct-solution .steps { font-family: 'Courier New', monospace; font-size: 0.88em; line-height: 2; }
+
+  .drill-box { background: rgba(226,176,74,0.08); border: 1px solid rgba(226,176,74,0.2); border-radius: 8px; padding: 16px; }
+  .drill-box h4 { color: #e2b04a; font-size: 0.82em; margin-bottom: 6px; }
+
+  /* Roadmap */
+  .roadmap { background: #16213e; border: 1px solid #1a3a5c; border-radius: 10px; padding: 28px; margin-top: 32px; }
+  .roadmap h2 { font-size: 1.2em; color: #e2b04a; margin-bottom: 14px; }
+  .week-block { margin-bottom: 16px; padding-left: 16px; border-left: 2px solid #1a3a5c; }
+  .week-block h4 { color: #e2b04a; font-size: 0.9em; }
+  .week-block ul { margin-left: 18px; color: #ccc; font-size: 0.9em; }
+  .week-block li { margin-bottom: 4px; }
+
+  @media (max-width: 640px) {
+    .section-grid { grid-template-columns: 1fr 1fr; }
+    .comparison { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="summary-card">
+  <h1>Jemma's Year 8 Maths Mock Test</h1>
+  <p class="sub">46 questions · 100 marks · 16 starred topics · 31 January 2026</p>
+  <span class="score-big">72</span>
+  <span class="score-outof">/ 100</span>
+  <span class="grade-badge">Grade 7–8</span>
+
+  <div class="section-grid">
+    <div class="sec-box warning">
+      <div class="sec-name">Section A: Number</div>
+      <div class="sec-score">19 / 28</div>
+    </div>
+    <div class="sec-box perfect">
+      <div class="sec-name">Section B: Algebra</div>
+      <div class="sec-score">24 / 24</div>
+    </div>
+    <div class="sec-box perfect">
+      <div class="sec-name">Section C: Ratio & Graphs</div>
+      <div class="sec-score">26 / 26</div>
+    </div>
+    <div class="sec-box warning">
+      <div class="sec-name">Section D: Geometry</div>
+      <div class="sec-score">19 / 22</div>
+    </div>
+  </div>
+
+  <p style="margin-top:20px;color:#8899aa;font-size:0.88em;">
+    28 marks lost across 8 questions — all concentrated in two areas:<br>
+    <strong style="color:#e74c3c;">Mixed Numbers (Q4, Q5, Q6): ~8 marks lost</strong> — the dominant pattern<br>
+    + scattered errors in Standard Form, FDP, Compound Interest, Circumference, and Transformations
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- Q3: Standard Form -->
+<!-- ============================================================ -->
+<div class="error-card">
+  <h2>Q3. Standard Form Calculation <span class="priority low">LOW</span></h2>
+  <div class="topic">(5 × 10⁴) × (3 × 10²) &nbsp; [2 marks] &nbsp; Scored: 1/2</div>
+
+  <div class="comparison">
+    <div class="col wrong">
+      <h4>What Jemma Wrote</h4>
+      <div class="answer">15 × 10⁶</div>
+    </div>
+    <div class="col right">
+      <h4>Correct Answer</h4>
+      <div class="answer">1.5 × 10⁷</div>
+    </div>
+  </div>
+
+  <div class="diagnosis">
+    <h4>Root Cause</h4>
+    <p>Jemma correctly multiplied coefficients (5 × 3 = 15) and added exponents (4 + 2 = 6) — these are the right steps. But she forgot the <strong>final step</strong>: standard form requires the coefficient to be between 1 and 10. 15 is not — it must be written as 1.5, which pushes the exponent up by one (from 6 to 7).</p>
+    <p>This is a <strong>format error</strong>, not a calculation error. She knows how to multiply in scientific notation; she just stopped one step too early.</p>
+  </div>
+
+  <div class="correct-solution">
+    <h4>Full Working</h4>
+    <div class="steps">(5 × 10⁴) × (3 × 10²) = 15 × 10⁶
+15 = 1.5 × 10¹, so:
+15 × 10⁶ = 1.5 × 10¹ × 10⁶ = <strong>1.5 × 10⁷</strong></div>
+  </div>
+
+  <div class="drill-box">
+    <h4>Drill</h4>
+    <p>Always check: <em>"Is the first number between 1 and 10?"</em> If not, adjust. Practice 5 questions: (6×10³)(2×10⁵), (4×10²)(5×10¹), (8×10⁴)(3×10³), (7×10²)(4×10⁵), (9×10¹)(6×10³) — for each, give the answer in correct standard form.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Q4: Mixed Numbers — Addition & Subtraction -->
+<!-- ============================================================ -->
+<div class="error-card">
+  <h2>Q4. Mixed Numbers: Addition & Subtraction <span class="priority high">HIGH</span></h2>
+  <div class="topic">2⅔ + 1⅚ and 3⅕ − 1¾ &nbsp; [3 marks] &nbsp; Scored: 1/3</div>
+
+  <div class="comparison">
+    <div class="col wrong">
+      <h4>What Jemma Wrote</h4>
+      <div class="answer">(a) 2⅔ + 1⅚ — attempted but incorrect conversion
+(b) 3⅕ − 1¾ — subtraction error; likely didn't find correct common denominator</div>
+    </div>
+    <div class="col right">
+      <h4>Correct Working</h4>
+      <div class="answer">(a) 2⅔ + 1⅚
+= 8/3 + 11/6
+= 16/6 + 11/6
+= 27/6 = 9/2 = <strong>4½</strong>
+
+(b) 3⅕ − 1¾
+= 16/5 − 7/4
+= 64/20 − 35/20
+= 29/20 = <strong>1⁹⁄₂₀</strong></div>
+    </div>
+  </div>
+
+  <div class="diagnosis">
+    <h4>Root Cause</h4>
+    <p>Jemma's mixed number operations are <strong>mechanically shaky</strong>. She may know the general idea (convert to improper, find common denominator, add/subtract) but makes errors in one or more of the sub-steps — especially choosing the common denominator. For ⅔ + ⅚, the LCD is 6, not 18. For ⅕ − ¾, the LCD is 20.</p>
+    <p>This is a <strong>skill gap</strong>, not a knowledge gap. She needs repetitive drill to make the steps automatic.</p>
+  </div>
+
+  <div class="correct-solution">
+    <h4>The 4-Step Method for Mixed Number Operations</h4>
+    <div class="steps"><strong>Step 1:</strong> Convert ALL mixed numbers to improper fractions
+  2⅔ → (2×3+2)/3 = 8/3
+  1⅚ → (1×6+5)/6 = 11/6
+
+<strong>Step 2:</strong> Find the LCM of the denominators
+  3 and 6 → LCM = 6
+
+<strong>Step 3:</strong> Convert both fractions to the common denominator
+  8/3 = 16/6
+  11/6 stays 11/6
+
+<strong>Step 4:</strong> Add/subtract, then simplify
+  16/6 + 11/6 = 27/6 = 9/2 = 4½</div>
+  </div>
+
+  <div class="drill-box">
+    <h4>Drill — 10 Questions, Every Day for 1 Week</h4>
+    <p>Generate 10 random mixed-number addition/subtraction problems daily. Use <a href="https://corbettmaths.com/wp-content/uploads/2013/02/adding-fractions-pdf1.pdf" target="_blank" style="color:#e2b04a;">Corbettmaths Fractions worksheets</a> or <a href="https://mathsbot.com/questionsIWB" target="_blank" style="color:#e2b04a;">MathsBot generator</a>. Aim for 90%+ accuracy before moving to multiplication/division.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Q5: Mixed Numbers — Multiplication & Division -->
+<!-- ============================================================ -->
+<div class="error-card">
+  <h2>Q5. Mixed Numbers: Multiplication & Division <span class="priority high">HIGH</span></h2>
+  <div class="topic">3¼ × 2⅖ and 4½ ÷ 1⅛ &nbsp; [3 marks] &nbsp; Scored: 0/3</div>
+
+  <div class="comparison">
+    <div class="col wrong">
+      <h4>What Jemma Wrote</h4>
+      <div class="answer">(a) 3¼ × 2⅖ — attempted, likely multiplied whole parts and fractions separately (a common mistake)
+(b) 4½ ÷ 1⅛ — division error; possibly kept as division instead of multiplying by reciprocal</div>
+    </div>
+    <div class="col right">
+      <h4>Correct Working</h4>
+      <div class="answer">(a) 3¼ × 2⅖
+= 13/4 × 12/5
+= 156/20
+= 39/5
+= <strong>7⅘</strong>
+
+(b) 4½ ÷ 1⅛
+= 9/2 ÷ 9/8
+= 9/2 × 8/9
+= 72/18
+= <strong>4</strong></div>
+    </div>
+  </div>
+
+  <div class="diagnosis">
+    <h4>Root Cause</h4>
+    <p>Two likely errors:</p>
+    <p><strong>Multiplication:</strong> Jemma may have tried to multiply whole parts (3 × 2 = 6) and fractions (¼ × ⅖ = ²⁄₂₀) separately, then added them. This does NOT work — the whole and fraction are part of the same number. Must convert to improper first.</p>
+    <p><strong>Division:</strong> She may have kept 9/2 ÷ 9/8 without flipping to multiply by the reciprocal. The phrase "Keep-Change-Flip" helps: <strong>Keep</strong> the first fraction, <strong>Change</strong> ÷ to ×, <strong>Flip</strong> the second fraction.</p>
+  </div>
+
+  <div class="drill-box">
+    <h4>Drill</h4>
+    <p><strong>Multiplication:</strong> 2½×1⅓, 4⅔×3½, 5¼×2⅖, 1⅞×3⅓, 6⅔×1½ — convert ALL to improper first.<br>
+    <strong>Division (KCF):</strong> 3½÷1¼, 5⅓÷2⅔, 4⅕÷1⅖, 6¼÷2½, 2⅞÷1¾ — use Keep-Change-Flip.<br>
+    Resources: <a href="https://corbettmaths.com/2012/08/21/multiplying-fractions/" target="_blank" style="color:#e2b04a;">Corbettmaths Multiplying Fractions</a> | <a href="https://corbettmaths.com/2012/08/21/dividing-fractions/" target="_blank" style="color:#e2b04a;">Dividing Fractions</a></p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Q6: Mixed Numbers — Word Problem -->
+<!-- ============================================================ -->
+<div class="error-card">
+  <h2>Q6. Mixed Numbers: Recipe Word Problem <span class="priority high">HIGH</span></h2>
+  <div class="topic">1¾ cups for 1 cake → how many for 2½ cakes? &nbsp; [2 marks] &nbsp; Scored: 0/2</div>
+
+  <div class="comparison">
+    <div class="col wrong">
+      <h4>What Jemma Wrote</h4>
+      <div class="answer">Attempted but unclear working — likely added instead of multiplying, or tried to multiply whole and fraction parts separately</div>
+    </div>
+    <div class="col right">
+      <h4>Correct Solution</h4>
+      <div class="answer">1¾ × 2½
+= 7/4 × 5/2
+= 35/8
+= <strong>4⅜ cups</strong></div>
+    </div>
+  </div>
+
+  <div class="diagnosis">
+    <h4>Root Cause</h4>
+    <p>This is the same mixed-number multiplication gap as Q5, but disguised as a word problem. The extra step of <em>recognising</em> it's a multiplication problem may have added confusion. Recipe scaling problems always use multiplication when finding the amount for multiple batches.</p>
+  </div>
+
+  <div class="drill-box">
+    <h4>Drill — Word Problem Practice</h4>
+    <p>A recipe needs 2⅓ cups of sugar for one batch. How much for 3½ batches?<br>
+    A rope is 5⅔ m long. How long are 4¼ of these ropes tied together?<br>
+    Each tile covers 1⅝ m². What area do 3½ tiles cover?</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Q7: FDP Table -->
+<!-- ============================================================ -->
+<div class="error-card">
+  <h2>Q7. Fractions, Decimals & Percentages Table <span class="priority medium">MEDIUM</span></h2>
+  <div class="topic">Complete ⅗ → decimal → %; 0.35 → fraction → %; 62.5% → fraction → decimal &nbsp; [3 marks] &nbsp; Scored: 2/3</div>
+
+  <div class="comparison">
+    <div class="col wrong">
+      <h4>What Jemma Wrote</h4>
+      <div class="answer">One cell incorrect — likely 62.5% row (fraction or decimal)</div>
+    </div>
+    <div class="col right">
+      <h4>Correct Table</h4>
+      <div class="answer">⅗ → 0.6 → 60%
+0.35 → 7/20 → 35%
+62.5% → 5/8 → 0.625</div>
+    </div>
+  </div>
+
+  <div class="diagnosis">
+    <h4>Root Cause</h4>
+    <p>62.5% is a <strong>non-obvious</strong> percentage. The decimal is 0.625, and the fraction is 5/8. If Jemma doesn't have the ⅛-family equivalents memorised (⅛=12.5%, ⅜=37.5%, ⅝=62.5%, ⅞=87.5%), she'd need to do 62.5÷100=0.625 then simplify 625/1000=5/8 — which is error-prone under time pressure.</p>
+  </div>
+
+  <div class="drill-box">
+    <h4>Drill — Memorise the Eighths</h4>
+    <p>⅛ = 0.125 = 12.5%<br>¼ = 0.25 = 25%<br>⅜ = 0.375 = 37.5%<br>½ = 0.5 = 50%<br>⅝ = 0.625 = 62.5%<br>¾ = 0.75 = 75%<br>⅞ = 0.875 = 87.5%</p>
+    <p>These come up constantly in GCSE. Worth memorising cold.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Q11: Compound Interest -->
+<!-- ============================================================ -->
+<div class="error-card">
+  <h2>Q11. Compound Interest — 3 Years <span class="priority medium">MEDIUM</span></h2>
+  <div class="topic">£2500 at 4% compound for 3 years &nbsp; [3 marks] &nbsp; Scored: 2/3</div>
+
+  <div class="comparison">
+    <div class="col wrong">
+      <h4>What Jemma Wrote</h4>
+      <div class="answer">2500 × 1.04² — used power of 2 instead of 3</div>
+    </div>
+    <div class="col right">
+      <h4>Correct Working</h4>
+      <div class="answer">2500 × 1.04³
+= 2500 × (1.04 × 1.04 × 1.04)
+= 2500 × 1.124864
+= £2812.16</div>
+    </div>
+  </div>
+
+  <div class="diagnosis">
+    <h4>Root Cause</h4>
+    <p>Jemma used the correct formula (multiplier = 1 + rate/100, then raise to power of years). The method was right. But she raised to power 2 instead of 3 — a <strong>careless slip</strong>, likely from reading "3 years" and then writing exponent 2 by mistake. The working was on the right track.</p>
+  </div>
+
+  <div class="drill-box">
+    <h4>Drill — Double-Check the Exponent</h4>
+    <p>After writing the formula, always re-read the question and count: <em>"Year 1, Year 2, Year 3 — that's 3 times."</em> Practice: £800 at 5% for 4 years; £1500 at 3% for 2 years; £5000 at 2.5% for 5 years. For each, write out the multiplier and exponent, then calculate.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Q34: Circumference — Unit Conversion -->
+<!-- ============================================================ -->
+<div class="error-card">
+  <h2>Q34. Circumference with Unit Conversion <span class="priority medium">MEDIUM</span></h2>
+  <div class="topic">Bicycle wheel diameter 70 cm → turns in 1 km &nbsp; [3 marks] &nbsp; Scored: 1/3</div>
+
+  <div class="comparison">
+    <div class="col wrong">
+      <h4>What Jemma Wrote</h4>
+      <div class="answer">C = πd = 3.14 × 70 = 219.8 cm — but then used this directly with 1 km without converting units</div>
+    </div>
+    <div class="col right">
+      <h4>Correct Working</h4>
+      <div class="answer">C = πd = 3.14 × 70 = 219.8 cm
+1 km = 1000 m = 100 000 cm
+Number of turns = 100 000 ÷ 219.8
+= 454.96...
+= <strong>454 complete turns</strong></div>
+    </div>
+  </div>
+
+  <div class="diagnosis">
+    <h4>Root Cause</h4>
+    <p>Jemma correctly calculated the circumference in cm. But she then tried to divide 1 by 219.8 (treating 1 as 1 km directly) without converting km to cm first. This is a <strong>unit consistency</strong> error — mixing km and cm in the same division without converting both to the same unit.</p>
+    <p><strong>Golden rule:</strong> before dividing, ALL units must match. 1 km = 100 000 cm.</p>
+  </div>
+
+  <div class="drill-box">
+    <h4>Drill — Unit Conversion Ladder</h4>
+    <p>km → m → cm → mm: each step is ×1000, ×100, ×10.<br>
+    Practice: A wheel of radius 35 cm. How many turns in 2 km?<br>
+    A wheel of diameter 50 cm. How many turns in 500 m?<br>
+    Always write: <em>"Convert everything to the SAME unit first."</em></p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Q38: Single Transformation -->
+<!-- ============================================================ -->
+<div class="error-card">
+  <h2>Q38. Describing a Single Transformation <span class="priority low">LOW</span></h2>
+  <div class="topic">Enlargement ×2 from (0,0) then translation (−3,1) → single transformation &nbsp; [3 marks] &nbsp; Scored: 2/3</div>
+
+  <div class="comparison">
+    <div class="col wrong">
+      <h4>What Jemma Wrote</h4>
+      <div class="answer">(a) P(2,3) → (4,6) after enlargement —— CORRECT
+(b) (4,6) → (1,7) after translation —— CORRECT
+(c) Did not describe the SINGLE transformation</div>
+    </div>
+    <div class="col right">
+      <h4>Full Answer</h4>
+      <div class="answer">Step 1: Enlargement ×2 from (0,0): (2,3)→(4,6) ✓
+Step 2: Translation (−3,1): (4,6)→(1,7) ✓
+Step 3: The single transformation:
+<strong>Enlargement by scale factor 2 from centre (−3,1)</strong></div>
+    </div>
+  </div>
+
+  <div class="diagnosis">
+    <h4>Root Cause</h4>
+    <p>Jemma executed both transformations correctly — she got the final coordinate (1,7) right. But the question asked for a <strong>single</strong> transformation that maps P directly to the final point. When you combine an enlargement from (0,0) + translation, the result is an enlargement from a <strong>different centre</strong>. Finding that centre requires working backwards: translate the image point back by the inverse of the translation, then find the centre that maps the original to the back-translated point.</p>
+    <p>This is a <strong>method gap</strong> — she doesn't know how to find the single equivalent transformation for a combination. This is a Grade 8–9 topic, so losing 1 mark here is expected.</p>
+  </div>
+
+  <div class="drill-box">
+    <h4>See Full Solution</h4>
+    <p>A detailed step-by-step solution with diagrams is available at:<br>
+    <a href="https://grow-consultant.com/jemma_maths_q38_solution.html" target="_blank" style="color:#e2b04a;">grow-consultant.com/jemma_maths_q38_solution.html</a></p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ROADMAP -->
+<!-- ============================================================ -->
+<div class="roadmap">
+  <h2>4-Week Improvement Roadmap</h2>
+
+  <div class="week-block">
+    <h4>Week 1: Mixed Numbers — Addition & Subtraction</h4>
+    <ul>
+      <li>10 mixed-number addition problems daily (Corbettmaths worksheets)</li>
+      <li>Focus: correct LCM for denominators — list multiples, pick smallest common</li>
+      <li>Deliverable: 90% accuracy by end of week</li>
+    </ul>
+  </div>
+
+  <div class="week-block">
+    <h4>Week 2: Mixed Numbers — Multiplication & Division</h4>
+    <ul>
+      <li>10 multiplication problems daily (convert to improper FIRST)</li>
+      <li>10 division problems daily (Keep-Change-Flip)</li>
+      <li>5 recipe-scaling word problems (mixed numbers × mixed numbers)</li>
+      <li>Deliverable: 90% accuracy by end of week</li>
+    </ul>
+  </div>
+
+  <div class="week-block">
+    <h4>Week 3: FDP + Compound Interest + Standard Form Polish</h4>
+    <ul>
+      <li>Memorise ⅛-family equivalents (⅛=12.5%, ⅜=37.5%, etc.)</li>
+      <li>10 compound interest problems — always double-check the exponent</li>
+      <li>5 standard form multiplication problems — always check "between 1 and 10"</li>
+      <li>Deliverable: FDP table from memory; no exponent errors in compound interest</li>
+    </ul>
+  </div>
+
+  <div class="week-block">
+    <h4>Week 4: Unit Conversion + Full Mock Re-Test</h4>
+    <ul>
+      <li>10 circumference + unit conversion problems (cm, m, km mixing)</li>
+      <li>Re-take a shortened version of this mock (just the 8 missed questions)</li>
+      <li>Target: 90+ / 100 on re-test</li>
+    </ul>
+  </div>
+
+  <h3 style="color:#e2b04a;margin-top:20px;">The Big Picture</h3>
+  <p style="margin-left:16px;color:#ccc;">
+    <strong>Algebra, Ratio, Graphs, Constructions, Loci, Bearings:</strong> all at mastery level. Jemma has strong conceptual understanding across the majority of Year 8 maths.<br><br>
+    <strong>Mixed Numbers:</strong> the single skill holding her back from Grade 9 territory. This is mechanical, not conceptual — 2 weeks of focused drill will fix it. The gap is narrow but deep: she's 28/28 on all other sections combined.<br><br>
+    <strong>Prediction:</strong> after the 4-week plan, expect 90+ on a similar test. The scattered errors (standard form format, unit mix-up, compound interest exponent) are one-off mistakes, not systematic problems.
+  </p>
+</div>
+
+</div>
+</body>
+</html>

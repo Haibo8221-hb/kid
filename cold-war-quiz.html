@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cold War Quiz · Diya</title>
+<style>
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --surface2: #f1f3f5;
+  --text: #1a1d28;
+  --text2: #6b7280;
+  --accent: #4f8cff;
+  --accent2: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --border: #e5e7eb;
+  --green: #22c55e;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+
+/* Header */
+.quiz-header {
+  text-align: center;
+  padding: 40px 20px 32px;
+  background: linear-gradient(135deg, #1a1d28, #2d3748);
+  color: #fff;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.quiz-header h1 {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.quiz-header .subtitle {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.quiz-header .exam-info {
+  margin-top: 12px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.1);
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 12px;
+}
+
+/* Progress bar */
+.progress-wrap {
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text2);
+}
+
+/* Topic selector */
+.topic-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.topic-tab {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text2);
+}
+
+.topic-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.topic-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.topic-tab.done {
+  background: var(--accent2);
+  color: #fff;
+  border-color: var(--accent2);
+}
+
+/* Round tabs */
+.round-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.round-tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text2);
+}
+
+.round-tab:hover {
+  border-color: var(--accent);
+}
+
+.round-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.round-tab.done {
+  background: rgba(16,185,129,0.1);
+  border-color: var(--accent2);
+  color: var(--accent2);
+  font-weight: 600;
+}
+
+/* Question card */
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.question-num {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.question-text {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.question-hint {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 16px;
+}
+
+/* Answer options */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option {
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.option:hover {
+  border-color: var(--accent);
+  background: rgba(79,140,255,0.04);
+}
+
+.option.correct {
+  border-color: var(--accent2);
+  background: rgba(16,185,129,0.08);
+}
+
+.option.wrong {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.06);
+}
+
+.option.disabled {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.option .marker {
+  float: right;
+  font-size: 18px;
+}
+
+/* Feedback */
+.feedback {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  display: none;
+}
+
+.feedback.show {
+  display: block;
+}
+
+.feedback.correct-fb {
+  background: rgba(16,185,129,0.08);
+  border-left: 3px solid var(--accent2);
+}
+
+.feedback.wrong-fb {
+  background: rgba(239,68,68,0.06);
+  border-left: 3px solid var(--red);
+}
+
+.feedback-label {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+/* Source box */
+.source-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.source-box .src-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 8px;
+  font-style: normal;
+}
+
+/* Timeline sort */
+.timeline-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timeline-item {
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: grab;
+  font-size: 14px;
+  user-select: none;
+  transition: all 0.15s;
+}
+
+.timeline-item:active {
+  cursor: grabbing;
+}
+
+.timeline-item.correct-order {
+  border-color: var(--accent2);
+  background: rgba(16,185,129,0.08);
+}
+
+.timeline-item.wrong-order {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.06);
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #3a7be8;
+}
+
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  background: var(--surface2);
+}
+
+.btn-submit {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  font-size: 15px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Score summary */
+.score-summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  margin-top: 24px;
+}
+
+.score-big {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.score-label {
+  font-size: 14px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+.score-breakdown {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.breakdown-item {
+  padding: 8px 16px;
+  background: var(--surface2);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.breakdown-item .b-num {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.breakdown-item .b-label {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+/* Wrong answers review */
+.review-section {
+  margin-top: 24px;
+}
+
+.review-header {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.review-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.review-item .rev-q {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.review-item .rev-your {
+  color: var(--red);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.review-item .rev-correct {
+  color: var(--accent2);
+  font-size: 13px;
+}
+
+/* Text input for explain questions */
+.text-input {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Model answer */
+.model-answer {
+  margin-top: 12px;
+  padding: 14px;
+  background: rgba(16,185,129,0.06);
+  border-left: 3px solid var(--accent2);
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+  line-height: 1.7;
+  display: none;
+}
+
+.model-answer.show {
+  display: block;
+}
+
+.model-answer .ma-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 8px;
+}
+
+/* Navigation */
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Match pairs */
+.match-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.match-left, .match-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.match-item {
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface);
+}
+
+.match-item.selected {
+  border-color: var(--accent);
+  background: rgba(79,140,255,0.08);
+}
+
+.match-item.matched {
+  border-color: var(--accent2);
+  background: rgba(16,185,129,0.08);
+}
+
+.match-item.wrong-match {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.06);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .container { padding: 12px 12px 60px; }
+  .quiz-header h1 { font-size: 22px; }
+  .round-tabs { flex-wrap: wrap; }
+  .round-tab { flex: 1 1 45%; }
+  .score-big { font-size: 36px; }
+  .match-container { grid-template-columns: 1fr; }
+}
+
+/* Tooltip */
+.tooltip {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border-radius: 6px;
+  display: none;
+}
+
+.tooltip.show {
+  display: block;
+}
+
+/* Restart */
+.restart-btn {
+  display: block;
+  margin: 24px auto 0;
+}
+
+/* Reset state */
+.score-summary, .review-section { display: none; }
+.score-summary.show, .review-section.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="quiz-header">
+    <h1>The Cold War 1941–1991</h1>
+    <div class="subtitle">Edexcel GCSE History · Paper 2 (Period Study)</div>
+    <div class="exam-info">Superpower relations & the Cold War · 1941–91</div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-stats">
+      <span id="progress-text">Question 0 of 42</span>
+      <span id="progress-score">Score: 0/0</span>
+    </div>
+  </div>
+
+  <!-- Topic Tabs -->
+  <div class="topic-tabs" id="topic-tabs">
+    <div class="topic-tab active" data-topic="0">🌍 Topic 1: Origins of the Cold War (1941–58)</div>
+    <div class="topic-tab" data-topic="1">🚨 Topic 2: Cold War Crises (1958–70)</div>
+    <div class="topic-tab" data-topic="2">🏁 Topic 3: The End of the Cold War (1970–91)</div>
+  </div>
+
+  <!-- Round Tabs -->
+  <div class="round-tabs" id="round-tabs">
+    <div class="round-tab active" data-round="0">🔤 Key Terms</div>
+    <div class="round-tab" data-round="1">📅 Key Dates</div>
+    <div class="round-tab" data-round="2">🔍 Source Skills</div>
+    <div class="round-tab" data-round="3">💬 Explain Why</div>
+  </div>
+
+  <!-- Question Area -->
+  <div id="question-area"></div>
+
+  <!-- Score Summary (hidden until quiz complete) -->
+  <div class="score-summary" id="score-summary">
+    <div class="score-big" id="total-score">0%</div>
+    <div class="score-label">Overall Score</div>
+    <div class="score-breakdown" id="score-breakdown"></div>
+    <div class="review-section" id="review-section">
+      <div class="review-header">📝 Key Facts to Remember</div>
+      <div id="review-list"></div>
+    </div>
+    <button class="btn btn-primary restart-btn" onclick="restartQuiz()">🔄 Restart Quiz</button>
+  </div>
+
+</div>
+
+<script>
+// ── QUIZ DATA ──────────────────────────────────────────────────────
+
+const quizData = {
+  // TOPIC 1: Origins of the Cold War 1941–1958
+  0: {
+    name: "Origins of the Cold War 1941–1958",
+    rounds: {
+      // Round 0: Key Terms
+      0: [
+        {
+          type: "match",
+          question: "Match each key term to its correct definition",
+          pairs: [
+            { left: "Grand Alliance", right: "Wartime coalition of USA, USSR and Britain against Nazi Germany (1941–45)" },
+            { left: "Truman Doctrine", right: "1947 US policy pledging support to countries resisting communist takeover" },
+            { left: "Marshall Plan", right: "US economic aid programme ($13bn) to rebuild Western Europe after WWII" },
+            { left: "Containment", right: "US strategy to prevent the spread of communism beyond its existing borders" },
+            { left: "Warsaw Pact", right: "1955 military alliance of the USSR and its satellite states in Eastern Europe" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "What was agreed at the Yalta Conference (February 1945)?",
+          options: [
+            "Germany to be divided into four zones; free elections in liberated Europe; USSR to join war against Japan",
+            "Immediate nuclear disarmament; creation of the United Nations; division of Berlin",
+            "Germany to remain united; reparations of $20 billion to USSR; US loan to Stalin",
+            "All of Eastern Europe to become Soviet; the Allies agree to divide Japan"
+          ],
+          answer: 0,
+          explanation: "At Yalta (Feb 1945) the Big Three agreed: Germany would be divided into four occupation zones, liberated European countries would hold free elections, and the USSR would join the war against Japan 3 months after Germany's defeat."
+        },
+        {
+          type: "mcq",
+          question: "What did Churchill mean by the 'Iron Curtain' in his March 1946 speech?",
+          options: [
+            "The ideological and physical division of Europe between capitalist West and communist East",
+            "A proposed military defence line against Soviet invasion of Western Europe",
+            "The Soviet blockade preventing supplies reaching West Berlin",
+            "A secret network of Soviet spies operating in Britain and America"
+          ],
+          answer: 0,
+          explanation: "Churchill's 'Iron Curtain' speech in Fulton, Missouri (March 1946) described the division of Europe: 'From Stettin in the Baltic to Trieste in the Adriatic, an iron curtain has descended.' It symbolised the emerging Cold War divide."
+        },
+        {
+          type: "mcq",
+          question: "What was the Soviet response to the Marshall Plan?",
+          options: [
+            "Comecon (Council for Mutual Economic Assistance) and rejection of Marshall Aid for Eastern Europe",
+            "The Molotov Plan — a Soviet military alliance to rival NATO",
+            "Stalin immediately blockaded Berlin in retaliation",
+            "The USSR applied for Marshall Aid and was refused"
+          ],
+          answer: 0,
+          explanation: "Stalin refused Marshall Aid for Eastern Europe, calling it 'dollar imperialism'. He created Comecon in 1949 to coordinate the economies of Soviet satellite states and ensure they remained tied to the USSR."
+        }
+      ],
+      // Round 1: Key Dates
+      1: [
+        {
+          type: "timeline",
+          question: "Put these events in chronological order (earliest first):",
+          items: [
+            { text: "Yalta Conference", date: "Feb 1945" },
+            { text: "Potsdam Conference", date: "July–Aug 1945" },
+            { text: "Churchill's Iron Curtain speech", date: "March 1946" },
+            { text: "Truman Doctrine announced", date: "March 1947" },
+            { text: "Marshall Plan launched", date: "June 1947" }
+          ]
+        },
+        {
+          type: "timeline",
+          question: "Put these events in chronological order (earliest first):",
+          items: [
+            { text: "Berlin Blockade begins", date: "June 1948" },
+            { text: "NATO formed", date: "April 1949" },
+            { text: "USSR tests its first atomic bomb", date: "Aug 1949" },
+            { text: "Korean War begins", date: "June 1950" },
+            { text: "Warsaw Pact formed", date: "May 1955" },
+            { text: "Hungarian Uprising", date: "Oct–Nov 1956" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "When did the Berlin Blockade begin?",
+          options: ["June 1947", "June 1948", "May 1949", "August 1949"],
+          answer: 1,
+          explanation: "The Berlin Blockade began in June 1948 when Stalin cut off all road, rail and canal access to West Berlin. He hoped to force the Western Allies out of Berlin. The Allies responded with the Berlin Airlift, which lasted 11 months and ultimately forced Stalin to lift the blockade in May 1949."
+        },
+        {
+          type: "mcq",
+          question: "When was NATO founded?",
+          options: ["1945", "1947", "1949", "1955"],
+          answer: 2,
+          explanation: "NATO (North Atlantic Treaty Organisation) was founded in April 1949 by the USA, Canada, Britain, France and 8 other Western European nations. The key principle was Article 5: an attack on one member was an attack on all. NATO was a direct response to the perceived Soviet threat."
+        }
+      ],
+      // Round 2: Source Skills
+      2: [
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about the Truman Doctrine.",
+          source: "Source A: From President Truman's speech to Congress, March 1947. 'I believe that it must be the policy of the United States to support free peoples who are resisting attempted subjugation by armed minorities or by outside pressures. If we falter in our leadership, we may endanger the peace of the world.'",
+          modelPoints: [
+            "I can infer that Truman saw the Cold War as a global struggle — he frames US intervention as protecting 'free peoples' worldwide, not just a European concern.",
+            "I can infer that the Truman Doctrine was a declaration of US leadership — the phrase 'if we falter in our leadership' shows America claiming responsibility for global security against communism."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about reactions to the Hungarian Uprising.",
+          source: "Source B: From a British news broadcast, November 1956. 'For five desperate days, the Hungarian people fought Soviet tanks with molotov cocktails and bare hands. Radio Budapest broadcast an anguished plea: \"The Russians are attacking. Help us! Where is the UN? Where is the West?\" But no help came. The West watched as the revolution was crushed.'",
+          modelPoints: [
+            "I can infer that the West was unwilling to intervene militarily to help Hungary — despite vocal support for 'freedom', the USA and its allies stood by as Soviet tanks crushed the uprising.",
+            "I can infer that Hungarians expected Western help and felt betrayed — the broadcast's desperate calls show they believed the West's anti-communist rhetoric meant real military support would come."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about Soviet attitudes at Potsdam.",
+          source: "Source C: From a report by a British diplomat at the Potsdam Conference, July 1945. 'Stalin was in a far stronger position than at Yalta. The Red Army occupied most of Eastern Europe. When Truman mentioned the new American atomic bomb, Stalin showed no surprise — his spies had already informed him. He refused to budge on Poland, insisting the pro-Soviet Lublin government remain in power.'",
+          modelPoints: [
+            "I can infer that the balance of power had shifted in Stalin's favour — the Red Army's occupation of Eastern Europe gave him physical control that no conference could reverse.",
+            "I can infer that mistrust between the Allies was deepening — Stalin's use of spies to learn about the atomic bomb and his intransigence on Poland show the Grand Alliance was crumbling into suspicion and rivalry."
+          ]
+        }
+      ],
+      // Round 3: Explain Why
+      3: [
+        {
+          type: "explain",
+          question: "Explain why relations between the USA and USSR worsened in the years 1945–1947.",
+          marks: 12,
+          modelAnswer: "Relations deteriorated rapidly after WWII because the common enemy (Nazi Germany) that had held the Grand Alliance together was gone, exposing deep ideological differences. At the Potsdam Conference (July 1945), there was open disagreement. Truman was more suspicious of Stalin than Roosevelt had been, and news of the successful US atomic bomb test made Stalin fear American dominance. Stalin refused to allow free elections in Poland (despite the Yalta agreement), instead installing a pro-Soviet government.\n\nIn 1946, tensions were further inflamed by Stalin's actions in Eastern Europe. He imposed communist governments across Poland, Hungary, Romania, and Bulgaria — a 'buffer zone' of satellite states. Churchill's 'Iron Curtain' speech in March 1946 publicly condemned these actions, alarming Americans and reinforcing the sense of a divided Europe.\n\nThe key turning point was 1947. The British government announced it could no longer afford to support Greece against a communist insurgency. Truman responded with the Truman Doctrine (March 1947), committing the USA to 'contain' communism worldwide. This was followed by the Marshall Plan (June 1947), which offered massive economic aid to rebuild Europe. Stalin saw this as a direct threat — it would tie Western Europe to the USA and undermine Soviet influence. He forbade Eastern European states from accepting the aid. By 1947, the wartime alliance was completely dead, replaced by the hostility of the Cold War."
+        },
+        {
+          type: "explain",
+          question: "Explain why the Berlin Blockade of 1948–49 was a crisis for the Cold War.",
+          marks: 12,
+          modelAnswer: "The Berlin Blockade was the first major direct confrontation of the Cold War and brought the superpowers to the brink of conflict. Stalin's motive was to force the Western Allies out of Berlin. The Western powers had introduced a new currency (the Deutschmark) in their zones of Germany, which Stalin saw as a step towards a permanently divided Germany. West Berlin, deep inside the Soviet zone, was a 'capitalist island' that Stalin found unacceptable.\n\nThe USA and Britain responded not with military force (which risked WWIII) but with the Berlin Airlift. For 11 months, planes flew supplies — food, coal, and medicine — into West Berlin. At its peak, a plane landed every 30 seconds. The Airlift was a huge propaganda victory for the West, making Stalin look like the aggressor and demonstrating American commitment to protecting freedom.\n\nThe crisis had lasting consequences. It confirmed the division of Germany — in May 1949, the Western zones became the Federal Republic of Germany (West Germany), and in October the Soviet zone became the German Democratic Republic (East Germany). It also accelerated the formation of NATO (April 1949), as Western nations sought permanent military protection against the USSR. The Berlin Blockade transformed the Cold War from political rivalry into a military standoff with clear alliances."
+        },
+        {
+          type: "explain",
+          question: "Explain why the Hungarian Uprising of 1956 was important for the Cold War.",
+          marks: 12,
+          modelAnswer: "The Hungarian Uprising was significant because it exposed the brutal reality of Soviet control over Eastern Europe. In October 1956, Hungarians rose up against their Stalinist government. Khrushchev's recent 'Secret Speech' (February 1956), which had denounced Stalin's crimes, had raised hopes of reform. The new Hungarian leader Imre Nagy announced reforms including free elections and withdrawal from the Warsaw Pact.\n\nThe Soviet response was ruthless. On 4 November 1956, 200,000 Soviet troops and 4,000 tanks invaded Hungary. An estimated 20,000 Hungarians were killed and 200,000 fled as refugees. Nagy was arrested and later executed. The West's failure to intervene — despite years of rhetoric about 'rolling back' communism — revealed the limits of American power. Eisenhower was unwilling to risk nuclear war over Hungary, especially while also dealing with the Suez Crisis.\n\nFor the USSR, the crushing of the uprising sent a clear warning to other satellite states: reform would not be tolerated. It reinforced Soviet dominance of Eastern Europe for another three decades. For the West, it was a propaganda disaster that exposed the gap between their promises and their willingness to act. It also convinced many that 'peaceful coexistence' was the only realistic policy — direct confrontation inside the Soviet sphere was too dangerous."
+        }
+      ]
+    }
+  },
+
+  // TOPIC 2: Cold War Crises 1958–1970
+  1: {
+    name: "Cold War Crises 1958–1970",
+    rounds: {
+      0: [
+        {
+          type: "match",
+          question: "Match each key term to its correct definition",
+          pairs: [
+            { left: "Berlin Wall", right: "Barrier built in 1961 by East Germany to stop citizens fleeing to the West via Berlin" },
+            { left: "Bay of Pigs", right: "Failed 1961 CIA-backed invasion of Cuba by Cuban exiles to overthrow Castro" },
+            { left: "Quarantine", right: "Term used by Kennedy for the naval blockade of Cuba during the 1962 missile crisis" },
+            { left: "Hotline", right: "Direct communication link between Washington and Moscow established after the missile crisis" },
+            { left: "Brezhnev Doctrine", right: "1968 Soviet policy that the USSR had the right to intervene in any communist state threatened by counter-revolution" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "What was the main purpose of the Berlin Wall (built 1961)?",
+          options: [
+            "To stop East Germans fleeing to the West — the 'brain drain' of skilled workers",
+            "To prevent a Western military invasion of East Berlin",
+            "To create a physical barrier for collecting customs duties",
+            "To protect East Berlin from Western spies and saboteurs"
+          ],
+          answer: 0,
+          explanation: "By 1961, approximately 3 million East Germans had fled to West Berlin since 1949 — roughly 1,000 per day. This 'brain drain' of skilled workers was crippling the East German economy. The Wall was Khrushchev's solution to stop the flow, though it was officially called the 'Anti-Fascist Protection Rampart'."
+        },
+        {
+          type: "mcq",
+          question: "What was the Bay of Pigs invasion (April 1961)?",
+          options: [
+            "A CIA-trained force of 1,400 Cuban exiles landing in Cuba to overthrow Castro — a complete failure",
+            "A successful US Marine landing that briefly captured Havana before retreating",
+            "A Soviet naval operation to supply Cuba with missiles",
+            "A UN peacekeeping mission to mediate between Cuba and the USA"
+          ],
+          answer: 0,
+          explanation: "The Bay of Pigs was a humiliating failure for Kennedy. 1,400 CIA-trained Cuban exiles landed at the Bay of Pigs expecting popular support, but Castro's forces crushed them within 3 days. The disaster emboldened Khrushchev and contributed to his decision to place missiles in Cuba."
+        },
+        {
+          type: "mcq",
+          question: "What was the Brezhnev Doctrine (1968)?",
+          options: [
+            "The USSR had the right to invade any communist country where socialism was threatened",
+            "A Soviet economic plan to match US industrial output within 20 years",
+            "A proposal for nuclear disarmament presented at the UN by Brezhnev",
+            "The principle that Eastern European states could choose their own path to socialism"
+          ],
+          answer: 0,
+          explanation: "The Brezhnev Doctrine was announced after the invasion of Czechoslovakia (August 1968). It declared that the USSR would intervene in any Warsaw Pact country where 'socialism was threatened by counter-revolutionary forces'. It effectively killed hopes of reform in Eastern Europe until 1989."
+        }
+      ],
+      1: [
+        {
+          type: "timeline",
+          question: "Put these events in chronological order (earliest first):",
+          items: [
+            { text: "Berlin Wall constructed", date: "Aug 1961" },
+            { text: "Bay of Pigs invasion", date: "April 1961" },
+            { text: "Cuban Missile Crisis", date: "Oct 1962" },
+            { text: "Hotline established", date: "June 1963" },
+            { text: "Limited Test Ban Treaty", date: "Aug 1963" }
+          ]
+        },
+        {
+          type: "timeline",
+          question: "Put these events in chronological order (earliest first):",
+          items: [
+            { text: "Kennedy's 'Ich bin ein Berliner' speech", date: "June 1963" },
+            { text: "Khrushchev removed from power", date: "Oct 1964" },
+            { text: "Prague Spring begins under Dubček", date: "Jan 1968" },
+            { text: "Warsaw Pact invasion of Czechoslovakia", date: "Aug 1968" },
+            { text: "Brezhnev Doctrine announced", date: "Sept 1968" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "When did the Cuban Missile Crisis take place?",
+          options: ["October 1961", "October 1962", "November 1962", "October 1963"],
+          answer: 1,
+          explanation: "The Cuban Missile Crisis lasted 13 days (16–28 October 1962) after US spy planes discovered Soviet nuclear missile sites in Cuba. It was the closest the world came to nuclear war. Kennedy imposed a naval 'quarantine' and after tense negotiations, Khrushchev agreed to remove the missiles in return for a US promise not to invade Cuba and the secret removal of US missiles from Turkey."
+        },
+        {
+          type: "mcq",
+          question: "When did the Warsaw Pact invade Czechoslovakia to end the Prague Spring?",
+          options: ["January 1968", "June 1968", "August 1968", "October 1968"],
+          answer: 2,
+          explanation: "On 20–21 August 1968, 500,000 Warsaw Pact troops invaded Czechoslovakia. Alexander Dubček's reforms — including freedom of speech, press, and travel ('socialism with a human face') — were crushed. Dubček was arrested and later replaced by the hardline Gustáv Husák."
+        }
+      ],
+      2: [
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about Kennedy's approach to the Cuban Missile Crisis.",
+          source: "Source D: From Kennedy's TV address to the American people, 22 October 1962. 'It shall be the policy of this nation to regard any nuclear missile launched from Cuba against any nation in the Western Hemisphere as an attack by the Soviet Union on the United States, requiring a full retaliatory response upon the Soviet Union.'",
+          modelPoints: [
+            "I can infer that Kennedy was drawing a clear red line — he publicly committed to a full nuclear response if any missile was launched from Cuba, making the stakes absolutely clear to Khrushchev.",
+            "I can infer that Kennedy was using public pressure as a strategy — by addressing the American people directly on television, he was forcing Khrushchev to respond in full view of the world, making secret escalation harder."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about the Prague Spring reforms.",
+          source: "Source E: From Dubček's radio address to the Czechoslovak people, April 1968. 'We want to create socialism which has not lost its human face. We want freedom of speech, freedom of the press, and the right of citizens to travel abroad. This is not a threat to socialism — this is socialism renewed and democratised.'",
+          modelPoints: [
+            "I can infer that Dubček believed reform could happen WITHIN communism — he explicitly says 'socialism which has not lost its human face', showing he wanted to improve the system, not abandon it.",
+            "I can infer that the reforms were genuinely popular — Dubček's emphasis on freedoms (speech, press, travel) reveals that ordinary Czechoslovaks desired the same rights enjoyed in Western democracies."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about the impact of the Berlin Wall.",
+          source: "Source F: A photograph from August 1961 showing a crowd of West Berliners watching East German soldiers lay barbed wire and bricks across the Bernauer Strasse. In the foreground, a woman reaches her arms out towards a building on the other side where residents lean from upper windows, some throwing down belongings.",
+          modelPoints: [
+            "I can infer that the Wall caused immediate human tragedy — the woman reaching out suggests families were being physically separated, and people were throwing belongings from windows in desperate attempts to escape.",
+            "I can infer that the Wall was built with brutal speed and permanence — soldiers started with barbed wire (quick to deploy) then added bricks, showing the determination to make the division permanent and impossible to cross."
+          ]
+        }
+      ],
+      3: [
+        {
+          type: "explain",
+          question: "Explain why the Cuban Missile Crisis of 1962 did NOT lead to nuclear war.",
+          marks: 12,
+          modelAnswer: "Nuclear war was avoided because both Kennedy and Khrushchev ultimately prioritised de-escalation over confrontation. Kennedy resisted the 'hawks' in his administration (including his military chiefs) who urged an immediate airstrike on the missile sites. Instead, he chose a naval 'quarantine' — a carefully chosen word because a 'blockade' would be an act of war. This gave Khrushchev time to think rather than forcing immediate retaliation.\n\nKhrushchev, for his part, was horrified by the prospect of nuclear war. He wrote to Kennedy: 'If war breaks out, it will not be in our power to stop it.' The secret correspondence between the two leaders (the 'back channel') was crucial — both were willing to compromise. Khrushchev's first letter (26 October) offered to remove missiles in return for a US pledge not to invade Cuba. His second letter added the demand to remove US Jupiter missiles from Turkey.\n\nKennedy's handling of the crisis demonstrated skilful diplomacy. He publicly accepted the first offer and secretly agreed to remove the Turkish missiles (provided this remained confidential). This allowed Khrushchev to present the outcome as a victory: Cuba was protected from invasion, and Soviet prestige was maintained. Both leaders had looked into the nuclear abyss and pulled back. The crisis led directly to the Hotline agreement and the Limited Test Ban Treaty (1963), as both superpowers sought to avoid such a dangerous confrontation again."
+        },
+        {
+          type: "explain",
+          question: "Explain why the Prague Spring of 1968 was crushed by the Soviet Union.",
+          marks: 12,
+          modelAnswer: "The Prague Spring was crushed because Brezhnev feared that Dubček's reforms would spread across Eastern Europe and threaten the entire Soviet bloc. Dubček's 'socialism with a human face' included freedom of speech, press, and travel, plus economic reforms that loosened central control. To hardline communists like Brezhnev, this looked like the first steps towards abandoning communism entirely.\n\nThe timing was critical. Romania under Ceaușescu was already pursuing an independent foreign policy, and Tito's Yugoslavia had long been outside Soviet control. Brezhnev could not afford to lose Czechoslovakia — a nation geographically at the heart of Europe, bordering both West Germany and Austria. If Czechoslovakia broke away, the entire buffer zone of satellite states could unravel.\n\nBrezhnev attempted negotiation first, but when Dubček refused to abandon reforms, the military option was activated. On 20–21 August 1968, 500,000 Warsaw Pact troops invaded. The West again did nothing — President Johnson was tied down by Vietnam and unwilling to risk war. The Brezhnev Doctrine, announced afterwards, made clear that the USSR would never allow another state to leave the Soviet sphere."
+        },
+        {
+          type: "explain",
+          question: "Explain why the building of the Berlin Wall in 1961 was significant for Cold War relations.",
+          marks: 12,
+          modelAnswer: "The Berlin Wall symbolised the permanent division of Europe and the failure of diplomacy to resolve the German question. Khrushchev had issued an ultimatum in 1958 demanding that Western troops leave Berlin within six months, making it a 'free city'. Kennedy and Khrushchev met at the Vienna Summit (June 1961) but reached no agreement. Khrushchev concluded Kennedy was weak (especially after the Bay of Pigs) and decided to act unilaterally.\n\nThe Wall solved Khrushchev's immediate problem — the 'brain drain' of 3 million East Germans escaping to the West — without triggering war. Because the Wall was built on East German territory, it did not violate any formal agreement. The West could protest but had no legal grounds to intervene. This made it politically effective: Khrushchev achieved his goal while avoiding direct confrontation.\n\nHowever, the Wall became the ultimate symbol of communist oppression. Kennedy's 'Ich bin ein Berliner' speech (June 1963) turned it into a propaganda weapon for the West — contrasting free and prosperous West Berlin with the imprisoned East. The Wall stabilised the situation in Berlin (there were no further Berlin crises) at the cost of making the division of Germany a permanent reality for 28 years."
+        }
+      ]
+    }
+  },
+
+  // TOPIC 3: The End of the Cold War 1970–1991
+  2: {
+    name: "The End of the Cold War 1970–1991",
+    rounds: {
+      0: [
+        {
+          type: "match",
+          question: "Match each key term to its correct definition",
+          pairs: [
+            { left: "Détente", right: "Period of reduced tension and improved relations between the superpowers in the 1970s" },
+            { left: "SALT I", right: "1972 Strategic Arms Limitation Treaty — the first agreement limiting nuclear weapons" },
+            { left: "Perestroika", right: "Gorbachev's policy of economic restructuring and limited free-market reforms" },
+            { left: "Glasnost", right: "Gorbachev's policy of openness — increased freedom of speech, press, and political debate" },
+            { left: "Sinatra Doctrine", right: "Gorbachev's 1989 policy allowing Eastern European states to 'do it their way' without Soviet interference" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "What was SALT I (1972)?",
+          options: [
+            "An agreement between Nixon and Brezhnev limiting the number of anti-ballistic missiles and ICBMs",
+            "A Soviet-American trade agreement opening up markets between the two superpowers",
+            "A treaty banning all nuclear tests above ground",
+            "A security pact between the USSR and China"
+          ],
+          answer: 0,
+          explanation: "SALT I (Strategic Arms Limitation Treaty) was signed by Nixon and Brezhnev in Moscow (May 1972). It froze the number of intercontinental ballistic missiles (ICBMs) at existing levels and limited anti-ballistic missile (ABM) systems. It was the high point of détente."
+        },
+        {
+          type: "mcq",
+          question: "What was the significance of the Helsinki Accords (1975)?",
+          options: [
+            "35 nations agreed on European borders, security, and human rights — including the USSR accepting human rights commitments",
+            "The USA and USSR agreed to dismantle all intermediate-range nuclear missiles in Europe",
+            "NATO and the Warsaw Pact signed a non-aggression pact",
+            "The Soviet Union officially apologised for the invasion of Hungary and Czechoslovakia"
+          ],
+          answer: 0,
+          explanation: "The Helsinki Accords (1975) were a major achievement of détente. In 'Basket Three', the USSR agreed to respect human rights and fundamental freedoms. Dissidents in Eastern Europe used these commitments to demand reform, creating pressure the USSR had not anticipated."
+        },
+        {
+          type: "mcq",
+          question: "What was the 'Sinatra Doctrine' (1989)?",
+          options: [
+            "Gorbachev's policy of non-intervention — allowing Eastern European states to determine their own futures",
+            "A US policy of cultural exchange to promote Western music in the Soviet bloc",
+            "A NATO strategy to win the Cold War through economic pressure",
+            "The Soviet plan for rapid economic liberalisation named after the singer's 'My Way'"
+          ],
+          answer: 0,
+          explanation: "The Sinatra Doctrine was named after Frank Sinatra's song 'My Way' — meaning Eastern European countries could now 'do it their way'. This was a complete reversal of the Brezhnev Doctrine. It meant the USSR would not intervene when communist regimes fell across Eastern Europe in 1989."
+        }
+      ],
+      1: [
+        {
+          type: "timeline",
+          question: "Put these events in chronological order (earliest first):",
+          items: [
+            { text: "SALT I signed", date: "May 1972" },
+            { text: "Helsinki Accords", date: "Aug 1975" },
+            { text: "Soviet invasion of Afghanistan", date: "Dec 1979" },
+            { text: "Reagan announces SDI ('Star Wars')", date: "March 1983" },
+            { text: "Gorbachev becomes Soviet leader", date: "March 1985" }
+          ]
+        },
+        {
+          type: "timeline",
+          question: "Put these events in chronological order (earliest first):",
+          items: [
+            { text: "Gorbachev announces Perestroika & Glasnost", date: "1986–87" },
+            { text: "INF Treaty signed (eliminating intermediate nuclear forces)", date: "Dec 1987" },
+            { text: "Fall of the Berlin Wall", date: "Nov 1989" },
+            { text: "Germany reunified", date: "Oct 1990" },
+            { text: "Collapse of the USSR / Gorbachev resigns", date: "Dec 1991" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "When did the Soviet Union invade Afghanistan?",
+          options: ["1975", "1978", "1979", "1981"],
+          answer: 2,
+          explanation: "The Soviet Union invaded Afghanistan in December 1979 to prop up the communist government. This ended détente — the USA saw it as an expansionist move towards the Persian Gulf oil fields. The USA armed the Afghan Mujahideen, and the war became the USSR's 'Vietnam', lasting 10 years."
+        },
+        {
+          type: "mcq",
+          question: "When did the Berlin Wall fall?",
+          options: ["8 November 1989", "9 November 1989", "3 October 1990", "25 December 1991"],
+          answer: 1,
+          explanation: "The Berlin Wall fell on 9 November 1989 after an East German official mistakenly announced that travel restrictions were lifted 'immediately'. Thousands flocked to the checkpoints, and guards opened the gates. It was the defining symbol of the end of the Cold War."
+        }
+      ],
+      2: [
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about Reagan's attitude to the USSR.",
+          source: "Source G: From Reagan's speech to the British Parliament, June 1982. 'In an ironic sense, Karl Marx was right. We are witnessing today a great revolutionary crisis — a crisis where the demands of the economic order are conflicting directly with those of the political order. But the crisis is happening not in the free, non-Marxist West, but in the home of Marxism-Leninism, the Soviet Union. The march of freedom and democracy will leave Marxism-Leninism on the ash heap of history.'",
+          modelPoints: [
+            "I can infer that Reagan was on the ideological offensive — he turned Marxist theory against the USSR, arguing that the inevitable crisis Marx predicted for capitalism was actually happening under communism.",
+            "I can infer that Reagan believed communism would collapse from within — his prediction that it would end up 'on the ash heap of history' shows he saw the Cold War as a contest the West was destined to win through the superiority of its system."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about the impact of the Afghan War on the USSR.",
+          source: "Source H: From a Soviet veteran's letter home from Afghanistan, 1986. 'We were told we were helping our socialist brothers. Instead we fight ghosts. The mountains hide enemies who vanish after every attack. I have seen boys my age come home in coffins. For what? The people here do not want us. We are not liberators — we are occupiers.'",
+          modelPoints: [
+            "I can infer that the Afghan War was deeply demoralising for Soviet soldiers — the veteran describes fighting 'ghosts' and questions the purpose of the war, showing the collapse of morale that contributed to the USSR's withdrawal.",
+            "I can infer that Soviet propaganda about the war was false — he was told they were 'helping socialist brothers' but found the Afghan people rejected them as 'occupiers', reflecting the gap between official narrative and reality enabled by Glasnost."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about Gorbachev's reforms.",
+          source: "Source I: From a speech by a Communist Party hardliner, 1990. 'Comrade Gorbachev's perestroika was meant to strengthen socialism. Instead it has unleashed chaos. Nationalist movements tear at the Union. The economy is in freefall. We warned him that glasnost would become a weapon for our enemies — and we were right. The Soviet Union is disintegrating before our eyes.'",
+          modelPoints: [
+            "I can infer that Gorbachev's reforms spiralled beyond his control — the hardliner admits perestroika 'was meant to strengthen socialism' but instead caused 'chaos', showing the reforms had unintended consequences.",
+            "I can infer that glasnost unleashed forces that could not be contained — nationalist movements mentioned here led directly to the breakup of the USSR in 1991, as republics used their new freedom to demand independence."
+          ]
+        }
+      ],
+      3: [
+        {
+          type: "explain",
+          question: "Explain why détente ended in 1979.",
+          marks: 12,
+          modelAnswer: "Détente collapsed primarily because the underlying mistrust between the superpowers had never truly disappeared. The Soviet invasion of Afghanistan in December 1979 was the immediate trigger. The USA saw this as Soviet expansionism towards the Persian Gulf and its vital oil supplies. President Carter withdrew SALT II from the Senate, imposed a grain embargo on the USSR, and announced the Carter Doctrine — that any outside attempt to control the Persian Gulf would be met with military force.\n\nHowever, tensions had been building throughout the late 1970s. The Helsinki Accords (1975) had raised expectations of improved human rights, but Soviet treatment of dissidents continued — figures like Andrei Sakharov were harassed and exiled. The USSR's deployment of SS-20 intermediate-range nuclear missiles in Eastern Europe from 1977 alarmed NATO and prompted NATO's 'twin-track' decision (1979) to deploy US Pershing II and cruise missiles while negotiating.\n\nThe USA also bolted from détente under Reagan (1981). He called the USSR the 'evil empire', massively increased defence spending (by 13% in 1983), and announced the Strategic Defense Initiative (SDI or 'Star Wars') in 1983 — a missile defence shield that threatened to make Soviet nuclear weapons obsolete. This escalated the arms race and the Cold War entered its most dangerous phase since the Cuban Missile Crisis."
+        },
+        {
+          type: "explain",
+          question: "Explain why the Soviet Union collapsed in 1991.",
+          marks: 12,
+          modelAnswer: "The USSR collapsed due to a combination of internal weaknesses and the unintended consequences of Gorbachev's reforms. Economically, the Soviet system was failing by the 1980s. Central planning could not keep up with the technological revolution in the West. The arms race with Reagan's USA — including SDI — was bankrupting the Soviet economy. The Afghan War (1979–89) cost billions and killed 15,000 Soviet soldiers with nothing to show for it.\n\nGorbachev's reforms accelerated the collapse. Perestroika (economic restructuring) failed to revive the economy and instead caused shortages and chaos. Glasnost (openness) allowed citizens to criticise the government for the first time, exposing the corruption and failures the regime had hidden for decades. Crucially, Gorbachev also abandoned the Brezhnev Doctrine. His 'Sinatra Doctrine' meant the USSR would not use force to keep Eastern Europe communist. In 1989, communist regimes fell across Eastern Europe — Poland, Hungary, East Germany, Czechoslovakia, Romania, Bulgaria — without Soviet intervention.\n\nThe final blow came from within the USSR itself. Glasnost unleashed nationalist movements in the Soviet republics: Lithuania declared independence in March 1990, followed by other Baltic states, Ukraine, and the Caucasus republics. In August 1991, a coup by communist hardliners against Gorbachev failed because of popular resistance led by Boris Yeltsin, but it fatally weakened Gorbachev's authority. On 25 December 1991, Gorbachev resigned as Soviet President and the USSR was formally dissolved the next day."
+        },
+        {
+          type: "explain",
+          question: "Explain why Reagan and Gorbachev were able to improve superpower relations in the years 1985–1989.",
+          marks: 12,
+          modelAnswer: "The improvement in relations was driven by Gorbachev's recognition that the USSR could not sustain the Cold War. He inherited a stagnating economy, an unwinnable war in Afghanistan, and the burden of the arms race against a resurgent America. Gorbachev's 'new thinking' in foreign policy accepted that Soviet security depended on cooperation with the West, not confrontation. He was willing to make genuine concessions that his predecessors would never have considered.\n\nReagan, despite his earlier hardline rhetoric ('evil empire'), proved willing to negotiate when he met a Soviet leader who was serious about reform. The key moment was the Reykjavik Summit (October 1986). Though it collapsed over Reagan's refusal to abandon SDI, it showed how close the two sides were to abolishing nuclear weapons entirely. The trust built at Reykjavik laid the groundwork for the INF Treaty (1987), which eliminated an entire class of nuclear weapons — intermediate-range missiles from Europe.\n\nGorbachev's willingness to withdraw from Afghanistan (completed 1989) and his announcement of unilateral conventional force reductions in Eastern Europe demonstrated that 'new thinking' was real, not propaganda. Crucially, he allowed Eastern Europe to go its own way — the 'Sinatra Doctrine'. When communist regimes fell across Eastern Europe in 1989, the USSR did nothing. This confirmed to the West that the Cold War was genuinely ending, not just entering another temporary thaw."
+        }
+      ]
+    }
+  }
+};
+
+// ── STATE ──────────────────────────────────────────────────────────
+let state = {
+  currentTopic: 0,
+  currentRound: 0,
+  currentQuestion: 0,
+  score: 0,
+  totalAnswered: 0,
+  answers: {},       // topic -> round -> question -> answer
+  completed: {},     // topic -> round -> bool
+  timelineState: null, // for drag-and-drop timeline
+  matchState: null,    // for match pairs
+  selectedMatch: null
+};
+
+// ── INIT ───────────────────────────────────────────────────────────
+function init() {
+  renderQuestion();
+  updateProgress();
+}
+
+// ── TOPIC / ROUND SWITCHING ────────────────────────────────────────
+document.getElementById('topic-tabs').addEventListener('click', function(e) {
+  const tab = e.target.closest('.topic-tab');
+  if (!tab) return;
+  state.currentTopic = parseInt(tab.dataset.topic);
+  state.currentRound = 0;
+  state.currentQuestion = 0;
+  updateTabs();
+  renderQuestion();
+  updateProgress();
+});
+
+document.getElementById('round-tabs').addEventListener('click', function(e) {
+  const tab = e.target.closest('.round-tab');
+  if (!tab) return;
+  state.currentRound = parseInt(tab.dataset.round);
+  state.currentQuestion = 0;
+  updateTabs();
+  renderQuestion();
+  updateProgress();
+});
+
+function updateTabs() {
+  // Topic tabs
+  document.querySelectorAll('.topic-tab').forEach(t => {
+    t.classList.remove('active', 'done');
+    const tid = parseInt(t.dataset.topic);
+    if (tid === state.currentTopic) t.classList.add('active');
+    else if (allRoundsDone(tid)) t.classList.add('done');
+  });
+  
+  // Round tabs
+  document.querySelectorAll('.round-tab').forEach(r => {
+    r.classList.remove('active', 'done');
+    const rid = parseInt(r.dataset.round);
+    if (rid === state.currentRound) r.classList.add('active');
+    else if (state.completed[state.currentTopic]?.[rid]) r.classList.add('done');
+  });
+}
+
+function allRoundsDone(topicId) {
+  return [0,1,2,3].every(r => state.completed[topicId]?.[r]);
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────
+function nextQuestion() {
+  const questions = getCurrentQuestions();
+  if (state.currentQuestion < questions.length - 1) {
+    state.currentQuestion++;
+    renderQuestion();
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    // Round complete
+    if (!state.completed[state.currentTopic]) state.completed[state.currentTopic] = {};
+    state.completed[state.currentTopic][state.currentRound] = true;
+    updateTabs();
+    updateProgress();
+    checkQuizComplete();
+    
+    // Move to next round or topic
+    if (state.currentRound < 3) {
+      state.currentRound++;
+      state.currentQuestion = 0;
+      updateTabs();
+      renderQuestion();
+    } else {
+      // All rounds done for this topic
+      showTopicComplete();
+    }
+  }
+}
+
+function getCurrentQuestions() {
+  return quizData[state.currentTopic].rounds[state.currentRound];
+}
+
+// ── RENDER QUESTION ────────────────────────────────────────────────
+function renderQuestion() {
+  const questions = getCurrentQuestions();
+  const q = questions[state.currentQuestion];
+  const area = document.getElementById('question-area');
+  
+  let html = '';
+  html += `<div class="question-card">`;
+  html += `<div class="question-num">${getRoundName(state.currentRound)} · ${quizData[state.currentTopic].name}</div>`;
+  html += `<div class="question-text">${q.question}</div>`;
+  
+  if (q.hint) html += `<div class="question-hint">${q.hint}</div>`;
+  
+  if (q.type === 'mcq') {
+    html += renderMCQ(q);
+  } else if (q.type === 'timeline') {
+    html += renderTimeline(q);
+  } else if (q.type === 'match') {
+    html += renderMatch(q);
+  } else if (q.type === 'source-infer') {
+    html += renderSourceInfer(q);
+  } else if (q.type === 'explain') {
+    html += renderExplain(q);
+  }
+  
+  html += `</div>`;
+  area.innerHTML = html;
+  
+  // Re-bind event listeners
+  if (q.type === 'timeline') setupTimelineDrag();
+  if (q.type === 'match') setupMatchClicks();
+  
+  // Hide score summary
+  document.getElementById('score-summary').classList.remove('show');
+}
+
+function getRoundName(round) {
+  return ['Key Terms', 'Key Dates', 'Source Skills', 'Explain Why'][round];
+}
+
+// ── MCQ ────────────────────────────────────────────────────────────
+function renderMCQ(q) {
+  let html = '<div class="options">';
+  q.options.forEach((opt, i) => {
+    html += `<div class="option" onclick="selectMCQ(this, ${i})" data-idx="${i}">${opt}</div>`;
+  });
+  html += '</div>';
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+function selectMCQ(el, idx) {
+  const q = getCurrentQuestions()[state.currentQuestion];
+  const correct = idx === q.answer;
+  
+  // Disable all options
+  document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+  
+  const fb = document.getElementById('fb');
+  
+  if (correct) {
+    el.classList.add('correct');
+    el.querySelector('.marker') || (el.innerHTML += ' <span class="marker">✅</span>');
+    fb.className = 'feedback correct-fb show';
+    fb.innerHTML = `<div class="feedback-label">✅ Correct!</div>${q.explanation}`;
+    state.score++;
+  } else {
+    el.classList.add('wrong');
+    el.querySelector('.marker') || (el.innerHTML += ' <span class="marker">❌</span>');
+    document.querySelector(`.option[data-idx="${q.answer}"]`).classList.add('correct');
+    fb.className = 'feedback wrong-fb show';
+    fb.innerHTML = `<div class="feedback-label">❌ Not quite</div>${q.explanation}`;
+  }
+  
+  state.totalAnswered++;
+  updateProgress();
+  
+  // Add next button
+  fb.innerHTML += `<br><br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── TIMELINE ───────────────────────────────────────────────────────
+function renderTimeline(q) {
+  // Shuffle items
+  const shuffled = [...q.items].sort(() => Math.random() - 0.5);
+  
+  let html = '<div class="timeline-items" id="timeline-container">';
+  shuffled.forEach((item, i) => {
+    html += `<div class="timeline-item" draggable="true" data-index="${i}" data-real="${q.items.indexOf(item)}">${item.text}</div>`;
+  });
+  html += '</div>';
+  html += `<button class="btn btn-primary btn-submit" onclick="checkTimeline()">✓ Check Order</button>`;
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+let draggedItem = null;
+
+function setupTimelineDrag() {
+  const items = document.querySelectorAll('.timeline-item');
+  items.forEach(item => {
+    item.addEventListener('dragstart', function(e) {
+      draggedItem = this;
+      this.style.opacity = '0.5';
+    });
+    item.addEventListener('dragend', function(e) {
+      this.style.opacity = '1';
+      draggedItem = null;
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+    });
+    item.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (draggedItem !== this) {
+        const container = document.getElementById('timeline-container');
+        const items = [...container.children];
+        const fromIdx = items.indexOf(draggedItem);
+        const toIdx = items.indexOf(this);
+        if (fromIdx < toIdx) {
+          container.insertBefore(draggedItem, this.nextSibling);
+        } else {
+          container.insertBefore(draggedItem, this);
+        }
+      }
+    });
+  });
+}
+
+function checkTimeline() {
+  const container = document.getElementById('timeline-container');
+  const items = [...container.children];
+  const q = getCurrentQuestions()[state.currentQuestion];
+  
+  let allCorrect = true;
+  items.forEach((item, i) => {
+    const realIdx = parseInt(item.dataset.real);
+    if (realIdx === i) {
+      item.classList.add('correct-order');
+      item.innerHTML += ' ✅';
+    } else {
+      item.classList.add('wrong-order');
+      item.innerHTML += ' ❌';
+      allCorrect = false;
+    }
+  });
+  
+  // Disable drag
+  items.forEach(i => i.setAttribute('draggable', 'false'));
+  document.querySelector('.btn-submit').style.display = 'none';
+  
+  const fb = document.getElementById('fb');
+  if (allCorrect) {
+    fb.className = 'feedback correct-fb show';
+    fb.innerHTML = `<div class="feedback-label">✅ Perfect!</div>Correct order: ${q.items.map(i => `${i.text} (${i.date})`).join(' → ')}`;
+    state.score++;
+  } else {
+    fb.className = 'feedback wrong-fb show';
+    fb.innerHTML = `<div class="feedback-label">❌ Not quite</div>Correct order: ${q.items.map(i => `<strong>${i.text}</strong> <em>(${i.date})</em>`).join(' → ')}`;
+  }
+  
+  state.totalAnswered++;
+  updateProgress();
+  fb.innerHTML += `<br><br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── MATCH ──────────────────────────────────────────────────────────
+function renderMatch(q) {
+  // Shuffle both sides independently
+  const leftItems = [...q.pairs].sort(() => Math.random() - 0.5);
+  const rightItems = [...q.pairs].map((p, i) => ({ text: p.right, pairIdx: q.pairs.indexOf(p) })).sort(() => Math.random() - 0.5);
+  
+  state.matchState = { pairs: q.pairs, leftItems, rightItems, matches: {} };
+  
+  let html = '<div class="match-container">';
+  html += '<div class="match-left" id="match-left">';
+  leftItems.forEach((p, i) => {
+    html += `<div class="match-item" data-side="left" data-idx="${i}" data-pair="${q.pairs.indexOf(p)}">${p.left}</div>`;
+  });
+  html += '</div>';
+  html += '<div class="match-right" id="match-right">';
+  rightItems.forEach((p, i) => {
+    html += `<div class="match-item" data-side="right" data-idx="${i}" data-pair="${p.pairIdx}">${p.text}</div>`;
+  });
+  html += '</div>';
+  html += '</div>';
+  html += `<button class="btn btn-primary btn-submit" id="btn-check-match" onclick="checkMatch()">✓ Check All Matches</button>`;
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+function setupMatchClicks() {
+  document.querySelectorAll('.match-item').forEach(item => {
+    item.addEventListener('click', function() {
+      if (this.classList.contains('matched')) return;
+      
+      const side = this.dataset.side;
+      const idx = parseInt(this.dataset.idx);
+      const pair = parseInt(this.dataset.pair);
+      
+      if (state.matchState.selectedMatch && state.matchState.selectedMatch.side === side) {
+        // Deselect same-side
+        document.querySelector(`.match-item[data-side="${side}"][data-idx="${state.matchState.selectedMatch.idx}"]`).classList.remove('selected');
+        state.matchState.selectedMatch = null;
+        return;
+      }
+      
+      if (state.matchState.selectedMatch && state.matchState.selectedMatch.side !== side) {
+        // Match!
+        const otherPair = state.matchState.selectedMatch.pair;
+        if (pair === otherPair) {
+          // Correct match
+          this.classList.add('matched');
+          document.querySelector(`.match-item[data-side="${state.matchState.selectedMatch.side}"][data-idx="${state.matchState.selectedMatch.idx}"]`).classList.add('matched');
+          document.querySelector(`.match-item[data-side="${state.matchState.selectedMatch.side}"][data-idx="${state.matchState.selectedMatch.idx}"]`).classList.remove('selected');
+          this.classList.remove('selected');
+          state.matchState.selectedMatch = null;
+        } else {
+          // Wrong - flash
+          this.classList.add('wrong-match');
+          setTimeout(() => this.classList.remove('wrong-match'), 600);
+          const otherEl = document.querySelector(`.match-item[data-side="${state.matchState.selectedMatch.side}"][data-idx="${state.matchState.selectedMatch.idx}"]`);
+          otherEl.classList.remove('selected');
+          state.matchState.selectedMatch = null;
+        }
+        return;
+      }
+      
+      // Select this item
+      document.querySelectorAll('.match-item.selected').forEach(el => el.classList.remove('selected'));
+      this.classList.add('selected');
+      state.matchState.selectedMatch = { side, idx, pair };
+    });
+  });
+}
+
+function checkMatch() {
+  const q = getCurrentQuestions()[state.currentQuestion];
+  const matchedLeft = document.querySelectorAll('.match-left .match-item.matched').length;
+  const totalPairs = q.pairs.length;
+  const allMatched = matchedLeft === totalPairs;
+  
+  const fb = document.getElementById('fb');
+  document.getElementById('btn-check-match').style.display = 'none';
+  
+  if (allMatched) {
+    fb.className = 'feedback correct-fb show';
+    fb.innerHTML = `<div class="feedback-label">✅ All correct!</div>`;
+    state.score++;
+  } else {
+    fb.className = 'feedback wrong-fb show';
+    fb.innerHTML = `<div class="feedback-label">❌ ${totalPairs - matchedLeft} pair(s) unmatched</div>Correct answers:<br>`;
+    q.pairs.forEach(p => {
+      fb.innerHTML += `<strong>${p.left}</strong> → ${p.right}<br>`;
+    });
+  }
+  
+  state.totalAnswered++;
+  updateProgress();
+  fb.innerHTML += `<br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── SOURCE INFERENCE ───────────────────────────────────────────────
+function renderSourceInfer(q) {
+  let html = '';
+  html += `<div class="source-box"><span class="src-label">📄 SOURCE</span>${q.source}</div>`;
+  html += '<div class="question-hint">Type two inferences below. Use the format: "I can infer that... because the source shows..."</div>';
+  html += `<textarea class="text-input" id="source-input" placeholder="Inference 1: I can infer that...&#10;&#10;Inference 2: I can infer that..."></textarea>`;
+  html += `<button class="btn btn-primary btn-submit" onclick="checkSourceInfer()">✓ Reveal Model Answer</button>`;
+  html += `<div class="model-answer" id="model-ans"><div class="ma-label">📝 Model Answer</div>${q.modelPoints.map(p => `<p style="margin-bottom:8px">${p}</p>`).join('')}</div>`;
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+function checkSourceInfer() {
+  document.getElementById('model-ans').classList.add('show');
+  document.querySelector('.btn-submit').style.display = 'none';
+  
+  // Self-assessment buttons
+  const fb = document.getElementById('fb');
+  const userInput = document.getElementById('source-input').value.trim();
+  const hasContent = userInput.length > 20;
+  
+  fb.className = 'feedback correct-fb show';
+  fb.innerHTML = `<div class="feedback-label">Compare Your Answer</div>`;
+  if (hasContent) {
+    fb.innerHTML += `<p style="font-size:13px;color:var(--text2);margin-bottom:12px">You wrote ${userInput.split(' ').length} words. Compare your points with the model answer above.</p>`;
+  }
+  fb.innerHTML += `
+    <button class="btn btn-primary" style="margin:6px 6px 0 0" onclick="selfAssess(true)">✅ I matched both points</button>
+    <button class="btn btn-secondary" style="margin:6px 6px 0 0" onclick="selfAssess(false)">⚠️ I missed some points</button>
+  `;
+}
+
+function selfAssess(correct) {
+  if (correct) state.score++;
+  state.totalAnswered++;
+  updateProgress();
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback ' + (correct ? 'correct-fb' : 'wrong-fb') + ' show';
+  fb.innerHTML = (correct 
+    ? '<div class="feedback-label">✅ Great! Self-assessment recorded.</div>'
+    : '<div class="feedback-label">⚠️ Noted. Review the model answer carefully — source skills improve with practice!</div>'
+  );
+  fb.innerHTML += `<br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── EXPLAIN ────────────────────────────────────────────────────────
+function renderExplain(q) {
+  let html = '';
+  html += `<div class="question-hint">${q.marks}-mark question. Write your answer in paragraphs, then compare with the model answer.</div>`;
+  html += `<textarea class="text-input" id="explain-input" style="min-height:150px" placeholder="Write your answer here..."></textarea>`;
+  html += `<button class="btn btn-primary btn-submit" onclick="checkExplain()">✓ Reveal Model Answer</button>`;
+  html += `<div class="model-answer" id="model-ans"><div class="ma-label">📝 Model Answer (${q.marks} marks)</div>${q.modelAnswer.replace(/\n\n/g, '</p><p style="margin-bottom:10px">').replace(/\n/g, '<br>')}</div>`;
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+function checkExplain() {
+  document.getElementById('model-ans').classList.add('show');
+  document.querySelector('.btn-submit').style.display = 'none';
+  
+  const q = getCurrentQuestions()[state.currentQuestion];
+  const userInput = document.getElementById('explain-input').value.trim();
+  const wordCount = userInput.split(/\s+/).filter(w => w.length > 0).length;
+  
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback correct-fb show';
+  fb.innerHTML = `<div class="feedback-label">Self-Assessment</div>`;
+  fb.innerHTML += `<p style="font-size:13px;color:var(--text2);margin-bottom:8px">You wrote ${wordCount} words. For a ${q.marks}-mark question, aim for 3 well-developed paragraphs.</p>`;
+  fb.innerHTML += `<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Compare your answer with the model: did you include specific facts, dates, and names? Did you explain WHY (not just describe)?</p>`;
+  fb.innerHTML += `
+    <button class="btn btn-primary" style="margin:6px 6px 0 0" onclick="explainSelfAssess(3)">🥇 Strong (3 paragraphs, specific facts)</button>
+    <button class="btn btn-secondary" style="margin:6px 6px 0 0" onclick="explainSelfAssess(2)">🥈 Okay (some points, could improve)</button>
+    <button class="btn btn-secondary" style="margin:6px 6px 0 0" onclick="explainSelfAssess(1)">🥉 Needs work (few specific facts)</button>
+  `;
+}
+
+function explainSelfAssess(level) {
+  if (level >= 2) state.score++;
+  state.totalAnswered++;
+  updateProgress();
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback ' + (level >= 2 ? 'correct-fb' : 'wrong-fb') + ' show';
+  if (level === 3) {
+    fb.innerHTML = '<div class="feedback-label">🥇 Excellent! Strong analysis with specific evidence.</div>';
+  } else if (level === 2) {
+    fb.innerHTML = '<div class="feedback-label">🥈 Good effort. Review the model answer to see what specific facts you could add next time.</div>';
+  } else {
+    fb.innerHTML = '<div class="feedback-label">🥉 Keep practicing! Explain questions need specific dates, names, and facts — not just general statements.</div>';
+  }
+  fb.innerHTML += `<p style="font-size:12px;color:var(--text2);margin-top:8px">Key exam tip: Edexcel markers look for <strong>own knowledge</strong> beyond the stimulus points.</p>`;
+  fb.innerHTML += `<br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── PROGRESS ───────────────────────────────────────────────────────
+function updateProgress() {
+  const totalQuestions = 42; // Total across all topics/rounds
+  const answered = state.totalAnswered;
+  const pct = Math.min(100, Math.round((answered / totalQuestions) * 100));
+  
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `Question ${answered} completed`;
+  document.getElementById('progress-score').textContent = `Score: ${state.score}/${answered || 1} (${answered ? Math.round(state.score/answered*100) : 0}%)`;
+}
+
+// ── QUIZ COMPLETE ──────────────────────────────────────────────────
+function checkQuizComplete() {
+  const allDone = [0,1,2].every(t => allRoundsDone(t));
+  if (allDone || state.totalAnswered >= 38) {
+    showFinalScore();
+  }
+}
+
+function showTopicComplete() {
+  document.getElementById('question-area').innerHTML = `
+    <div class="question-card" style="text-align:center; padding:40px">
+      <div style="font-size:48px; margin-bottom:16px">🎉</div>
+      <div style="font-size:18px; font-weight:700; margin-bottom:8px">Topic ${state.currentTopic + 1} Complete!</div>
+      <div style="color:var(--text2); margin-bottom:20px">${quizData[state.currentTopic].name}</div>
+      <button class="btn btn-primary" onclick="moveToNextTopic()">Next Topic →</button>
+    </div>
+  `;
+  updateTabs();
+  updateProgress();
+  checkQuizComplete();
+}
+
+function moveToNextTopic() {
+  if (state.currentTopic < 2) {
+    state.currentTopic++;
+    state.currentRound = 0;
+    state.currentQuestion = 0;
+    updateTabs();
+    renderQuestion();
+    updateProgress();
+  } else {
+    showFinalScore();
+  }
+}
+
+function showFinalScore() {
+  const total = state.totalAnswered;
+  const pct = total > 0 ? Math.round(state.score / total * 100) : 0;
+  
+  document.getElementById('total-score').textContent = pct + '%';
+  document.getElementById('score-summary').classList.add('show');
+  document.getElementById('question-area').innerHTML = '';
+  
+  // Per-topic breakdown
+  let breakdownHtml = '';
+  [0,1,2].forEach(t => {
+    const done = allRoundsDone(t);
+    breakdownHtml += `
+      <div class="breakdown-item">
+        <div class="b-num">${done ? '✅' : '⬜'}</div>
+        <div class="b-label">${quizData[t].name.split(' ').slice(0,3).join(' ')}</div>
+      </div>
+    `;
+  });
+  
+  let grade = '';
+  if (pct >= 90) grade = 'Grade 9 — Outstanding';
+  else if (pct >= 80) grade = 'Grade 8 — Excellent';
+  else if (pct >= 70) grade = 'Grade 7 — Strong';
+  else if (pct >= 60) grade = 'Grade 6 — Good';
+  else if (pct >= 50) grade = 'Grade 5 — Solid';
+  else grade = 'Keep Practicing';
+  
+  document.getElementById('score-breakdown').innerHTML = breakdownHtml;
+  
+  // Review list
+  let reviewHtml = '';
+  const tips = [
+    'The Grand Alliance of WWII was ALWAYS temporary — the common enemy (Nazi Germany) held it together, not shared values.',
+    'The Truman Doctrine and Marshall Plan were COMPLEMENTARY — one was military/political (containment), the other economic (rebuilding).',
+    'The Berlin Blockade was Stalin\'s attempt to force the West out of Berlin. The Airlift was the peaceful but determined Western response.',
+    'NATO (1949) and Warsaw Pact (1955) formalised the division of Europe into opposing military blocs. Article 5 vs Brezhnev Doctrine.',
+    'The Hungarian Uprising (1956) showed the West would NOT intervene militarily behind the Iron Curtain despite \'rollback\' rhetoric.',
+    'Khrushchev\'s Berlin Ultimatum (1958) and the Berlin Wall (1961) — the Wall solved the \'brain drain\' crisis without triggering war.',
+    'The Cuban Missile Crisis (1962) was 13 days — the closest the world came to nuclear war. Both leaders pulled back from the brink.',
+    'The Brezhnev Doctrine (1968) meant the USSR would use force to keep communist states in its orbit. The Sinatra Doctrine (1989) reversed this.',
+    'Détente (1970s) was built on MAD — Mutually Assured Destruction. Both sides knew nuclear war was unwinnable.',
+    'The Soviet invasion of Afghanistan (1979) ended détente. It became the USSR\'s \'Vietnam\' — 10 years, billions of dollars, 15,000 dead.',
+    'Reagan\'s SDI (\'Star Wars\') threatened to make Soviet nuclear weapons obsolete. Gorbachev knew the USSR couldn\'t match the spending.',
+    'Gorbachev\'s reforms (Perestroika + Glasnost) were meant to SAVE communism — instead they accelerated its collapse.',
+    'The fall of the Berlin Wall (9 Nov 1989) was accidental — an East German official misspoke at a press conference about travel rules.',
+    'The USSR collapsed from within — nationalist movements in the republics (Lithuania, Ukraine, etc.) were unleashed by Glasnost.',
+    'For Paper 2, always consider BOTH sides: US actions AND Soviet actions. The Cold War was never just one side\'s fault.'
+  ];
+  
+  const shuffledTips = tips.sort(() => Math.random() - 0.5).slice(0, 6);
+  reviewHtml = '<div style="text-align:left;margin-top:12px">';
+  reviewHtml += '<div style="font-weight:700;margin-bottom:12px;color:var(--orange)">⚠️ Key Facts to Remember:</div>';
+  shuffledTips.forEach(tip => {
+    reviewHtml += `<div class="review-item"><div class="rev-correct" style="color:var(--text)">💡 ${tip}</div></div>`;
+  });
+  reviewHtml += '</div>';
+  
+  document.getElementById('review-list').innerHTML = reviewHtml;
+  document.getElementById('review-section').classList.add('show');
+  
+  updateTabs();
+}
+
+// ── RESTART ────────────────────────────────────────────────────────
+function restartQuiz() {
+  state = {
+    currentTopic: 0,
+    currentRound: 0,
+    currentQuestion: 0,
+    score: 0,
+    totalAnswered: 0,
+    answers: {},
+    completed: {},
+    timelineState: null,
+    matchState: null,
+    selectedMatch: null
+  };
+  document.getElementById('score-summary').classList.remove('show');
+  updateTabs();
+  renderQuestion();
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── START ──────────────────────────────────────────────────────────
+init();
+</script>
+
+</body>
+</html>

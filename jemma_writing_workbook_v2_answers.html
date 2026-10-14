@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jemma's Writing Workbook v2 — Answer Key</title>
+<style>
+  :root {
+    --bg: #faf9f7;
+    --card: #ffffff;
+    --text: #2d2a26;
+    --text-secondary: #5c5752;
+    --accent: #7c6f64;
+    --accent-light: #e8e4df;
+    --creative: #4a7c59;
+    --creative-bg: #edf5ef;
+    --analysis: #5b6e8a;
+    --analysis-bg: #f0f3f7;
+    --answer: #8b5a2b;
+    --answer-bg: #fdf6ee;
+    --border: #e0dcd7;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 10px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 17px;
+  }
+  .header {
+    background: linear-gradient(135deg, #8b5a2b 0%, #a0724a 40%, #b88a6c 100%);
+    color: #fff;
+    padding: 48px 24px 36px;
+    text-align: center;
+  }
+  .header h1 { font-size: 2em; font-weight: 400; letter-spacing: 0.02em; margin-bottom: 4px; }
+  .header .subtitle { font-size: 1em; opacity: 0.85; font-style: italic; }
+  .header .warning {
+    margin-top: 20px; padding: 12px 24px; background: rgba(255,255,255,0.12);
+    border-radius: 8px; font-size: 0.88em; display: inline-block;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+  .tabs { display: flex; gap: 0; margin-top: -1px; position: sticky; top: 0; z-index: 10; background: var(--bg); padding-top: 24px; border-bottom: 2px solid var(--border); }
+  .tab {
+    padding: 14px 28px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+    letter-spacing: 0.03em; border: none; background: none; color: var(--text-secondary);
+    border-bottom: 3px solid transparent; transition: all 0.2s; font-family: inherit;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  section { margin-top: 44px; }
+  .section-title {
+    font-size: 1.3em; font-weight: 400; padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-light); margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title .badge {
+    font-size: 0.65em; padding: 4px 12px; border-radius: 12px;
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;
+  }
+  .badge.creative { background: var(--creative-bg); color: var(--creative); }
+  .badge.analysis { background: var(--analysis-bg); color: var(--analysis); }
+  .answer-box {
+    background: var(--answer-bg); border-radius: var(--radius);
+    padding: 24px 28px; margin: 16px 0; border: 1px solid #e8d5c0;
+    border-left: 5px solid var(--answer);
+  }
+  .answer-box .a-label {
+    font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+    color: var(--answer); margin-bottom: 10px;
+  }
+  .answer-box p, .answer-box li { font-size: 0.93em; color: var(--text-secondary); line-height: 1.8; }
+  .answer-box ul, .answer-box ol { padding-left: 22px; margin: 8px 0; }
+  .answer-box li { margin-bottom: 4px; }
+  .ex-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .ex-num {
+    width: 38px; height: 38px; border-radius: 50%; text-align: center; line-height: 38px;
+    font-size: 0.9em; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .creative-ex .ex-num { background: var(--creative); }
+  .analysis-ex .ex-num { background: var(--analysis); }
+  .ex-header h3 { font-size: 1.08em; font-weight: 600; }
+  .mark {
+    display: inline-block; font-size: 0.72em; padding: 2px 10px; border-radius: 8px;
+    font-weight: 700; margin-left: 8px;
+  }
+  .mark.good { background: var(--creative-bg); color: var(--creative); }
+  .mark.note { background: #fef3cd; color: #997a00; }
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.88em; margin: 12px 0; }
+  .ref-table th {
+    text-align: left; padding: 10px 14px; font-size: 0.75em; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-secondary); border-bottom: 2px solid var(--border);
+  }
+  .ref-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+  .ref-table tr:hover { background: #fafaf8; }
+  footer {
+    text-align: center; padding: 40px 24px; color: var(--text-secondary);
+    font-size: 0.82em; border-top: 1px solid var(--border); margin-top: 60px;
+  }
+  @media print {
+    .tabs { display: none; }
+    .tab-content { display: block !important; margin-top: 30px; }
+    .answer-box { break-inside: avoid; }
+    .header { padding: 20px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Jemma's Writing Workbook v2</h1>
+  <div class="subtitle">Answer Key &amp; Model Responses — For Parent / Teacher Use</div>
+  <div class="warning">&#9888;  <strong>Please give Jemma time to complete each exercise</strong> before reviewing the answers. Creative writing answers are <em>models</em>, not "correct" — Jemma's own voice is what matters.</div>
+</div>
+
+<div class="container">
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('creative')">&#9998; Creative Writing Answers</button>
+  <button class="tab" onclick="switchTab('analysis')">&#128270; PEEL Analysis Answers</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- CREATIVE WRITING ANSWERS -->
+<!-- ============================================================ -->
+<div class="tab-content active" id="tab-creative">
+
+<section>
+  <div class="section-title">
+    &#127777; Warm-Up Drills
+    <span class="badge creative">Model Responses</span>
+  </div>
+
+  <!-- CW1 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">1</div><h3>Five Senses in Five Minutes <span class="mark note">Model</span></h3></div>
+    <p><em>Example: a mug of tea on the desk.</em></p>
+    <ul>
+      <li><strong>Sight:</strong> A curl of steam rose from the dark amber surface, catching the light before vanishing into nothing.</li>
+      <li><strong>Sound:</strong> The faint clink of ceramic against wood as I set it down — a small, familiar chime.</li>
+      <li><strong>Smell:</strong> Earthy and warm, like damp leaves on an autumn morning, cut through with a hint of something sweet.</li>
+      <li><strong>Touch:</strong> The heat seeped through the thick clay walls, pressing against my palms as if the cup were alive.</li>
+      <li><strong>Taste:</strong> (imaginative) If silence had a flavour, it would taste like this — calm, slightly bitter, and settling slowly on the tongue.</li>
+    </ul>
+    <p style="font-size:0.82em; margin-top:8px; color:var(--text-secondary);"><strong>What to look for:</strong> Each sense gets a distinct sentence. The object is never named. "Taste" uses metaphor. Any object works — the skill is using precise sensory language.</p>
+  </div>
+
+  <!-- CW2 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">2</div><h3>The Sentence Stretch <span class="mark note">Model</span></h3></div>
+    <p><strong>V1 (add colour):</strong> The clear glass bottle arrived.</p>
+    <p><strong>V2 (add texture):</strong> The clear glass bottle, smooth as polished ice, arrived.</p>
+    <p><strong>V3 (add sound):</strong> The clear glass bottle, smooth as polished ice, arrived with a hollow clunk against the shore.</p>
+    <p><strong>V4 (add emotion):</strong> The clear glass bottle, smooth as polished ice, arrived with a hollow clunk against the shore — a sound that made my breath catch.</p>
+    <p><strong>V5 (add simile/metaphor):</strong> The clear glass bottle, smooth as a secret waiting to be told, arrived with a hollow clunk against the shore — a sound that made my breath catch.</p>
+  </div>
+
+  <!-- CW3 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">3</div><h3>Mood Flip <span class="mark note">Model</span></h3></div>
+    <p><strong>Peaceful — A forest at dusk:</strong> The last sunlight dripped through the canopy like warm honey. Leaves rustled softly, as if the trees were breathing in their sleep. The air smelled of pine and damp earth — a clean, quiet fragrance that made the world feel safe.</p>
+    <p><strong>Threatening — A forest at dusk:</strong> The dying light bled through the branches in thin, trembling streaks. Leaves scratched against each other — dry, furtive whispers from every direction. The air smelled of rot and something metallic, like old blood pooling in the dark.</p>
+    <p style="font-size:0.82em; margin-top:8px; color:var(--text-secondary);"><strong>What to look for:</strong> Same scene, completely different word choices. Peaceful = warm verbs (dripped, rustled, smelled). Threatening = violent verbs (bled, scratched, pooling). The contrast is in the adjectives and connotations.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-title">&#128100; Character &amp; Voice<span class="badge creative">Model Responses</span></div>
+
+  <!-- CW4 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">4</div><h3>The Outsider's Diary <span class="mark note">Model — Option: The ghost</span></h3></div>
+    <p style="font-style:italic; color:var(--text-secondary);">
+      They're eating my mother's lasagne. I can see the steam rising from the dish — the same blue ceramic dish I bought her for Christmas three years ago. Nobody's sitting in my chair. It's still pushed against the wall, exactly where I left it. I don't know whether to feel grateful or destroyed.
+      <br><br>
+      Sophie laughed just now. A real laugh — head back, eyes crinkling — and for a moment I forgot I wasn't there. I almost called out to her. But the sound would just be a draught through the hallway, a flicker of the lights, something my father would blame on faulty wiring.
+      <br><br>
+      Then my mother looked up. Not at me — she can't see me — but toward the window, toward the garden where we used to plant tulips together. She held that look for a long time. I think she felt something. I think she felt me. And that's enough. It has to be.
+    </p>
+    <p style="font-size:0.82em; margin-top:8px; color:var(--text-secondary);"><strong>Checklist:</strong> Sensory details (steam, blue dish, flickering lights) ✓ | Longing (mother's lasagne, tulip garden) ✓ | Unexpected joy (Sophie's laugh, mother's glance) ✓ | Closing line that lingers ✓</p>
+  </div>
+
+  <!-- CW5 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">5</div><h3>Voice Transplant <span class="mark note">Model</span></h3></div>
+    <p><strong>Narrator A — curious 8-year-old:</strong> A shiny gold key! Right there on the ground, all glittery and old-looking at the same time. I picked it up and it was heavy — way heavier than my house key. It had this twisty shape at the top, like a curly snake. I bet it opens a treasure chest. Or maybe a secret castle door!</p>
+    <p><strong>Narrator B — tired police officer:</strong> Another lost key. Brass, by the look of it — old, not recently cut. Probably fell out of someone's bag. I turned it over. No markings, no serial. A decorative piece, maybe, or a sentimental one. I dropped it into the evidence pouch with a sigh. Somebody somewhere is probably tearing their house apart looking for it. Not my problem tonight.</p>
+    <p><strong>Narrator C — antique collector:</strong> Tarnished brass. Victorian, I'd wager — look at that bow design, hand-filed, not machine-stamped. The weight is satisfying; they didn't skimp on metal back then. What did this unlock? A writing desk? A jewellery cabinet? I could feel its history in my palm — every hand that had turned it, every door it had opened across a century and a half.</p>
+  </div>
+
+  <!-- CW6 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">6</div><h3>The Unreliable Narrator <span class="mark note">Model — "Perfect" family dinner</span></h3></div>
+    <p style="font-style:italic; color:var(--text-secondary);">
+      Dinner was wonderful. Mum smiled the whole time. Dad told stories about work — funny ones, the kind that make everyone laugh. Sarah showed us her art project, a watercolour of the garden, and we all said how talented she was. The roast chicken was perfect. Mum's been cooking more lately, which is great. After dinner, Dad helped with the washing up. He didn't say much, but that's normal — he's always been the quiet type. Sarah went upstairs to do her homework, and Mum sat in the living room with the lights off. Just relaxing. It was a really good evening.
+    </p>
+    <p style="font-size:0.82em; margin-top:8px; color:var(--text-secondary);"><strong>What gives it away:</strong> "Mum smiled the whole time" (too insistent), "which is great" (protesting), "Dad didn't say much" (slippage), "Mum sat in the living room with the lights off. Just relaxing." (the final crack).</p>
+  </div>
+
+  <!-- CW7 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">7</div><h3>Show, Don't Tell: Emotions <span class="mark note">Model</span></h3></div>
+    <p><strong>Fear:</strong></p>
+    <ul>
+      <li>"She counted the cracks in the ceiling for the third time, her fingers curling and uncurling around the edge of the duvet."</li>
+      <li>"The doorbell rang. He didn't move. His tea grew cold in his hands."</li>
+    </ul>
+    <p><strong>Joy:</strong></p>
+    <ul>
+      <li>"She read the letter twice, then a third time, mouthing the words silently as if tasting them."</li>
+      <li>"He pushed open the front door and the hallway seemed wider than it had this morning — brighter, somehow, though the light hadn't changed."</li>
+    </ul>
+    <p><strong>Guilt:</strong></p>
+    <ul>
+      <li>"Every time her mother mentioned the broken vase, she found herself straightening objects around the room — books, cushions, anything within reach."</li>
+      <li>"He'd been home for an hour and still hadn't taken off his coat."</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="section-title">&#127758; Setting &amp; Atmosphere<span class="badge creative">Model Responses</span></div>
+
+  <!-- CW8 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">8</div><h3>Describe a Place in 150 Words <span class="mark note">Model — Beach at sunrise</span></h3></div>
+    <p style="font-style:italic; color:var(--text-secondary);">
+      The sand was still cool from the night, untouched as fresh snow. In the half-light before dawn, the sea stretched out like a sheet of hammered pewter — flat, grey, barely breathing. The only sound was the slow hush of water dragging itself onto the shore, then retreating, as if the ocean hadn't quite decided to wake up yet. The air tasted of salt and cold stone, clean and sharp against the back of my throat. Then colour began to bleed into the horizon — first a pale apricot, then a fierce, burning orange that set the water alight. The first gull cried out, a jagged sound that sliced the silence open. The world had been monochrome; now it was on fire. I stood at the edge of it, the only witness to the day being born.
+    </p>
+    <p style="font-size:0.82em; margin-top:8px; color:var(--text-secondary);"><strong>Check:</strong> All five senses ✓ | Simile (like a sheet of hammered pewter) ✓ | Metaphor (the world was on fire) ✓ | ~150 words ✓</p>
+  </div>
+
+  <!-- CW9 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">9</div><h3>Weather as Emotion <span class="mark note">Model</span></h3></div>
+    <p><strong>Hope &amp; Beginnings:</strong> The rain had stopped an hour ago, leaving the pavement slick and gleaming like polished slate. Puddles reflected a sky that was breaking open — clouds pulling apart to reveal a blue so clean it hurt to look at. A warm wind pushed down the street, carrying the smell of wet grass and possibility.</p>
+    <p><strong>Loss &amp; Endings:</strong> The rain fell in thin, insistent needles — the kind that soaks through clothes before you notice. Gutters gurgled weakly, choking on dead leaves. The sky was a single unbroken slab of grey, low enough to touch. Nothing moved on the street. Nothing wanted to.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-title">&#128196; Story Structure<span class="badge creative">Model Responses</span></div>
+
+  <!-- CW10 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">10</div><h3>Opening Lines That Hook <span class="mark note">Model</span></h3></div>
+    <p><strong>In the middle of action:</strong> "The envelope was already open when I found it on the doormat, my neighbour's name scrawled across the front in handwriting I didn't recognise."</p>
+    <p><strong>Start with a strange detail:</strong> "The letter smelled of the sea — salt and something older, like a room that hadn't been opened in a hundred years."</p>
+    <p><strong>Start with dialogue:</strong> "'This isn't for you,' my mother said, but her hand was shaking and the paper was already in mine."</p>
+    <p><strong>Start with a question:</strong> "What do you do when you read a message that was never meant for your eyes — and it changes everything you thought you knew?"</p>
+    <p><strong>Start with a contradiction:</strong> "I had never met Eleanor Vance, but the letter addressed to her told me exactly how she was going to die."</p>
+  </div>
+
+  <!-- CW11 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">11</div><h3>Complete Flash Fiction (300 words) <span class="mark note">Model — "The message said 'don't open it'"</span></h3></div>
+    <p style="font-style:italic; color:var(--text-secondary);">
+      The box arrived on a Tuesday, wrapped in brown paper and tied with string that smelled faintly of smoke. There was no return address. No stamp. Just my name — LENA — written in capital letters that tilted left, as if the writer had been leaning away from the words.
+      <br><br>
+      Tucked beneath the string was a folded square of paper. Four words: <em>Don't open it. Please.</em>
+      <br><br>
+      I laughed. Who sends a box with a note that says not to open it? A joke, obviously. One of Tom's stupid pranks. I reached for the string.
+      <br><br>
+      Then I stopped.
+      <br><br>
+      The handwriting. It was my mother's.
+      <br><br>
+      My mother, who had died when I was seven. My mother, whose handwriting I knew only from birthday cards I kept in a shoebox under my bed. I knew the way her "L"s looped, the way her "e"s didn't quite close at the top. I knew it like I knew my own heartbeat.
+      <br><br>
+      <em>Don't open it. Please.</em>
+      <br><br>
+      I sat on the floor with the box in my lap. It wasn't heavy. It didn't rattle. Through the paper, I thought I could feel something — a faint warmth, like skin. Or maybe I imagined it.
+      <br><br>
+      The string is still tied. The box is still on my desk. It's been three years. Some mornings I pick it up and hold it, just to feel the weight of whatever my mother wanted me to know — or never know. Some questions are heavier than answers. And some gifts are not meant to be unwrapped.
+    </p>
+    <p style="font-size:0.82em; margin-top:8px; color:var(--text-secondary);"><strong>Check:</strong> Clear beginning → middle → end ✓ | Tension (the pause, the recognition of handwriting) ✓ | Satisfying final sentence ✓ | ~300 words ✓</p>
+  </div>
+
+  <!-- CW12 -->
+  <div class="answer-box creative-ex">
+    <div class="ex-header"><div class="ex-num">12</div><h3>Constraint Writing <span class="mark note">Model</span></h3></div>
+    <p style="font-style:italic; color:var(--text-secondary); font-size:0.9em;">
+      Her fingers found the seam first — a hairline crack in the wallpaper, running from floor to ceiling. She pressed. The wall gave. Cold air rushed through the gap, carrying the mineral scent of underground stone. A latch clicked somewhere deep inside. The panel swung inward, revealing a staircase that spiralled down into absolute black. She hesitated. Somewhere below, metal scraped against stone — a single, deliberate sound. Then silence. She stepped through. The panel closed behind her with a soft, final thud, swallowing the last sliver of amber light.
+    </p>
+    <p style="font-size:0.82em; margin-top:8px; color:var(--text-secondary);"><strong>Constraints check:</strong> No -ly adverbs ✓ | No "to be" verbs (is/was/were/are/am/been/being) — none present ✓ | Colour (amber light) ✓ | Sound (metal scraped against stone, latch clicked, soft final thud) ✓</p>
+  </div>
+</section>
+
+</div><!-- end creative answers -->
+
+<!-- ============================================================ -->
+<!-- PEEL ANALYSIS ANSWERS -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-analysis">
+
+<section>
+  <div class="section-title">&#128270; PEEL Analysis Exercises<span class="badge analysis">Answers</span></div>
+
+  <!-- A1 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A1</div><h3>Spot the Technique</h3></div>
+    <table class="ref-table">
+      <thead><tr><th style="width:5%">#</th><th style="width:25%">Quotation</th><th style="width:25%">Technique</th><th style="width:45%">Effect</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>"He got stuck in the ticket barrier on the Underground"</td>
+          <td><strong>Physical comedy / situational irony</strong></td>
+          <td>Hagrid is an enormous magical being squeezed into an ordinary Muggle space — the image is comically absurd. It highlights the clash between the magical and non-magical worlds, making the reader both laugh and sympathise with Hagrid's discomfort.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>"'I don't know how the Muggles manage without magic'"</td>
+          <td><strong>Dialogue</strong></td>
+          <td>Hagrid's spoken words reveal his magical worldview — he genuinely cannot comprehend life without magic. This casual remark deepens the reader's sense that the wizarding world is a fully realised culture with its own assumptions, and Hagrid serves as our guide into it.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>"a <em>bustling</em> road lined with shops"</td>
+          <td><strong>Adjective choice</strong></td>
+          <td>"Bustling" conveys energy, crowds, and purposeful movement — it paints a picture of a vibrant, busy London street. The word carries positive connotations of life and commerce, which contrasts with the "broken-down" escalator that leads to it.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>"a <em>broken-down</em> escalator that led up to a bustling road"</td>
+          <td><strong>Juxtaposition / contrast</strong></td>
+          <td>The "broken-down" escalator (Muggle world, flawed, decaying) leads to the "bustling" road (full of life and possibility). This contrast mirrors Harry's journey from his neglected ordinary life toward the magical — the broken path leads to something wonderful.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- A2 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A2</div><h3>PEEL Builder: Fill the Gaps</h3></div>
+    <p><strong>Evidence:</strong> Auggie lists ordinary things he does — "<em>I eat ice cream. I ride my bike. I play ball. I have an Xbox.</em>" and "<em>I feel ordinary. Inside.</em>" — but immediately follows with the contrast that "<em>ordinary kids don't make other ordinary kids run away screaming in playgrounds.</em>"</p>
+    <p><strong>Explain:</strong> The structure of the paragraph mirrors Auggie's experience: Palacio uses the word "<em>ordinary</em>" four times in quick succession, which creates a sense of <em>desperation — Auggie is trying to convince himself as much as the reader</em>. The contrast between the list of normal activities and the image of kids "<em>run away screaming in playgrounds</em>" is a powerful example of <em>juxtaposition — two utterly incompatible realities forced to coexist in one boy's life</em>.</p>
+    <p><strong>Link:</strong> This opening is effective because <em>it immediately makes the reader confront their own assumptions about "normal." We enter Auggie's world not through his face but through his voice — his intelligence, his self-awareness, his pain. It hooks us with empathy, not shock.</em></p>
+  </div>
+
+  <!-- A3 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A3</div><h3>Write a Full PEEL Paragraph: Holes <span class="mark good">8/8 model</span></h3></div>
+    <p style="font-style:italic; color:var(--text-secondary);">
+      <strong>Point:</strong> Sachar creates a sense of a harsh, unwelcoming place by systematically stripping Camp Green Lake of everything its name promises — water, life, and hope.
+      <br><br>
+      <strong>Evidence:</strong> The opening line immediately establishes the central irony: "There is no lake at Camp Green Lake." The name is a lie — and Sachar wastes no time exposing it. The verbs he chooses — "shrivelled," "dried up" — describe not just the lake but the town and "the people who lived there," collapsing an entire community into a single image of decay.
+      <br><br>
+      <strong>Explain:</strong> The word "shrivelled" is particularly significant because it does not simply mean "disappeared" — it connotes something that was once living and full being drained of its vitality, like a fruit left too long in the sun. By applying it to the town <em>and</em> the people, Sachar suggests that the environment itself consumes life. The parenthetical aside — "(if you can find any shade)" — is a bitterly ironic jab: the narrator knows you won't. The repetition of "dry" (three times in four sentences) hammers the aridity into the reader's consciousness. There is no escape from it.
+      <br><br>
+      <strong>Link:</strong> This opening does more than describe a setting — it establishes the novel's central theme: that places shape people, and a place this unforgiving will demand everything from those sent there. The reader arrives already oppressed by the heat and dust, primed for the story of survival to come.
+    </p>
+  </div>
+
+  <!-- A4 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A4</div><h3>Comparative: Two Openings <span class="mark good">7/8 model</span></h3></div>
+    <p style="font-style:italic; color:var(--text-secondary);">
+      <strong>Point:</strong> Rundell transforms a generic jungle description into an immersive sensory experience through precise visual detail, striking similes, and deliberate sound imagery that the plain version entirely lacks.
+      <br><br>
+      <strong>Evidence:</strong> Where Version A offers only a flat statement — "It was very big and green" — Rundell names specific shades: "emerald, lime, sage." These are not just colours; they are colours with texture and association, "stacked one on top of another" like a painter describing a palette. The butterflies are not merely "big" but "the size of dinner plates" — a simile that makes the scale startlingly concrete.
+      <br><br>
+      <strong>Explain:</strong> The verb "hung" (butterflies "hung in the air") is carefully chosen — it suggests stillness, weight, and a kind of suspension that feels almost magical. Then the silence is shattered by the howler monkey's roar, described through another vivid simile: "a sound like the tearing of a great sheet of canvas." This comparison is masterful because it makes the sound <em>physical</em> — we can feel the rip, hear the violence in it. The call is answered by another, "deeper in the trees," establishing a world that extends far beyond what is visible. Version A, by contrast, says only "they could hear animals in the distance" — vague, flat, leaving the reader with nothing to picture.
+      <br><br>
+      <strong>Link:</strong> Rundell's version works because she treats the jungle not as background but as a character in its own right — alive, layered, and full of specific, named wonders. The reader does not just read about the jungle; they step into it.
+    </p>
+  </div>
+
+  <!-- A5 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A5</div><h3>The Word-Level Drill</h3></div>
+    <table class="ref-table">
+      <thead><tr><th style="width:12%">Word</th><th style="width:18%">Connotation</th><th style="width:70%">What it suggests</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="3"><strong>"shrivelled"</strong></td>
+          <td>Decay / withering</td>
+          <td>Something organic that was once alive and full of moisture being drained of life — the town is not just abandoned; it has <em>died</em>.</td>
+        </tr>
+        <tr>
+          <td>Shrinking / retreat</td>
+          <td>The town didn't just disappear — it curled in on itself, as if the environment was so hostile that everything tried to make itself smaller to survive, and failed.</td>
+        </tr>
+        <tr>
+          <td>Inevitability / powerlessness</td>
+          <td>"Shrivelled" is passive — the town didn't <em>choose</em> to die; the heat and drought did it to them. This creates a sense of nature's overwhelming, indifferent power.</td>
+        </tr>
+        <tr>
+          <td rowspan="3"><strong>"bustling"</strong></td>
+          <td>Energy / movement</td>
+          <td>A place full of purposeful human activity — people going somewhere, doing something, alive and busy. It makes the road feel like the opposite of stillness.</td>
+        </tr>
+        <tr>
+          <td>Normality / ordinariness</td>
+          <td>"Bustling" is a word for a functioning, everyday world — the Muggle world Harry is about to leave behind for the magical. It grounds the scene in relatable reality before the wonder begins.</td>
+        </tr>
+        <tr>
+          <td>Promise / possibility</td>
+          <td>A bustling street is full of unknown destinations. For Harry, who has never been to London, it represents a world of potential — every shop could contain something he has never imagined.</td>
+        </tr>
+        <tr>
+          <td rowspan="3"><strong>"stacked"</strong></td>
+          <td>Deliberate arrangement</td>
+          <td>Something intentionally placed layer upon layer — nature as architecture. It suggests the jungle is not random chaos but an organised, almost artistic structure.</td>
+        </tr>
+        <tr>
+          <td>Abundance / excess</td>
+          <td>"Stacked" implies there is so much green it has to be piled up — more than the eye can take in at once. It conveys overwhelming sensory richness.</td>
+        </tr>
+        <tr>
+          <td>Depth / layering</td>
+          <td>The word suggests dimension — foreground, middle, background — each layer a different shade. The jungle is not flat; it has architecture and depth, like a painting or a stage set.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- A6 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A6</div><h3>Structure Analysis: Before and After <span class="mark good">8/8 model</span></h3></div>
+    <p style="font-style:italic; color:var(--text-secondary);">
+      <strong>Point:</strong> Reynolds uses a mirrored two-paragraph structure, a dramatic shift in verb choice, and the strategic placement of a single-word final sentence to chart Castle's transformation from a terrified child running from danger into an athlete who has reclaimed running as an act of power and identity.
+      <br><br>
+      <strong>Evidence:</strong> The first paragraph is defined by fear — the father's "footsteps were loud behind us. Loud and getting louder." The second paragraph inverts nearly every element: "Now, running is different." The verbs transform: where his feet once "pound[ed] the pavement," now "they kiss it." Where his arms once "flail[ed]," now they "pump, like pistons." The father's footsteps, the source of terror, are dismissed in a single line: "I can't hear them anymore."
+      <br><br>
+      <strong>Explain:</strong> The verb "kiss" is the pivot of the entire passage — it replaces violence with tenderness, fear with control. Running was something done <em>to</em> Castle (the father's chase); now it is something he <em>does</em>. The simile "like pistons" converts his body into a machine — precise, powerful, engineered. The structure narrows from the chaos of the first paragraph into a final rhythmic sequence: "Steady. Strong. Mine." The full stops between these words force the reader to pause on each one, giving them the weight of a declaration. The shift from past to present tense is equally important: the trauma is in the past; the triumph is now.
+      <br><br>
+      <strong>Link:</strong> Reynolds's structural choice — the mirror image, the reclamation — makes the reader feel Castle's transformation physically. We run with him in terror, and we run with him in freedom. The final word, "Mine," is not just about running; it is about identity. Castle has taken back what was stolen.
+    </p>
+  </div>
+
+  <!-- A7 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A7</div><h3>Character Analysis: Coraline <span class="mark good">7/8 model</span></h3></div>
+    <p style="font-style:italic; color:var(--text-secondary);">
+      Gaiman presents Coraline as brave but vulnerable by acknowledging her fear directly while showing that her courage is not the absence of fear, but a deliberate choice made <em>despite</em> it. The parenthetical aside — "(and she was often scared)" — is crucial: it refuses to pretend she is fearless. This honesty makes her bravery more real, not less. Her strategy is methodical and childlike: "she would take a deep breath and count to ten" — a ritual that is simultaneously vulnerable (a child's coping mechanism) and impressive (it works). Her self-talk — "'Fear is not a bad thing,' she told herself. 'It just means you're about to do something very, very brave'" — reframes fear as a signal of approaching courage rather than a weakness. The repetition of "very" in "very, very brave" captures her youth — an adult might say "courageous"; a child reaches for emphasis through repetition. Gaiman balances her vulnerability (small for her age, often scared, using counting as comfort) with her strength (stubborn, determined, able to reframe fear philosophically) so that the reader admires her courage precisely because we see how much it costs her.
+    </p>
+  </div>
+
+  <!-- A8 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A8</div><h3>Mark a Model Paragraph</h3></div>
+    <p><strong>Score: 3 / 8</strong> (Building level — identifies obvious techniques but doesn't explore them in depth)</p>
+    <p><strong>What's missing?</strong></p>
+    <ol>
+      <li><strong>No embedded quotations or specific word exploration.</strong> The writer says "the writer uses the word 'wasteland'" but doesn't explore what "wasteland" connotes — emptiness, abandonment, hostility, biblical echoes of desolation. Specific words need to be unpacked, not just named.</li>
+      <li><strong>No named techniques, no PEEL structure.</strong> The paragraph identifies irony ("the place is different from its name") but doesn't name it as a technique. There is no clear Point-Evidence-Explain-Link structure. The final sentence ("I think this is an effective opening") is vague — effective at <em>what</em>? Creating atmosphere? Establishing theme? Foreshadowing hardship?</li>
+    </ol>
+    <p><strong>Rewritten as a strong PEEL paragraph:</strong></p>
+    <p style="font-style:italic; color:var(--text-secondary);">
+      Sachar creates a crushing sense of hostility and disappointment through the stark irony of the camp's name and his choice of relentlessly negative vocabulary. The opening sentence — "There is no lake at Camp Green Lake" — establishes immediate ironic contrast: the name promises nature and refreshment; the reality delivers absence. The word "wasteland" carries powerful connotations of barrenness, abandonment, and biblical desolation, while "shrivelled" suggests something organic that has been drained of life — the town and its people are not merely gone but have withered under an indifferent sun. The precise temperature detail — "ninety-five degrees in the shade" — grounds the menace in uncomfortable fact, and the parenthetical "(if you can find any shade)" is a bitterly knowing aside that implicates the reader: you <em>know</em> there isn't any. This opening matters because it establishes the novel's central truth before a single character appears — this is a place that destroys things, and survival here will require more than luck.
+    </p>
+  </div>
+
+  <!-- A9 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A9</div><h3>Opening Lines Analysis</h3></div>
+    <table class="ref-table">
+      <thead><tr><th style="width:5%">#</th><th style="width:40%">Opening Line</th><th style="width:55%">Technique + Effect</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>"There was a hand in the darkness, and it held a knife."</td>
+          <td>Gaiman uses <strong>immediate, visceral imagery</strong> — "hand" and "knife" are concrete nouns placed against the abstract "darkness," creating instant tension. The sentence is short and declarative, offering no context, which forces the reader into the same disorientation as a potential victim.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>"I know I'm not an ordinary ten-year-old kid."</td>
+          <td>Palacio uses <strong>first-person narration</strong> with <strong>understatement</strong> — the word "ordinary" is doing heavy work. The reader immediately wonders <em>why</em> he's not ordinary and <em>what</em> he knows that we don't. The casual, conversational tone makes the mystery feel intimate rather than dramatic.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>"There is no lake at Camp Green Lake."</td>
+          <td>Sachar uses <strong>ironic contradiction</strong> — the name promises one thing; the opening line denies it. This immediate undermining of expectations signals to the reader that nothing here will be what it seems. The blunt simplicity of the sentence makes the irony land with deadpan force.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>"The sky above the port was the colour of television, tuned to a dead channel."</td>
+          <td>Gibson uses a <strong>simile</strong> that is remarkable for its time (1984): comparing the sky to a technological image rather than nature is deliberately jarring. "Dead channel" connotes static, greyness, something broken and ominous — the world described is urban, artificial, and already decaying.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- A10 -->
+  <div class="answer-box analysis-ex">
+    <div class="ex-header"><div class="ex-num">A10</div><h3>Vocabulary of Analysis: Upgrade Your Words</h3></div>
+    <table class="ref-table">
+      <thead><tr><th style="width:35%">Weak Phrase</th><th style="width:65%">Your Stronger Alternative</th></tr></thead>
+      <tbody>
+        <tr><td>"This shows that..."</td><td>"This suggests / implies / conveys / evokes / demonstrates..." <span class="mark note">(given)</span></td></tr>
+        <tr><td>"The writer uses good words"</td><td>"The writer's precise choice of vocabulary..." / "The writer employs carefully selected diction..." / "The writer's lexical choices..."</td></tr>
+        <tr><td>"It makes the reader interested"</td><td>"It engages the reader by..." / "It draws the reader into..." / "It compels the reader to consider..." / "It evokes a sense of..."</td></tr>
+        <tr><td>"It stands out"</td><td>"It is particularly striking because..." / "This is emphasised by..." / "The writer foregrounds this through..." / "This is accentuated by..."</td></tr>
+        <tr><td>"The writer does this to..."</td><td>"The writer's purpose here is to..." / "By doing this, the writer seeks to..." / "This serves to..." / "The intended effect is to..."</td></tr>
+        <tr><td>"It creates a picture in your head"</td><td>"It conjures a vivid image of..." / "It evokes a strong visual impression..." / "The imagery allows the reader to visualise..." / "It paints a picture of..."</td></tr>
+        <tr><td>"It makes you feel..."</td><td>"It elicits a sense of..." / "It evokes feelings of..." / "The reader is made to experience..." / "This provokes an emotional response of..."</td></tr>
+        <tr><td>"This is effective because..."</td><td>"This is effective in conveying..." / "This technique successfully..." / "The impact of this is..." / "This works on the reader by..."</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div><!-- end analysis answers -->
+
+</div><!-- container -->
+
+<footer>
+  Answer Key &middot; Jemma's Writing Workbook v2 &middot; Headington School, Year 8 &middot; May 2026<br>
+  <span style="font-size:0.85em;">Model responses are exemplars — Jemma's own voice and ideas are what matter most.</span>
+</footer>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+</script>
+
+</body>
+</html>

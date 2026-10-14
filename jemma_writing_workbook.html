@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jemma's Writing Workbook — Creative Writing &amp; Analysis Paragraphs</title>
+<style>
+  :root {
+    --bg: #faf9f7;
+    --card: #ffffff;
+    --text: #2d2a26;
+    --text-secondary: #5c5752;
+    --accent: #7c6f64;
+    --accent-light: #e8e4df;
+    --creative: #4a7c59;
+    --creative-bg: #edf5ef;
+    --analysis: #5b6e8a;
+    --analysis-bg: #f0f3f7;
+    --border: #e0dcd7;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 10px;
+    --gold: #c9a84c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #3a3440 0%, #5c5268 40%, #7c6f84 100%);
+    color: #fff;
+    padding: 56px 24px 44px;
+    text-align: center;
+  }
+  .header h1 { font-size: 2em; font-weight: 400; letter-spacing: 0.02em; margin-bottom: 6px; }
+  .header .subtitle { font-size: 1em; opacity: 0.8; font-style: italic; }
+  .header .meta { margin-top: 16px; font-size: 0.82em; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; margin-top: -1px; position: sticky; top: 0; z-index: 10; background: var(--bg); padding-top: 24px; border-bottom: 2px solid var(--border); }
+  .tab {
+    padding: 14px 28px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Score Banner */
+  .score-banner {
+    display: flex; gap: 16px; margin-top: -30px; position: relative; z-index: 2;
+    flex-wrap: wrap;
+  }
+  .score-card {
+    flex: 1; min-width: 130px; background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow-lg); padding: 18px 14px; text-align: center; border: 1px solid var(--border);
+  }
+  .score-card .label { font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); margin-bottom: 4px; }
+  .score-card .value { font-size: 2em; font-weight: 700; line-height: 1.2; }
+
+  /* Section */
+  section { margin-top: 44px; }
+  .section-title {
+    font-size: 1.3em; font-weight: 400; padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-light); margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title .badge {
+    font-size: 0.65em; padding: 4px 12px; border-radius: 12px;
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;
+  }
+  .badge.creative { background: var(--creative-bg); color: var(--creative); }
+  .badge.analysis { background: var(--analysis-bg); color: var(--analysis); }
+
+  /* Exercise Card */
+  .exercise {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 28px; margin: 20px 0; border: 1px solid var(--border);
+    border-left: 5px solid var(--accent);
+  }
+  .exercise.creative-ex { border-left-color: var(--creative); }
+  .exercise.analysis-ex { border-left-color: var(--analysis); }
+
+  .ex-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .ex-num {
+    width: 38px; height: 38px; border-radius: 50%; text-align: center; line-height: 38px;
+    font-size: 0.9em; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .creative-ex .ex-num { background: var(--creative); }
+  .analysis-ex .ex-num { background: var(--analysis); }
+
+  .ex-header h3 { font-size: 1.1em; font-weight: 600; }
+  .ex-header .difficulty {
+    font-size: 0.7em; padding: 3px 10px; border-radius: 10px;
+    text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;
+    margin-left: auto;
+  }
+  .diff-easy { background: #edf5ef; color: #4a7c59; }
+  .diff-medium { background: #fef3cd; color: #997a00; }
+  .diff-hard { background: #fde8e8; color: #b85c38; }
+
+  .ex-instructions { font-size: 0.92em; color: var(--text-secondary); line-height: 1.75; }
+  .ex-instructions ol, .ex-instructions ul { padding-left: 22px; margin: 8px 0; }
+  .ex-instructions li { margin-bottom: 5px; }
+
+  .ex-prompt {
+    background: #f8f6f4; border-radius: 8px; padding: 18px 22px; margin: 14px 0;
+    font-style: italic; font-size: 0.95em; line-height: 1.7; border: 1px dashed var(--border);
+  }
+  .ex-prompt strong { font-style: normal; }
+
+  .ex-tip {
+    background: #fef9f0; border-radius: 6px; padding: 12px 16px; margin-top: 12px;
+    font-size: 0.84em; color: #8b6914; border-left: 3px solid #e8c547;
+  }
+  .ex-tip::before { content: '💡 Tip: '; font-weight: 700; }
+
+  .ex-checklist {
+    margin-top: 14px; padding: 14px 18px; background: #f8faf7; border-radius: 8px;
+    font-size: 0.85em;
+  }
+  .ex-checklist h4 { font-size: 0.88em; margin-bottom: 8px; color: var(--text); }
+  .ex-checklist li { margin-bottom: 3px; color: var(--text-secondary); }
+
+  /* Framework Box */
+  .framework {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+    padding: 28px; margin: 24px 0; border: 2px solid var(--analysis);
+  }
+  .framework h3 { font-size: 1.15em; color: var(--analysis); margin-bottom: 16px; }
+  .framework .step { margin-bottom: 18px; }
+  .framework .step h4 {
+    font-size: 0.92em; font-weight: 700; color: var(--text);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+  }
+  .framework .step p { font-size: 0.88em; color: var(--text-secondary); line-height: 1.7; }
+  .framework .step .example {
+    background: #f5f6f8; padding: 12px 16px; border-radius: 6px; margin-top: 6px;
+    font-size: 0.84em; font-style: italic; color: var(--text-secondary);
+    border-left: 3px solid var(--analysis);
+  }
+
+  /* Before/After */
+  .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+  @media (max-width: 600px) { .ba-grid { grid-template-columns: 1fr; } }
+  .ba-col { padding: 16px; border-radius: 8px; font-size: 0.88em; line-height: 1.7; }
+  .ba-col.bad { background: #fef5f2; border: 1px solid #f0d5cb; }
+  .ba-col.good { background: #f2f8f4; border: 1px solid #c8ddcf; }
+  .ba-col .ba-label {
+    font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 8px;
+  }
+  .ba-col.bad .ba-label { color: #b85c38; }
+  .ba-col.good .ba-label { color: #4a7c59; }
+
+  /* Table */
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.88em; margin: 16px 0; }
+  .ref-table th {
+    text-align: left; padding: 10px 14px; font-size: 0.75em; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-secondary); border-bottom: 2px solid var(--border);
+  }
+  .ref-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+  .ref-table tr:hover { background: #fafaf8; }
+
+  /* Print */
+  @media print {
+    .tabs { display: none; }
+    .tab-content { display: block !important; margin-top: 30px; }
+    .exercise { break-inside: avoid; }
+    .header { padding: 20px 24px; }
+  }
+
+  /* Progress tracker */
+  .progress-bar-outer {
+    background: var(--accent-light); border-radius: 10px; height: 10px; margin-top: 6px; overflow: hidden;
+  }
+  .progress-bar-inner { background: var(--creative); height: 100%; border-radius: 10px; transition: width 0.3s; }
+
+  footer {
+    text-align: center; padding: 40px 24px; color: var(--text-secondary);
+    font-size: 0.82em; border-top: 1px solid var(--border); margin-top: 60px;
+  }
+
+  /* Anchor link highlight */
+  .highlight-target {
+    animation: highlightFade 2s ease-out;
+  }
+  @keyframes highlightFade {
+    0% { background-color: #fef9c3; }
+    100% { background-color: transparent; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Jemma's Writing Workbook</h1>
+  <div class="subtitle">Creative Writing &amp; Analysis Paragraphs — Year 8 → GCSE Ready</div>
+  <div class="meta">Headington School &middot; 30+ Exercises &middot; Self-Paced &middot; Updated May 2026</div>
+</div>
+
+<div class="container">
+
+<div class="score-banner">
+  <div class="score-card">
+    <div class="label">Creative Writing</div>
+    <div class="value" style="color:var(--creative);">18</div>
+    <div class="label">Exercises</div>
+  </div>
+  <div class="score-card">
+    <div class="label">Analysis Paragraphs</div>
+    <div class="value" style="color:var(--analysis);">14</div>
+    <div class="label">Exercises</div>
+  </div>
+  <div class="score-card">
+    <div class="label">Difficulty Range</div>
+    <div class="value" style="color:var(--gold);">&#9733; &#9733;&#9733;</div>
+    <div class="label">Easy → Challenging</div>
+  </div>
+  <div class="score-card">
+    <div class="label">Time Per Exercise</div>
+    <div class="value" style="color:var(--accent);">15-30</div>
+    <div class="label">Minutes</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('creative')">&#9998; Creative Writing</button>
+  <button class="tab" onclick="switchTab('analysis')">&#128270; Analysis Paragraphs</button>
+  <button class="tab" onclick="switchTab('reference')">&#128218; Quick Reference</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- CREATIVE WRITING TAB -->
+<!-- ============================================================ -->
+<div class="tab-content active" id="tab-creative">
+
+<section id="cw-warmup">
+  <div class="section-title">
+    &#127777; Warm-Up Drills
+    <span class="badge creative">5 min each</span>
+  </div>
+  <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom:16px;">
+    These are quick, low-pressure exercises to get words flowing. Do one before a longer writing session — like stretching before a run.
+  </p>
+
+  <!-- CW1 -->
+  <div class="exercise creative-ex" id="cw1">
+    <div class="ex-header">
+      <div class="ex-num">1</div>
+      <h3>Five Senses in Five Minutes</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Pick an object near you right now — a lamp, a mug, a window, anything. Write exactly <strong>one sentence for each sense</strong> that describes it. The catch: <strong>you cannot name the object</strong>. Let the reader figure it out from the sensory clues.</p>
+      <div class="ex-prompt">
+        <strong>Sight:</strong> _______________________________________________<br>
+        <strong>Sound:</strong> _______________________________________________<br>
+        <strong>Smell:</strong> _______________________________________________<br>
+        <strong>Touch:</strong> _______________________________________________<br>
+        <strong>Taste:</strong> (imaginative — what would it taste like?) _________
+      </div>
+      <div class="ex-tip">If you're stuck on 'taste', think metaphorically. A dusty old book might taste "of forgotten afternoons."</div>
+    </div>
+  </div>
+
+  <!-- CW2 -->
+  <div class="exercise creative-ex" id="cw2">
+    <div class="ex-header">
+      <div class="ex-num">2</div>
+      <h3>The Sentence Stretch</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Start with a bare 3-word sentence. Then rewrite it five times, <strong>adding one new detail each time</strong> without changing the core meaning.</p>
+      <div class="ex-prompt">
+        <strong>Start:</strong> "The bottle arrived."<br><br>
+        <strong>Version 1 (add colour):</strong> ________________________________<br>
+        <strong>Version 2 (add texture/surface):</strong> ______________________<br>
+        <strong>Version 3 (add sound):</strong> _______________________________<br>
+        <strong>Version 4 (add emotion/atmosphere):</strong> _________________<br>
+        <strong>Version 5 (add a simile or metaphor):</strong> ________________
+      </div>
+      <div class="ex-checklist">
+        <h4>Self-Check</h4>
+        <ul>
+          <li>Does each version add genuine new information (not just more words)?</li>
+          <li>Is Version 5 still one sentence?</li>
+          <li>Could a reader picture the scene differently after each version?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CW3 -->
+  <div class="exercise creative-ex" id="cw3">
+    <div class="ex-header">
+      <div class="ex-num">3</div>
+      <h3>Mood Flip</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Take the same scene and describe it twice — once to feel <strong>peaceful and safe</strong>, once to feel <strong>threatening and dangerous</strong>. You may only change the <strong>descriptive words</strong>, not the facts of what's there.</p>
+      <div class="ba-grid">
+        <div class="ba-col good">
+          <div class="ba-label">Peaceful Version</div>
+          "The waves whispered against the shore. The bottle, smooth as sea-glass, caught the last light of the sun."
+        </div>
+        <div class="ba-col bad">
+          <div class="ba-label">Threatening Version</div>
+          "The waves hissed against the shore. The bottle, slick and wet like something drowned, caught the jagged last light."
+        </div>
+      </div>
+      <div class="ex-prompt">
+        <strong>Your scene:</strong> A forest at dusk.<br>
+        <strong>Peaceful:</strong> ________________________________________________<br>
+        <strong>Threatening:</strong> ____________________________________________
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CW - Character -->
+<section id="cw-character">
+  <div class="section-title">
+    &#128100; Character &amp; Voice
+    <span class="badge creative">10-15 min</span>
+  </div>
+
+  <!-- CW4 -->
+  <div class="exercise creative-ex" id="cw4">
+    <div class="ex-header">
+      <div class="ex-num">4</div>
+      <h3>The Outsider's Diary</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Jemma, your story's narrator is an exile — this is your strength. Write a <strong>diary entry (200 words)</strong> from the perspective of someone who doesn't belong. Choose one:</p>
+      <ul>
+        <li>A mermaid who has just grown legs and is walking on land for the first time</li>
+        <li>A ghost watching their own family eat dinner without them</li>
+        <li>The last person on Earth who remembers how to read</li>
+        <li>A dragon disguised as a human, attending a normal school</li>
+      </ul>
+      <div class="ex-checklist">
+        <h4>Must Include</h4>
+        <ul>
+          <li>At least <strong>two sensory details</strong> that show their difference (e.g. the mermaid notices gravity pressing on her new bones)</li>
+          <li>One moment of <strong>longing</strong> for their original world</li>
+          <li>One moment of <strong>unexpected joy</strong> in the new world</li>
+          <li>A closing line that leaves the reader thinking</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CW5 -->
+  <div class="exercise creative-ex" id="cw5">
+    <div class="ex-header">
+      <div class="ex-num">5</div>
+      <h3>Voice Transplant</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Describe the same event from <strong>three different narrators</strong>. The event: <em>finding a strange key on the pavement.</em></p>
+      <div class="ex-prompt">
+        <strong>Narrator A — a curious 8-year-old:</strong><br>
+        ____________________________________________________________<br><br>
+        <strong>Narrator B — a tired police officer at the end of a shift:</strong><br>
+        ____________________________________________________________<br><br>
+        <strong>Narrator C — a historian who specialises in Victorian artefacts:</strong><br>
+        ____________________________________________________________
+      </div>
+      <div class="ex-tip">Don't just change the facts each narrator notices — change the <em>words they use</em>. The child says "shiny", the officer says "metallic", the historian says "patinated brass."</div>
+    </div>
+  </div>
+
+  <!-- CW6 -->
+  <div class="exercise creative-ex" id="cw6">
+    <div class="ex-header">
+      <div class="ex-num">6</div>
+      <h3>The Unreliable Narrator</h3>
+      <span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Write 250 words where the narrator is <strong>lying to themselves</strong> about something obvious to the reader. The reader should slowly realise the truth while the narrator keeps pretending.</p>
+      <div class="ex-prompt">
+        <strong>Choose one:</strong><br>
+        &bull; A character insists they're "fine" after being left behind by their best friend<br>
+        &bull; A character claims the strange sounds in their house are "just the pipes"<br>
+        &bull; A character says they "don't care" about the message in the bottle — while checking the horizon every day
+      </div>
+      <div class="ex-tip">This is an advanced GCSE-level skill. The key is <em>what the narrator doesn't say</em> — the gaps between their words. Read the first page of <em>The Remains of the Day</em> by Kazuo Ishiguro for a masterclass in this.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CW - Setting -->
+<section id="cw-setting">
+  <div class="section-title">
+    &#127758; Setting &amp; Atmosphere
+    <span class="badge creative">10-15 min</span>
+  </div>
+
+  <!-- CW7 -->
+  <div class="exercise creative-ex" id="cw7">
+    <div class="ex-header">
+      <div class="ex-num">7</div>
+      <h3>Weather as Emotion</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Describe a thunderstorm <strong>three different ways</strong>, each reflecting a different character's emotional state. The storm is the same — the perception is different.</p>
+      <div class="ex-prompt">
+        <strong>A character who has just fallen in love:</strong><br>
+        ____________________________________________________________<br><br>
+        <strong>A character who has just received terrible news:</strong><br>
+        ____________________________________________________________<br><br>
+        <strong>A character who is about to do something brave:</strong><br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- CW8 -->
+  <div class="exercise creative-ex" id="cw8">
+    <div class="ex-header">
+      <div class="ex-num">8</div>
+      <h3>The Empty Room</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Describe an <strong>empty room</strong> in such detail that the reader can deduce <strong>who lived there and what happened to them</strong> — without you ever stating it directly.</p>
+      <div class="ex-prompt">
+        <strong>Choose one scenario (don't tell the reader which):</strong><br>
+        &bull; A child who was taken away suddenly<br>
+        &bull; An old person who died peacefully after a long life<br>
+        &bull; Someone who packed in a hurry and fled<br>
+        &bull; A scientist whose experiment went wrong
+      </div>
+      <div class="ex-checklist">
+        <h4>Clue Ideas</h4>
+        <ul>
+          <li>What's still there? What's missing?</li>
+          <li>What's in the bin? What's on the walls?</li>
+          <li>What does the dust tell you? Where is it thick and where is it disturbed?</li>
+          <li>What's the one object that doesn't belong?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CW - Plot & Structure -->
+<section id="cw-structure">
+  <div class="section-title">
+    &#128196; Plot &amp; Structure
+    <span class="badge creative">15-20 min</span>
+  </div>
+
+  <!-- CW9 -->
+  <div class="exercise creative-ex" id="cw9">
+    <div class="ex-header">
+      <div class="ex-num">9</div>
+      <h3>The Inverted Opening</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Most stories begin at the beginning. This exercise forces you to begin at the <strong>moment of highest tension</strong>, then work backwards.</p>
+      <p style="margin-top:8px;">Write a <strong>200-word opening</strong> that starts with one of these lines, then fill in how we got there:</p>
+      <div class="ex-prompt">
+        <strong>Choose your opening line:</strong><br>
+        &bull; "The second message was worse than the first."<br>
+        &bull; "She had been underwater for four minutes when she realised she wasn't drowning."<br>
+        &bull; "The map was wrong — deliberately, beautifully wrong."<br>
+        &bull; "No one had ever returned from the Glass Sea. Until today."
+      </div>
+      <div class="ex-tip">Your story already does this well — "I love being exiled" is a striking opening that makes us ask <em>why?</em> This exercise pushes that instinct further.</div>
+    </div>
+  </div>
+
+  <!-- CW10 -->
+  <div class="exercise creative-ex" id="cw10">
+    <div class="ex-header">
+      <div class="ex-num">10</div>
+      <h3>The Two-Sentence Story</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Write a complete story in <strong>exactly two sentences</strong>. The first sentence sets up a situation. The second sentence <strong>completely changes how we understand the first</strong>.</p>
+      <div class="ex-prompt">
+        <strong>Example:</strong><br>
+        "For sale: baby shoes, never worn."<br>
+        — Attributed to Ernest Hemingway<br><br>
+        <strong>Your turn — write THREE two-sentence stories:</strong><br>
+        1. ____________________________________________________________<br>
+        ____________________________________________________________<br><br>
+        2. ____________________________________________________________<br>
+        ____________________________________________________________<br><br>
+        3. ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- CW11 -->
+  <div class="exercise creative-ex" id="cw11">
+    <div class="ex-header">
+      <div class="ex-num">11</div>
+      <h3>The Bottle: Part Two</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Continue your original story. She has read the message: <em>"Sail across the water, my love. And find your kind."</em></p>
+      <p><strong>Write 300-400 words</strong> covering what happens next. Does she build a boat? Does she discover she's not the only exile? Is there another message?</p>
+      <div class="ex-checklist">
+        <h4>Must Include</h4>
+        <ul>
+          <li>At least <strong>one sensory callback</strong> to your original story (pale blue skin, white hair, the glass bottle)</li>
+          <li>A <strong>decision moment</strong> — the point where she chooses to act</li>
+          <li>An ending that <strong>raises a new question</strong> for a potential Part Three</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CW12 -->
+  <div class="exercise creative-ex" id="cw12">
+    <div class="ex-header">
+      <div class="ex-num">12</div>
+      <h3>Circular Narrative</h3>
+      <span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Write a 300-word story where the <strong>first and last sentence are identical</strong> — but the reader understands them <strong>completely differently</strong> the second time because of everything that happened in between.</p>
+      <div class="ex-prompt">
+        <strong>Possible opening/closing sentences:</strong><br>
+        &bull; "The sea was exactly where she'd left it."<br>
+        &bull; "Some messages are better left unread."<br>
+        &bull; "She had always known she was different."
+      </div>
+      <div class="ex-tip">This is a sophisticated GCSE-grade structural technique. The meaning of the sentence doesn't change — the <em>reader's understanding</em> does. Think about what information you reveal in the middle that re-contextualises the opening.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CW - Language Craft -->
+<section id="cw-craft">
+  <div class="section-title">
+    &#128396; Language Craft
+    <span class="badge creative">10-15 min</span>
+  </div>
+
+  <!-- CW13 -->
+  <div class="exercise creative-ex" id="cw13">
+    <div class="ex-header">
+      <div class="ex-num">13</div>
+      <h3>Kill Your Darlings: The "Get" Hunt</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>"Get" is the most overused verb in student writing. Take a piece of your own writing (or the paragraph below) and <strong>replace every instance of "get/got/gotten"</strong> with a more precise verb.</p>
+      <div class="ba-grid">
+        <div class="ba-col bad">
+          <div class="ba-label">Before</div>
+          She <strong>got</strong> to the shore and <strong>got</strong> the bottle out of the water. She <strong>got</strong> the cork out and <strong>got</strong> hold of the paper. Then she <strong>got</strong> a strange feeling.
+        </div>
+        <div class="ba-col good">
+          <div class="ba-label">Possible Revision</div>
+          She <strong>waded</strong> to the shore and <strong>plucked</strong> the bottle from the water. She <strong>worked</strong> the cork free and <strong>pinched</strong> the edge of the paper. Then a strange feeling <strong>crept</strong> over her.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CW14 -->
+  <div class="exercise creative-ex" id="cw14">
+    <div class="ex-header">
+      <div class="ex-num">14</div>
+      <h3>Said Is Not Dead — But Alternatives Help</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Good dialogue uses "said" most of the time — but when emotion is high, a precise alternative carries weight. For each emotion below, write <strong>three alternative dialogue tags</strong>.</p>
+      <div class="ex-prompt">
+        <strong>Fear:</strong> "Don't open it," she _________. (whispered / breathed / stammered)<br>
+        <strong>Anger:</strong> "You knew all along," he _________. (____________________)<br>
+        <strong>Wonder:</strong> "It's beautiful," she _________. (____________________)<br>
+        <strong>Urgency:</strong> "They're coming," he _________. (____________________)<br>
+        <strong>Sadness:</strong> "I waited so long," she _________. (____________________)
+      </div>
+    </div>
+  </div>
+
+  <!-- CW15 -->
+  <div class="exercise creative-ex" id="cw15">
+    <div class="ex-header">
+      <div class="ex-num">15</div>
+      <h3>Simile &amp; Metaphor Bank</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>For each ordinary thing below, write <strong>one simile and one metaphor</strong> that makes it feel mysterious or magical — matching the tone of your bottle story.</p>
+      <div class="ex-prompt">
+        <strong>Ordinary thing</strong> → <strong>Your simile</strong> → <strong>Your metaphor</strong><br><br>
+        <strong>1. Fog:</strong><br>
+        Simile: ______________________________________________________<br>
+        Metaphor: ____________________________________________________<br><br>
+        <strong>2. An old mirror:</strong><br>
+        Simile: ______________________________________________________<br>
+        Metaphor: ____________________________________________________<br><br>
+        <strong>3. Silence:</strong><br>
+        Simile: ______________________________________________________<br>
+        Metaphor: ____________________________________________________<br><br>
+        <strong>4. Stars:</strong><br>
+        Simile: ______________________________________________________<br>
+        Metaphor: ____________________________________________________
+      </div>
+      <div class="ex-tip">A simile uses "like" or "as" (fog like a held breath). A metaphor says it IS the thing (fog was the earth's held breath). Metaphors are generally stronger.</div>
+    </div>
+  </div>
+
+  <!-- CW16 -->
+  <div class="exercise creative-ex" id="cw16">
+    <div class="ex-header">
+      <div class="ex-num">16</div>
+      <h3>Show, Don't Tell: Emotion Edition</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>For each emotion, write <strong>two sentences that show it through physical action or sensory detail</strong> — without naming the emotion.</p>
+      <div class="ex-prompt">
+        <strong>Loneliness</strong> (don't use the word "lonely" or "alone")<br>
+        1. ____________________________________________________________<br>
+        2. ____________________________________________________________<br><br>
+        <strong>Hope</strong> (don't use the word "hope" or "hopeful")<br>
+        1. ____________________________________________________________<br>
+        2. ____________________________________________________________<br><br>
+        <strong>Regret</strong> (don't use the word "regret" or "sorry")<br>
+        1. ____________________________________________________________<br>
+        2. ____________________________________________________________
+      </div>
+      <div class="ex-checklist">
+        <h4>Instead of naming the emotion, describe:</h4>
+        <ul>
+          <li>What their hands are doing</li>
+          <li>What they notice in the room that others wouldn't</li>
+          <li>How their breathing changes</li>
+          <li>What they do that makes no logical sense</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CW17 -->
+  <div class="exercise creative-ex" id="cw17">
+    <div class="ex-header">
+      <div class="ex-num">17</div>
+      <h3>Pacing: The Slow-Motion Moment</h3>
+      <span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Take a moment that would normally take <strong>one second in real time</strong> and stretch it across <strong>150 words</strong>. This is called a "slow-motion moment" and it's a powerful GCSE narrative technique.</p>
+      <div class="ex-prompt">
+        <strong>Choose your one-second moment:</strong><br>
+        &bull; The cork coming out of the bottle<br>
+        &bull; A character's foot crossing a threshold<br>
+        &bull; The moment before diving into water<br>
+        &bull; A door beginning to open
+      </div>
+      <div class="ex-tip">How to stretch time: describe every micro-sensation, every flicker of thought, every detail the character notices in that split second. Use short sentences for quick observations, longer ones for the thoughts that unspool.</div>
+    </div>
+  </div>
+
+  <!-- CW18 -->
+  <div class="exercise creative-ex" id="cw18">
+    <div class="ex-header">
+      <div class="ex-num">18</div>
+      <h3>The Constraint Challenge</h3>
+      <span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Write a 150-word scene with <strong>strict constraints</strong>. Constraints force creativity — professional writers use this technique.</p>
+      <div class="ex-prompt">
+        <strong>Scene:</strong> A character discovers a hidden door.<br><br>
+        <strong>Constraints:</strong><br>
+        &bull; No adverbs ending in -ly<br>
+        &bull; No form of the verb "to be" (is, was, were, are, am, been, being)<br>
+        &bull; Must include one colour and one sound
+      </div>
+      <div class="ex-tip">Removing "to be" verbs forces you into active, vivid sentences. Instead of "The door was old", you write "The door sagged on its hinges" or "Centuries had warped the oak."</div>
+    </div>
+  </div>
+</section>
+
+</div><!-- end creative tab -->
+
+<!-- ============================================================ -->
+<!-- ANALYSIS PARAGRAPHS TAB -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-analysis">
+
+<section>
+  <div class="section-title">
+    &#128214; The PEEZL Framework
+    <span class="badge analysis">Foundation</span>
+  </div>
+
+  <div class="framework">
+    <h3>How to Write a GCSE Analysis Paragraph</h3>
+    <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom: 16px;">
+      Analysis paragraphs are the core skill for GCSE English Literature and Language. They ask you to explain <strong>how</strong> a writer creates an effect — not just what happens. The PEEZL structure gives you a reliable formula.
+    </p>
+
+    <div class="step">
+      <h4><span style="color:var(--analysis);">P</span> — Point</h4>
+      <p>One clear sentence stating your argument about the text. What effect does the writer create?</p>
+      <div class="example">"Orwell presents the room as oppressive and claustrophobic to reflect Winston's lack of freedom."</div>
+    </div>
+
+    <div class="step">
+      <h4><span style="color:var(--analysis);">E</span> — Evidence</h4>
+      <p>A short, embedded quotation that supports your point. <strong>Embed</strong> means weave it into your sentence — don't just drop it in.</p>
+      <div class="example">The description of the "vile wind" and "stripped" walls creates a sense of...</div>
+    </div>
+
+    <div class="step">
+      <h4><span style="color:var(--analysis);">E</span> — Explain (Technique)</h4>
+      <p>Name the writer's technique and explain what it does. <strong>Always name a technique.</strong></p>
+      <div class="example">The adjective "vile" personifies the wind, suggesting that even nature has turned hostile...</div>
+    </div>
+
+    <div class="step">
+      <h4><span style="color:var(--analysis);">Z</span> — Zoom (Word Level)</h4>
+      <p>Zoom in on <strong>one specific word</strong> and analyse its connotations. This is where top marks live.</p>
+      <div class="example">The word "stripped" carries connotations of violence and exposure — the room has been forcibly robbed of comfort...</div>
+    </div>
+
+    <div class="step">
+      <h4><span style="color:var(--analysis);">L</span> — Link</h4>
+      <p>Connect back to the wider text, the writer's purpose, or the reader's response. Why does this matter?</p>
+      <div class="example">This creates a powerful sense of isolation that mirrors Winston's psychological state throughout the novel, making the reader feel the weight of the Party's control.</div>
+    </div>
+  </div>
+
+  <!-- Technique Glossary -->
+  <div style="margin:24px 0;">
+    <h3 style="font-size:1.05em; margin-bottom:12px;">Quick Technique Glossary</h3>
+    <table class="ref-table">
+      <thead>
+        <tr><th style="width:20%">Technique</th><th style="width:35%">Definition</th><th style="width:45%">Example from Published Texts</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Simile</strong></td><td>Comparison using "like" or "as"</td><td>"It was as if the disease had sharpened my senses" (Poe)</td></tr>
+        <tr><td><strong>Metaphor</strong></td><td>Direct comparison (says it IS the thing)</td><td>"the distant savage lair...was the sea" — sea as a wild beast's den (Dickens)</td></tr>
+        <tr><td><strong>Personification</strong></td><td>Giving human qualities to non-human things</td><td>"the wind was rushing" — wind given deliberate, aggressive movement (Dickens)</td></tr>
+        <tr><td><strong>Sensory imagery</strong></td><td>Description that appeals to the 5 senses</td><td>"warm and clean" room, "fresh ice cubes", "two tall glasses" (Dahl)</td></tr>
+        <tr><td><strong>Pathetic fallacy</strong></td><td>Weather/setting reflecting emotion</td><td>"dark flat wilderness", "low leaden line" — gloomy setting mirrors Pip's isolation (Dickens)</td></tr>
+        <tr><td><strong>Short sentence</strong></td><td>A brief sentence for emphasis or shock</td><td>"How, then, am I mad?" (Poe) — abrupt challenge to the reader</td></tr>
+        <tr><td><strong>Adjective</strong></td><td>A describing word</td><td>"dreadfully nervous", "dark flat wilderness", "warm and clean"</td></tr>
+        <tr><td><strong>Verb choice</strong></td><td>Specific action words that create effect</td><td>"sharpened" (Poe) — senses as blades; "rushing" (Dickens) — wind as attacker</td></tr>
+        <tr><td><strong>Juxtaposition</strong></td><td>Placing two contrasting things side by side</td><td>Cosy domestic scene → sudden murder (Dahl); "I heard...heaven...hell" (Poe)</td></tr>
+        <tr><td><strong>First-person narration</strong></td><td>"I" voice — limited to one character's perspective</td><td>"True! — nervous — very, very dreadfully nervous I had been" (Poe)</td></tr>
+        <tr><td><strong>Foreshadowing</strong></td><td>Hinting at what will happen later</td><td>"the empty chair opposite" — hints at the husband's absence to come (Dahl)</td></tr>
+        <tr><td><strong>Symbolism</strong></td><td>An object representing a bigger idea</td><td>The Thermos bucket with "fresh ice cubes" — preserved, cold domestic perfection (Dahl)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Analysis Exercises -->
+<section>
+  <div class="section-title">
+    &#128270; Analysis Paragraph Exercises
+    <span class="badge analysis">GCSE preparation</span>
+  </div>
+
+  <!-- AP1 -->
+  <div class="exercise analysis-ex" id="ap1">
+    <div class="ex-header">
+      <div class="ex-num">A1</div>
+      <h3>Spot the Technique</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Read the opening of <strong>"The Tell-Tale Heart" by Edgar Allan Poe</strong> below. For each quotation, <strong>name the technique</strong> and explain its effect in one sentence.</p>
+      <div class="ex-prompt" style="margin-bottom:12px;">
+        <em>"True! — nervous — very, very dreadfully nervous I had been and am; but why will you say that I am mad? The disease had sharpened my senses — not destroyed — not dulled them. Above all was the sense of hearing acute. I heard all things in the heaven and in the earth. I heard many things in hell. How, then, am I mad? Hearken! and observe how healthily — how calmly I can tell you the whole story."</em>
+      </div>
+      <div class="ex-prompt">
+        <strong>1.</strong> "True! — nervous — very, very dreadfully nervous I had been and am"<br>
+        Technique: _________________ &nbsp; Effect: _______________________________<br><br>
+        <strong>2.</strong> "I heard all things in the heaven and in the earth. I heard many things in hell."<br>
+        Technique: _________________ &nbsp; Effect: _______________________________<br><br>
+        <strong>3.</strong> "why will you say that I am mad?"<br>
+        Technique: _________________ &nbsp; Effect: _______________________________<br><br>
+        <strong>4.</strong> "how healthily — how calmly I can tell you the whole story"<br>
+        Technique: _________________ &nbsp; Effect: _______________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- AP2 -->
+  <div class="exercise analysis-ex" id="ap2">
+    <div class="ex-header">
+      <div class="ex-num">A2</div>
+      <h3>PEEZL Builder: Fill the Gaps</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Below is a partially complete PEEZL paragraph about the opening of <strong>"Lamb to the Slaughter" by Roald Dahl</strong>. <strong>Fill in the missing parts</strong> (marked with ______).</p>
+      <div class="ex-prompt" style="margin-bottom:12px;">
+        <em>"The room was warm and clean, the curtains drawn, the two table lamps alight — hers and the one by the empty chair opposite. On the sideboard behind her, two tall glasses, soda water, whisky. Fresh ice cubes in the Thermos bucket. Mary Maloney was waiting for her husband to come home from work."</em>
+      </div>
+      <div class="ex-prompt">
+        <strong>Point:</strong> Dahl creates a sense of cosy domesticity that makes the later violence more shocking by contrast.<br><br>
+        <strong>Evidence:</strong> The description of the "___________________________" room with "___________________________" creates an impression of ___________________________.<br><br>
+        <strong>Explain:</strong> The adjective "___________________________" establishes a mood of ___________________________. The detail of "___________________________" suggests that Mary is a ___________________________ wife.<br><br>
+        <strong>Zoom:</strong> The word "___________________________" is particularly effective because its connotations of ___________________________ imply that ___________________________.<br><br>
+        <strong>Link:</strong> This opening is important because ____________________________________________________________.
+      </div>
+    </div>
+  </div>
+
+  <!-- AP3 -->
+  <div class="exercise analysis-ex" id="ap3">
+    <div class="ex-header">
+      <div class="ex-num">A3</div>
+      <h3>Write a Full PEEZL Paragraph: The Tell-Tale Heart</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Re-read the opening of <strong>"The Tell-Tale Heart" by Edgar Allan Poe</strong> (see A1 above). Write a complete PEEZL paragraph analysing <strong>how Poe presents the narrator as unstable</strong>.</p>
+      <div class="ex-prompt">
+        <strong>Your question:</strong> How does Poe use language to present the narrator's mental state?<br><br>
+        <strong>Your paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+      <div class="ex-checklist">
+        <h4>Self-Check (tick each)</h4>
+        <ul>
+          <li>Point makes a clear argument (not just a summary of what happens)?</li>
+          <li>Evidence is embedded in the sentence (not "This is shown by the quote...")?</li>
+          <li>At least <strong>two techniques</strong> are named?</li>
+          <li>Zoom analyses <strong>one specific word</strong> and its connotations?</li>
+          <li>Link connects to the <strong>whole story</strong> or the <strong>reader's experience</strong>?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- AP4 -->
+  <div class="exercise analysis-ex" id="ap4">
+    <div class="ex-header">
+      <div class="ex-num">A4</div>
+      <h3>Comparative Analysis: Two Versions of an Opening</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Below are two descriptions of a churchyard — one plain, one from <strong>Charles Dickens' <em>Great Expectations</em></strong>. Write a PEEZL paragraph explaining <strong>how Dickens' version creates a more powerful atmosphere</strong>.</p>
+      <div class="ba-grid">
+        <div class="ba-col bad">
+          <div class="ba-label">Version A (Plain)</div>
+          It was a cold afternoon in the churchyard. It was quiet and there were graves everywhere. A boy stood there looking at his parents' graves. He felt sad and scared.
+        </div>
+        <div class="ba-col good">
+          <div class="ba-label">Version B (Dickens)</div>
+          "Ours was the marsh country, down by the river... The dark flat wilderness beyond the churchyard, intersected with dykes and mounds and gates, with scattered cattle feeding on it, was the marshes; and the low leaden line beyond, was the river; and the distant savage lair from which the wind was rushing, was the sea."
+      </div>
+      <div class="ex-prompt" style="margin-top:12px;">
+        <strong>Your comparative PEEZL paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- AP5 -->
+  <div class="exercise analysis-ex" id="ap5">
+    <div class="ex-header">
+      <div class="ex-num">A5</div>
+      <h3>The Zoom-In Drill</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>The "Zoom" is the highest-mark part of a GCSE analysis paragraph. For each word below (taken from the extracts you've studied), write <strong>three connotations</strong> and explain what they add to the text.</p>
+      <div class="ex-prompt">
+        <strong>1. "dreadfully"</strong> (from Poe: "very, very dreadfully nervous")<br>
+        Connotation 1: _________________ → suggests _______________________________<br>
+        Connotation 2: _________________ → suggests _______________________________<br>
+        Connotation 3: _________________ → suggests _______________________________<br><br>
+        <strong>2. "savage"</strong> (from Dickens: "the distant savage lair...was the sea")<br>
+        Connotation 1: _________________ → suggests _______________________________<br>
+        Connotation 2: _________________ → suggests _______________________________<br>
+        Connotation 3: _________________ → suggests _______________________________<br><br>
+        <strong>3. "alight"</strong> (from Dahl: "the two table lamps alight")<br>
+        Connotation 1: _________________ → suggests _______________________________<br>
+        Connotation 2: _________________ → suggests _______________________________<br>
+        Connotation 3: _________________ → suggests _______________________________
+      </div>
+      <div class="ex-tip">"Dreadfully" connotes fear, something terrible approaching, and — importantly — excess. The narrator isn't just nervous; he's <em>dreadfully</em> nervous, which hints at his exaggerated, unstable perception. This layered thinking is what gets top marks.</div>
+    </div>
+  </div>
+
+  <!-- AP6 -->
+  <div class="exercise analysis-ex" id="ap6">
+    <div class="ex-header">
+      <div class="ex-num">A6</div>
+      <h3>Structure Analysis: Dahl's Shift in Mood</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>GCSE also asks about <strong>structure</strong> — how the writer orders events for effect. Write a PEEZL paragraph analysing <strong>how Dahl structures the opening of "Lamb to the Slaughter" to create an abrupt shift in mood</strong>.</p>
+      <p style="margin-top:8px;">Think about: the peaceful domestic opening → the husband's cold announcement → Mary's stunned reaction → the sudden violence → her calculated cover-up. Focus especially on the <strong>transition point</strong> where the mood changes.</p>
+      <div class="ex-prompt">
+        <strong>Your structure paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- AP7 -->
+  <div class="exercise analysis-ex" id="ap7">
+    <div class="ex-header">
+      <div class="ex-num">A7</div>
+      <h3>Analyse a Published Extract</h3>
+      <span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Read this extract from <em>The Ocean at the End of the Lane</em> by Neil Gaiman. Write a full PEEZL paragraph answering: <strong>How does Gaiman create an atmosphere of unease?</strong></p>
+      <div class="ex-prompt">
+        <em>"I liked the sea. I liked the way it stretched out, grey and endless, further than I could imagine. But I did not like the thing that washed up on the shore. It was not a fish. It was not a piece of driftwood. It was small and dark and it moved in a way that things on the shore should not move. I stood very still and watched it, and it watched me back, and the sea whispered secrets I did not want to hear."</em>
+      </div>
+      <div class="ex-prompt" style="margin-top:12px;">
+        <strong>Your PEEZL paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- AP8 -->
+  <div class="exercise analysis-ex" id="ap8">
+    <div class="ex-header">
+      <div class="ex-num">A8</div>
+      <h3>Comparative: Two Endings</h3>
+      <span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Compare your story's ending with the ending of a published story or poem. How do both writers use final lines to create impact?</p>
+      <p style="margin-top:8px;"><strong>Your ending:</strong> "Sail across the water, my love. And find your kind."</p>
+      <p><strong>Compare with ONE of these:</strong></p>
+      <ul>
+        <li>The ending of any Neil Gaiman short story</li>
+        <li>The final stanza of "The Listeners" by Walter de la Mare</li>
+        <li>The ending of <em>Coraline</em> by Neil Gaiman</li>
+      </ul>
+      <div class="ex-prompt">
+        <strong>Your comparative paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- AP9 -->
+  <div class="exercise analysis-ex" id="ap9">
+    <div class="ex-header">
+      <div class="ex-num">A9</div>
+      <h3>Narrative Perspective: Poe's First-Person Narrator</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Poe's "The Tell-Tale Heart" uses <strong>first-person narration</strong> — an "I" voice limited to one character's perspective. Write a PEEZL paragraph explaining <strong>what effect this choice has on the reader</strong>.</p>
+      <p style="margin-top:8px;">Consider: What does the narrator reveal about himself that he doesn't intend to? What does the reader understand that the narrator doesn't? How does being inside his head affect how we judge his actions?</p>
+      <div class="ex-prompt">
+        <strong>Your paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- AP10 -->
+  <div class="exercise analysis-ex" id="ap10">
+    <div class="ex-header">
+      <div class="ex-num">A10</div>
+      <h3>Extended Response: Great Expectations Opening</h3>
+      <span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Read the full opening of <strong><em>Great Expectations</em> by Charles Dickens</strong> (Chapter 1 — your English teacher can provide a copy, or find it online). Write <strong>three connected PEEZL paragraphs</strong> answering this GCSE-style question:</p>
+      <div class="ex-prompt">
+        <strong>"How does Dickens use language and structure to create sympathy for the young Pip?"</strong><br><br>
+        Paragraph 1 (Setting & Atmosphere): _______________________________________<br>
+        ____________________________________________________________<br><br>
+        Paragraph 2 (Character & Voice): _________________________________________<br>
+        ____________________________________________________________<br><br>
+        Paragraph 3 (The convict's arrival as turning point): ______________________<br>
+        ____________________________________________________________
+      </div>
+      <div class="ex-tip">This is real GCSE-level work. The examiner wants to see you can sustain analysis across multiple paragraphs, each making a different point but building toward a coherent argument. Plan your three points before writing.</div>
+    </div>
+  </div>
+
+  <!-- AP11 -->
+  <div class="exercise analysis-ex" id="ap11">
+    <div class="ex-header">
+      <div class="ex-num">A11</div>
+      <h3>Mark a Model Paragraph</h3>
+      <span class="difficulty diff-medium">&#9733;&#9733; Medium</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Below is a student's analysis paragraph about <strong>the opening of "The Tell-Tale Heart"</strong>. <strong>Give it a mark out of 8</strong> and write <strong>two specific suggestions</strong> for improvement.</p>
+      <div class="ex-prompt">
+        <em>"The writer uses good words to describe the narrator. The narrator says he is 'nervous' which shows he is scared. This shows that the narrator is not calm. Also the writer uses short sentences which makes it fast. The writer makes the reader interested because they want to know what happens next. I think this is effective writing."</em>
+      </div>
+      <div class="ex-prompt" style="margin-top:12px;">
+        <strong>Your mark: ____ / 8</strong><br><br>
+        <strong>What's missing?</strong><br>
+        1. ____________________________________________________________<br>
+        2. ____________________________________________________________<br><br>
+        <strong>Now rewrite this paragraph to make it a 7/8:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+      <div class="ex-tip">Marking someone else's work is one of the fastest ways to improve your own. You'll spot weaknesses you didn't realise you also had.</div>
+    </div>
+  </div>
+
+  <!-- AP12 -->
+  <div class="exercise analysis-ex" id="ap12">
+    <div class="ex-header">
+      <div class="ex-num">A12</div>
+      <h3>Poetry Analysis: "The Listeners"</h3>
+      <span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Read Walter de la Mare's poem "The Listeners" (your English teacher can provide a copy, or find it online). Write a PEEZL paragraph on: <strong>How does de la Mare create a sense of mystery and loneliness?</strong></p>
+      <p style="margin-top:8px;">This poem pairs beautifully with your bottle story — both feature a lone figure, an empty landscape, and a message delivered to silence.</p>
+      <div class="ex-prompt">
+        <strong>Your paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- AP13 -->
+  <div class="exercise analysis-ex" id="ap13">
+    <div class="ex-header">
+      <div class="ex-num">A13</div>
+      <h3>Opening Lines Analysis</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Read these famous opening lines. For each, write <strong>one sentence naming a technique and explaining its effect</strong>.</p>
+      <div class="ex-prompt">
+        <strong>1.</strong> "It was a bright cold day in April, and the clocks were striking thirteen." (<em>1984</em>, George Orwell)<br>
+        ____________________________________________________________<br><br>
+        <strong>2.</strong> "There was no possibility of taking a walk that day." (<em>Jane Eyre</em>, Charlotte Bronte)<br>
+        ____________________________________________________________<br><br>
+        <strong>3.</strong> "The sky above the port was the colour of television, tuned to a dead channel." (<em>Neuromancer</em>, William Gibson)<br>
+        ____________________________________________________________<br><br>
+        <strong>4.</strong> "Marley was dead: to begin with." (<em>A Christmas Carol</em>, Charles Dickens)<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- AP14 -->
+  <div class="exercise analysis-ex" id="ap14">
+    <div class="ex-header">
+      <div class="ex-num">A14</div>
+      <h3>Vocabulary of Analysis: Upgrade Your Words</h3>
+      <span class="difficulty diff-easy">&#9733; Easy</span>
+    </div>
+    <div class="ex-instructions">
+      <p>Replace each weak analytical phrase with a stronger alternative. The first one is done for you.</p>
+      <table class="ref-table" style="margin-top:12px;">
+        <thead><tr><th>Weak Phrase</th><th>Your Stronger Alternative</th></tr></thead>
+        <tbody>
+          <tr><td>"This shows that..."</td><td>"This suggests / implies / conveys / evokes..."</td></tr>
+          <tr><td>"The writer uses good words"</td><td>_______________________________________________</td></tr>
+          <tr><td>"It makes the reader interested"</td><td>_______________________________________________</td></tr>
+          <tr><td>"It stands out"</td><td>_______________________________________________</td></tr>
+          <tr><td>"The writer does this to..."</td><td>_______________________________________________</td></tr>
+          <tr><td>"It creates a picture in your head"</td><td>_______________________________________________</td></tr>
+          <tr><td>"It makes you feel..."</td><td>_______________________________________________</td></tr>
+          <tr><td>"This is effective because..."</td><td>_______________________________________________</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+</div><!-- end analysis tab -->
+
+<!-- ============================================================ -->
+<!-- QUICK REFERENCE TAB -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-reference">
+
+<section>
+  <div class="section-title">&#128203; Weekly Practice Schedule</div>
+  <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom:20px;">
+    Consistency beats intensity. Aim for 3-4 short sessions per week rather than one long session.
+  </p>
+
+  <table class="ref-table">
+    <thead>
+      <tr><th>Day</th><th>Focus</th><th>Exercise</th><th>Time</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Monday</strong></td><td>Creative warm-up</td><td>CW1 (Five Senses) or CW2 (Sentence Stretch)</td><td>10 min</td></tr>
+      <tr><td><strong>Wednesday</strong></td><td>Analysis skill</td><td>A1 (Spot the Technique) or A2 (PEEZL Builder)</td><td>15 min</td></tr>
+      <tr><td><strong>Friday</strong></td><td>Creative deep dive</td><td>One medium exercise (CW4-CW9) or CW11 (Part Two)</td><td>20-25 min</td></tr>
+      <tr><td><strong>Weekend</strong></td><td>Full analysis paragraph</td><td>A3, A4, or A10 (Extended Response)</td><td>25 min</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="section-title">&#127919; GCSE Grade Descriptors — What Examiners Look For</div>
+
+  <table class="ref-table">
+    <thead>
+      <tr><th style="width:12%">Grade</th><th style="width:44%">Creative Writing</th><th style="width:44%">Analysis Paragraph</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Grade 7-9</strong><br><span style="font-size:0.75em;color:var(--text-secondary);">(A/A*)</span></td>
+        <td>Ambitious vocabulary; controlled structure with deliberate pace shifts; distinctive voice; figurative language used precisely; convincing and compelling</td>
+        <td>Perceptive analysis of language AND structure; zoom on specific words with layered connotations; explores alternative interpretations; links to writer's purpose</td>
+      </tr>
+      <tr>
+        <td><strong>Grade 5-6</strong><br><span style="font-size:0.75em;color:var(--text-secondary);">(B/low A)</span></td>
+        <td>Clear control of tone; some successful figurative language; mostly secure paragraphing; vocabulary is appropriate but not always ambitious</td>
+        <td>Clear explanation of effects; names techniques accurately; uses relevant quotations; explains what words suggest; attempts zoom but may stay surface-level</td>
+      </tr>
+      <tr>
+        <td><strong>Grade 3-4</strong><br><span style="font-size:0.75em;color:var(--text-secondary);">(D/C)</span></td>
+        <td>Some control of basic structure; simple vocabulary; attempts description but may be generic; limited paragraphing</td>
+        <td>Identifies obvious techniques; uses quotations but may not embed them; describes what happens rather than analysing how; limited technical vocabulary</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="section-title">&#128218; Recommended Reading for Analysis Practice</div>
+  <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom:16px;">
+    These are excellent texts for practising analysis — rich in techniques, short enough to read in one sitting.
+  </p>
+
+  <table class="ref-table">
+    <thead>
+      <tr><th>Text</th><th>Author</th><th>Why It's Good for Analysis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>"The Listeners"</td><td>Walter de la Mare</td><td>Poem — atmosphere, repetition, mystery, sound devices</td></tr>
+      <tr><td>"Lamb to the Slaughter"</td><td>Roald Dahl</td><td>Short story — irony, characterisation, dark humour, twist ending</td></tr>
+      <tr><td>"The Tell-Tale Heart"</td><td>Edgar Allan Poe</td><td>Short story — unreliable narrator, pacing, repetition, Gothic atmosphere</td></tr>
+      <tr><td>"Exposure"</td><td>Wilfred Owen</td><td>Poem — personification, sensory imagery, structure, collective voice</td></tr>
+      <tr><td>"The Lottery"</td><td>Shirley Jackson</td><td>Short story — foreshadowing, atmosphere, juxtaposition, shocking ending</td></tr>
+      <tr><td>"Checking Out Me History"</td><td>John Agard</td><td>Poem — dialect, structure, juxtaposition, cultural identity</td></tr>
+      <tr><td>Opening of <em>Great Expectations</em></td><td>Charles Dickens</td><td>Novel extract — setting, pathetic fallacy, first-person voice, character</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="section-title">&#128221; Sentence Starters for Analysis</div>
+  <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom:16px;">
+    Print this and keep it next to you when writing analysis paragraphs.
+  </p>
+
+  <table class="ref-table">
+    <thead>
+      <tr><th style="width:20%">Part</th><th style="width:80%">Sentence Starters</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Point</strong></td><td>"The writer presents...", "Through the use of...", "The writer creates a sense of...", "The author establishes..."</td></tr>
+      <tr><td><strong>Evidence</strong></td><td>"This is evident when...", "The description of '...' conveys...", "The phrase '...' suggests...", "The writer's choice of '...' implies..."</td></tr>
+      <tr><td><strong>Explain</strong></td><td>"The [technique] creates the effect of...", "This [technique] evokes a feeling of...", "By using [technique], the writer emphasises...", "The [technique] reinforces the idea that..."</td></tr>
+      <tr><td><strong>Zoom</strong></td><td>"The word '...' is particularly significant because...", "The connotations of '...' include...", "The adjective/verb '...' carries implications of...", "On a deeper level, '...' could also suggest..."</td></tr>
+      <tr><td><strong>Link</strong></td><td>"This connects to the wider theme of...", "Ultimately, this makes the reader consider...", "The writer may be suggesting that...", "This contributes to the overall impression that..."</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</div><!-- end reference tab -->
+
+</div><!-- container -->
+
+<footer>
+  Jemma's Writing Workbook &middot; Headington School, Year 8 &middot; May 2026<br>
+  <span style="font-size:0.85em;">Designed for self-paced practice. Aim for 3-4 sessions per week.</span>
+</footer>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+</script>
+
+</body>
+</html>

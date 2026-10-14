@@ -1,0 +1,48 @@
+[
+  {
+    "model": "bytedance-seed/seed-2.0-lite",
+    "status": "success",
+    "time_s": 39.0,
+    "cost_usd": 0.002162,
+    "chars": 773,
+    "lines": 27,
+    "prompt_tokens": 1399,
+    "completion_tokens": 906,
+    "text_preview": "### Full transcription of all page content, preserving layout/line breaks:\n---\nTop center of page: `9`\nTop right aligned text:\n```\nDo not write\noutside the\nbox\n```\nLeft-side question identifier + first question line:\n`[0][3].[3] Chadwick's experiments showed the existence of neutrons in an atom.`\nNe"
+  },
+  {
+    "model": "openai/gpt-4o",
+    "status": "error",
+    "time_s": 0.1,
+    "http_status": 403,
+    "error": "{\"error\":{\"message\":\"The request is prohibited due to a violation of provider Terms Of Service.\",\"code\":403,\"metadata\":{\"provider_name\":null}},\"user_id\":\"user_39kgWmqodFcC69KjSqxQhTzxbz4\"}"
+  },
+  {
+    "model": "openai/gpt-4o-mini",
+    "status": "error",
+    "time_s": 0.1,
+    "http_status": 403,
+    "error": "{\"error\":{\"message\":\"The request is prohibited due to a violation of provider Terms Of Service.\",\"code\":403,\"metadata\":{\"provider_name\":null}},\"user_id\":\"user_39kgWmqodFcC69KjSqxQhTzxbz4\"}"
+  },
+  {
+    "model": "anthropic/claude-3.5-sonnet",
+    "status": "error",
+    "time_s": 0.0,
+    "http_status": 404,
+    "error": "{\"error\":{\"message\":\"No endpoints found for anthropic/claude-3.5-sonnet.\",\"code\":404},\"user_id\":\"user_39kgWmqodFcC69KjSqxQhTzxbz4\"}"
+  },
+  {
+    "model": "google/gemini-2.0-flash-001",
+    "status": "error",
+    "time_s": 0.1,
+    "http_status": 403,
+    "error": "{\"error\":{\"message\":\"The request is prohibited due to a violation of provider Terms Of Service.\",\"code\":403,\"metadata\":{\"provider_name\":null}},\"user_id\":\"user_39kgWmqodFcC69KjSqxQhTzxbz4\"}"
+  },
+  {
+    "model": "qwen/qwen3.6-flash",
+    "status": "error",
+    "time_s": 1.7,
+    "http_status": 429,
+    "error": "{\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"qwen/qwen3.6-flash is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations\",\"provider_name\":\"Alibaba\",\"is_byok\":false}},\"use"
+  }
+]

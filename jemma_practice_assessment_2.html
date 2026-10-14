@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jemma Practice Assessment 2 — Treasure Island</title>
+<style>
+  @page { size: A4; margin: 18mm 20mm; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #1a1a1a;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .header-block {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .subject {
+    font-size: 0.95em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #555;
+    margin-bottom: 4px;
+  }
+  .title {
+    font-size: 1.35em;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .name-row {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+  }
+  .name-row span {
+    display: inline-block;
+    border-bottom: 1px solid #999;
+    width: 180px;
+  }
+  .info-box {
+    border: 2px solid #333;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    line-height: 1.6;
+  }
+  .info-box ul { margin: 6px 0 0 18px; }
+  .section-header {
+    font-size: 1.1em;
+    font-weight: 700;
+    border-bottom: 2px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 14px;
+    margin-top: 24px;
+  }
+  .marks { font-size: 0.8em; color: #555; font-weight: 400; }
+  .proof-item { margin-bottom: 16px; }
+  .proof-item .num { font-weight: 700; margin-right: 4px; }
+  .proof-item .wrong { background: #f9f9f9; padding: 6px 8px; border-left: 3px solid #c0392b; margin: 4px 0; font-size: 0.92em; }
+  .correct-lines {
+    border-bottom: 1px solid #ccc;
+    height: 24px;
+    margin-top: 2px;
+    margin-left: 18px;
+  }
+  .page-break { page-break-before: always; }
+  .extract-intro { font-size: 0.9em; color: #444; margin-bottom: 14px; line-height: 1.6; }
+  .extract-box {
+    border: 1px solid #999;
+    padding: 18px 22px;
+    background: #fafaf7;
+    text-align: justify;
+    margin-bottom: 16px;
+  }
+  .extract-box p { text-indent: 1.5em; margin-bottom: 10px; }
+  .glossary-box {
+    border: 1px solid #ccc;
+    padding: 12px 16px;
+    background: #f5f6f8;
+    font-size: 0.88em;
+    margin-bottom: 8px;
+  }
+  .glossary-box h4 { margin: 0 0 8px 0; font-size: 0.95em; }
+  .gloss-item { margin-bottom: 4px; }
+  .gloss-word { font-weight: 700; }
+  .attribution { text-align: right; font-size: 0.8em; color: #888; margin-bottom: 20px; }
+  .vocab-q { margin-bottom: 14px; }
+  .vocab-options span { display: inline-block; margin: 0 10px; font-style: italic; }
+  .vocab-answer {
+    display: inline-block;
+    border-bottom: 1px solid #ccc;
+    width: 70px;
+    height: 22px;
+    margin-left: 12px;
+    vertical-align: bottom;
+  }
+  .writing-prompt {
+    border: 1px solid #999;
+    padding: 18px 22px;
+    background: #fafaf7;
+    margin-bottom: 14px;
+  }
+  .writing-prompt .title-line {
+    text-align: center;
+    font-size: 1.15em;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .constraints { padding-left: 20px; font-size: 0.9em; color: #444; }
+  .constraints li { margin-bottom: 4px; }
+  .writing-lines { margin-top: 10px; }
+  .wl { border-bottom: 1px solid #ddd; height: 28px; }
+  .marks-footer {
+    text-align: center;
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid #ccc;
+  }
+  .section-end {
+    text-align: center;
+    color: #999;
+    font-size: 0.8em;
+    margin: 18px 0 6px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== PAGE 1: HEADER + SECTION A ===== -->
+<div class="header-block">
+  <div class="subject">Y8 English</div>
+  <div class="title">Lower School PRACTICE Assessment</div>
+  <div class="name-row">
+    NAME: <span>&nbsp;</span>
+    ENGLISH TEACHER: <span>&nbsp;</span>
+  </div>
+</div>
+
+<div class="info-box">
+  <p><strong>Information</strong></p>
+  <p>Make sure you write your name on every separate sheet you use.</p>
+  <p>You have <strong>1 hour 10 minutes</strong> in total.</p>
+  <ul>
+    <li>Spend <strong>10 minutes</strong> on Section A</li>
+    <li>Spend <strong>35 minutes</strong> on Section B</li>
+    <li>Spend <strong>20 minutes</strong> on Section C</li>
+    <li>Spend <strong>5 minutes</strong> checking your responses</li>
+  </ul>
+</div>
+
+<div class="section-header">
+  Section A — Proofreading
+  <span class="marks">[4 marks]</span>
+</div>
+
+<p style="font-size:0.9em; margin-bottom:14px; color:#444;">Write the following sentences correctly. Each sentence contains <strong>two errors</strong> in spelling, punctuation, or grammar.</p>
+
+<div class="proof-item">
+  <span class="num">1.</span>
+  <div class="wrong">The old sailor come into the inn and their was a strange silence fell over the room.</div>
+  <div class="correct-lines"></div>
+</div>
+
+<div class="proof-item">
+  <span class="num">2.</span>
+  <div class="wrong">He had a scar across his cheek his cloths were dirty and he carried a heavy sea chest.</div>
+  <div class="correct-lines"></div>
+</div>
+
+<div class="proof-item">
+  <span class="num">3.</span>
+  <div class="wrong">"Their coming for me," the sailor said, "I must leave before it gets more darker."</div>
+  <div class="correct-lines"></div>
+</div>
+
+<div class="proof-item">
+  <span class="num">4.</span>
+  <div class="wrong">The young boy could of warned the captain but he was to afraid to speak up.</div>
+  <div class="correct-lines"></div>
+</div>
+
+<div class="section-end">Section B begins on the next page &rarr;</div>
+
+<!-- ===== PAGE 2: SECTION B — EXTRACT + GLOSSARY ===== -->
+<div class="page-break"></div>
+
+<div class="section-header">
+  Section B — Reading
+  <span class="marks">[29 marks]</span>
+</div>
+
+<p class="extract-intro">
+  Spend around <strong>35 minutes</strong> on this section. Read the passage carefully. You may refer back to it when answering the questions that follow.<br><br>
+  This extract is from the opening of <strong><em>Treasure Island</em> by Robert Louis Stevenson (1883)</strong>. The narrator, Jim Hawkins, is a young boy whose family runs a small inn by the sea. One day, a mysterious stranger arrives...
+</p>
+
+<div class="extract-box">
+  <p>I remember him as if it were yesterday, as he came <strong>plodding</strong> to the inn door, his sea-chest following behind him in a hand-barrow — a tall, strong, heavy, nut-brown man, his <strong>tarry</strong> pigtail falling over the shoulder of his soiled blue coat, his hands ragged and scarred, with black, broken nails; and the sabre cut across one cheek, a dirty, <strong>livid</strong> white.</p>
+
+  <p>I remember him looking round the cove and whistling to himself as he did so, and then breaking out in that old sea-song that he sang so often afterwards:</p>
+
+  <p style="text-align:center; text-indent:0; font-style:italic; margin:10px 0;">
+    "Fifteen men on the dead man's chest —<br>
+    Yo-ho-ho, and a bottle of rum!"
+  </p>
+
+  <p>in the high, old <strong>tottering</strong> voice that seemed to have been tuned and broken at the <strong>capstan</strong> bars. Then he rapped on the door with a bit of stick like a handspike that he carried, and when my father appeared, called roughly for a glass of rum. This, when it was brought to him, he drank slowly, like a <strong>connoisseur</strong>, lingering on the taste and still looking about him at the cliffs and up at our signboard.</p>
+
+  <p>"This is a handy cove," says he at length; "and a pleasant <strong>sittypated</strong> grog-shop. Much company, mate?"</p>
+
+  <p>My father told him no, very little company, the more was the pity.</p>
+
+  <p>"Well, then," said he, "this is the <strong>berth</strong> for me. Here you, matey," he cried to the man who trundled the barrow; "bring up alongside and help up my chest. I'll stay here a bit," he continued. "I'm a plain man; rum and bacon and eggs is what I want, and that head up there for to watch ships off. What you mought call me? You mought call me captain. Oh, I see what you're at — there"; and he threw down three or four gold pieces on the <strong>threshold</strong>. "You can tell me when I've worked through that," says he, looking as fierce as a commander.</p>
+
+  <p>And indeed bad as his clothes were and coarsely as he spoke, he had none of the appearance of a man who sailed before the mast, but seemed like a mate or skipper accustomed to be obeyed or to strike. The man who came with the barrow told us the mail had set him down the morning before at the Royal George, that he had <strong>inquired</strong> what inns there were along the coast, and hearing ours well spoken of, I suppose, and described as lonely, had chosen it from the others for his place of <strong>residence</strong>. And that was all we could learn of our guest.</p>
+</div>
+
+<div class="glossary-box">
+  <h4>Glossary</h4>
+  <div class="gloss-item"><span class="gloss-word">tarry</span> covered with tar (a black sticky substance used on ships)</div>
+  <div class="gloss-item"><span class="gloss-word">livid</span> dark bluish-grey in colour</div>
+  <div class="gloss-item"><span class="gloss-word">capstan</span> a machine on a ship used for lifting heavy objects like the anchor</div>
+  <div class="gloss-item"><span class="gloss-word">connoisseur</span> an expert who knows and appreciates fine quality</div>
+  <div class="gloss-item"><span class="gloss-word">sittypated</span> a slang word meaning "situated" (the captain speaks in an uneducated way)</div>
+  <div class="gloss-item"><span class="gloss-word">berth</span> a place to sleep on a ship; here used to mean a place to stay</div>
+  <div class="gloss-item"><span class="gloss-word">threshold</span> the entrance or doorway to a building</div>
+</div>
+
+<div class="attribution">from <em>Treasure Island</em> by Robert Louis Stevenson (1883)</div>
+
+<!-- ===== PAGE 3: QUESTIONS + SECTION C ===== -->
+<div class="page-break"></div>
+
+<div class="section-header">
+  Section B — Questions (continued)
+</div>
+
+<p style="font-size:0.9em; color:#444; margin-bottom:14px;">
+  Answer the following questions about the extract. Use <strong>short quotations</strong> from the passage to support your answers.
+</p>
+
+<p style="margin-bottom:18px;">
+  <strong>1.</strong> From the first paragraph, list <strong>three details</strong> about the stranger's appearance that make him seem threatening or unusual.<br>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px; margin-top:4px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="float:right; color:#555; font-size:0.85em;">[3 marks]</span>
+</p>
+
+<p style="margin-bottom:18px;">
+  <strong>2.</strong> The captain says <em>"I'm a plain man"</em> but then throws down gold coins and speaks <em>"as fierce as a commander."</em> What does this <strong>contradiction</strong> tell us about his character?<br>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px; margin-top:4px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="float:right; color:#555; font-size:0.85em;">[3 marks]</span>
+</p>
+
+<p style="margin-bottom:18px;">
+  <strong>3.</strong> How does Stevenson create a sense that the captain is <strong>not an ordinary sailor</strong>? Use evidence from the <strong>final paragraph</strong> of the extract.<br>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px; margin-top:4px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="float:right; color:#555; font-size:0.85em;">[3 marks]</span>
+</p>
+
+<p style="margin-bottom:18px;">
+  <strong>4.</strong> <strong>Summarise</strong> the extract in your own words. Your summary should:<br>
+  &bull; Include <strong>who</strong> arrives, <strong>where</strong> they arrive, and <strong>what they do</strong><br>
+  &bull; Be no more than <strong>60 words</strong><br>
+  &bull; Use your own wording — do not copy sentences from the passage<br>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px; margin-top:4px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="float:right; color:#555; font-size:0.85em;">[4 marks]</span>
+</p>
+
+<p style="margin-bottom:24px;">
+  <strong>5.</strong> Read the description of the captain in <strong>paragraphs 1 and 6</strong>. Using the <strong>PEZL</strong> structure, write one paragraph analysing <strong>how Stevenson uses language to make the captain seem dangerous</strong>.</p>
+  <p style="font-size:0.82em; color:#666; margin:-12px 0 8px 0;">
+    <strong>PEZL reminder:</strong> <em>Point</em> (one clear argument) → <em>Evidence</em> (embedded quotation) → <em>Zoom</em> (analyse one specific word) → <em>Link</em> (connect to the reader's response or wider text)
+  </p>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px; margin-top:4px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+</p>
+<div style="text-align:right; margin-top:-16px; margin-bottom:14px;">
+  <span style="color:#555; font-size:0.85em;">[6 marks]</span>
+</div>
+
+<p style="margin-bottom:24px;">
+  <strong>6.</strong> For each of the words in bold below (which are also in bold in the passage): write down the <strong>italicised word</strong> which is closest in meaning. Use what you read in the passage to help you.
+</p>
+
+<div class="vocab-q">
+  <p><strong>A. plodding</strong></p>
+  <div class="vocab-options">
+    <span><em>running</em></span> <span><em>stomping</em></span> <span><em>trudging</em></span> <span><em>skipping</em></span>
+  </div>
+  <div class="vocab-answer"></div>
+</div>
+
+<div class="vocab-q">
+  <p><strong>B. tottering</strong></p>
+  <div class="vocab-options">
+    <span><em>musical</em></span> <span><em>shaky</em></span> <span><em>angry</em></span> <span><em>whispering</em></span>
+  </div>
+  <div class="vocab-answer"></div>
+</div>
+
+<div class="vocab-q">
+  <p><strong>C. inquired</strong></p>
+  <div class="vocab-options">
+    <span><em>complained</em></span> <span><em>shouted</em></span> <span><em>demanded</em></span> <span><em>asked</em></span>
+  </div>
+  <div class="vocab-answer"></div>
+</div>
+
+<div class="vocab-q">
+  <p><strong>D. residence</strong></p>
+  <div class="vocab-options">
+    <span><em>business</em></span> <span><em>holiday</em></span> <span><em>home</em></span> <span><em>hiding place</em></span>
+  </div>
+  <div class="vocab-answer" style="margin-bottom:8px;"></div>
+  <span style="float:right; color:#555; font-size:0.85em;">[2 marks]</span>
+</p>
+
+<div style="clear:both;"></div>
+
+<p style="margin-bottom:18px; margin-top:20px; padding-top:16px; border-top:1px solid #999;">
+  <strong>7.</strong> <strong>Extended analysis.</strong> Stevenson uses several techniques to make the reader <strong>suspicious of the captain</strong> from the very first paragraph.</p>
+  <p style="font-size:0.9em; color:#444; margin:-10px 0 8px 0;">
+    Write <strong>two PEEZL paragraphs</strong> answering the question: <strong><em>"How does Stevenson create a sense of menace and mystery around the captain in this extract?"</em></strong>
+  </p>
+  <p style="font-size:0.82em; color:#666; margin-bottom:8px;">
+    You should write about:<br>
+    &bull; The captain's <strong>appearance</strong> and what it suggests about his past<br>
+    &bull; The way he <strong>speaks and behaves</strong> towards the innkeepers<br>
+    &bull; The <strong>impression</strong> the narrator Jim gives of him<br><br>
+    Use short, embedded quotations. Remember to zoom in on <strong>specific words</strong>.
+  </p>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+  <span style="display:inline-block; border-bottom:1px solid #ccc; width:100%; height:24px;"></span>
+</p>
+<div style="text-align:right; margin-top:-16px; margin-bottom:14px;">
+  <span style="color:#555; font-size:0.85em;">[8 marks]</span>
+</div>
+
+<!-- ===== SECTION C ===== -->
+<div class="section-header">
+  Section C — Writing
+  <span class="marks">[15 marks]</span>
+</div>
+
+<p style="font-size:0.9em; color:#444; margin-bottom:6px;">Spend <strong>20 minutes</strong> on this section.</p>
+
+<div class="writing-prompt">
+  <div class="title-line">"The Stranger"</div>
+
+  <p>Write the opening of a story in which a <strong>mysterious stranger</strong> arrives at an ordinary place.</p>
+
+  <ul class="constraints">
+    <li>Aim for <strong>two to three paragraphs</strong></li>
+    <li>Describe the stranger's <strong>appearance</strong> using at least one simile or metaphor</li>
+    <li>Show how the stranger's arrival <strong>changes the atmosphere</strong> of the place</li>
+    <li>Use <strong>sensory details</strong> (sight, sound, smell) to make the scene vivid</li>
+  </ul>
+
+  <p style="font-size:0.82em; color:#666; margin-top:10px;">Marks will be awarded for accurate spelling, punctuation and grammar, and for ambitious vocabulary.</p>
+</div>
+
+<p style="font-size:0.82em; color:#444; margin-bottom:4px;"><em>Use the space below for planning and writing.</em></p>
+
+<div class="writing-lines">
+  <div class="wl"></div><div class="wl"></div><div class="wl"></div><div class="wl"></div>
+  <div class="wl"></div><div class="wl"></div><div class="wl"></div><div class="wl"></div>
+  <div class="wl"></div><div class="wl"></div><div class="wl"></div><div class="wl"></div>
+  <div class="wl"></div><div class="wl"></div><div class="wl"></div><div class="wl"></div>
+  <div class="wl"></div><div class="wl"></div><div class="wl"></div><div class="wl"></div>
+</div>
+
+<div class="marks-footer">END OF ASSESSMENT &nbsp;|&nbsp; Total: 48 marks</div>
+
+<!-- ===== ANSWER KEY (for parent/teacher) ===== -->
+<div class="page-break"></div>
+<div style="margin-top:20px;">
+  <div class="section-header" style="color:#4a7c59; border-bottom-color:#4a7c59;">
+    Answer Key &amp; Marking Guide
+    <span style="font-size:0.7em; float:right; font-weight:400;">For parent/teacher use</span>
+  </div>
+
+  <h4 style="margin-top:16px;">Section A — Proofreading [4 marks]</h4>
+  <p style="font-size:0.88em; color:#444;">Award <strong>1 mark per sentence</strong> if both errors are corrected. Award ½ mark if only one error corrected.</p>
+  <table style="width:100%; border-collapse:collapse; font-size:0.85em; margin-top:8px;">
+    <thead>
+      <tr style="background:#f5faf6;"><th style="text-align:left;padding:6px 10px;border-bottom:1px solid #ccc;width:8%;">Q</th><th style="text-align:left;padding:6px 10px;border-bottom:1px solid #ccc;">Correct Version</th><th style="text-align:left;padding:6px 10px;border-bottom:1px solid #ccc;width:35%;">Errors</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">1</td><td style="padding:6px 10px;border-bottom:1px solid #eee;">The old sailor <strong>came</strong> into the inn and <strong>there</strong> was a strange silence <strong>that</strong> fell over the room.</td><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:0.82em;">"come"→"came" (tense); "their"→"there" (homophone); accept adding "that" after "silence"</td></tr>
+      <tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">2</td><td style="padding:6px 10px;border-bottom:1px solid #eee;">He had a scar across his cheek<strong>.</strong> His <strong>clothes</strong> were dirty and he carried a heavy sea chest.</td><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:0.82em;">comma splice → full stop or semicolon; "cloths"→"clothes"</td></tr>
+      <tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">3</td><td style="padding:6px 10px;border-bottom:1px solid #eee;">"<strong>They're</strong> coming for me," the sailor said, "I must leave before it gets <strong>darker</strong>."</td><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:0.82em;">"Their"→"They're"; "more darker"→"darker" (double comparative)</td></tr>
+      <tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">4</td><td style="padding:6px 10px;border-bottom:1px solid #eee;">The young boy could <strong>have</strong> warned the captain but he was <strong>too</strong> afraid to speak up.</td><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:0.82em;">"could of"→"could have"; "to"→"too"</td></tr>
+    </tbody>
+  </table>
+
+  <h4 style="margin-top:20px;">Section B — Reading [29 marks]</h4>
+
+  <p style="font-size:0.88em; margin-bottom:4px;"><strong>Q1. Three details [3 marks]</strong> — 1 mark each. Accept any three of:</p>
+  <ul style="font-size:0.85em; color:#444; padding-left:22px; margin-bottom:12px;">
+    <li>"ragged and scarred" hands / "black, broken nails"</li>
+    <li>"sabre cut across one cheek, a dirty, livid white"</li>
+    <li>"soiled blue coat"</li>
+    <li>"nut-brown" skin suggesting a life outdoors / at sea</li>
+    <li>"fierce as a commander" expression</li>
+    <li>"tall, strong, heavy" build</li>
+  </ul>
+
+  <p style="font-size:0.88em; margin-bottom:4px;"><strong>Q2. Contradiction [3 marks]</strong></p>
+  <ul style="font-size:0.85em; color:#444; padding-left:22px; margin-bottom:12px;">
+    <li><strong>1 mark:</strong> Identifies that he claims to be ordinary but acts like someone important/dangerous</li>
+    <li><strong>1 mark:</strong> Evidence — "throws down three or four gold pieces" shows wealth; "fierce as a commander" shows authority</li>
+    <li><strong>1 mark:</strong> Explains what this reveals — he is hiding his true identity; he is used to power; he is not what he pretends to be</li>
+  </ul>
+
+  <p style="font-size:0.88em; margin-bottom:4px;"><strong>Q3. Final paragraph analysis [3 marks]</strong></p>
+  <ul style="font-size:0.85em; color:#444; padding-left:22px; margin-bottom:12px;">
+    <li><strong>1 mark:</strong> Identifies the contrast — "bad as his clothes were" vs "seemed like a mate or skipper"</li>
+    <li><strong>1 mark:</strong> Evidence — "accustomed to be obeyed or to strike" suggests violence and authority</li>
+    <li><strong>1 mark:</strong> Explains — Stevenson reveals the captain is more dangerous than he first appears; the phrase "or to strike" hints at cruelty</li>
+  </ul>
+
+  <p style="font-size:0.88em; margin-bottom:4px;"><strong>Q4. Summary [4 marks]</strong></p>
+  <ul style="font-size:0.85em; color:#444; padding-left:22px; margin-bottom:12px;">
+    <li><strong>2 marks:</strong> Includes all three key points — WHO (a scarred, rough sea captain), WHERE (the Admiral Benbow inn / a lonely coastal inn), WHAT (arrives, demands rum, pays in gold, decides to stay)</li>
+    <li><strong>1 mark:</strong> Stays within ~60 words and uses own wording (no direct copying)</li>
+    <li><strong>1 mark:</strong> Clear, concise, grammatically correct sentences</li>
+    <li><strong>Model answer:</strong> "A rough, scarred old sailor arrives at a lonely seaside inn carrying a heavy sea chest. He sings a grim sea shanty, demands rum, and speaks roughly to the innkeeper. Though dressed in dirty clothes, he throws down gold coins and speaks with the authority of a commander. He decides to stay, having deliberately chosen this remote location."</li>
+  </ul>
+
+  <p style="font-size:0.88em; margin-bottom:4px;"><strong>Q5. PEZL Analysis Paragraph [6 marks]</strong></p>
+  <ul style="font-size:0.85em; color:#444; padding-left:22px; margin-bottom:12px;">
+    <li><strong>Point [1]:</strong> Clear argument about how Stevenson presents the captain as dangerous</li>
+    <li><strong>Evidence [1]:</strong> At least one embedded quotation from paragraphs 1 or 6</li>
+    <li><strong>Zoom [2]:</strong> Analyses one specific word and its connotations in depth (e.g. "livid" → bruised/dead colour, hints at violence; "accustomed to strike" → casual violence as habit; "sabre cut" → weapon wound, combat history)</li>
+    <li><strong>Link [1]:</strong> Connects to reader's response — makes us fear for Jim and his family</li>
+    <li><strong>SPAG [1]:</strong> Accurate spelling, punctuation and grammar</li>
+  </ul>
+
+  <p style="font-size:0.88em; margin-bottom:4px;"><strong>Q6. Vocabulary [2 marks]</strong> — ½ mark each</p>
+  <ul style="font-size:0.85em; color:#444; padding-left:22px; margin-bottom:12px;">
+    <li>A. plodding = <em>trudging</em></li>
+    <li>B. tottering = <em>shaky</em></li>
+    <li>C. inquired = <em>asked</em></li>
+    <li>D. residence = <em>home</em></li>
+  </ul>
+
+  <p style="font-size:0.88em; margin-bottom:4px;"><strong>Q7. Extended Analysis [8 marks]</strong></p>
+  <p style="font-size:0.85em; color:#444; margin-bottom:4px;">Two PEEZL paragraphs required. Award:</p>
+  <ul style="font-size:0.85em; color:#444; padding-left:22px; margin-bottom:12px;">
+    <li><strong>Paragraph 1 — Appearance [up to 3]:</strong> Analyses physical description. Should zoom on words like "sabre cut" (weapon wound), "livid" (death-like colour), "ragged and scarred", "black broken nails", "tarry pigtail". Must name techniques (adjective choice, sensory imagery).</li>
+    <li><strong>Paragraph 2 — Speech & Behaviour [up to 3]:</strong> Analyses his actions and words. Should zoom on verbs like "rapped", "called roughly", "looking as fierce as a commander"; should note the contradiction of "I'm a plain man" with his commanding behaviour; should analyse the sea shanty ("Fifteen men on the dead man's chest") as foreshadowing death.</li>
+    <li><strong>Overall quality [up to 2]:</strong> Both paragraphs embedded with quotations; techniques named accurately; zoom goes beyond surface meaning; links connect to overall impression of menace; SPAG is secure.</li>
+  </ul>
+
+  <h4 style="margin-top:20px;">Section C — Writing [15 marks]</h4>
+  <table style="width:100%; border-collapse:collapse; font-size:0.85em; margin-top:8px;">
+    <thead>
+      <tr style="background:#f5faf6;"><th style="text-align:left;padding:6px 10px;border-bottom:1px solid #ccc;">Band</th><th style="text-align:left;padding:6px 10px;border-bottom:1px solid #ccc;">Marks</th><th style="text-align:left;padding:6px 10px;border-bottom:1px solid #ccc;">Descriptor</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">Top</td><td style="padding:6px 10px;border-bottom:1px solid #eee;">12-15</td><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:0.82em;">Ambitious vocabulary; controlled structure; stranger's arrival creates genuine atmosphere shift; sensory details are vivid and specific; SPAG is secure; simile/metaphor used effectively</td></tr>
+      <tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">Middle</td><td style="padding:6px 10px;border-bottom:1px solid #eee;">7-11</td><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:0.82em;">Clear description of stranger; some attempt at atmosphere; sensory details present but may be generic; SPAG mostly accurate; simile/metaphor attempted</td></tr>
+      <tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">Lower</td><td style="padding:6px 10px;border-bottom:1px solid #eee;">1-6</td><td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:0.82em;">Simple description; limited vocabulary; atmosphere not developed; SPAG errors interfere with meaning; simile/metaphor missing or ineffective</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:0.82em; color:#666; margin-top:14px;">
+    <strong>Note:</strong> The passage is from Chapter 1 of <em>Treasure Island</em> by Robert Louis Stevenson (1883), now in the public domain. The proofreading sentences and comprehension questions are original but inspired by the text.
+  </p>
+</div>
+
+</body>
+</html>

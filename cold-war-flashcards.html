@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cold War · Superpower Relations Flashcards</title>
+<style>
+:root{
+  --bg:#f8f9fa;--card-bg:#ffffff;--border:#e5e7eb;--text:#1a1d28;--text2:#6b7280;
+  --accent:#4f8cff;--green:#10b981;--red:#ef4444;--orange:#f59e0b;--purple:#8b5cf6;
+  --origins:#4f8cff;--crises:#ef4444;--end:#10b981
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;gap:10px;flex-wrap:wrap;background:var(--card-bg)}
+.topbar h1{font-size:16px;white-space:nowrap}
+.topbar .count{font-size:12px;color:var(--text2)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{padding:4px 12px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);color:var(--text2);cursor:pointer;font-size:11px;transition:all 0.15s;white-space:nowrap}
+.filter-btn:hover{color:var(--text);border-color:var(--text2)}
+.filter-btn.active{color:#fff;border-color:transparent;font-weight:600}
+.filter-btn[data-filter="origins"].active,.filter-btn[data-filter="origins"]:hover{background:var(--origins);border-color:var(--origins);color:#fff}
+.filter-btn[data-filter="crises"].active,.filter-btn[data-filter="crises"]:hover{background:var(--crises);border-color:var(--crises);color:#fff}
+.filter-btn[data-filter="end"].active,.filter-btn[data-filter="end"]:hover{background:var(--end);border-color:var(--end);color:#fff}
+
+/* Card area */
+.card-area{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;perspective:1200px;min-height:0}
+.card-container{width:100%;max-width:620px;height:100%;max-height:460px;position:relative}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);cursor:pointer}
+.card-inner.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px;border:1px solid var(--border);background:var(--card-bg);display:flex;flex-direction:column;padding:28px 30px;overflow-y:auto;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.card-back{transform:rotateY(180deg)}
+
+/* Front */
+.card-front .topic-badge{position:absolute;top:16px;left:16px;font-size:10px;padding:3px 12px;border-radius:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#fff}
+.badge-origins{background:var(--origins)}
+.badge-crises{background:var(--crises)}
+.badge-end{background:var(--end)}
+
+.card-front .card-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);margin-bottom:20px;margin-top:10px}
+.card-front .key-text{font-size:20px;font-weight:700;line-height:1.4;text-align:center;color:var(--text);margin-bottom:12px;flex:1;display:flex;align-items:center;justify-content:center}
+.card-front .date-text{font-size:14px;color:var(--accent);text-align:center;font-weight:600}
+.card-front .tap-hint{position:absolute;bottom:14px;font-size:11px;color:var(--text2);opacity:0.5;width:100%;text-align:center;left:0}
+.card-front .card-number{position:absolute;top:16px;right:16px;font-size:11px;color:var(--text2)}
+
+/* Back */
+.card-back .topic-badge{position:absolute;top:16px;left:16px;font-size:10px;padding:3px 12px;border-radius:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#fff}
+.card-back .key-mini{font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);text-align:center;width:100%}
+.card-back .detail-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;font-weight:700}
+.card-back .detail-text{font-size:14px;line-height:1.75;text-align:left;width:100%}
+.card-back .detail-text strong{color:var(--accent)}
+.card-back .detail-text .highlight{background:rgba(79,140,255,0.1);padding:1px 4px;border-radius:3px}
+.card-back .significance{font-size:12px;color:var(--text2);margin-top:14px;padding:10px 14px;background:var(--bg);border-radius:8px;line-height:1.6}
+.card-back .significance strong{color:var(--orange)}
+.card-back .card-number{position:absolute;top:16px;right:16px;font-size:11px;color:var(--text2)}
+.card-back .tap-hint{position:absolute;bottom:14px;font-size:11px;color:var(--text2);opacity:0.5;width:100%;text-align:center;left:0}
+
+/* Nav */
+.nav-bar{display:flex;align-items:center;justify-content:center;gap:20px;padding:10px 16px;border-top:1px solid var(--border);flex-shrink:0;background:var(--card-bg)}
+.nav-btn{padding:8px 20px;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);cursor:pointer;font-size:13px;transition:all 0.15s;min-width:80px}
+.nav-btn:hover{background:var(--bg);border-color:var(--accent)}
+.nav-btn:disabled{opacity:0.3;cursor:not-allowed}
+.nav-info{font-size:12px;color:var(--text2);min-width:60px;text-align:center}
+.nav-shuffle{margin-left:12px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:14px;cursor:pointer;font-size:12px;transition:all 0.15s}
+.nav-shuffle:hover{opacity:0.85}
+
+/* Progress dots */
+.progress-dots{display:flex;gap:4px;justify-content:center;margin-top:4px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all 0.2s}
+.dot.seen{background:var(--accent);opacity:0.4}
+.dot.current{background:var(--accent);opacity:1}
+
+/* Mobile */
+@media (max-width:600px){
+  .card-inner{max-height:380px}
+  .card-front .key-text{font-size:17px}
+  .card-back .detail-text{font-size:13px}
+  .topbar{gap:6px;padding:8px 10px}
+  .filter-btn{padding:3px 8px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🌍 Cold War · Superpower Relations</h1>
+  <div class="count" id="filter-count">50 cards</div>
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="origins">🔵 Origins</button>
+    <button class="filter-btn" data-filter="crises">🔴 Crises</button>
+    <button class="filter-btn" data-filter="end">🟢 End</button>
+  </div>
+</div>
+
+<div class="card-area">
+  <div class="card-container">
+    <div class="card-inner" id="card-inner" onclick="flipCard()">
+      <div class="card-face card-front" id="card-front"></div>
+      <div class="card-face card-back" id="card-back"></div>
+    </div>
+    <div class="progress-dots" id="progress-dots"></div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn" id="prev-btn" onclick="prevCard()">← Prev</button>
+  <span class="nav-info" id="nav-info">1 / 50</span>
+  <button class="nav-btn" id="next-btn" onclick="nextCard()">Next →</button>
+  <button class="nav-shuffle" onclick="shuffleCards()">🔀 Shuffle</button>
+</div>
+
+<script>
+// ── FLASHCARD DATA ─────────────────────────────────────────────
+const cards = [
+  // ══ TOPIC 1: ORIGINS OF THE COLD WAR (1941–1958) ══
+  {topic:"origins",type:"KEY TERM",front:"What was the Grand Alliance?",date:"1941–1945",back:"The wartime alliance between the <strong>USA (Roosevelt/Truman), USSR (Stalin), and Britain (Churchill/Attlee)</strong>. Formed after Hitler invaded the USSR (Operation Barbarossa, June 1941), forcing the USSR to join the Allies. The alliance was always one of <strong>convenience</strong> — united by a common enemy (Nazi Germany) but divided by ideology (capitalism vs communism).",significance:"The Grand Alliance papered over deep ideological cracks. Once the common enemy was defeated, the alliance collapsed — exam markers want you to explain that this collapse was almost inevitable given the ideological differences."},
+  {topic:"origins",type:"KEY EVENT",front:"What was agreed at the Tehran Conference?",date:"November 1943",back:"The first 'Big Three' meeting (Stalin, Roosevelt, Churchill). Key agreements: <strong>1)</strong> USA and Britain would open a <strong>Second Front</strong> in Western Europe (D-Day) by May 1944 to relieve pressure on the USSR. <strong>2)</strong> The USSR would declare war on Japan once Germany was defeated. <strong>3)</strong> The <span class='highlight'>'Polish question'</span> was discussed — Stalin wanted Polish territory, Churchill wanted a free Poland. No firm agreement was reached.",significance:"Tehran showed that cooperation was possible, but also revealed tensions over Poland — a recurring issue that would poison relations. The Second Front promise was fulfilled (D-Day, June 1944), building some trust."},
+  {topic:"origins",type:"KEY EVENT",front:"What was agreed at the Yalta Conference?",date:"February 1945",back:"The most cooperative conference, with Germany near defeat. Key agreements: <strong>1)</strong> Germany would be divided into <strong>four occupation zones</strong> (US, UK, USSR, France). <strong>2)</strong> Berlin would also be divided into four sectors. <strong>3)</strong> Free elections would be held in liberated Eastern European countries (Declaration on Liberated Europe). <strong>4)</strong> The USSR agreed to join the war against Japan 3 months after Germany's defeat. <strong>5)</strong> A United Nations would be established.",significance:"Yalta is often seen as the high point of Grand Alliance cooperation. BUT Stalin's interpretation of 'free elections' was very different from the West's — he installed pro-Soviet 'puppet' governments instead. This became a major source of post-war tension."},
+  {topic:"origins",type:"KEY EVENT",front:"What changed at the Potsdam Conference?",date:"July–August 1945",back:"The atmosphere was far more hostile than Yalta. Key changes: <strong>1)</strong> <span class='highlight'>Truman had replaced Roosevelt</span> as US President — he was far more suspicious of Stalin. <strong>2)</strong> <strong>Churchill was replaced mid-conference by Attlee</strong> (Labour won the 1945 election). <strong>3)</strong> Truman informed Stalin of the <strong>atom bomb</strong> (tested successfully 16 July 1945) — Stalin already knew via spies. Disagreements over Poland's borders and reparations deepened.",significance:"Potsdam marks the effective END of the Grand Alliance. The new leaders (Truman, Attlee) had no personal relationship with Stalin, and the atom bomb shifted the balance of power dramatically. Exam markers want you to contrast Yalta (cooperation) with Potsdam (conflict)."},
+  {topic:"origins",type:"KEY EVENT",front:"Why did the USA drop atomic bombs on Japan?",date:"August 1945",back:"Two bombs were dropped: <strong>Hiroshima (6 August)</strong> and <strong>Nagasaki (9 August)</strong>. Reasons: <strong>1)</strong> To force Japan's surrender and avoid a costly land invasion. <strong>2)</strong> To end the war before the USSR could claim territory in Asia. <strong>3)</strong> To demonstrate US military superiority to the USSR — a <span class='highlight'>warning shot in the emerging Cold War</span>. The USSR declared war on Japan on 8 August, between the two bombs.",significance:"Historians debate whether the bombs were primarily aimed at Japan or the USSR. The nuclear monopoly (1945–1949) gave the USA enormous strategic advantage and deepened Soviet insecurity — a key driver of early Cold War tensions."},
+  {topic:"origins",type:"KEY TERM",front:"What was the 'Iron Curtain' speech?",date:"5 March 1946",back:"Winston Churchill (now out of office) gave a speech at Westminster College in Fulton, Missouri. He declared: <em>'An iron curtain has descended across the continent.'</em> He warned that the USSR was expanding its control over Eastern Europe (Poland, Czechoslovakia, Hungary, Romania, Bulgaria) and called for a strong US-UK alliance to resist Soviet expansion. Stalin responded by calling Churchill a 'warmonger'.",significance:"The speech publicly named the division of Europe and hardened attitudes on both sides. It is often seen as the symbolic START of the Cold War. Exam markers want you to note it was Churchill (not Truman) who used this phrase first."},
+  {topic:"origins",type:"KEY TERM",front:"What was the Truman Doctrine?",date:"March 1947",back:"President Truman promised that the USA would <strong>contain communism</strong> and support 'free peoples who are resisting attempted subjugation by armed minorities or by outside pressures.' It was a direct response to crises in <strong>Greece</strong> (civil war between monarchists and communists) and <strong>Turkey</strong> (Soviet pressure for access to the Mediterranean). Congress approved $400 million in aid. This marked the end of US isolationism.",significance:"The Truman Doctrine established <span class='highlight'>CONTAINMENT</span> as the cornerstone of US foreign policy for the next 40+ years. It committed the USA to a global struggle against communism. Edexcel examiners frequently ask about this as the ideological turning point in US-Soviet relations."},
+  {topic:"origins",type:"KEY TERM",front:"What was the Marshall Plan?",date:"June 1947",back:"<strong>George Marshall</strong> (US Secretary of State) proposed massive economic aid to rebuild Europe. Over 4 years, the USA gave <strong>$13 billion</strong> (approx. $150 billion today) to 16 Western European countries. Goals: <strong>1)</strong> Rebuild war-damaged economies. <strong>2)</strong> Prevent the spread of communism (poverty made communism attractive). <strong>3)</strong> Create markets for US goods. Aid was offered to ALL European countries including the USSR — but Stalin refused it and forbade Eastern Bloc countries from accepting.",significance:"The Marshall Plan was wildly successful — Western Europe recovered rapidly (the 'economic miracle'). It also deepened the division of Europe, as the USSR created its own rival system (Comecon). Examiners want you to contrast the Marshall Plan's economic approach with the Truman Doctrine's military/political approach — together they formed the twin pillars of containment."},
+  {topic:"origins",type:"KEY TERM",front:"What were Cominform and Comecon?",date:"Cominform 1947, Comecon 1949",back:"<strong>Cominform (Communist Information Bureau):</strong> An organisation to coordinate communist parties across Europe and ensure they followed Moscow's line. Response to the Truman Doctrine.<br><br><strong>Comecon (Council for Mutual Economic Assistance):</strong> The Soviet equivalent of the Marshall Plan. Coordinated trade and economic planning across the Eastern Bloc. In reality, it primarily benefited the USSR by extracting resources from satellite states.",significance:"Cominform and Comecon were the USSR's institutional responses to US initiatives. They tightened Soviet control over Eastern Europe and formalised the economic division of Europe into two competing blocs."},
+  {topic:"origins",type:"KEY EVENT",front:"What was the Berlin Blockade?",date:"June 1948 – May 1949",back:"Stalin blocked all road, rail, and canal access to West Berlin (which was deep inside the Soviet zone of Germany). His aim: force the Western Allies to abandon West Berlin or accept Soviet control of the entire city. The trigger was the introduction of the new <strong>Deutschmark</strong> in the Western zones — the USSR saw this as a threat to its influence. The West responded with the <strong>Berlin Airlift</strong>.",significance:"The Blockade was the first major CRISIS of the Cold War. It transformed West Berlin from a liability into a symbol of Western resolve. The success of the Airlift was a major propaganda victory for the USA and humiliation for Stalin."},
+  {topic:"origins",type:"KEY EVENT",front:"What was the Berlin Airlift?",date:"June 1948 – May 1949",back:"The Western Allies (US and UK) flew supplies into West Berlin to break the blockade. At its peak, a plane landed every <strong>90 seconds</strong> at Tempelhof Airport. Over 10 months, <strong>2.3 million tonnes</strong> of supplies were delivered (food, coal, medicine). Stalin could not shoot down the planes without starting a war. He lifted the blockade on <strong>12 May 1949</strong>.",significance:"The Airlift was a triumph of logistics and determination. It proved that the West would NOT abandon Berlin. Crucially, it led directly to the formal division of Germany into two states: the Federal Republic of Germany (West, May 1949) and the German Democratic Republic (East, October 1949)."},
+  {topic:"origins",type:"KEY TERM",front:"What was NATO and why was it formed?",date:"April 1949",back:"The <strong>North Atlantic Treaty Organisation</strong> — a military alliance of 12 Western nations (USA, UK, France, Canada, and others). Its core principle — <span class='highlight'>Article 5</span> — stated that an attack on one member was an attack on ALL members. It was formed as a direct response to the Berlin Blockade and the perceived Soviet military threat.",significance:"NATO was the first peacetime military alliance the USA had ever joined (breaking with its tradition of isolationism). It formalised the military division of Europe and remains central to European security today."},
+  {topic:"origins",type:"KEY TERM",front:"What was the Warsaw Pact?",date:"May 1955",back:"The USSR's military alliance with its satellite states — East Germany, Poland, Czechoslovakia, Hungary, Romania, Bulgaria, Albania. Formed in response to West Germany joining NATO (1955). It gave the USSR formal military control over Eastern Europe and was used to crush uprisings (Hungary 1956, Czechoslovakia 1968).",significance:"The Warsaw Pact completed the division of Europe into two armed camps. By 1955, the Cold War was institutionalised — two superpowers, two alliances, two ideologies, facing each other across the Iron Curtain."},
+  {topic:"origins",type:"KEY PERSON",front:"What was Stalin's role in the origins of the Cold War?",date:"Soviet leader 1924–1953",back:"Stalin was deeply suspicious of the West — he believed the Western Allies had deliberately delayed the Second Front to bleed the USSR. After the war, he created a <strong>buffer zone</strong> of satellite states in Eastern Europe to protect the USSR from future invasion (the USSR had been invaded through Poland twice, in 1914 and 1941). He used <strong>salami tactics</strong> — gradually eliminating non-communist politicians in Eastern Europe — to establish total control.",significance:"The 'Stalin or Truman?' debate is a classic exam question on who was to blame for the Cold War. Orthodox historians blame Stalin's expansionism; revisionists blame Truman's atomic diplomacy and economic imperialism; post-revisionists argue both sides were to blame — mutual misunderstanding and security fears."},
+  {topic:"origins",type:"KEY EVENT",front:"What was the Soviet takeover of Eastern Europe (1945–1948)?",back:"Stalin used <strong>salami tactics</strong> — step-by-step elimination of opposition in each country. <strong>Poland:</strong> Promised free elections at Yalta but communists rigged the 1947 election. <strong>Czechoslovakia:</strong> The last democracy in Eastern Europe — taken over by a communist coup in <strong>February 1948</strong>. <strong>Hungary, Romania, Bulgaria:</strong> Communist governments installed by 1947–48. Non-communist politicians were arrested, exiled, or executed.",significance:"The Soviet takeover of Eastern Europe was the single biggest factor in ending the Grand Alliance. The West saw it as outright betrayal of the Yalta promises. By 1948, the Iron Curtain was fully in place."},
+  {topic:"origins",type:"KEY TERM",front:"What was the Soviet Union's atomic bomb programme?",date:"Tested August 1949",back:"The USSR tested its first atomic bomb on <strong>29 August 1949</strong>, ending the US nuclear monopoly 4 years earlier than the West expected. Soviet spies (including <strong>Klaus Fuchs</strong> and the Rosenbergs) had infiltrated the Manhattan Project and passed secrets to Moscow. The test triggered panic in the USA and led Truman to authorise development of the <strong>hydrogen bomb</strong> (far more powerful, tested by the USA in 1952).",significance:"The end of the US nuclear monopoly was a major turning point. It triggered the nuclear arms race — by 1953, both superpowers had the H-bomb. The concept of <span class='highlight'>Mutually Assured Destruction (MAD)</span> emerged, paradoxically stabilising the Cold War."},
+  {topic:"origins",type:"KEY TERM",front:"What was the Long Telegram and the Novikov Telegram?",date:"1946",back:"<strong>Long Telegram (Kennan, Feb 1946):</strong> US diplomat George Kennan in Moscow sent an 8,000-word telegram arguing that the USSR was inherently expansionist and could not be reasoned with — only <strong>contained</strong>. This became the intellectual foundation of containment.<br><br><strong>Novikov Telegram (Sept 1946):</strong> Soviet ambassador Nikolai Novikov sent a mirror-image analysis — he argued the USA was pursuing global domination and preparing for war against the USSR.",significance:"These two telegrams perfectly illustrate the MUTUAL MISPERCEPTION at the heart of the Cold War. Each side viewed the other as aggressive and expansionist. Exam markers love this point — it supports the post-revisionist interpretation."},
+  {topic:"origins",type:"KEY EVENT",front:"What happened in the Hungarian Uprising?",date:"October–November 1956",back:"Hungarians, inspired by Khrushchev's 'Secret Speech' (denouncing Stalin), rose up against Soviet control. The reformist leader <strong>Imre Nagy</strong> announced Hungary would leave the Warsaw Pact and become neutral. On <strong>4 November 1956</strong>, Soviet tanks crushed the uprising — an estimated <strong>20,000–30,000 Hungarians were killed</strong>. Nagy was executed two years later. The West condemned the invasion but did NOT intervene (they were distracted by the Suez Crisis).",significance:"The Hungarian Uprising taught two crucial lessons: <strong>1)</strong> The USSR would use force to keep control of its sphere — the 'freedom' Khrushchev seemed to offer was an illusion. <strong>2)</strong> The USA's rhetoric about 'rolling back' communism was empty — containment, not liberation, was the real policy. The West would not risk war for Eastern Europe."},
+
+  // ══ TOPIC 2: COLD WAR CRISES (1958–1970) ══
+  {topic:"crises",type:"KEY PERSON",front:"Who was Nikita Khrushchev?",date:"Soviet leader 1953–1964",back:"Stalin's successor. He denounced Stalin's crimes in the <strong>'Secret Speech'</strong> (February 1956) and pursued <strong>peaceful coexistence</strong> — the idea that capitalism and communism could compete without war. BUT he was also erratic and provocative — he banged his shoe at the UN (1960), placed missiles in Cuba (1962), and issued ultimatums over Berlin. He was removed from power in 1964, partly because of the Cuban Missile Crisis humiliation.",significance:"Khrushchev is a complex figure — he wanted to reduce tensions but his aggressive tactics nearly caused nuclear war. His removal in 1964 marked the end of the most dangerous phase of the Cold War. Exam markers want you to show his contradictions."},
+  {topic:"crises",type:"KEY TERM",front:"What was Khrushchev's Berlin Ultimatum?",date:"November 1958",back:"Khrushchev demanded that Western troops leave West Berlin within <strong>6 months</strong> and that Berlin become a 'free city'. His motives: <strong>1)</strong> Stop the 'brain drain' — millions of East Germans (especially skilled workers) were fleeing to the West through Berlin. <strong>2)</strong> Humiliate the West and demonstrate Soviet power. The West refused. A series of summits (Geneva 1959, Camp David 1959, Paris 1960 — which collapsed when a US U-2 spy plane was shot down) failed to resolve the crisis.",significance:"The Berlin Ultimatum created 3 years of tension (1958–1961) that culminated in the building of the Berlin Wall. It demonstrated the limits of 'peaceful coexistence' and showed how Berlin remained the flashpoint of the Cold War."},
+  {topic:"crises",type:"KEY EVENT",front:"Why was the Berlin Wall built?",date:"13 August 1961",back:"Overnight on 12–13 August 1961, East German troops (backed by the USSR) sealed the border between East and West Berlin and began constructing a wall. Reasons: <strong>1)</strong> To stop the <strong>'brain drain'</strong> — by 1961, 3 million East Germans had fled to the West (approx. 20% of the population), including many doctors, engineers, and skilled workers. <strong>2)</strong> To show Soviet strength after the failure of the Berlin Ultimatum. <strong>3)</strong> To stabilise East Germany economically.",significance:"The Wall became the most powerful SYMBOL of the Cold War division. Kennedy visited in 1963 ('Ich bin ein Berliner'). The Wall stabilised the Cold War paradoxically — by accepting the division, both sides reduced the risk of direct confrontation over Berlin."},
+  {topic:"crises",type:"KEY PERSON",front:"Who was Fidel Castro and what was the Cuban Revolution?",date:"1953–1959",back:"Castro was a nationalist lawyer who led a guerrilla campaign against the corrupt US-backed dictator <strong>Fulgencio Batista</strong>. Key events: 1953 — failed attack on Moncada Barracks (Castro imprisoned). 1956 — Castro, <strong>Che Guevara</strong>, and 80 rebels landed in Cuba (the Granma). 1959 — Batista fled and Castro took power. Castro was initially not a communist, but his nationalisation of US-owned businesses and land reforms pushed him towards the USSR.",significance:"Cuba became the most dangerous flashpoint of the Cold War. A communist state just 90 miles from Florida gave the USSR a strategic foothold in America's 'backyard'. This challenged the Monroe Doctrine and terrified US policymakers."},
+  {topic:"crises",type:"KEY EVENT",front:"What was the Bay of Pigs invasion?",date:"April 1961",back:"A CIA-organised invasion of Cuba by <strong>1,400 Cuban exiles</strong>. They landed at the Bay of Pigs expecting a popular uprising against Castro. The invasion was a <strong>total disaster</strong> — Castro's forces crushed it within 3 days. Over 1,100 exiles were captured. President Kennedy had approved the operation (planned under Eisenhower) but refused to provide US air support, dooming the mission.",significance:"The Bay of Pigs was a HUMILIATION for Kennedy and the USA. It achieved the opposite of its goal — Castro was strengthened, declared himself a communist, and turned to the USSR for protection. It also made Khrushchev believe Kennedy was weak, contributing to his decision to place missiles in Cuba."},
+  {topic:"crises",type:"KEY EVENT",front:"What triggered the Cuban Missile Crisis?",date:"October 1962",back:"On <strong>14 October 1962</strong>, a US <strong>U-2 spy plane</strong> photographed Soviet missile sites under construction in Cuba. These were medium-range nuclear missiles capable of reaching most US cities. Khrushchev's motives: <strong>1)</strong> Close the 'missile gap' — the USA had missiles in Turkey and Italy aimed at the USSR. <strong>2)</strong> Protect Cuba from another US invasion. <strong>3)</strong> Demonstrate Soviet power after the Bay of Pigs embarrassment.",significance:"The Cuban Missile Crisis was the closest the world has ever come to nuclear war. For 13 days, the world held its breath. Edexcel questions often focus on WHO 'won' — there were gains and losses for both sides."},
+  {topic:"crises",type:"KEY EVENT",front:"What happened during the '13 Days' of the Cuban Missile Crisis?",date:"16–28 October 1962",back:"The 13 days in detail: <strong>16 Oct:</strong> Kennedy informed of the missiles. He formed <strong>ExComm</strong> (Executive Committee) to advise him. Hawks wanted airstrikes; doves wanted diplomacy. <strong>22 Oct:</strong> Kennedy announced a <strong>naval 'quarantine'</strong> (blockade) of Cuba and demanded removal of missiles. <strong>24 Oct:</strong> Soviet ships approached the quarantine line... then turned back. <strong>26 Oct:</strong> Khrushchev sent a long, emotional letter offering to remove missiles if the USA promised not to invade Cuba. <strong>27 Oct ('Black Saturday'):</strong> A second, tougher letter demanded US missiles be removed from Turkey. A U-2 was shot down over Cuba. War seemed imminent. <strong>28 Oct:</strong> Khrushchev agreed to remove the missiles.",significance:"The 13 Days show how close the world came to nuclear war — and how leadership decisions matter. Kennedy's choice of a blockade (rather than airstrikes) gave Khrushchev time to back down. The secret deal on Turkey (US missiles removed later) was kept quiet so Kennedy could claim victory."},
+  {topic:"crises",type:"KEY TERM",front:"What were the consequences of the Cuban Missile Crisis?",back:"<strong>1) Hotline:</strong> A direct teleprinter link between the White House and Kremlin was established (June 1963) to prevent miscommunication in future crises.<br><strong>2) Test Ban Treaty (August 1963):</strong> The USA, USSR, and UK agreed to ban nuclear testing in the atmosphere, outer space, and underwater. Underground testing still permitted.<br><strong>3) Khrushchev weakened:</strong> The USSR publicly 'lost' the crisis; Khrushchev was removed from power in October 1964.<br><strong>4) Détente:</strong> Both superpowers realised how close they had come to war and began to move towards peaceful coexistence.",significance:"The Cuban Missile Crisis was a WATERSHED. Before 1962, direct confrontation; after 1962, movement towards arms control and dialogue. The 'Hotline' is the classic example of learning from near-disaster."},
+  {topic:"crises",type:"KEY TERM",front:"What was the Nuclear Test Ban Treaty?",date:"August 1963",back:"Signed by the USA, USSR, and UK (but NOT France or China). It banned nuclear weapons testing in the <strong>atmosphere, outer space, and underwater</strong>. Underground testing was still allowed. It was the FIRST arms control agreement of the Cold War. Kennedy called it 'a shaft of light in the darkness.'",significance:"The Test Ban Treaty shows that the Cuban Missile Crisis created genuine momentum for cooperation. BUT it was limited — underground testing continued, and the arms race shifted to new areas (MIRVs, missile defences). It was a small but significant first step."},
+  {topic:"crises",type:"KEY EVENT",front:"What was the Prague Spring?",date:"January–August 1968",back:"A period of liberalisation in Czechoslovakia under the reformist communist leader <strong>Alexander Dubček</strong>. He introduced <strong>'socialism with a human face'</strong> — relaxing censorship, allowing criticism of the government, promising free elections, and reducing secret police power. The reforms were hugely popular with Czechs and Slovaks but alarmed the USSR, who feared the reforms would spread.",significance:"The Prague Spring showed that even within the Soviet bloc, there was demand for reform. It directly challenged the USSR's control of Eastern Europe. The Soviet response — invasion — defined the limits of what was acceptable within the Warsaw Pact."},
+  {topic:"crises",type:"KEY EVENT",front:"What was the Soviet invasion of Czechoslovakia?",date:"20 August 1968",back:"<strong>500,000 Warsaw Pact troops</strong> (mainly Soviet) invaded Czechoslovakia and crushed the Prague Spring. Dubček was arrested and taken to Moscow. There was minimal armed resistance — mostly peaceful protest (Jan Palach's self-immolation in January 1969 became a symbol of defiance). Dubček was replaced by the hardline <strong>Gustáv Husák</strong>, who reversed all reforms.",significance:"The invasion showed that the USSR would NOT tolerate any deviation from Soviet-style communism within its sphere. It demoralised communists worldwide — many Western European communist parties condemned the invasion."},
+  {topic:"crises",type:"KEY TERM",front:"What was the Brezhnev Doctrine?",date:"November 1968",back:"The policy announced by Soviet leader <strong>Leonid Brezhnev</strong> justifying the invasion of Czechoslovakia. It stated that the USSR had the RIGHT to intervene in any Warsaw Pact country where socialism was threatened. In effect: <span class='highlight'>once a communist country, always a communist country</span> — and under Moscow's control. It was used to threaten Poland during the Solidarity crisis (1980–81).",significance:"The Brezhnev Doctrine was the ideological justification for Soviet domination of Eastern Europe. It remained official policy until Gorbachev rejected it in the late 1980s. Its abandonment was a crucial factor in the collapse of Soviet control over Eastern Europe in 1989."},
+  {topic:"crises",type:"KEY TERM",front:"What was the U-2 spy plane incident?",date:"May 1960",back:"A US <strong>U-2 spy plane</strong> piloted by <strong>Francis Gary Powers</strong> was shot down over Soviet territory. The USA initially claimed it was a weather plane, but the USSR produced the pilot (alive) and wreckage of the plane. Eisenhower eventually admitted responsibility. The incident caused the <strong>Paris Summit</strong> (May 1960) to collapse — Khrushchev stormed out demanding an apology. Powers was sentenced to 10 years but exchanged for a Soviet spy in 1962.",significance:"The U-2 incident destroyed the brief 'Spirit of Camp David' (1959) and ensured there would be no early resolution to the Berlin crisis. It demonstrated the importance of espionage in the Cold War and how one incident could derail diplomacy."},
+  {topic:"crises",type:"KEY PERSON",front:"Who was John F. Kennedy and what was his Cold War role?",date:"US President 1961–1963",back:"JFK entered office promising to 'pay any price, bear any burden' to defend freedom. His Cold War record: <strong>1)</strong> Bay of Pigs (1961) — disaster. <strong>2)</strong> Vienna Summit with Khrushchev (June 1961) — Khrushchev bullied him over Berlin. <strong>3)</strong> Berlin Wall speech (1963) — 'Ich bin ein Berliner.' <strong>4)</strong> Cuban Missile Crisis (1962) — his finest hour, skilfully managing the crisis. <strong>5)</strong> Test Ban Treaty (1963). Assassinated in November 1963.",significance:"Kennedy's presidency encapsulates the dangers of the Cold War — from humiliation at the Bay of Pigs to near-apocalypse in Cuba to the first arms control agreement. His handling of the Cuban Missile Crisis is a model of crisis management studied to this day."},
+  {topic:"crises",type:"KEY EVENT",front:"How did the Vietnam War relate to the Cold War?",date:"1955–1975",back:"Vietnam was a Cold War proxy war. The USA supported <strong>South Vietnam</strong> (anti-communist) against <strong>North Vietnam</strong> (communist, backed by the USSR and China). The USA applied the <strong>Domino Theory</strong> — if Vietnam fell to communism, neighbouring countries would follow. By 1968, 500,000+ US troops were in Vietnam. US public opinion turned against the war (especially after the 1968 Tet Offensive). The USA withdrew in 1973; South Vietnam fell in 1975.",significance:"Vietnam was deeply damaging to US prestige and confidence. It shifted the Cold War balance — the USSR became more assertive in the 1970s, while the USA (weakened by Vietnam) pursued détente. Vietnam is essential context for understanding US policy shifts in Topic 3."},
+
+  // ══ TOPIC 3: THE END OF THE COLD WAR (1970–1991) ══
+  {topic:"end",type:"KEY TERM",front:"What was Détente?",date:"~1969–1979",back:"<strong>Détente</strong> (French for 'relaxation of tension') was a period of improved US-Soviet relations. Causes: <strong>1)</strong> Both sides feared nuclear war after the Cuban Missile Crisis. <strong>2)</strong> The USA was weakened by Vietnam and needed a 'breather'. <strong>3)</strong> The USSR wanted access to Western technology and grain. <strong>4)</strong> The Sino-Soviet split meant the USSR wanted to avoid a two-front Cold War. Key achievements: SALT 1 (1972), Helsinki Accords (1975), Apollo-Soyuz mission (1975).",significance:"Détente was the first sustained period of cooperation in the Cold War. BUT it was always fragile — both sides continued to compete for influence in the Third World (Angola, Ethiopia, Afghanistan). It ultimately collapsed after the Soviet invasion of Afghanistan (1979)."},
+  {topic:"end",type:"KEY TERM",front:"What was SALT 1?",date:"May 1972",back:"<strong>Strategic Arms Limitation Talks</strong> — a landmark treaty signed by Nixon and Brezhnev in Moscow. Key agreements: <strong>1) Anti-Ballistic Missile (ABM) Treaty</strong> — limited each side to 2 ABM sites (later reduced to 1), preventing a defensive arms race. <strong>2) Interim Agreement</strong> — froze the number of ICBMs and SLBMs at current levels for 5 years. It did NOT limit MIRVs (multiple warheads on one missile) or bombers.",significance:"SALT 1 was the first treaty to actually LIMIT nuclear weapons (not just testing). It represented genuine progress in arms control. However, it had significant loopholes — both sides promptly developed MIRVs, increasing the number of warheads even while limiting launchers."},
+  {topic:"end",type:"KEY EVENT",front:"What were the Helsinki Accords?",date:"August 1975",back:"Signed by <strong>35 nations</strong> (USA, USSR, Canada, and all European countries except Albania). Three 'baskets' of agreements: <strong>Basket 1 — Security:</strong> Recognition of all post-war European borders (including the division of Germany) — a major Soviet objective. <strong>Basket 2 — Cooperation:</strong> Trade, technology, and scientific exchange. <strong>Basket 3 — Human Rights:</strong> Commitments to respect human rights, freedom of speech, religion, and movement. The USSR signed Basket 3 but largely ignored it.",significance:"Helsinki was initially seen as a Soviet VICTORY (borders recognised). BUT Basket 3 had unintended consequences — human rights groups (Helsinki Watch groups) sprang up across the Eastern Bloc, using the Accords to demand rights their governments had signed up to. This became a powerful tool for dissidents and ultimately undermined communist regimes."},
+  {topic:"end",type:"KEY TERM",front:"What was SALT 2?",date:"Signed June 1979, never ratified",back:"Agreed by Carter and Brezhnev. It aimed to limit the total number of strategic nuclear delivery vehicles to <strong>2,250 per side</strong> and limit MIRV-equipped missiles. However, the US Senate <strong>never ratified</strong> SALT 2 because of the Soviet invasion of Afghanistan (December 1979). Despite this, both sides largely adhered to its terms.",significance:"SALT 2 shows how quickly détente could collapse. The treaty represented genuine progress, but geopolitical events (Afghanistan) derailed it. The failure to ratify SALT 2 symbolises the end of the détente era and the beginning of the 'Second Cold War'."},
+  {topic:"end",type:"KEY EVENT",front:"Why did the Soviet Union invade Afghanistan?",date:"December 1979",back:"The USSR invaded to prop up a struggling communist government in Afghanistan that was facing a growing Islamic insurgency (the <strong>Mujahideen</strong>). Soviet motives: <strong>1)</strong> Prevent a friendly communist state from collapsing on the USSR's southern border. <strong>2)</strong> Maintain Soviet influence in a strategically important region. <strong>3)</strong> The Brezhnev Doctrine — protect a fellow socialist state. The war became the USSR's 'Vietnam' — brutal, unwinnable, and deeply unpopular.",significance:"The invasion of Afghanistan was the DEATH of détente. The USA responded with: the Carter Doctrine (threat of force to protect Gulf oil), a grain embargo, an Olympic boycott (Moscow 1980), and covert CIA support for the Mujahideen (Operation Cyclone). The war drained the USSR economically and militarily — a key factor in its eventual collapse."},
+  {topic:"end",type:"KEY PERSON",front:"What was Ronald Reagan's Cold War policy?",date:"US President 1981–1989",back:"Reagan abandoned détente and launched the <strong>'Second Cold War'</strong>. Key elements: <strong>1)</strong> Massive military spending — defence budget increased by ~40%. <strong>2)</strong> The 'Evil Empire' speech (March 1983) — ideological hostility to the USSR. <strong>3)</strong> SDI (Strategic Defense Initiative / 'Star Wars', 1983) — a missile defence system. <strong>4)</strong> Reagan Doctrine — US support for anti-communist rebels worldwide (Nicaragua's Contras, Afghan Mujahideen, Angolan UNITA). <strong>5)</strong> BUT after 1985, Reagan built a genuine relationship with Gorbachev, culminating in the INF Treaty (1987).",significance:"Reagan is hugely controversial. Hardliners credit him with 'winning' the Cold War by outspending and pressuring the USSR into collapse. Others argue Gorbachev's reforms and internal Soviet weaknesses were more important. Edexcel questions often ask you to evaluate Reagan's role in ending the Cold War."},
+  {topic:"end",type:"KEY TERM",front:"What was the Strategic Defense Initiative (SDI)?",date:"Announced March 1983",back:"Nicknamed <strong>'Star Wars'</strong>. Reagan proposed a space-based missile defence system that would use lasers and satellites to shoot down incoming Soviet missiles, making nuclear weapons 'impotent and obsolete'. Most scientists doubted it could work. The USSR was terrified — SDI threatened to undermine MAD (Mutually Assured Destruction) and render the Soviet nuclear arsenal useless. It also threatened to start a new, incredibly expensive technological arms race the USSR could not afford.",significance:"SDI was a major factor in bringing the USSR to the negotiating table. Gorbachev knew the Soviet economy could not compete with a high-tech arms race. At the Reykjavik Summit (1986), Gorbachev offered sweeping arms reductions — IF Reagan abandoned SDI. Reagan refused. SDI was never built, but its psychological impact was enormous."},
+  {topic:"end",type:"KEY PERSON",front:"Who was Mikhail Gorbachev and what was his 'new thinking'?",date:"Soviet leader 1985–1991",back:"Gorbachev was the last leader of the USSR. He recognised the Soviet system was failing — the economy was stagnant, the Afghanistan war was unwinnable, and technology was falling behind the West. His reforms: <strong>1) Perestroika</strong> (restructuring) — economic reforms introducing limited market mechanisms. <strong>2) Glasnost</strong> (openness) — freedom of speech, press, and political debate for the first time. <strong>3)</strong> Ending the Brezhnev Doctrine — Eastern European countries could choose their own path. <strong>4)</strong> Withdrawing from Afghanistan (1989).",significance:"Gorbachev is arguably the single most important individual in ending the Cold War. His reforms were intended to SAVE communism — but instead they unleashed forces that destroyed it. Edexcel often asks about Gorbachev's role vs Reagan's role."},
+  {topic:"end",type:"KEY TERM",front:"What were Perestroika and Glasnost?",date:"1985–1991",back:"<strong>Perestroika</strong> ('restructuring'): Economic reforms including allowing some private enterprise, decentralising economic decisions, and encouraging foreign investment. Aim: revitalise the stagnant Soviet economy.<br><br><strong>Glasnost</strong> ('openness'): Greater freedom of speech, press, and political debate. Previously banned books/films were released, political prisoners freed, and criticism of the government was permitted. It exposed the full extent of Stalin's crimes and the failures of the system.",significance:"Perestroika and Glasnost are the two pillars of Gorbachev's reforms. PERESTROIKA tried to fix the economy (largely failed). GLASNOST unleashed demands for full democracy that the communist system could not contain. Together, they unintentionally destroyed the USSR."},
+  {topic:"end",type:"KEY EVENT",front:"What was the INF Treaty?",date:"December 1987",back:"The <strong>Intermediate-Range Nuclear Forces Treaty</strong> — signed by Reagan and Gorbachev in Washington. It <span class='highlight'>eliminated an ENTIRE CLASS of nuclear weapons</span> — all land-based missiles with ranges of 500–5,500 km. By 1991, nearly <strong>2,700 missiles</strong> had been destroyed, with on-site inspections for verification — the first treaty to include such intrusive verification measures.",significance:"The INF Treaty was a landmark — the first treaty to REDUCE existing nuclear arsenals (not just limit growth). It showed that Gorbachev was serious about disarmament and established a genuine US-Soviet partnership. Edexcel markers see it as the high point of Reagan-Gorbachev cooperation."},
+  {topic:"end",type:"KEY EVENT",front:"How did the Soviet Union withdraw from Afghanistan?",date:"1988–1989",back:"Gorbachev recognised the war was unwinnable and draining the USSR — often called 'the USSR's Vietnam'. The <strong>Geneva Accords</strong> (April 1988) set a timetable for withdrawal. The last Soviet troops left on <strong>15 February 1989</strong>. The war had cost an estimated <strong>15,000 Soviet lives</strong> and billions of dollars. The pro-Soviet Najibullah government survived until 1992 before falling to the Mujahideen.",significance:"The withdrawal demonstrated Gorbachev's rejection of the Brezhnev Doctrine and the limits of Soviet power. It also removed a major obstacle to US-Soviet relations. BUT the chaos left behind in Afghanistan had long-term consequences (civil war, rise of the Taliban)."},
+  {topic:"end",type:"KEY EVENT",front:"What caused the fall of the Berlin Wall?",date:"9 November 1989",back:"The Wall fell due to a perfect storm: <strong>1)</strong> Gorbachev had abandoned the Brezhnev Doctrine — Eastern Bloc countries could reform without fear of Soviet invasion. <strong>2)</strong> Hungary opened its border with Austria (May 1989), allowing East Germans to escape to the West. Mass protests erupted across East Germany. <strong>3)</strong> On <strong>9 November 1989</strong>, an East German official mistakenly announced that travel restrictions were lifted 'immediately' — thousands flooded the checkpoints. Guards, overwhelmed and without orders, opened the gates. The Wall was breached, then torn down.",significance:"The fall of the Berlin Wall is THE defining symbol of the end of the Cold War. It happened almost by accident — a bureaucratic mistake — but it was made possible by Gorbachev's refusal to use force. Within a year, Germany was reunified (3 October 1990). The Cold War division of Europe was over."},
+  {topic:"end",type:"KEY EVENT",front:"How did Eastern Europe break free from Soviet control in 1989?",back:"The <strong>'Autumn of Nations'</strong> (1989) saw a wave of revolutions across Eastern Europe, all peaceful except Romania. Key events: <strong>Poland:</strong> Solidarity won elections (June). <strong>Hungary:</strong> Opened its border, began democratic reforms. <strong>East Germany:</strong> Wall fell (9 Nov). <strong>Czechoslovakia:</strong> Velvet Revolution (Nov-Dec) — Václav Havel became president. <strong>Bulgaria:</strong> Communist leader Zhivkov resigned (Nov). <strong>Romania:</strong> Violent revolution, Ceaușescu executed (Dec). Gorbachev did NOT intervene.",significance:"The speed of the collapse stunned the world. Within months, the Soviet empire in Eastern Europe — built over 45 years — disintegrated. This only happened because Gorbachev made it clear Soviet tanks would NOT roll in. 1989 fundamentally redrew the map of Europe."},
+  {topic:"end",type:"KEY EVENT",front:"When and why did the Soviet Union collapse?",date:"25 December 1991",back:"Multiple factors: <strong>1)</strong> Economic collapse — Perestroika failed to revive the economy; shortages and inflation worsened. <strong>2)</strong> Nationalism — republics (Lithuania, Latvia, Estonia, Ukraine, Georgia, etc.) demanded independence. <strong>3)</strong> The August Coup (1991) — hardline communists attempted to overthrow Gorbachev. It failed, but fatally weakened him. <strong>4)</strong> <strong>Boris Yeltsin</strong> (Russian president) emerged as the dominant figure, effectively sidelining Gorbachev. <strong>5)</strong> On 25 December 1991, Gorbachev resigned as Soviet President and the USSR was formally dissolved into 15 independent republics. The Cold War was officially over.",significance:"The USSR collapsed NOT from external invasion but from internal rot. Gorbachev's reforms, intended to save the system, destroyed it. Exam markers want you to show multiple causes — economic, political, nationalist — not just 'Reagan won it.'"},
+
+  {topic:"end",type:"KEY TERM",front:"What was the 'Second Cold War'?",date:"~1979–1985",back:"The period after the collapse of détente, characterised by renewed US-Soviet hostility. Key features: <strong>1)</strong> Soviet invasion of Afghanistan (1979). <strong>2)</strong> Reagan's election (1980) and aggressive anti-Soviet rhetoric ('Evil Empire'). <strong>3)</strong> Massive US military build-up and SDI. <strong>4)</strong> Soviet shooting down of Korean Air Lines Flight 007 (1983). <strong>5)</strong> NATO's Able Archer exercise (1983) — a war game that the USSR feared was cover for a real attack. <strong>6)</strong> US support for anti-communist rebels worldwide.",significance:"The Second Cold War brought US-Soviet relations to their lowest point since the Cuban Missile Crisis. The world arguably came close to nuclear war in 1983 (Able Archer). BUT it also paved the way for the end of the Cold War — the pressure forced the USSR to seek reform."},
+  {topic:"end",type:"KEY TERM",front:"What was the 'Sinatra Doctrine'?",date:"1989",back:"A joke nickname for Gorbachev's abandonment of the Brezhnev Doctrine. The idea was that Eastern European countries could now 'do it their way' (referencing Frank Sinatra's song). In practice, it meant the USSR would no longer use military force to keep communist governments in power in Eastern Europe. This was demonstrated when Gorbachev did NOT intervene during the 1989 revolutions.",significance:"The Sinatra Doctrine is the flip side of the Brezhnev Doctrine. Its adoption is arguably the single most important decision in ending the Cold War in Europe. Without the threat of Soviet tanks, communist regimes across Eastern Europe collapsed like dominoes."},
+  {topic:"end",type:"KEY DATE",front:"When was Germany reunified?",date:"3 October 1990",back:"After the fall of the Berlin Wall, the two Germanies moved rapidly towards reunification. Key steps: <strong>1)</strong> The 'Two Plus Four' talks — the two Germanies plus the four wartime Allies (US, UK, USSR, France). <strong>2)</strong> Gorbachev agreed to a reunified Germany in NATO — a major concession. <strong>3)</strong> Germany formally reunified on 3 October 1990. <strong>4)</strong> The USSR withdrew its 380,000 troops from East Germany by 1994.",significance:"German reunification was the final confirmation that the Cold War division of Europe was over. A united Germany in NATO — something Stalin would have considered unthinkable — was accepted peacefully. This is often the 'end point' of the Cold War narrative in Edexcel questions — though the USSR itself survived until December 1991."}
+];
+
+// ── STATE ──────────────────────────────────────────────────────
+let filteredCards = [...cards];
+let currentIndex = 0;
+let flipped = false;
+let seenCards = new Set();
+let currentFilter = 'all';
+
+// ── RENDER ─────────────────────────────────────────────────────
+function renderCard() {
+  const card = filteredCards[currentIndex];
+  const front = document.getElementById('card-front');
+  const back = document.getElementById('card-back');
+
+  const topicNames = {origins:'Origins of the Cold War',crises:'Cold War Crises',end:'End of the Cold War'};
+  const topicBadge = `badge-${card.topic}`;
+
+  // Front
+  front.innerHTML = `
+    <div class="topic-badge ${topicBadge}">${topicNames[card.topic]}</div>
+    <div class="card-number">${currentIndex + 1} / ${filteredCards.length}</div>
+    <div class="card-type">${card.type}</div>
+    <div class="key-text">${card.front}</div>
+    ${card.date ? `<div class="date-text">${card.date}</div>` : ''}
+    <div class="tap-hint">tap to reveal</div>
+  `;
+
+  // Back
+  back.innerHTML = `
+    <div class="topic-badge ${topicBadge}">${topicNames[card.topic]}</div>
+    <div class="card-number">${currentIndex + 1} / ${filteredCards.length}</div>
+    <div class="key-mini">${card.front}</div>
+    <div class="detail-title">DETAIL</div>
+    <div class="detail-text">${card.back}</div>
+    <div class="significance"><strong>⚠ EXAM SIGNIFICANCE:</strong> ${card.significance}</div>
+    <div class="tap-hint">tap to flip back</div>
+  `;
+
+  // Track as seen
+  seenCards.add(currentIndex);
+  updateDots();
+
+  // Unflip
+  const inner = document.getElementById('card-inner');
+  inner.classList.remove('flipped');
+  flipped = false;
+
+  // Update nav
+  document.getElementById('nav-info').textContent = `${currentIndex + 1} / ${filteredCards.length}`;
+  document.getElementById('prev-btn').disabled = currentIndex === 0;
+  document.getElementById('next-btn').disabled = currentIndex === filteredCards.length - 1;
+}
+
+function updateDots() {
+  const container = document.getElementById('progress-dots');
+  let html = '';
+  for (let i = 0; i < filteredCards.length; i++) {
+    let cls = 'dot';
+    if (i === currentIndex) cls += ' current';
+    else if (seenCards.has(i)) cls += ' seen';
+    html += `<span class="${cls}"></span>`;
+  }
+  container.innerHTML = html;
+}
+
+// ── FLIP ───────────────────────────────────────────────────────
+function flipCard() {
+  const inner = document.getElementById('card-inner');
+  flipped = !flipped;
+  if (flipped) {
+    inner.classList.add('flipped');
+  } else {
+    inner.classList.remove('flipped');
+  }
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────
+function nextCard() {
+  if (currentIndex < filteredCards.length - 1) {
+    currentIndex++;
+    renderCard();
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderCard();
+  }
+}
+
+function shuffleCards() {
+  // Fisher-Yates shuffle
+  for (let i = filteredCards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [filteredCards[i], filteredCards[j]] = [filteredCards[j], filteredCards[i]];
+  }
+  currentIndex = 0;
+  seenCards.clear();
+  renderCard();
+}
+
+// ── FILTERS ────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentFilter = this.dataset.filter;
+
+    if (currentFilter === 'all') {
+      filteredCards = [...cards];
+    } else {
+      filteredCards = cards.filter(c => c.topic === currentFilter);
+    }
+
+    currentIndex = 0;
+    seenCards.clear();
+    document.getElementById('filter-count').textContent = `${filteredCards.length} cards`;
+    renderCard();
+  });
+});
+
+// ── KEYBOARD ───────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') nextCard();
+  if (e.key === 'ArrowLeft') prevCard();
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    flipCard();
+  }
+});
+
+// ── TOUCH SWIPE ────────────────────────────────────────────────
+let touchStartX = 0;
+document.getElementById('card-inner').addEventListener('touchstart', function(e) {
+  touchStartX = e.touches[0].clientX;
+});
+
+document.getElementById('card-inner').addEventListener('touchend', function(e) {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 60) {
+    if (diff > 0) nextCard();
+    else prevCard();
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+renderCard();
+</script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macbeth Key Quotations · Quizlet-style Flashcards</title>
+<style>
+:root{--bg:#0d1117;--card-bg:#161b22;--border:#30363d;--text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--green:#3fb950;--red:#f85149;--purple:#bc8cff;--orange:#d2991d;--pink:#f778ba}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;gap:10px;flex-wrap:wrap}
+.topbar h1{font-size:16px;white-space:nowrap}
+.topbar .count{font-size:12px;color:var(--text2)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{padding:4px 10px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);color:var(--text2);cursor:pointer;font-size:11px;transition:all 0.15s;white-space:nowrap}
+.filter-btn:hover,.filter-btn.active{color:#fff}
+.filter-btn[data-filter="Ambition"].active,.filter-btn[data-filter="Ambition"]:hover{background:var(--red);border-color:var(--red)}
+.filter-btn[data-filter="Guilt"].active,.filter-btn[data-filter="Guilt"]:hover{background:var(--purple);border-color:var(--purple)}
+.filter-btn[data-filter="Supernatural"].active,.filter-btn[data-filter="Supernatural"]:hover{background:#6e40c9;border-color:#6e40c9}
+.filter-btn[data-filter="Appearance"].active,.filter-btn[data-filter="Appearance"]:hover{background:var(--orange);border-color:var(--orange)}
+.filter-btn[data-filter="Kingship"].active,.filter-btn[data-filter="Kingship"]:hover{background:var(--accent);border-color:var(--accent)}
+.filter-btn[data-filter="Gender"].active,.filter-btn[data-filter="Gender"]:hover{background:var(--pink);border-color:var(--pink)}
+
+/* Card area */
+.card-area{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;perspective:1200px;min-height:0}
+.card-container{width:100%;max-width:600px;height:100%;max-height:500px;position:relative}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);cursor:pointer}
+.card-inner.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px;border:1px solid var(--border);background:var(--card-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;overflow-y:auto}
+.card-back{transform:rotateY(180deg)}
+
+/* Front */
+.card-front .theme-badge{position:absolute;top:14px;left:14px;font-size:10px;padding:3px 10px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.badge-Ambition{background:#f8514922;color:var(--red)}
+.badge-Guilt{background:#bc8cff22;color:var(--purple)}
+.badge-Supernatural{background:#6e40c922;color:#bc8cff}
+.badge-Appearance{background:#d2991d22;color:var(--orange)}
+.badge-Kingship{background:#58a6ff22;color:var(--accent)}
+.badge-Gender{background:#f778ba22;color:var(--pink)}
+
+.card-front .quote-text{font-size:22px;font-weight:700;font-style:italic;line-height:1.4;text-align:center;color:var(--green);margin-bottom:16px}
+.card-front .speaker-text{font-size:14px;color:var(--accent);margin-bottom:6px}
+.card-front .context-text{font-size:13px;color:var(--text2);text-align:center}
+.card-front .tap-hint{position:absolute;bottom:14px;font-size:11px;color:var(--text2);opacity:0.5}
+.card-front .card-number{position:absolute;top:14px;right:14px;font-size:11px;color:var(--text2)}
+
+/* Back */
+.card-back .theme-badge{position:absolute;top:14px;left:14px;font-size:10px;padding:3px 10px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.card-back .quote-mini{font-size:13px;font-style:italic;color:var(--green);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);text-align:center;width:100%}
+.card-back .analysis-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.card-back .analysis-text{font-size:14px;line-height:1.7;text-align:left;width:100%}
+.card-back .card-number{position:absolute;top:14px;right:14px;font-size:11px;color:var(--text2)}
+.card-back .tap-hint{position:absolute;bottom:14px;font-size:11px;color:var(--text2);opacity:0.5}
+
+/* Nav */
+.nav-bar{display:flex;align-items:center;justify-content:center;gap:20px;padding:10px 16px;border-top:1px solid var(--border);flex-shrink:0}
+.nav-btn{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);cursor:pointer;font-size:13px;transition:all 0.15s;min-width:80px}
+.nav-btn:hover{background:var(--border)}
+.nav-btn:disabled{opacity:0.3;cursor:default}
+.nav-btn.flip-btn{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.nav-btn.flip-btn:hover{opacity:0.85}
+.nav-dots{display:flex;gap:4px;align-items:center}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all 0.2s}
+.nav-dot.active{background:var(--accent);width:18px;border-radius:3px}
+.nav-dot.reviewed{background:var(--green)}
+
+@media(max-width:500px){
+  .card-front .quote-text{font-size:17px}
+  .card-back .analysis-text{font-size:12px}
+  .filters{gap:4px}
+  .filter-btn{padding:3px 7px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <h1>🎭 Macbeth Quotes</h1>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="filters" id="filters"></div>
+</div>
+
+<div class="card-area" id="cardArea">
+  <div class="card-container">
+    <div class="card-inner" id="cardInner" onclick="flipCard()">
+      <div class="card-face card-front" id="cardFront"></div>
+      <div class="card-face card-back" id="cardBack"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn" id="prevBtn" onclick="prevCard()">◀ Prev</button>
+  <div class="nav-dots" id="navDots"></div>
+  <button class="nav-btn flip-btn" onclick="flipCard()">↻ Flip</button>
+  <button class="nav-btn" id="nextBtn" onclick="nextCard()">Next ▶</button>
+</div>
+
+<script>
+const quotes = [
+  // ═══════ AMBITION ═══════
+  {q:"Stars, hide your fires; Let not light see my black and deep desires", speaker:"Macbeth", act:"Act 1, Scene 4", context:"After Duncan names Malcolm as heir — ambition first surfaces", theme:"Ambition", analysis:"Macbeth's ambition is already 'black and deep' — he knows it's evil but cannot suppress it. 'Stars' and 'light' symbolise heaven/God — he wants his desires hidden from divine judgment. The imperative 'hide' shows he's already commanding the universe to conceal his sin. This soliloquy moment is where ambition first becomes dangerous."},
+  {q:"I have no spur / To prick the sides of my intent, but only / Vaulting ambition, which o'erleaps itself / And falls on th'other", speaker:"Macbeth", act:"Act 1, Scene 7", context:"Soliloquy — debating whether to kill Duncan", theme:"Ambition", analysis:"Extended horse-riding metaphor: 'spur' = motivation. Macbeth admits he has ONLY ambition — not loyalty, justice, or reason. 'Vaulting' means jumping too ambitiously; 'o'erleaps itself' shows ambition is self-destructive. He KNOWS this will end badly and proceeds anyway. The caesura before 'And falls' makes collapse feel inevitable. Key for essays on tragic flaw / hamartia."},
+  {q:"To be thus is nothing, but to be safely thus", speaker:"Macbeth", act:"Act 3, Scene 1", context:"After becoming king — now paranoid, planning Banquo's murder", theme:"Ambition", analysis:"Paradox: being king means nothing if he's not secure in it. 'Thus' avoids saying 'king' — he can't name what he's become. This marks the shift from ambitious to paranoid. His obsession with the 'fruitless crown' and 'barren sceptre' begins: he killed for a throne his children won't inherit. Ambition's emptiness exposed."},
+  {q:"If chance will have me king, why, chance may crown me / Without my stir", speaker:"Macbeth", act:"Act 1, Scene 3", context:"Right after the witches' prophecy — his first reaction", theme:"Ambition", analysis:"Crucial moment: Macbeth's FIRST response to the prophecy is to let fate do the work. 'Without my stir' = without my action. This is the Macbeth BEFORE corruption — he's willing to wait. The contrast with what follows (murder) shows how far he falls. 'Chance' personified — he's externalising responsibility already. For essays: this is the 'before' in his tragic arc."},
+  {q:"The Prince of Cumberland! that is a step / On which I must fall down, or else o'erleap", speaker:"Macbeth", act:"Act 1, Scene 4", context:"Duncan names Malcolm as heir — Macbeth's aside", theme:"Ambition", analysis:"The turning point from passive to active ambition. Malcolm is now a 'step' — a staircase metaphor: either stumble on it or jump OVER it. 'O'erleap' echoes the later 'vaulting ambition which o'erleaps itself' — the seed is planted here. 'Stars, hide your fires' follows immediately. The aside form shows his thoughts are now split from his public face."},
+  {q:"Thou wouldst be great; / Art not without ambition, but without / The illness should attend it", speaker:"Lady Macbeth", act:"Act 1, Scene 5", context:"Reading Macbeth's letter — analysing his character", theme:"Ambition", analysis:"Lady Macbeth's diagnostic of her husband: he HAS ambition ('not without') but LACKS the ruthlessness ('illness') to act on it. 'Illness' = moral sickness, the willingness to do evil. She sees this as a FLAW in him, not a virtue. This is the play's definition of corrupted ambition: ambition alone isn't dangerous — ambition PLUS ruthlessness is. Key for 'Lady Macbeth as catalyst' essays."},
+  {q:"We have scotch'd the snake, not kill'd it", speaker:"Macbeth", act:"Act 3, Scene 2", context:"After Banquo's murder — still feels threatened", theme:"Ambition", analysis:"Ambition's endless hunger: one murder is never enough. 'Scotch'd' = wounded, not killed. The snake metaphor (echoing Lady Macbeth's 'serpent under't') shows the danger is still alive. Killing Duncan was supposed to solve everything — instead it created infinite threats. This quote captures ambition's paradox: it promises satisfaction but delivers only more fear."},
+  {q:"The very firstlings of my heart shall be / The firstlings of my hand", speaker:"Macbeth", act:"Act 4, Scene 1", context:"Vowing to act on impulse — killing Macduff's family", theme:"Ambition", analysis:"Ambition's final form: thought and action become ONE — no pause, no conscience, no reflection. 'Firstlings' = firstborn, first impulse. He will now kill as instantly as he thinks. This is the opposite of Act 1's hesitant Macbeth. Shakespeare shows ambition's degenerative effect: it strips away the space between thought and deed that makes us human. From 'If chance will have me king' to this — the arc is complete."},
+
+  // ═══════ GUILT ═══════
+  {q:"Will all great Neptune's ocean wash this blood / Clean from my hand? No", speaker:"Macbeth", act:"Act 2, Scene 2", context:"Immediately after killing Duncan — staring at his bloody hands", theme:"Guilt", analysis:"Hyperbole: the ENTIRE ocean cannot wash away this guilt. 'Neptune' adds classical/mythic scale. The monosyllabic 'No' is devastating — he answers his own question. Blood becomes the play's central guilt symbol. Contrast with Lady Macbeth's 'A little water clears us of this deed' — Macbeth knows immediately that guilt is permanent; she learns it too late."},
+  {q:"Methought I heard a voice cry 'Sleep no more! / Macbeth does murder sleep'", speaker:"Macbeth", act:"Act 2, Scene 2", context:"Auditory hallucination right after the murder", theme:"Guilt", analysis:"Guilt manifests as a voice only he hears — psychological breakdown begins. 'Sleep' = innocence, peace, divine order. By killing Duncan (who was sleeping), Macbeth has 'murdered' his own ability to rest. 'Macbeth does murder sleep' — his own name is now synonymous with destroyed peace. Foreshadows Lady Macbeth's sleepwalking."},
+  {q:"Out, damned spot! Out, I say!", speaker:"Lady Macbeth", act:"Act 5, Scene 1", context:"Sleepwalking — compulsively washing imaginary blood from her hands", theme:"Guilt", analysis:"THE guilt quote. 'Damned' means both cursed and hell-bound. The 'spot' is imaginary — guilt has destroyed her psyche. Repetition of 'Out' shows futile desperation. Contrast with Act 2: 'A little water clears us of this deed' — the reversal is total. Her arc: from commanding evil to being destroyed by it. Structure: exclamation + repetition = mental collapse."},
+  {q:"Here's the smell of the blood still. All the perfumes of Arabia will not sweeten this little hand", speaker:"Lady Macbeth", act:"Act 5, Scene 1", context:"Sleepwalking — now SMELLING imaginary blood", theme:"Guilt", analysis:"Synaesthesia progression: she saw blood → now she SMELLS it. Sensory overload shows deepening madness. 'All the perfumes of Arabia' — hyperbole linking to exotic wealth (Shakespeare's audience's idea of ultimate luxury). 'Little hand' is tragic pathos: this small hand, once the engine of ambition, is now permanently stained. The juxtaposition of 'little' and her enormous crimes."},
+  {q:"I am in blood / Stepp'd in so far that, should I wade no more, / Returning were as tedious as go o'er", speaker:"Macbeth", act:"Act 3, Scene 4", context:"After Banquo's ghost disrupts the banquet", theme:"Guilt", analysis:"Blood as RIVER metaphor: he's waded so deep that turning back is equally hard as continuing. This is the point of no return — he chooses more murder as the 'easier' path. 'Tedious' is horrifyingly casual: murder has become mere inconvenience. Guilt transforms from conscience into practical problem — morality replaced by logistics."},
+  {q:"What's done cannot be undone", speaker:"Lady Macbeth", act:"Act 5, Scene 1", context:"Her final words — sleepwalking, broken", theme:"Guilt", analysis:"Tragic echo of her Act 3 dismissal: 'What's done is done.' Then: casual. Now: despair. She has learned — too late — that actions have permanent consequences. The passive voice ('cannot be undone') strips her of all agency. The woman who commanded spirits now can't command her own mind. Complete arc: ambitious → guilty → destroyed."},
+
+  // ═══════ SUPERNATURAL ═══════
+  {q:"Fair is foul, and foul is fair / Hover through the fog and filthy air", speaker:"Witches", act:"Act 1, Scene 1", context:"Opening scene — the play's thesis statement", theme:"Supernatural", analysis:"Chiasmus (ABBA): fair/foul/foul/fair — moral reversal embedded in the language itself. 'Hover' = between worlds (earth/hell, real/nightmare). 'Fog and filthy air' = moral and literal murkiness. Sets up EVERY major theme: Appearance vs Reality, the supernatural, moral confusion. The witches speak in trochaic tetrameter (different from noble iambic pentameter) — marking them as 'other'."},
+  {q:"Is this a dagger which I see before me, / The handle toward my hand?", speaker:"Macbeth", act:"Act 2, Scene 1", context:"The dagger soliloquy — hallucination before killing Duncan", theme:"Supernatural", analysis:"Is it supernatural or psychological? The play refuses to answer — this ambiguity is the whole point. 'Handle toward my hand' = the dagger is INVITING him, as if fate guides him. The question 'Is this...' shows his uncertainty. Key debate: is Macbeth controlled by external forces (witches/fate) or his own mind? The play lets BOTH readings work."},
+  {q:"Double, double toil and trouble; / Fire burn and cauldron bubble", speaker:"Witches", act:"Act 4, Scene 1", context:"Brewing potion, preparing Macbeth's second prophecy", theme:"Supernatural", analysis:"Trochaic tetrameter (DUM-da DUM-da) vs noble iambic — rhythmic 'otherness'. 'Double' = duplicity, doublespeak. Incantatory repetition mimics spellcasting. James I (Shakespeare's king) wrote Daemonologie about witchcraft — this scene was partly crowd-pleasing for him. The witches' power peaks here; Macbeth is now their puppet, not their audience."},
+  {q:"By the pricking of my thumbs, / Something wicked this way comes", speaker:"Second Witch", act:"Act 4, Scene 1", context:"Sensing Macbeth's approach to their cavern", theme:"Supernatural", analysis:"Physical sensation of evil: 'pricking' = tingling, premonition. The witches, embodiments of evil, call MACBETH 'wicked' — he has become MORE evil than supernatural forces. Deictic 'this way' implicates audience: evil approaches us too. Dramatic irony: Macbeth thinks he's seeking the witches for answers; they were waiting for him. Power dynamic reversed."},
+  {q:"Come, thick night, / And pall thee in the dunnest smoke of hell", speaker:"Lady Macbeth", act:"Act 1, Scene 5", context:"Invoking darkness to conceal Duncan's murder", theme:"Supernatural", analysis:"Imperative 'Come' — she COMMANDS darkness, doesn't request it. 'Pall' = funeral shroud; 'dunnest' = darkest. She's actively wrapping hell's darkness around herself. Compare with Macbeth's 'Stars, hide your fires' — he asks stars; she summons hell. She's the more aggressive, more willing invoker of supernatural evil. Jacobean audience: a woman commanding spirits = witchcraft = terrifying."},
+
+  // ═══════ GENDER ROLES ═══════
+  {q:"Come, you spirits / That tend on mortal thoughts, unsex me here", speaker:"Lady Macbeth", act:"Act 1, Scene 5", context:"Preparing to persuade Macbeth to murder Duncan", theme:"Gender", analysis:"She calls on spirits to REMOVE her femininity — equating womanhood with weakness, cruelty with masculinity. 'Unsex' is a verb she invents — she's literally trying to undo her biology. Jacobean gender norms: women = nurturing, gentle. Lady Macbeth inverts ALL of this. Links to witchcraft (women summoning spirits) and the play's obsession with what makes a 'man'."},
+  {q:"Yet do I fear thy nature; It is too full o'th'milk of human kindness", speaker:"Lady Macbeth", act:"Act 1, Scene 5", context:"Reading Macbeth's letter, doubting he can murder", theme:"Gender", analysis:"She immediately frames kindness as FEMININE weakness. 'Milk' = breastfeeding, nurturing, infancy — coded female. By gendering compassion, she sets up the play's central gender conflict: to be cruel is to be masculine; to hesitate is to be feminine. She will spend the next two scenes trying to remove the 'milk' from Macbeth and the 'woman' from herself."},
+  {q:"When you durst do it, then you were a man", speaker:"Lady Macbeth", act:"Act 1, Scene 7", context:"Macbeth wavers — she attacks his masculinity", theme:"Gender", analysis:"THE manipulation quote. She makes manhood CONDITIONAL on murder: 'when...then'. 'Durst' (dared) frames hesitation as cowardice, not conscience. This one line weaponises gender — she knows EXACTLY how to push Macbeth. The attack on his manhood is what finally makes him act. For essays: Lady Macbeth uses gendered language as a tool of manipulation; masculinity = violence in this play."},
+  {q:"I dare do all that may become a man; / Who dares do more is none", speaker:"Macbeth", act:"Act 1, Scene 7", context:"Defending his hesitation — defining real manhood", theme:"Gender", analysis:"Macbeth's counter-definition of manhood: a REAL man knows his limits. 'Who dares do more is none' = anyone who goes beyond human bounds is NOT a man — he's a monster. This is actually the play's moral position, but Lady Macbeth overrides it. Tragic irony: Macbeth's definition is CORRECT, and by abandoning it, he becomes exactly 'none' — a 'walking shadow', less than human."},
+  {q:"Bring forth men-children only", speaker:"Macbeth", act:"Act 1, Scene 7", context:"To Lady Macbeth, admiring her ruthless resolve", theme:"Gender", analysis:"Macbeth's jaw-dropping response to her manipulation. He's so impressed by her cruelty that he wants her to only birth male children — 'thy undaunted mettle should compose nothing but males.' Mettle = spirit/courage, pun on 'metal'. He's buying into HER definition: cruelty = masculine. The line shows how completely she's reframed his values in one scene."},
+  {q:"Are you a man?", speaker:"Lady Macbeth", act:"Act 3, Scene 4", context:"Banquet scene — Macbeth sees Banquo's ghost, she covers for him", theme:"Gender", analysis:"Same weapon, different context. She attacks his manhood AGAIN when he shows fear — but this time it doesn't work. He's too far gone. The repetition of gendered manipulation shows both her limited toolkit AND the play's obsession with masculinity. 'O, these flaws and starts... Are you a man?' — she's still performing the strong one, but cracks are showing."},
+  {q:"Dispute it like a man. / I shall do so; but I must also feel it as a man", speaker:"Malcolm / Macduff", act:"Act 4, Scene 3", context:"Malcolm tells Macduff to turn grief into vengeful action", theme:"Gender", analysis:"THE alternative masculinity. Malcolm says 'dispute it like a man' = fight. Macduff responds: yes, I'll fight — but I must also FEEL. Macduff is the only man in the play who combines strength WITH emotion. He weeps for his murdered family. This is Shakespeare's answer to the play's gender question: true manhood = action + feeling. Contrast with Macbeth's hollow violence."},
+
+  // ═══════ APPEARANCE vs REALITY ═══════
+  {q:"Look like the innocent flower, / But be the serpent under't", speaker:"Lady Macbeth", act:"Act 1, Scene 5", context:"Scripting Macbeth's performance for Duncan's visit", theme:"Appearance", analysis:"Flower / serpent binary: surface beauty hiding deadly intent. Biblical allusion: serpent = Satan in Eden. Lady Macbeth DIRECTS the deception — she's the playwright within the play. 'Look like' vs 'be' — the GAP between appearance and truth is the engine of the entire tragedy. This quote is the thesis statement of the Appearance vs Reality theme."},
+  {q:"False face must hide what the false heart doth know", speaker:"Macbeth", act:"Act 1, Scene 7", context:"End of wavering soliloquy — committing to the murder", theme:"Appearance", analysis:"'False' doubled: face AND heart are both false — no part of him remains genuine. Alliteration (false face / false heart) binds appearance and reality in an unbreakable knot. 'Must' = deception is no longer a choice; it's compulsory. After this line, the murder is inevitable and the performance begins."},
+  {q:"There's daggers in men's smiles", speaker:"Donalbain", act:"Act 2, Scene 3", context:"After Duncan's body found — immediately deciding to flee", theme:"Appearance", analysis:"The ultimate Appearance/Reality metaphor: the friendliest gesture concealing the deadliest intent. Donalbain is young, often overlooked — but he sees through the performance instantly. Plural 'men's' = he knows it's systemic, not one person. His immediate flight shows wisdom: he knows staying means death. Often underrated character moment."},
+  {q:"Thou hast it now: King, Cawdor, Glamis, all / As the weird women promised, and I fear / Thou play'dst most foully for't", speaker:"Banquo", act:"Act 3, Scene 1", context:"Soliloquy — suspecting Macbeth of murder", theme:"Appearance", analysis:"Banquo is the moral counterweight: he got the SAME prophecy but didn't kill for it. 'Play'dst most foully' — theatrical metaphor: Macbeth's kingship is a PERFORMANCE, not legitimate rule. 'I fear' — Banquo KNOWS but stays silent, making him complicit. His silence is as important as his speech: why doesn't he act? Fear? Hope his sons will be kings?"},
+
+  // ═══════ KINGSHIP ═══════
+  {q:"His silver skin lac'd with his golden blood", speaker:"Macbeth", act:"Act 2, Scene 3", context:"Describing Duncan's body — falsely performing grief", theme:"Kingship", analysis:"Duncan described in royal metals (silver/gold) — even in death, he's sacred, Christ-like. Deeply ironic: Macbeth describes the body he murdered with poetic reverence. The elaborate imagery contrasts with Lady Macbeth's bluntness — he OVER-performs grief to hide guilt. Duncan = ideal of sacred kingship; Macbeth = its destroyer."},
+  {q:"Bleed, bleed, poor country!", speaker:"Macduff", act:"Act 4, Scene 3", context:"Lamenting Scotland under Macbeth's tyranny", theme:"Kingship", analysis:"Personification: Scotland as a bleeding body. The Great Chain of Being: when the king is diseased, the ENTIRE nation bleeds. 'Poor country' — paternal grief. Macduff doesn't want power; he wants to HEAL Scotland. This is what makes him the rightful avenger: he acts for the nation, not himself. Contrast with Macbeth's self-serving violence."},
+  {q:"Out, out, brief candle! / Life's but a walking shadow", speaker:"Macbeth", act:"Act 5, Scene 5", context:"Responding to Lady Macbeth's death", theme:"Kingship", analysis:"Existential nihilism — the endpoint of unchecked ambition. Metaphor chain: candle → shadow → player → tale. Each image strips life of MORE meaning: brief, insubstantial, performed, meaningless. 'It is a tale / Told by an idiot, full of sound and fury, / Signifying nothing.' After all the murder, he has concluded NOTHING matters. This is what 'vaulting ambition' costs: total spiritual bankruptcy."},
+  {q:"The queen, my lord, is dead", speaker:"Seyton", act:"Act 5, Scene 5", context:"Delivering news of Lady Macbeth's suicide", theme:"Kingship", analysis:"The moment it all collapses. Macbeth's response — 'She should have died hereafter' — is emotionally dead. He's become so numb that his wife's suicide barely registers. All his ambition led HERE: alone, unloved, ruling a hated kingdom, nothing to show. The emptiness of tyranny. Seyton's name is a pun on 'Satan' — the devil delivers the final blow."}
+];
+
+let currentFilter = 'All';
+let currentIndex = 0;
+let flipped = false;
+let reviewed = {};
+
+function getFiltered(){
+  return currentFilter === 'All' ? quotes : quotes.filter(q => q.theme === currentFilter);
+}
+
+function filter(theme){
+  currentFilter = theme;
+  currentIndex = 0;
+  flipped = false;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-filter="${theme}"]`).classList.add('active');
+  renderCard();
+  renderNav();
+}
+
+function flipCard(){
+  const filtered = getFiltered();
+  if(!filtered.length) return;
+  flipped = !flipped;
+  if(flipped) reviewed[quotes.indexOf(filtered[currentIndex])] = true;
+  document.getElementById('cardInner').classList.toggle('flipped', flipped);
+  renderNav();
+}
+
+function prevCard(){
+  const filtered = getFiltered();
+  if(!filtered.length) return;
+  currentIndex = (currentIndex - 1 + filtered.length) % filtered.length;
+  flipped = false;
+  document.getElementById('cardInner').classList.remove('flipped');
+  renderCard();
+  renderNav();
+}
+
+function nextCard(){
+  const filtered = getFiltered();
+  if(!filtered.length) return;
+  currentIndex = (currentIndex + 1) % filtered.length;
+  flipped = false;
+  document.getElementById('cardInner').classList.remove('flipped');
+  renderCard();
+  renderNav();
+}
+
+function renderCard(){
+  const filtered = getFiltered();
+  if(!filtered.length){
+    document.getElementById('cardFront').innerHTML = '<div style="text-align:center;color:var(--text2)">No quotes in this theme</div>';
+    document.getElementById('cardBack').innerHTML = '';
+    return;
+  }
+  const q = filtered[currentIndex];
+  const id = quotes.indexOf(q);
+  const themeColors = {Ambition:'var(--red)',Guilt:'var(--purple)',Supernatural:'#6e40c9',Appearance:'var(--orange)',Kingship:'var(--accent)',Gender:'var(--pink)'};
+  const tc = themeColors[q.theme] || 'var(--accent)';
+  
+  document.getElementById('cardFront').innerHTML = `
+    <span class="theme-badge badge-${q.theme}">${q.theme}</span>
+    <span class="card-number">${currentIndex+1}/${filtered.length}</span>
+    <div class="quote-text">"${q.q}"</div>
+    <div class="speaker-text">— ${q.speaker}, ${q.act}</div>
+    <div class="context-text">📍 ${q.context}</div>
+    <div class="tap-hint">Tap card or press Flip to reveal analysis</div>
+  `;
+  
+  document.getElementById('cardBack').innerHTML = `
+    <span class="theme-badge badge-${q.theme}">${q.theme}</span>
+    <span class="card-number">${currentIndex+1}/${filtered.length}</span>
+    <div class="quote-mini">"${q.q}" — ${q.speaker}</div>
+    <div class="analysis-title">ANALYSIS</div>
+    <div class="analysis-text">${q.analysis}</div>
+    <div class="tap-hint">Tap to flip back</div>
+  `;
+  
+  document.getElementById('count').textContent = `${filtered.length} quotes`;
+}
+
+function renderNav(){
+  const filtered = getFiltered();
+  document.getElementById('prevBtn').disabled = filtered.length <= 1;
+  document.getElementById('nextBtn').disabled = filtered.length <= 1;
+  
+  // Dots
+  let dots = '';
+  for(let i=0;i<filtered.length;i++){
+    const id = quotes.indexOf(filtered[i]);
+    const active = i===currentIndex?'active':'';
+    const rev = reviewed[id]?'reviewed':'';
+    dots += `<span class="nav-dot ${active} ${rev}"></span>`;
+  }
+  document.getElementById('navDots').innerHTML = dots;
+  document.getElementById('count').textContent = `${filtered.length} quotes`;
+}
+
+// Build filter buttons
+(function(){
+  const themes = ['All','Ambition','Guilt','Supernatural','Gender','Appearance','Kingship'];
+  document.getElementById('filters').innerHTML = themes.map(t =>
+    `<button class="filter-btn${t==='All'?' active':''}" data-filter="${t}" onclick="filter('${t}')">${t==='All'?'All':t==='Appearance'?'Appearance vs Reality':t}</button>`
+  ).join('');
+})();
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft') prevCard();
+  if(e.key==='ArrowRight') nextCard();
+  if(e.key===' '||e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();flipCard();}
+});
+
+// Swipe
+let touchX=0;
+document.getElementById('cardArea').addEventListener('touchstart',e=>{touchX=e.touches[0].clientX});
+document.getElementById('cardArea').addEventListener('touchend',e=>{
+  const dx = e.changedTouches[0].clientX - touchX;
+  if(Math.abs(dx)>60) dx>0?prevCard():nextCard();
+});
+
+renderCard();
+renderNav();
+</script>
+</body>
+</html>

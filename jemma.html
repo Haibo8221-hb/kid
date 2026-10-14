@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title> Jemma · Growth Explorer</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f1117;--surface:#1a1d28;--surface2:#232736;--border:#2a2f42;--text:#e2e6f0;--text2:#8892b0;--accent:#4f8cff;--accent2:#38d9a9;--red:#ff6b6b;--orange:#ffa94d;--yellow:#ffd43b;--green:#69db7c;--radius:12px}
+body{font-family:-apple-system,'Segoe UI','Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sidebar-logo{padding:0 20px 16px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.sidebar-logo h1{font-size:16px;font-weight:700}
+.sidebar-logo p{font-size:10px;color:var(--text2);margin-top:2px}
+.sidebar-nav{list-style:none;flex:1}
+.sidebar-nav a{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;color:var(--text2);transition:all 0.15s;border-left:3px solid transparent}
+.sidebar-nav a:hover,.sidebar-nav a.active{color:var(--text);background:var(--surface2);border-left-color:var(--accent)}
+.sidebar-bottom{padding:12px 20px;border-top:1px solid var(--border);margin-top:auto}
+.sidebar-bottom a{display:block;font-size:11px;color:var(--text2);padding:4px 0}
+.sidebar-bottom a:hover{color:var(--accent)}
+.sidebar-bottom .logout-btn{display:block;font-size:11px;color:var(--red);padding:4px 0;cursor:pointer;background:none;border:none}
+.sidebar-bottom .logout-btn:hover{color:#ff8a8a}
+
+/* Profile Card */
+.profile-card{padding:12px 16px;margin:8px 12px;background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:12px;text-align:center;cursor:default}
+.profile-avatar{font-size:40px;cursor:pointer;transition:transform 0.2s;display:inline-block;line-height:1.2}
+.profile-avatar:hover{transform:scale(1.15) rotate(5deg)}
+.profile-name{font-size:14px;font-weight:700;margin-top:4px;cursor:text;border:none;background:transparent;color:var(--text);text-align:center;width:100%;outline:none;border-bottom:1px dashed transparent;transition:border-color 0.2s}
+.profile-name:focus{border-bottom-color:var(--accent)}
+.profile-xp{margin-top:6px;font-size:10px;color:var(--text2)}
+.profile-xp-bar{height:4px;background:var(--bg);border-radius:2px;margin-top:3px;overflow:hidden}
+.profile-xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.5s}
+.profile-streak{font-size:10px;color:var(--orange);margin-top:4px}
+.theme-dots{display:flex;gap:6px;justify-content:center;margin-top:8px}
+.theme-dot{width:14px;height:14px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform 0.15s}
+.theme-dot:hover{transform:scale(1.2)}
+.theme-dot.active{border-color:var(--text);box-shadow:0 0 6px currentColor}
+@keyframes bounce-in{0%{transform:scale(0.3);opacity:0}50%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 rgba(79,140,255,0)}50%{box-shadow:0 0 12px rgba(79,140,255,0.3)}}
+.avatar-picker{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 0}
+.avatar-option{font-size:32px;padding:8px;cursor:pointer;border-radius:8px;text-align:center;transition:transform 0.15s,background 0.15s}
+.avatar-option:hover{transform:scale(1.25);background:var(--surface2)}
+.avatar-option.selected{background:var(--accent);border-radius:12px}
+.gradient-header{background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:14px}
+.streak-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,169,77,0.15);color:var(--orange);font-size:11px;padding:3px 8px;border-radius:12px;font-weight:600}
+
+/* Main */
+.main{margin-left:220px;padding:28px 36px;max-width:1400px;min-height:100vh}
+.header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.header-bar h2{font-size:18px;font-weight:700}
+.header-bar .admin-info{font-size:14px;color:var(--text2)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* Shared */
+.panel-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.section-title{font-size:13px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.flex-row{display:flex;gap:8px;align-items:center}
+.flex-row.grow{flex:1}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:14px;cursor:pointer;transition:background 0.15s}
+.btn:hover{background:#7aa5ff}
+.btn-sm{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer}
+.btn-sm:hover{border-color:var(--accent)}
+.btn-danger{background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer}
+input,textarea,select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:7px 11px;outline:none;font-family:inherit;width:100%}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+.tag{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:10px;color:var(--text2)}
+.tag.green{background:rgba(57,217,169,0.15);border-color:var(--accent2);color:var(--accent2)}
+.tag.yellow{background:rgba(255,212,59,0.15);border-color:var(--yellow);color:var(--yellow)}
+.tag.orange{background:rgba(255,169,77,0.15);border-color:var(--orange);color:var(--orange)}
+.tag.red{background:rgba(255,107,107,0.15);border-color:var(--red);color:var(--red)}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;background:var(--accent);transition:width 0.4s}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.stat-card .lbl{font-size:14px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px}
+.stat-card .val{font-size:24px;font-weight:700;margin-top:3px}
+.stat-card .sub{font-size:13px;color:var(--text2);margin-top:1px}
+
+/* Dashboard */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.radar-wrap{display:flex;align-items:center;gap:12px}
+.timer-list{display:flex;flex-direction:column;gap:8px}
+.timer-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.timer-item .t-name{font-size:14px;font-weight:600;flex:1}
+.timer-item .t-val{font-size:13px;color:var(--accent);font-variant-numeric:tabular-nums}
+.timer-item .t-tag{font-size:10px;padding:2px 8px;border-radius:10px}
+.quick-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+.quick-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:border-color 0.15s}
+.quick-card:hover{border-color:var(--accent)}
+.quick-card .qc-icon{font-size:20px}
+.quick-card .qc-name{font-size:14px;font-weight:500}
+.res-card{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--accent);text-decoration:none;transition:all 0.15s}
+.res-card:hover{background:var(--surface);border-color:var(--accent);color:#7aa5ff}
+.radar-legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;color:var(--text2);margin-top:6px}
+
+/* Subject Analysis Grid */
+.subject-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-bottom:4px}
+.subject-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;transition:all 0.2s}
+.subject-card.risk{border-color:rgba(255,107,107,0.4);background:rgba(255,107,107,0.06)}
+.subject-card.excellent{border-color:rgba(56,217,169,0.4);background:rgba(56,217,169,0.06)}
+.subject-card .sj-name{font-size:11px;font-weight:600;margin-bottom:2px}
+.subject-card .sj-grade{font-size:16px;font-weight:700;letter-spacing:-0.5px}
+.subject-card .sj-grade.above{color:var(--accent2)}
+.subject-card .sj-grade.meeting{color:var(--accent)}
+.subject-card .sj-grade.below{color:var(--orange)}
+.subject-card .sj-grade.risk{color:var(--red)}
+.subject-card .sj-grade.neutral{color:var(--text2)}
+.subject-card .sj-trend{font-size:10px;color:var(--text2);margin-top:1px}
+.subject-card .sj-bar{height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
+.subject-card .sj-bar-fill{height:100%;border-radius:2px;transition:width 0.3s}
+.subject-card .sj-tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:8px;margin-top:4px}
+
+/* Child Banner */
+.child-banner{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.child-avatar{width:48px;height:48px;border-radius:50%;background:var(--surface2);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.child-info{flex:1}
+.child-info h2{font-size:16px;font-weight:700}
+.child-info p{font-size:11px;color:var(--text2);margin-top:2px}
+.child-subjects{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.ch-subject{font-size:11px;padding:3px 10px;border-radius:12px}
+
+/* Tasks — minimalist 2-column + collapsible completed */
+.task-section{margin-bottom:14px}
+.task-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.task-section-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px}
+.task-list{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.task-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:15px;transition:all 0.15s;border-bottom:1px solid var(--border);cursor:pointer}
+.task-item:hover .task-del{opacity:1}
+.task-item.done{opacity:0.45}
+.task-item.done .task-name{text-decoration:line-through}
+.task-item .cb{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;cursor:pointer;transition:all 0.15s}
+.task-item .cb.checked{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.task-item .task-name{flex:1;cursor:text}
+.task-item .task-name:focus{outline:none}
+.task-del{background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:0 4px;line-height:1;opacity:0;transition:opacity 0.15s;flex-shrink:0}
+.task-del:hover{color:var(--red)}
+.collapse-toggle{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;padding:4px 0;user-select:none;margin-top:10px;border-top:1px dashed var(--border)}
+.collapse-toggle .arrow{transition:transform 0.2s;font-size:10px}
+.collapse-toggle.open .arrow{transform:rotate(90deg)}
+.collapse-body{overflow:hidden;transition:max-height 0.3s ease}
+.collapse-body.collapsed{max-height:0}
+/* Chat markdown */
+.chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.bubble p{margin:0 0 8px}.bubble p:last-child{margin:0}
+.bubble h1,.bubble h2,.bubble h3{font-weight:700;margin:10px 0 6px;font-size:15px}
+.bubble ul,.bubble ol{padding-left:18px;margin:6px 0}
+.bubble li{margin-bottom:3px}
+.bubble code{background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px;font-size:14px;font-family:monospace}
+.bubble pre{background:rgba(255,255,255,0.06);padding:10px 12px;border-radius:6px;overflow-x:auto;font-size:14px;margin:8px 0}
+.bubble pre code{background:none;padding:0}
+.bubble strong{font-weight:700}
+.bubble em{font-style:italic}
+.bubble blockquote{border-left:3px solid var(--accent);padding-left:10px;color:var(--text2);margin:8px 0}
+.bubble hr{border:none;border-top:1px solid var(--border);margin:10px 0}
+.bubble a{color:var(--accent)}
+.msg.user .bubble a{text-decoration:underline}
+/* Socratic banner */
+.socratic-banner{background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.08));color:#fbbf24;font-size:11px;font-weight:600;text-align:center;padding:6px 12px;border-bottom:1px solid rgba(245,158,11,0.2);letter-spacing:0.3px}
+
+/* Weekly Planner — Jemma Timetable */
+.planner-controls{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+#planner-week-label{font-size:13px;font-weight:600}
+.jtimetable{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.jtimetable th{background:var(--surface2);padding:8px 4px;font-weight:600;color:var(--accent);font-size:11px;border:1px solid var(--border);position:sticky;top:0;z-index:1}
+.jtimetable th:first-child{width:80px;color:var(--text2)}
+.jtimetable td{border:1px solid var(--border);padding:0;vertical-align:top}
+.jtimetable td.time-label{background:var(--surface2);text-align:center;font-size:11px;color:var(--text2);padding:6px 4px;font-weight:500}
+.jtimetable td textarea{width:100%;height:100%;border:none;background:transparent;color:var(--text);font-size:11px;padding:4px 5px;resize:none;min-height:42px;font-family:inherit;line-height:1.4;outline:none;display:block}
+.jtimetable td textarea:focus{background:rgba(79,140,255,0.08)}
+.jtimetable td textarea::placeholder{color:var(--text2);font-size:10px}
+.planner-dl-btn{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--accent);cursor:pointer;white-space:nowrap}
+.planner-dl-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* Routes */
+.route-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.route-card-hdr{display:flex;align-items:center;padding:12px 16px;cursor:pointer;gap:10px}
+.route-card-hdr:hover{background:var(--surface2)}
+.route-card-hdr .rc-icon{font-size:18px}
+.route-card-hdr .rc-title{flex:1;font-size:13px;font-weight:600}
+.route-card-hdr .rc-arrow{color:var(--text2);transition:transform 0.2s}
+.route-card.open .rc-arrow{transform:rotate(180deg)}
+.route-card-body{display:none;padding:0 16px 16px}
+.route-card.open .route-card-body{display:block}
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.compare-table th,.compare-table td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.compare-table th{color:var(--text2);font-weight:600}
+
+/* Resources */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--text2);cursor:pointer;transition:all 0.15s}
+.filter-btn:hover,.filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+/* Error Book */
+.error-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0;margin-bottom:16px;overflow:hidden;transition:border-color 0.15s}
+.error-card:hover{border-color:var(--accent)}
+.ec-topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.ec-subject{font-size:12px;font-weight:600;padding:3px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--border)}
+.ec-type{font-size:11px;padding:2px 8px;border-radius:8px;background:rgba(79,140,255,0.1);color:var(--accent)}
+.ec-priority{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px}
+.ec-priority.high{background:rgba(255,107,107,0.12);color:var(--red)}
+.ec-priority.medium{background:rgba(255,169,77,0.12);color:var(--orange)}
+.ec-priority.low{background:var(--surface2);color:var(--text2)}
+.ec-date{font-size:11px;color:var(--text2);margin-left:auto}
+.ec-body{padding:14px 16px}
+.ec-image{max-width:100%;max-height:400px;border-radius:8px;margin-bottom:12px;border:1px solid var(--border)}
+.ec-question{font-size:14px;color:var(--text);line-height:1.6;margin-bottom:12px;padding:10px 14px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)}
+.ec-answer-section{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.ec-diya-answer{font-size:13px;color:var(--text);line-height:1.5;padding:10px 14px;background:rgba(255,169,77,0.06);border-radius:8px;border-left:3px solid var(--orange)}
+.ec-diya-answer .label,.ec-correct .label,.ec-weaknesses .label,.ec-solution .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.ec-diya-answer .label{color:var(--orange)}.ec-correct .label{color:var(--accent2)}.ec-weaknesses .label{color:var(--red)}.ec-solution .label{color:var(--accent2)}
+.ec-correct{font-size:13px;color:var(--text);line-height:1.5;padding:10px 14px;background:rgba(16,185,129,0.06);border-radius:8px;border-left:3px solid var(--accent2)}
+.ec-score{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;padding:6px 10px;background:var(--surface2);border-radius:6px;display:inline-block}
+.ec-weaknesses{font-size:12px;color:var(--red);line-height:1.6;margin-bottom:10px;padding:8px 12px;background:rgba(255,107,107,0.05);border-radius:8px}
+.ec-solution{font-size:13px;color:var(--accent2);line-height:1.6;padding:10px 14px;background:rgba(16,185,129,0.06);border-radius:8px;margin-bottom:10px}
+.ec-tags{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.ec-tag{font-size:10px;padding:2px 8px;background:var(--surface2);border-radius:8px;color:var(--text2)}
+.ec-actions{display:flex;gap:8px;margin-top:10px}
+.ec-source{font-size:11px;color:var(--text2);margin-top:8px;font-style:italic}
+.err-mastered{opacity:0.5}.err-mastered .ec-topbar{text-decoration:line-through;text-decoration-color:var(--accent2)}
+.btn-master{background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all 0.15s}
+.btn-master.undo{background:var(--orange)}
+.error-empty{text-align:center;padding:40px;color:var(--text2)}
+.form-group{margin-bottom:12px}
+.resource-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color 0.15s}
+.resource-item:hover{border-color:var(--accent)}
+.resource-item .ri-icon{font-size:18px;width:28px;text-align:center}
+.resource-item .ri-info{flex:1}
+.resource-item .ri-name{font-size:13px;font-weight:600}
+.resource-item .ri-desc{font-size:11px;color:var(--text2);margin-top:1px}
+.resource-item .ri-meta{font-size:10px;color:var(--text2)}
+.resource-item .ri-arrow{color:var(--text2);font-size:14px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:460px;max-width:90vw}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.modal textarea{resize:vertical;min-height:80px}
+.modal input[type="date"]{width:auto}
+
+/* Chat */
+.chat-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;height:580px;background:var(--surface)}
+.chat-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.ch-title{font-size:13px;font-weight:600}
+.msg{display:flex;flex-direction:column}
+.msg.user{align-items:flex-end}
+.msg.ai{align-items:flex-start}
+.bubble{max-width:75%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
+.msg.user .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.msg.ai .bubble{background:var(--surface2);color:var(--text);border-bottom-left-radius:4px}
+.chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);background:var(--surface2)}
+.chat-input-row textarea{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;color:var(--text);resize:none;min-height:44px;max-height:120px}
+.chat-input-row textarea:focus{outline:none;border-color:var(--accent)}
+
+/* Thinking indicator */
+.thinking-msg{display:flex;align-items:center;gap:8px;padding:10px 16px;color:var(--text2);font-size:13px}
+.thinking-dots{display:inline-flex;gap:2px}
+.thinking-dots span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:dot-bounce 1.2s infinite}
+.thinking-dots span:nth-child(2){animation-delay:0.2s}
+.thinking-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes dot-bounce{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1.3)}}
+.chat-input-row button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer;white-space:nowrap}
+.chat-input-row button:hover{background:#7aa5ff}
+.chat-input-row button:disabled{opacity:0.5;cursor:not-allowed}
+
+/* Wiki */
+.wiki-entry{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.we-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.we-date{font-size:11px;color:var(--text2);white-space:nowrap}
+.we-title{font-size:13px;font-weight:600;flex:1}
+.we-content{font-size:14px;color:var(--text2);line-height:1.6;white-space:pre-wrap}
+.we-tags{display:flex;gap:6px;margin-top:8px}
+
+/* Tab panel base */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* Study Tips */
+.tip-row{display:flex;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;align-items:flex-start}
+.tip-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;margin-top:1px}
+.tip-num.p0{background:var(--accent2);color:#fff}
+.tip-num.p1{background:var(--accent);color:#fff}
+.tip-body{flex:1;min-width:0}
+.tip-body .tip-head{font-size:14px;font-weight:600;margin-bottom:3px}
+.tip-body .tip-detail{font-size:12px;color:var(--text2);line-height:1.5}
+.tip-body .tip-action{display:inline-block;margin-top:6px;font-size:11px;font-weight:600;color:var(--accent2);background:rgba(57,217,169,0.1);padding:2px 8px;border-radius:4px}
+.tips-refresh{font-size:10px;color:var(--text2);text-align:right;margin-bottom:6px}
+.tip-single-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:10px}
+.tip-cat-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:3px 10px;border-radius:10px;margin-bottom:12px;color:#fff}
+.tip-cat-badge.general{background:var(--accent)}
+.tip-cat-badge.maths{background:var(--accent2)}
+.tip-cat-badge.physics{background:#06b6d4}
+.tip-cat-badge.chemistry{background:var(--green)}
+.tip-cat-badge.biology{background:var(--green)}
+.tip-cat-badge.science{background:#06b6d4}
+.tip-cat-badge.english{background:var(--red)}
+.tip-cat-badge.history{background:var(--orange)}
+.tip-cat-badge.drama{background:#a855f7}
+.tip-cat-badge.computing{background:#6366f1}
+.tip-cat-badge.german{background:#f59e0b}
+.tip-cat-badge.geography{background:var(--green)}
+.tip-cat-badge.art{background:#ec4899}
+.tip-single-head{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px;line-height:1.5}
+.tip-single-detail{font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:14px}
+.tip-single-action{font-size:13px;color:var(--accent2);background:rgba(57,217,169,0.1);padding:10px 14px;border-radius:8px;border-left:3px solid var(--accent2);line-height:1.6}
+.tip-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tip-nav button{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:16px;color:var(--text);cursor:pointer;transition:all 0.15s;min-width:44px}
+.tip-nav button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tip-nav button:disabled{opacity:0.3;cursor:not-allowed}
+.tip-counter{font-size:13px;font-weight:600;color:var(--text2)}
+
+#toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:10px 18px;border-radius:8px;font-size:14px;z-index:300;display:none;transition:opacity 0.3s}
+#toast.show{display:block}
+.empty-state{font-size:14px;color:var(--text2);padding:20px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+<div class="profile-card" id="profile-card">
+ <div class="profile-avatar" id="profile-avatar" onclick="showAvatarPicker()" title="Change Avatar"></div>
+ <input class="profile-name" id="profile-name" value="Jemma" maxlength="12" onchange="saveProfile()" title="Change Name">
+ <div class="profile-xp">Lv.<span id="profile-level">1</span></div>
+ <div class="profile-xp-bar"><div class="profile-xp-fill" id="profile-xp-fill" style="width:20%"></div></div>
+ <div class="profile-streak" id="profile-streak">Streak 0 days</div>
+ <div class="theme-dots" id="theme-dots">
+ <span class="theme-dot active" style="background:#4f8cff" data-theme="blue" onclick="setTheme('blue')" title="Ocean Blue"></span>
+ <span class="theme-dot" style="background:#a855f7" data-theme="purple" onclick="setTheme('purple')" title="Dream Purple"></span>
+ <span class="theme-dot" style="background:#f472b6" data-theme="pink" onclick="setTheme('pink')" title="Sakura Pink"></span>
+ <span class="theme-dot" style="background:#34d399" data-theme="green" onclick="setTheme('green')" title="Forest Green"></span>
+ <span class="theme-dot" style="background:#fb923c" data-theme="orange" onclick="setTheme('orange')" title="Sunset Orange"></span>
+ </div>
+</div>
+<ul class="sidebar-nav">
+<li><a href="#" data-tab="dashboard" class="active" onclick="switchTab('dashboard');return false">🏠 Dashboard</a></li>
+<li><a href="#" data-tab="routes" onclick="switchTab('routes');return false">🗺️ Route Compare</a></li>
+<li><a href="#" data-tab="resources" onclick="switchTab('resources');return false">📦 Learning Resources</a></li>
+<li><a href="#" data-tab="planner" onclick="switchTab('planner');return false">📅 Weekly Plan</a></li>
+<li><a href="#" data-tab="notes" onclick="switchTab('notes');return false">📝 Notes</a></li>
+<li><a href="#" data-tab="weekly-review" onclick="switchTab('weekly-review');return false">📋 Weekly Review</a></li>
+<li><a href="#" data-tab="chat" onclick="switchTab('chat');return false">💬 AI Chat</a></li>
+<li><a href="#" data-tab="errors" onclick="switchTab('errors');return false">❌ Error Book</a></li>
+</ul>
+<div class="sidebar-bottom">
+<div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Planning Docs</div>
+<a href="/Jemma_Plan.html" target="_blank">Jemma Full Plan</a>
+<a href="/Jemma_Plan.html" target="_blank">Growth Route Overview</a>
+<a href="/Jemma_2026_Summer_Guide.html" target="_blank">Jemma Summer Guide</a>
+<a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
+</div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+<div class="header-bar">
+<h2>Jemma Growth Dashboard</h2>
+<div class="admin-info"><a href="/app.html" style="color:var(--accent);font-weight:600;margin-right:12px">Switch to Diya →</a> · <a href="#" onclick="logout();return false" style="color:var(--red)">Logout</a></div>
+</div>
+
+<!-- 
+ DASHBOARD
+ -->
+<div id="tab-dashboard" class="tab-panel active">
+<div class="panel-title"> Jemma · Growth Explorer</div>
+
+<!-- Countdown Strip -->
+<div id="countdown-strip" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap"></div>
+
+<!-- Study Tips Rotator -->
+<div id="study-tips" style="margin-bottom:16px"></div>
+
+<!-- Subject Analysis - From Latest Exam Report -->
+<div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%);border-color:#2a2f42">
+<div class="section-title"> Latest Grades Analysis · March 2026 Report</div>
+<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+<div class="subject-grid" id="subject-grid" style="flex:1;min-width:0">
+ <!-- JS populated -->
+</div>
+<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px">
+<canvas id="radarCanvas" width="340" height="340" style="width:340px;height:340px"></canvas>
+<div class="radar-legend" id="radar-legend"></div>
+</div>
+</div>
+</div>
+
+<!-- Stat Cards -->
+<div class="stat-cards">
+<div class="stat-card"><div class="lbl">Tasks Done</div><div class="val" id="dash-jemma-pct">--%</div><div class="sub" id="dash-jemma-sub">Loading...</div></div>
+<div class="stat-card"><div class="lbl">Key Countdown</div><div class="val" id="dash-key-timer">--</div><div class="sub" id="dash-key-label">--</div></div>
+</div>
+<!-- SWOT + School Assessment -->
+<div class="dash-grid">
+<div class="section">
+<div class="section-title"> Strengths</div>
+<div style="font-size:14px;line-height:1.8;color:var(--accent2)">
+ Maths 88% — 13pts above median, top set<br>
+ Chemistry 74% (+2) — climbing steadily<br>
+ Computing — UK Bebras Distinction, national top 10%<br>
+ Art — Exceptional, "a talented Artist"<br>
+ Strong self-motivation — sets own goals, self-reviews and summarises<br>
+ Has sister Diya as role model + shares resources
+</div>
+</div>
+<div class="section">
+<div class="section-title">Risk & Weaknesses</div>
+<div style="font-size:14px;line-height:1.8;color:var(--text2)">
+ English confidence low — "confidence falters when analysing"<br>
+ Low class participation — History/Drama reluctant to share<br>
+ Physics: last term Exceptional → this term Above<br>
+ Competition season starts now — Bebras 1 Nov, IMC 27 Jan: first real tests<br>
+ Calm runway — 2.5 years to GCSE, no panic needed
+</div>
+</div>
+</div>
+<!-- RiskHeatmap + EnglishRiskchain -->
+<div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%)">
+<div class="section-title">Risk Heatmap</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;font-size:14px">
+<div style="padding:8px 12px;background:rgba(255,169,77,0.1);border-radius:8px;border-left:3px solid var(--orange)">
+ <b>English confidence low</b> — Low Probability·Med Impact — "confidence falters when analysing" — long-term cultivation
+</div>
+<div style="padding:8px 12px;background:rgba(255,212,59,0.1);border-radius:8px;border-left:3px solid var(--yellow)">
+ <b>Class participation</b> — Low Probability·Low Impact — History/Drama reluctant to share — gradual encouragement
+</div>
+<div style="padding:8px 12px;background:rgba(255,212,59,0.08);border-radius:8px;border-left:3px solid var(--yellow)">
+ <b>Physics trend declining</b> — Low Probability·Med Impact — Exceptional→Above — observe, don't rush to intervene
+</div>
+<div style="padding:8px 12px;background:rgba(56,217,169,0.1);border-radius:8px;border-left:3px solid var(--accent2)">
+ <b>First competition season (Bebras + IMC)</b> — Low Probability·Med Impact — gentle start; results are feedback, not verdicts
+</div>
+<div style="padding:8px 12px;background:rgba(56,217,169,0.08);border-radius:8px;border-left:3px solid var(--accent2)">
+ <b>Sister Diya ahead</b> — Confirmed·Positive — clear path, shared resources, fewer detours
+</div>
+</div>
+<div style="margin-top:12px;font-size:14px;color:var(--text2);line-height:1.8">
+<div style="color:var(--accent2);font-weight:600;margin-bottom:4px">Jemma Core Judgment</div>
+<b>Year 9 = final exploration year — build phase starts in Y10</b> — Maths + coding + strong science core + art talent all fit together<br>
+English confidence needs nurturing — a confidence issue, not ability; 4-year window to develop calmly<br>
+<b style="color:var(--accent2)">Strategy:</b> low pressure · high interest · build foundations — start with what she enjoys, gently push what needs improvement
+</div>
+</div>
+<!-- Task List -->
+<div class="section">
+<div class="section-title"> Task List</div>
+<div id="jemma-tasks"><div class="empty-state">Loading...</div></div>
+<div class="flex-row" style="margin-top:10px">
+<input type="text" id="jemma-task-input" placeholder="Add new task..." style="flex:1">
+<button class="btn" onclick="addTask('jemma')">+</button>
+</div>
+</div>
+<!-- 5-8Monthly Plan Overview -->
+<div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%)">
+<div class="section-title">Year 9 Plan · 2026-27</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;font-size:14px">
+<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
+<b>Now → 1 Nov · Bebras sprint</b> · 20 days out<br>
+Bebras past puzzles — 2-3 per week (bebras.uk)<br>
+Timed practice: 45 min, one full round<br>
+Keep it fun — puzzles, not pressure<br>
+Sparx Maths — stay on schedule<br>
+Free art creation · 1h outdoor sports per day
+</div>
+<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
+<b>Nov → 27 Jan · IMC runway</b><br>
+IMC past papers — 1 section per week, untimed<br>
+10 min puzzle habit daily (NRICH / UKMT)<br>
+1 reading journal entry per week, 100-200 words<br>
+Type, don't handwrite — builds good habits<br>
+Do UKMT puzzles together with sister Diya
+</div>
+<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--yellow)">
+<b>All year · Core skills</b><br>
+ One small Python project per month<br>
+ Complete 1 functional Tinkercad project (save screenshots)<br>
+ Piano Grade 8 — 20 min practice daily<br>
+ Physics experiments (levers / simple circuits)<br>
+ Scratch mini-games / simple coding projects
+</div>
+<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent2)">
+<b>Year 9 Core Principles</b><br>
+ Final exploration year — build phase starts in Y10<br>
+ Start with what she enjoys: Maths / Coding / Science / Art<br>
+ Gently push what needs improvement: English analysis + confident expression<br>
+ Some joint sessions with sister — UKMT prep together<br>
+ School nights: homework first, then 30-45 min own projects
+</div>
+</div>
+<p style="margin-top:10px;font-size:11px;color:var(--text2)">
+ <b>English teacher's key advice:</b> "exploring different suggestions of words" — Focus on vocabulary analysis<br>
+ <b>Computing teacher's feedback:</b> "embrace learning from mistakes" — Learn from mistakes<br>
+ <b>Full Plan</b> <a href="/Jemma_2026_Summer_Guide.html" target="_blank" style="color:var(--accent)">Open Jemma's Summer Exec Guide →</a>
+</p>
+<div style="display:flex;gap:8px;margin-top:8px">
+<button class="btn" onclick="genExecTasks()" style="font-size:11px">Extract key todos to task list</button>
+<span style="font-size:11px;color:var(--accent2)" id="exec-task-status"></span>
+</div>
+</div>
+<!-- Long-term Roadmap -->
+<div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%)">
+<div class="section-title">Long-term Plan · From Y9 to University</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;font-size:14px">
+<!-- Phase 1 -->
+<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
+<b>Phase A · Y8-9 Exploration Phase</b><br>
+ Discover 1-2 genuine subject passions<br>
+ Academic English writing — start now, cultivate long-term<br>
+ UKMT JMC → IMC maths competition intro<br>
+ Instrument / sport — get 1-2 to a proficient level<br>
+ School club participation+Volunteer community service
+</div>
+<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
+<b>Phase B · Y10-11 Build Phase</b><br>
+ GCSE target: 8-9 (A*-A equivalent)<br>
+ UKMT SMC → BMO Round 1<br>
+ BPhO/UKChO Olympiad<br>
+ Summer school: UNIQ / Imperial<br>
+PS portfolio + academic reading notes
+</div>
+<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--orange)">
+<b>Phase C · Y12-13 Sprint Phase</b><br>
+ A-level: Maths+FMaths+Physics+Chem<br>
+ MAT / STEP / ESAT exam prep<br>
+ UCAS application — 2030 season<br>
+ Interview prep + competition credentials<br>
+Benchmark sister's path, but start from her own strengths
+</div>
+<!-- Phase 4 -->
+<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--red)">
+<b>How she differs from Diya</b><br>
+ Diya Y10-11 = sprint phase, 2-yr window<br>
+ Jemma Y8-9 = exploration phase, 4-yr window<br>
+ Low pressure, high interest vs High-pressure Sprint<br>
+ Long-term English cultivation vs crash-course fixes<br>
+ Older sister's experience + shared resources
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+<div style="padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:14px">
+<b style="color:var(--accent2)">Target universities</b><br>
+<span style="color:var(--accent2)">Sprint Tier:</span> Oxford · Cambridge · Imperial<br>
+<span style="color:var(--accent)">Primary Tier:</span> Edinburgh · UCL · Manchester · KCL<br>
+<span style="color:var(--text2)">Safety Tier:</span> Durham · Warwick · Bristol · Southampton<br>
+<b style="color:var(--accent2)">Direction:</b> Engineering / Maths / CS / Natural Sciences
+</div>
+<div style="padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:14px">
+<b style="color:var(--accent)"> Key Execution Checklist</b><br>
+<span style="color:var(--accent2)">Now:</span> Bebras 1 Nov · IMC prep weekly · keep Python projects going<br>
+<span style="color:var(--accent)">Y9:</span> 27 Jan: IMC — aim for Gold · explore Physics/Chemistry depth<br>
+<span style="color:var(--accent2)">Y9→Y10:</span> STEM summer camp · English confidence · GCSE options<br>
+<b style="color:var(--accent2)">Strategy:</b> Low Pressure + High Interest + Build Foundation
+</div>
+</div>
+</div>
+</div>
+
+<!-- 
+ ROUTES
+ -->
+<div id="tab-routes" class="tab-panel">
+<div class="panel-title">Admissions Route Compare</div>
+<div id="routes-list">
+<div class="section"><div class="empty-state">Loading...</div></div>
+</div>
+</div>
+
+<!-- 
+ RESOURCES
+ -->
+<div id="tab-resources" class="tab-panel">
+<div class="panel-title">Resources · Direct Download</div>
+<div class="section">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 0">
+
+<div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+  <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Physics Mock Test</div>
+  <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
+    Year 8 · Static Electricity, Magnetism, Electromagnets, Density, Pressure, Moments, Circuits<br>
+    75 marks · 38 questions · Difficulty ★ to ★★★
+  </div>
+  <a href="/jemma_physics_mock.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Mock Test</a>
+</div>
+
+    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Creative Writing Analysis</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
+        "The Message in the Bottle" · Detailed feedback on Jemma's story<br>
+        Strengths, corrections, polished version, book recommendations
+      </div>
+      <a href="/jemma_writing_analysis.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Analysis</a>
+    </div>
+
+    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Writing Workbook</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
+        28 exercises · Creative Writing (18) + PEEL Analysis (10)<br>
+        Year 8-9 level · PEEL framework, self-paced with difficulty levels
+      </div>
+      <a href="/jemma_writing_workbook_v2.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Workbook</a>
+      <a href="/jemma_writing_workbook_v2_answers.html" target="_blank" style="display:inline-block;background:#8b5a2b;color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;margin-left:6px;">Answer Key</a>
+    </div>
+
+    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Treasure Island Practice</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
+        1hr 10min paper · Extract from <em>Treasure Island</em> (R.L. Stevenson)<br>
+        Proofreading + Reading + Summary + PEZL Analysis + Creative Writing · 48 marks<br>
+        <span style="color:#b85c38;font-size:11px;">Answers included on last page of paper</span>
+      </div>
+      <a href="/jemma_practice_assessment_2.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Paper</a>
+    </div>
+
+    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Maths Mock Test v3</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
+        Year 8 · All 16 starred topics · Standard Form, Mixed Numbers, FDP, Inequalities, Sequences, y=mx+c, Proportion, Distance-Time Graphs, Circles, Transformations, Constructions, Loci, Bearings<br>
+        100 marks · 46 questions · Difficulty ★ to ★★★
+      </div>
+      <a href="/jemma_maths_mock.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Mock Test</a>
+      <a href="/jemma_maths_error_analysis.html" target="_blank" style="display:inline-block;background:var(--accent2);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;margin-left:6px;">Error Analysis (72/100)</a>
+    </div>
+
+    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Electromagnetism Test Results</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
+        Access Tuition · KS3 Science · 19/27 marks (70%)<br>
+        Question-by-question grading, feedback, strengths &amp; 3 recommendations
+      </div>
+      <a href="/downloads/jemma_physics_electromagnetism_results.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">View Results</a>
+    </div>
+
+</div>
+</div>
+
+<div class="section" style="margin-top:14px">
+<div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px">Web &amp; Download Resources</div>
+<div class="filter-bar" id="resource-filter" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+<button class="filter-btn active" data-filter="all" onclick="filterResources('all')">All</button>
+<button class="filter-btn" data-filter="maths" onclick="filterResources('maths')">Maths</button>
+<button class="filter-btn" data-filter="computing" onclick="filterResources('computing')">Computing</button>
+<button class="filter-btn" data-filter="jemma" onclick="filterResources('jemma')">Jemma</button>
+</div>
+<div id="resource-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px"></div>
+</div>
+</div>
+
+<!-- 
+ PLANNER
+ -->
+<div id="tab-planner" class="tab-panel">
+<div class="panel-title">Weekly Plan</div>
+<div class="section" style="margin-bottom:12px">
+<div class="planner-controls">
+<span style="font-size:14px;font-weight:700;color:var(--accent)">Fixed Weekly Template</span>
+<button class="btn" onclick="savePlanner('jemma')" style="margin-left:auto">Save</button>
+<button class="planner-dl-btn" onclick="downloadWeekPlan('jemma')">Download</button>
+</div>
+</div>
+<div style="overflow-x:auto">
+<table class="jtimetable" id="jemma-planner"></table>
+</div>
+</div>
+
+<!-- 
+ CHAT
+ -->
+<div id="tab-chat" class="tab-panel">
+<div class="panel-title">AI Chat</div>
+<div class="chat-wrap">
+<div class="chat-hdr">
+<span class="ch-title" id="chat-hdr-title"> Chat with Jemma</span>
+<button class="btn-sm" onclick="clearChatHistory()">Clear</button>
+</div>
+<div class="socratic-banner">This AI guides your thinking, it does not think for you</div>
+<div class="chat-msgs" id="chat-messages"></div>
+<div class="chat-input-row">
+<textarea id="chat-msg-input" placeholder="Type a message... Enter to send, Shift+Enter for a new line" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg()}"></textarea>
+<button id="chat-send-btn" onclick="sendChatMsg()">Send</button>
+</div>
+</div>
+</div>
+
+<!-- 
+ NOTES
+ -->
+<!-- ERROR BOOK -->
+<div id="tab-errors" class="tab-panel">
+<div class="panel-title">❌ Error Book · Jemma</div>
+<div class="filter-bar" id="error-filter-bar">
+<button class="filter-btn active" data-subject="all" onclick="filterErrors('all')">All</button>
+<button class="filter-btn" data-subject="Maths" onclick="filterErrors('Maths')">Maths</button>
+<button class="filter-btn" data-subject="Physics" onclick="filterErrors('Physics')">Physics</button>
+<button class="filter-btn" data-subject="Chemistry" onclick="filterErrors('Chemistry')">Chemistry</button>
+<button class="filter-btn" data-subject="Biology" onclick="filterErrors('Biology')">Biology</button>
+<button class="filter-btn" data-subject="English" onclick="filterErrors('English')">English</button>
+<button class="filter-btn" data-subject="German" onclick="filterErrors('German')">German</button>
+<button class="filter-btn" data-subject="Geography" onclick="filterErrors('Geography')">Geography</button>
+<button class="filter-btn" data-subject="History" onclick="filterErrors('History')">History</button>
+<button class="filter-btn" data-subject="Art" onclick="filterErrors('Art')">Art</button>
+<button class="filter-btn" data-subject="Computing" onclick="filterErrors('Computing')">Computing</button>
+</div>
+<div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+<button class="btn" onclick="openErrorModal()">+ Add Error</button>
+<span id="error-count" style="font-size:12px;color:var(--text2);margin-left:8px"></span>
+</div>
+<div id="error-list"><div class="error-empty">Loading...</div></div>
+</div>
+<div id="tab-notes" class="tab-panel">
+<div class="panel-title"> Notes</div>
+<div class="section">
+<textarea id="notes-area" placeholder="Write study notes hereideasrisk log..." 
+ style="width:100%;min-height:400px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:12px;resize:vertical;font-family:inherit;line-height:1.6"
+ oninput="saveNotes()"></textarea>
+<div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+<button class="btn" onclick="saveNotesNow()"> Save</button>
+<span style="font-size:11px;color:var(--accent2)" id="notes-status"></span>
+</div>
+</div>
+</div>
+
+<!-- Weekly Review -->
+<div id="tab-weekly-review" class="tab-panel">
+<div class="panel-title"> Weekly Review</div>
+<div class="section">
+<div style="font-size:12px;color:var(--text2);margin-bottom:12px">Auto-generated summary from this week&apos;s learning activities</div>
+<div id="weekly-review-content"><div class="empty-state">Coming soon -- weekly AI review will appear here</div></div>
+</div>
+</div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+// Error Book
+let errorsData = [], errorFilter = 'all';
+function formatRelativeDate(dateStr){
+ if(!dateStr) return '';
+ const d = new Date(dateStr);
+ if(isNaN(d.getTime())) return dateStr;
+ const now = new Date();
+ const diffMs = now - d;
+ const diffMins = Math.floor(diffMs/60000);
+ const diffHrs = Math.floor(diffMs/3600000);
+ const diffDays = Math.floor(diffMs/86400000);
+ if(diffMins < 1) return 'Just now';
+ if(diffMins < 60) return `${diffMins} mins ago`;
+ if(diffHrs < 24) return `${diffHrs} hours ago`;
+ if(diffDays === 1) return 'Yesterday';
+ if(diffDays < 7) return `${diffDays} days ago`;
+ if(diffDays < 14) return 'Last week';
+ if(diffDays < 30) return `${Math.floor(diffDays/7)} weeks ago`;
+ return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+async function loadErrorBook(){
+ try{
+  const r = await fetch('/api/errors/jemma');
+  errorsData = await r.json();
+  if(!Array.isArray(errorsData)) errorsData = errorsData.errors || errorsData.entries || [];
+ }catch(e){ errorsData = []; }
+ const mastered = JSON.parse(localStorage.getItem('mastered_errors_jemma')||'{}');
+ errorsData.forEach(e=>{if(mastered[e.id]){e.mastered=true;e.masteredDate=mastered[e.id];}});
+ renderErrors();
+ const mCount = errorsData.filter(e=>e.mastered).length;
+ const aCount = errorsData.length - mCount;
+ const errCountEl = document.getElementById('error-count');
+ if(errCountEl){
+  let parts = [];
+  if(mCount>0) parts.push(`<span style="color:var(--accent2);font-weight:700">${mCount} mastered</span>`);
+  if(aCount>0) parts.push(`<span style="color:var(--orange);font-weight:700">${aCount} active</span>`);
+  if(!parts.length) parts.push('No errors yet — add your first!');
+  errCountEl.innerHTML = parts.join(' · ');
+ }
+}
+function markMastered(id){
+ const err = errorsData.find(e=>e.id===id);
+ if(!err) return;
+ err.mastered = !err.mastered;
+ err.masteredDate = err.mastered ? new Date().toISOString() : null;
+ const mastered = JSON.parse(localStorage.getItem('mastered_errors_jemma')||'{}');
+ if(err.mastered) mastered[id]=err.masteredDate; else delete mastered[id];
+ localStorage.setItem('mastered_errors_jemma',JSON.stringify(mastered));
+ renderErrors();
+ const mCount = errorsData.filter(e=>e.mastered).length;
+ const aCount = errorsData.length - mCount;
+ const el = document.getElementById('error-count');
+ if(el) el.innerHTML = (mCount>0?`<span style="color:var(--accent2);font-weight:700">${mCount} mastered</span> · `:'')+`<span style="color:var(--orange);font-weight:700">${aCount} active</span>`;
+}
+function filterErrors(subj){ errorFilter=subj; document.querySelectorAll('#error-filter-bar .filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.subject===subj)); renderErrors(); }
+function renderErrors(){
+ const container = document.getElementById('error-list');
+ if(!container) return;
+ errorsData.sort((a,b)=>{const da=new Date(a.date||0),db=new Date(b.date||0);if(db-da!==0)return db-da;const p={high:3,medium:2,low:1};return(p[b.priority]||0)-(p[a.priority]||0);});
+ const filtered = errorFilter==='all'?errorsData:errorsData.filter(e=>e.subject===errorFilter);
+ if(!filtered.length){ container.innerHTML='<div class="error-empty">No errors found. Click + Add Error to start building your error book!</div>'; return; }
+ container.innerHTML = filtered.map(e=>{
+   const q = typeof e.question==='string'?e.question:(e.question?.question||e.question?.original_question||'');
+   const oq = e.original_question||'';
+   const ans = e.jemma_answer||e.diya_answer||'';
+   const correct = e.correct_solution||'';
+   const solution = typeof e.solution==='string'?e.solution:(e.solution_display||e.solution?.explanation||'');
+   const weaknesses = e.weaknesses_display||(Array.isArray(e.weaknesses)?e.weaknesses.join('; '):'');
+   const score = e.score_display||(e.score?`${e.score.estimated||e.score}/${e.score.out_of||'?'}`:'');
+   const img = e.question_image||e.image||'';
+   const priority = e.priority||'low';
+   const etype = e.error_type||e.type||'other';
+   const exam = e.exam||e.source||'';
+   const tags = Array.isArray(e.tags)?e.tags:(typeof e.tags==='string'?e.tags.split(','):[]);
+   return `<div class="error-card${e.mastered?' err-mastered':''}">
+   <div class="ec-topbar">
+     <span class="ec-subject">${e.subject||'?'}</span>
+     <span class="ec-type">${etype.replace(/_/g,' ')}</span>
+     <span class="ec-priority ${priority}">${priority.toUpperCase()}</span>
+     <span class="ec-date">${formatRelativeDate(e.date||e.created_at||'')}</span>
+   </div>
+   <div class="ec-body">
+     ${img?`<img src="${img}" class="ec-image" alt="Question" loading="lazy" onerror="this.style.display='none'">`:''}
+     ${oq?`<div class="ec-question">${oq}</div>`:(q?`<div class="ec-question">${q}</div>`:'')}
+     ${score?`<div class="ec-score">Score: ${score}</div>`:''}
+     <div class="ec-answer-section">
+       ${ans?`<div class="ec-diya-answer"><div class="label">Your Answer</div>${ans}</div>`:''}
+       ${correct?`<div class="ec-correct"><div class="label">Correct Answer</div>${correct}</div>`:''}
+     </div>
+     ${weaknesses?`<div class="ec-weaknesses"><div class="label">Weaknesses</div>${weaknesses}</div>`:''}
+     ${solution?`<div class="ec-solution"><div class="label">How to Improve</div>${solution}</div>`:''}
+     ${tags.length?`<div class="ec-tags">${tags.map(t=>`<span class="ec-tag">${(t||'').toString().trim()}</span>`).join('')}</div>`:''}
+     ${exam?`<div class="ec-source">Source: ${exam}</div>`:''}
+   </div>
+   <div class="ec-actions" style="padding:0 16px 10px;display:flex;gap:8px">
+     <button class="btn-master${e.mastered?' undo':''}" onclick="event.stopPropagation();markMastered('${e.id||''}')">${e.mastered?'↩ Undo':'✓ Mastered'}</button>
+     <button class="btn-sm" onclick="event.stopPropagation();deleteError('${e.id||''}')">Delete</button>
+   </div>
+   </div>`;
+ }).join('');
+}
+function openErrorModal(id){ document.getElementById('error-edit-id').value=''; document.getElementById('error-modal-title').textContent='Add Error'; document.getElementById('error-modal').classList.add('open'); }
+function closeErrorModal(){ document.getElementById('error-modal').classList.remove('open'); }
+async function saveError(){
+ const body = {
+  subject: document.getElementById('error-subject-input').value,
+  date: document.getElementById('error-date-input').value,
+  question: document.getElementById('error-question-input').value,
+  solution: document.getElementById('error-solution-input').value,
+  type: document.getElementById('error-type-input').value,
+  tags: document.getElementById('error-tags-input').value
+ };
+ if(!body.subject||!body.question){ toast('Please fill in subject and question'); return; }
+ try{
+  await fetch('/api/errors/jemma',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  closeErrorModal();
+  await loadErrorBook();
+  toast('Saved!');
+ }catch(e){ toast('Save failed'); }
+}
+async function deleteError(id){
+ const error = errorsData.find(e=>e.id===id);
+ const label = error?(error.subject||'')+' — '+(error.question||'').slice(0,50):'this error';
+ if(!confirm(`Delete "${label}"? This cannot be undone.`)) return;
+ try{ await fetch('/api/errors/jemma/'+id,{method:'DELETE'}); await loadErrorBook(); toast('Deleted'); }
+ catch(e){ toast('Delete failed'); }
+}
+// State 
+let currentChild = 'jemma';
+let plannerWeeks = {jemma:0};
+let plannerData = {jemma:{}};
+let tasksData = {jemma:{}};
+let allResources = [];
+let resourceFilter = 'all';
+let notesTimeout = null;
+
+// Tab Navigation 
+
+// Notes 
+function loadNotes(){
+ const notes = localStorage.getItem('jemma_notes') || '';
+ const el = document.getElementById('notes-area');
+ if(el) el.value = notes;
+}
+function saveNotes(){
+ clearTimeout(notesTimeout);
+ notesTimeout = setTimeout(()=>{
+ const el = document.getElementById('notes-area');
+ if(el) localStorage.setItem('jemma_notes', el.value);
+ }, 400);
+ const s=document.getElementById('notes-status');
+ if(s) s.textContent='';
+}
+function saveNotesNow(){
+ clearTimeout(notesTimeout);
+ const el = document.getElementById('notes-area');
+ if(el){ localStorage.setItem('jemma_notes', el.value); }
+ const s=document.getElementById('notes-status');
+ if(s){ s.textContent=' Save'; setTimeout(()=>s.textContent='',2000); }
+}
+
+// Execution Plan → Tasks 
+function genExecTasks(){
+ const child='jemma';
+ if(!tasksData[child]) tasksData[child]={};
+ const newTasks=[
+ {cat:'Maths', name:'Bebras past puzzles — 2-3 per week until 1 Nov'},
+ {cat:'Maths', name:'IMC prep from Nov — 1 past-paper section per week'},
+ {cat:'English', name:'Reading journal — 1 entry per week (100-200 words)'},
+ {cat:'English', name:'Practise "exploring different suggestions of words"'},
+ {cat:'Computing', name:'One small Python project per month'},
+ {cat:'Computing', name:'Tinkercad — build one functional model'},
+ {cat:'Science', name:'Watch BBC Bitesize Chemistry/Physics videos'},
+ {cat:'Science', name:'Simple chemistry experiments at home (baking soda + vinegar)'},
+ {cat:'Art', name:'Free creation — draw / craft / design'},
+ {cat:'general', name:'Piano Grade 8 — 20 min practice daily'},
+ {cat:'general', name:'Complete 1 functional Tinkercad project (save screenshots)'},
+ {cat:'general', name:'IMC past papers — 2-3 sets before 27 Jan'},
+ {cat:'general', name:'Read ch.2 of a book + write an analytical paragraph'},
+ {cat:'general', name:'Do UKMT puzzles together with sister Diya'},
+ ];
+ let added=0;
+ newTasks.forEach(t=>{
+ const key=t.cat+'-'+t.name;
+ if(!tasksData[child][key]){
+ tasksData[child][key]={done:false,name:t.name};
+ added++;
+ }
+ });
+ saveTasks(child);
+ renderTasks(child);
+ const s=document.getElementById('exec-task-status');
+ if(s) s.textContent=added>0?`Added ${added} new tasks`:'All tasks already exist';
+ setTimeout(()=>{if(s) s.textContent='';},3000);
+}
+
+// Toast 
+function toast(msg,dur=2500){
+ const t=document.getElementById('toast');
+ t.textContent=msg;t.classList.add('show');
+ setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// Countdown 
+const TIMER_TARGETS = [
+ {id:'t-gcse', name:'GCSE Exams', target:'2029-05-01', tag:'Jemma', tagClass:'green'},
+ {id:'t-jmc', name:'UKMT JMC', target:'2027-06-01', tag:'Jemma', tagClass:'accent2'},
+ {id:'t-bebras', name:'Jemma Bebras', target:'2025-11-12', tag:'Jemma', tagClass:'green'},
+ {id:'t-summer', name:'Summer Start', target:'2025-07-01', tag:'Both', tagClass:'yellow'},
+ {id:'t-halfterm', name:'Half Term', target:'2025-10-24', tag:'Both', tagClass:'yellow'}
+];
+
+function getTimeLeft(target){
+ const now=Date.now(), end=new Date(target).getTime();
+ const diff=end-now;
+ if(diff<=0) return 'Passed';
+ const d=Math.floor(diff/86400000);
+ const h=Math.floor((diff%86400000)/3600000);
+ const m=Math.floor((diff%3600000)/60000);
+ return d>0?`${d}D ${h}H`:h>0?`${h}H ${m}M`:`${m}M`;
+}
+
+// Radar Chart (Canvas) 
+
+// Dashboard 
+
+// Child Tabs 
+async function loadTasks(child){
+ try{
+ const r=await fetch('/api/tasks?user='+child);
+ const data=await r.json();
+ tasksData[child]=data;
+ renderTasks(child);
+ }catch(e){
+ // Fallback to localStorage
+ const ls=localStorage.getItem('tasks_'+child);
+ tasksData[child]=ls?JSON.parse(ls):{};
+ renderTasks(child);
+ }
+}
+const _esc=s=>String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+function renderTasks(child){
+ const container=document.getElementById(child+'-tasks');
+ if(!container) return;
+ const tasks=tasksData[child]||{};
+ const categories={
+ 'English':{label:'English',color:'var(--red)'},
+ 'Art':{label:'Art',color:'var(--orange)'},
+ 'Maths':{label:'Maths',color:'var(--accent)'},
+ 'Science':{label:'Science',color:'var(--accent2)'},
+ 'Competition':{label:'Competition',color:'var(--yellow)'},
+ 'general':{label:'General',color:'var(--text2)'}
+ };
+ const grouped={};
+ Object.entries(tasks).forEach(([k,v])=>{
+ const parts=k.split('-');
+ const cat=parts.length>1?categories[parts[0]]?parts[0]:'general':'general';
+ if(!grouped[cat]) grouped[cat]=[];
+ const name=typeof v==='object'?v.name:(parts.length>1?k.slice(cat.length+1):k);
+ const done=typeof v==='object'?v.done:!!v;
+ grouped[cat].push({key:k,done:done,name:name});
+ });
+ let html='';
+ Object.entries(grouped).forEach(([cat,items])=>{
+ const catInfo=categories[cat]||categories.general;
+ const doneItems=items.filter(i=>i.done);
+ const pendingItems=items.filter(i=>!i.done);
+ html+=`<div class="task-section">`;
+ html+=`<div class="task-section-header"><span class="task-section-title" style="color:${catInfo.color}">${catInfo.label}</span></div>`;
+ if(!pendingItems.length&&!doneItems.length){
+ html+=`<div style="font-size:11px;color:var(--text2);padding:6px 0">No tasks</div>`;
+ } else {
+ if(pendingItems.length){
+ html+=`<div class="task-list">`;
+ html+=pendingItems.map(item=>`
+ <div class="task-item" onclick="toggleTask('${_esc(child)}','${_esc(item.key)}',this)">
+ <div class="cb"></div>
+ <span class="task-name" contenteditable="false" data-child="${child}" data-key="${_esc(item.key)}"
+ ondblclick="event.stopPropagation();startEditTask(this)"
+ onblur="event.stopPropagation();saveEditTask(this)"
+ onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${item.name}</span>
+ <button class="task-del" onclick="event.stopPropagation();deleteTask('${child}','${_esc(item.key)}')" title="Delete">×</button>
+ </div>
+ `).join('');
+ html+=`</div>`;
+ }
+ if(doneItems.length){
+ const secId='done-'+child+'-'+cat;
+ html+=`<div class="collapse-toggle" id="tog-${secId}" onclick="toggleCollapse('${secId}')"><span class="arrow">▸</span>Completed (${doneItems.length})</div>`;
+ html+=`<div class="collapse-body collapsed" id="${secId}"><div class="task-list" style="margin-top:4px">`;
+ html+=doneItems.map(item=>`
+ <div class="task-item done" onclick="toggleTask('${_esc(child)}','${_esc(item.key)}',this)">
+ <div class="cb checked">✓</div>
+ <span class="task-name" contenteditable="false" data-child="${child}" data-key="${_esc(item.key)}"
+ ondblclick="event.stopPropagation();startEditTask(this)"
+ onblur="event.stopPropagation();saveEditTask(this)"
+ onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${item.name}</span>
+ <button class="task-del" onclick="event.stopPropagation();deleteTask('${child}','${_esc(item.key)}')" title="Delete">×</button>
+ </div>
+ `).join('');
+ html+=`</div></div>`;
+ }
+ }
+ html+=`</div>`;
+ });
+ if(Object.keys(grouped).length===0){
+ html=`<div class="empty-state">No tasks yet, add below</div>`;
+ }
+ container.innerHTML=html;
+}
+function toggleCollapse(id){
+ const body=document.getElementById(id);
+ const tog=document.getElementById('tog-'+id);
+ body.classList.toggle('collapsed');
+ tog.classList.toggle('open');
+}
+async function addTask(child){
+ const input=document.getElementById(child+'-task-input');
+ if(!input) return;
+ const name=input.value.trim();
+ if(!name) return;
+ const key='general-'+Date.now();
+ if(!tasksData[child]) tasksData[child]={};
+ tasksData[child][key]={done:false,name:name};
+ await saveTasks(child);
+ renderTasks(child);
+ input.value='';
+}
+async function toggleTask(child,key,el){
+ const entry=tasksData[child][key];
+ const isObj=typeof entry==='object';
+ const done=!(isObj?entry.done:entry);
+ tasksData[child][key]=isObj?{...entry,done:done}:done;
+ await saveTasks(child);
+ renderTasks(child);
+}
+
+
+async function deleteTask(child,key){
+ delete tasksData[child][key];
+ await saveTasks(child);
+ renderTasks(child);
+}
+
+function startEditTask(el){
+ el.contentEditable='true';
+ el.focus();
+ // Select all text
+ const range=document.createRange();
+ range.selectNodeContents(el);
+ const sel=window.getSelection();
+ sel.removeAllRanges();
+ sel.addRange(range);
+ el._origText=el.textContent;
+}
+function saveEditTask(el){
+ el.contentEditable='false';
+ const child=el.dataset.child;
+ const key=el.dataset.key;
+ const newName=el.textContent.trim();
+ if(!newName||newName===el._origText) return;
+ const entry=tasksData[child]?.[key];
+ if(!entry) return;
+ if(typeof entry==='object'){
+ entry.name=newName;
+ }
+ saveTasks(child);
+}
+
+async function saveTasks(child){
+ try{
+ await fetch('/api/tasks',{
+ method:'POST',
+ headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({user:child,tasks:tasksData[child]})
+ });
+ localStorage.setItem('tasks_'+child,JSON.stringify(tasksData[child]));
+ toast('Synced ');
+ }catch(e){
+ // Save to localStorage as fallback
+ localStorage.setItem('tasks_'+child,JSON.stringify(tasksData[child]));
+ toast('Saved locally');
+ }
+}
+
+// Planner 
+function loadPlannerView(){
+ loadPlanner('jemma');
+}
+async function loadPlanner(child){
+ // Always start from localStorage (most recent data)
+ const ls=localStorage.getItem('planner_'+child);
+ let lsData={};
+ if(ls) try{lsData=JSON.parse(ls);}catch(e){}
+
+ // Try to fetch from API and merge
+ try{
+ const r=await fetch('/api/planner?user='+child);
+ const apiData=await r.json();
+ // Start with API data, then overlay localStorage (local always wins)
+ plannerData[child]={...apiData,...lsData};
+ for(const dk of Object.keys(lsData)){
+ if(!plannerData[child][dk]) plannerData[child][dk]=lsData[dk];
+ else plannerData[child][dk]={...plannerData[child][dk],...lsData[dk]};
+ }
+ }catch(e){
+ plannerData[child]=lsData;
+ }
+ renderPlannerGrid(child);
+}
+function getWeekDates(child){
+ const now=new Date();
+ const weekStart=plannerWeeks[child]||0;
+ const start=new Date(now);
+ start.setDate(now.getDate()-now.getDay()+1+weekStart*7);
+ const days=[];
+ for(let i=0;i<7;i++){
+ const d=new Date(start);
+ d.setDate(start.getDate()+i);
+ days.push(d);
+ }
+ return days;
+}
+function formatDate(d){
+ return `${d.getMonth()+1}/${d.getDate()}`;
+}
+function dateKey(d){
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function renderPlannerGrid(child){
+ const gridId=child+'-planner';
+ const grid=document.getElementById(gridId);
+ if(!grid) return;
+
+ const DAYS=[
+ {key:'mon', label:'Mon'},
+ {key:'tue', label:'Tue'},
+ {key:'wed', label:'Wed'},
+ {key:'thu', label:'Thu'},
+ {key:'fri', label:'Fri'},
+ {key:'sat', label:'Sat'},
+ {key:'sun', label:'Sun'}
+ ];
+ const slots=[
+ {key:'8am', label:'8:00-10:00'},
+ {key:'10am', label:'10:00-12:00'},
+ {key:'12pm', label:'12:00-14:00'},
+ {key:'2pm', label:'14:00-16:00'},
+ {key:'4pm', label:'16:00-18:00'},
+ {key:'6pm', label:'18:00-20:00'},
+ {key:'8pm', label:'20:00-22:00'},
+ ];
+
+ let html='<thead><tr><th>time</th>';
+ DAYS.forEach(d=>html+=`<th>${d.label}</th>`);
+ html+='</tr></thead><tbody>';
+
+ slots.forEach(s=>{
+ html+=`<tr><td class="time-label">${s.label}</td>`;
+ DAYS.forEach(d=>{
+ const val=(plannerData[child]&&plannerData[child][d.key]&&plannerData[child][d.key][s.key])||'';
+ html+=`<td><textarea data-child="${child}" data-day="${d.key}" data-hour="${s.key}" onchange="savePlannerCell(this)" onfocus="this.select()" placeholder="+" rows="2">${escapeHtml(val)}</textarea></td>`;
+ });
+ html+='</tr>';
+ });
+
+ html+='</tbody>';
+ grid.innerHTML=html;
+}
+
+function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function savePlannerCell(input){
+ const child=input.dataset.child;
+ const day=input.dataset.day;
+ const hour=input.dataset.hour;
+ const val=input.value.trim();
+ if(!plannerData[child]) plannerData[child]={};
+ if(!plannerData[child][day]) plannerData[child][day]={};
+ if(val){
+ plannerData[child][day][hour]=val;
+ } else {
+ delete plannerData[child][day][hour];
+ }
+ localStorage.setItem('planner_'+child,JSON.stringify(plannerData[child]));
+ // Debounced API save (every 2s)
+ clearTimeout(window._plannerSaveTimer);
+ window._plannerSaveTimer=setTimeout(()=>{
+ fetch('/api/planner',{
+ method:'POST',
+ headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({user:child,plan:plannerData[child]||{}})
+ }).catch(()=>{});
+ },2000);
+}
+function updatePlannerLabel(child){
+ const days=getWeekDates(child);
+ const label=document.getElementById(child+'-week-label');
+ if(label) label.textContent=`${formatDate(days[0])} – ${formatDate(days[6])}`;
+ const syncLabel=document.getElementById('planner-sync-label');
+ if(syncLabel&&child==='jemma') syncLabel.textContent=`${formatDate(days[0])} – ${formatDate(days[6])}`;
+}
+function changeWeek(child,delta){
+ plannerWeeks[child]=(plannerWeeks[child]||0)+delta;
+ renderPlannerGrid(child);
+ updatePlannerLabel(child);
+}
+function downloadWeekPlan(child){
+ const DAYS=[
+ {key:'mon', label:'Mon'},{key:'tue', label:'Tue'},{key:'wed', label:'Wed'},
+ {key:'thu', label:'Thu'},{key:'fri', label:'Fri'},{key:'sat', label:'Sat'},{key:'sun', label:'Sun'}
+ ];
+ const slotLabels={'8am':'8-10','10am':'10-12','12pm':'12-14','2pm':'14-16','4pm':'16-18','6pm':'18-20','8pm':'20-22'};
+ let md='';
+ DAYS.forEach(d=>{
+ md+=`## ${d.label}\n\n`;
+ Object.entries(slotLabels).forEach(([key,label])=>{
+ const val=(plannerData[child]&&plannerData[child][d.key]&&plannerData[child][d.key][key])||'';
+ md+=`- **${label}**${val||'—'}\n`;
+ });
+ md+='\n';
+ });
+ const blob=new Blob([md],{type:'text/markdown;charset=utf-8'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ a.href=url;
+ a.download='Jemma_Weekly_Plan.md';
+ a.click();
+ URL.revokeObjectURL(url);
+}
+async function addPlannerItem(child,date,hour){
+ const item=prompt('Add plan item:');
+ if(!item||!item.trim()) return;
+ if(!plannerData[child]) plannerData[child]={};
+ if(!plannerData[child][date]) plannerData[child][date]={};
+ if(!plannerData[child][date][hour]) plannerData[child][date][hour]=[];
+ plannerData[child][date][hour].push(item.trim());
+ localStorage.setItem('planner_'+child,JSON.stringify(plannerData[child]));
+ renderPlannerGrid(child);
+}
+async function removePlannerItem(child,date,hour,item){
+ if(!plannerData[child]?.[date]?.[hour]) return;
+ plannerData[child][date][hour]=plannerData[child][date][hour].filter(i=>i!==item);
+ localStorage.setItem('planner_'+child,JSON.stringify(plannerData[child]));
+ renderPlannerGrid(child);
+}
+async function savePlanner(child){
+ try{
+ await fetch('/api/planner',{
+ method:'POST',
+ headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({user:child,plan:plannerData[child]||{}})
+ });
+ localStorage.setItem('planner_'+child,JSON.stringify(plannerData[child]));
+ updateStreak();
+ toast('Planner saved ');
+ }catch(e){
+ localStorage.setItem('planner_'+child,JSON.stringify(plannerData[child]));
+ toast('Saved locally (Cloud sync failed)');
+ }
+}
+// Routes 
+async function loadRoutes(){
+ const container=document.getElementById('routes-list');
+ // Fetch research intel first
+ let intelHtml='';
+ try{
+ const intel=await fetch('/api/intel').then(r=>r.json());
+ if(intel.sections&&intel.sections.length>0){
+ intelHtml=`
+ <div class="route-card open" id="route-intel">
+ <div class="route-card-hdr" onclick="toggleRoute('intel')">
+ <span class="rc-icon"></span>
+ <span class="rc-title">Admissions Intel · Tavily auto-collected <span style="font-size:11px;color:var(--text2)">${intel.updated||''}</span></span>
+ <span class="rc-arrow"></span>
+ </div>
+ <div class="route-card-body"><div style="font-size:14px;color:var(--text2);line-height:1.8">
+${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
+ <div style="margin-bottom:12px">
+ <b style="color:var(--accent2)">${s.title}</b>
+ ${s.items.map(item=>`
+ <div style="margin:4px 0;padding:4px 0;border-bottom:1px solid var(--border)">
+ <a href="${item.url}" target="_blank" style="color:var(--accent);font-weight:600;font-size:13px">${item.title}</a>
+ <div style="font-size:11px;color:var(--text3);margin-top:2px">${item.snippet}</div>
+ </div>`).join('')}
+ </div>`).join('')}
+ </div></div>
+ </div>`;
+ }
+ }catch(e){console.error('intel load err',e)}
+
+ const routes=[
+ {
+ id:'jemma-g5', icon:'', title:' G5 Sprint Route · Engineering/Maths/CS',
+ content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
+<p><b>Jemma now:</b> Year 9 · Maths 88% (13pts above median) · Computing Distinction · Bebras top 10%</p>
+<p><b>Target:</b> Oxford / Cambridge / Imperial — Engineering / Maths / CS</p>
+<p><b>Time window:</b> 6 yrs (Y8→Y13) vs Diya's 2 yrs</p>
+<br>
+<table class="compare-table">
+<tr><th>Tier</th><th>University</th><th>Direction</th><th>Notes</th></tr>
+<tr><td><b>Sprint Tier</b></td><td>Oxford · Cambridge · Imperial</td><td>Engineering/Maths/CS</td><td>G5 STEM, triple-strong profile</td></tr>
+<tr><td><b>Primary Tier</b></td><td>Edinburgh · UCL · Manchester · KCL</td><td>Engineering/CS</td><td>Expansion options, higher acceptance rate</td></tr>
+<tr><td><b>Safety Tier</b></td><td>Durham · Warwick · Bristol · Southampton</td><td>Engineering</td><td>Strong engineering school reputations</td></tr>
+</table>
+<p style="margin-top:8px"><b>Recommended A-level combo:</b> Maths + Further Maths + Physics + Chemistry (4)</p>
+<p style="color:var(--accent2)"><b>Strengths:</b> Diya's experience + shared resources + clear path + 6-yr runway</p>
+</div>`
+ },
+ {
+ id:'jemma-timeline', icon:'', title:' 6-Year Planning Timeline (Y8→Y13)',
+ content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
+<table class="compare-table">
+<tr><th>Phase</th><th>Years</th><th>Core Target</th><th>Key Actions</th></tr>
+<tr><td><b>Exploration Phase</b></td><td>Y8-9</td><td>Discover subject passion + start English</td><td>UKMT JMC/IMC · Academic Reading · Club leadership</td></tr>
+<tr><td><b>Build Phase</b></td><td>Y10-11</td><td>High GCSEs + competition system</td><td>UKMT SMC→BMO · BPhO/UKChO · Summer School</td></tr>
+<tr><td><b>Sprint Phase</b></td><td>Y12-13</td><td>A-levels + admissions tests + UCAS</td><td>MAT/STEP/ESAT · PS · Interview · 2030 season</td></tr>
+</table>
+<p style="margin-top:8px;color:var(--accent2)"><b>Key:</b> every step mapped against Diya's timeline — fewer detours</p>
+</div>`
+ },
+ {
+ id:'jemma-summer', icon:'', title:' Summer Strategy · Low pressure, high interest',
+ content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
+<table class="compare-table">
+<tr><th>Dimension</th><th>Jemma (Y9)</th><th>Diya (Y11)</th></tr>
+<tr><td>Current Phase</td><td style="color:var(--accent2)">Exploration, 4-yr window</td><td style="color:var(--red)">Sprint, 2-yr window</td></tr>
+<tr><td>Pressure Level</td><td style="color:var(--accent2)">Low pressure, free exploration</td><td style="color:var(--red)">High intensity, time tight</td></tr>
+<tr><td>English need</td><td>Slow burn — long-term cultivation</td><td>Urgent — 4/3, needs work</td></tr>
+<tr><td>Focus</td><td>Interest Discovery+Basic Skills</td><td>Competition+Extra Exams+English</td></tr>
+</table>
+<p style="margin-top:8px"><b>Summer strategy:</b> start with what she enjoys (Maths / Coding / Science / Art), gently push English analysis + confident expression</p>
+<p style="color:var(--accent2)"><b>Core principles:</b> a Year 8 summer is still childhood — 3-4h learning per day + at least 1h outdoor sports + 2 free days per week</p>
+</div>`
+ },
+ {
+ id:'jemma-resources', icon:'', title:' Recommended Resources',
+ content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
+<p><b>Maths competitions:</b> UKMT official JMC/IMC past papers | AoPS | Sparx Maths (school-assigned)</p>
+<p><b>Coding/CS:</b> Tinkercad 3D modelling | Scratch | UK Bebras Challenge</p>
+<p><b>Science:</b> BBC Bitesize | Isaac Physics (Cambridge, free) | MEL Science</p>
+<p><b>English:</b> Free reading of English novels | Reading journal writing | Khan Academy English</p>
+<p><b>Online Platforms:</b> Brilliant.org | Khan Academy | Coursera/edX</p>
+<p style="margin-top:8px;color:var(--accent2)"><b>Key:</b> UK-based free resources first; CN competition training as a supplement — not US-focused</p>
+</div>`
+ },
+ {
+ id:'jemma-germany', icon:'', title:'🇩🇪 Germany · TU9 Engineering Route (Jemma Special)',
+ content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
+<p><b>Why Germany works for Jemma:</b> Already learning German (28/30 Above Standard) — 4yr head start!</p>
+<br>
+<table class="compare-table">
+<tr><th>University</th><th>City</th><th>Tuition/sem</th><th>QS Eng</th></tr>
+<tr><td><b>RWTH Aachen</b></td><td>Aachen</td><td style="color:var(--accent2);font-weight:600">€0</td><td>Top 50</td></tr>
+<tr><td><b>TU Berlin</b></td><td>Berlin</td><td style="color:var(--accent2);font-weight:600">€0</td><td>Top 60</td></tr>
+<tr><td><b>TU Darmstadt</b></td><td>Darmstadt</td><td style="color:var(--accent2);font-weight:600">€0</td><td>Top 150</td></tr>
+<tr><td>TU Munich</td><td>Munich</td><td>€2,000-3,000</td><td>Top 30</td></tr>
+</table>
+<p style="margin-top:8px"><b>Language Timeline (5yr window):</b></p>
+<p>Year 8 (now): German 28/30 · Year 9: Goethe B1 · Year 10: Goethe B2 · Year 11-12: TestDaF 4×4 (C1)</p>
+<p><b>Entry Requirements (DAAD):</b> 3 A-Levels min C (Maths + Physics + Chemistry ✅) · 12yr schooling ✅</p>
+<p style="margin-top:8px"><b>Cost Per Year:</b> Tuition €0 (RWTH/TU Berlin) + Living €11,000-13,000 = <b>€11-13k/yr</b></p>
+<p style="color:var(--accent2)"><b>Recommendation:</b> UK main + Germany backup — apply simultaneously (UCAS Oct + uni-assist Jan). If Jemma keeps German going, this becomes a real, low-cost alternative.</p>
+<p style="margin-top:8px;font-size:11px;color:var(--text2)">Source: DAAD GCE page · tum.de tuition fees · uni-assist.de</p>
+</div>`
+ }
+ ];
+
+ container.innerHTML=intelHtml+routes.map(r=>`
+ <div class="route-card open" id="route-${r.id}">
+ <div class="route-card-hdr" onclick="toggleRoute('${r.id}')">
+ <span class="rc-icon">${r.icon}</span>
+ <span class="rc-title">${r.title}</span>
+ <span class="rc-arrow"></span>
+ </div>
+ <div class="route-card-body">${r.content}</div>
+ </div>
+ `).join('');
+}
+function toggleRoute(id){
+ const card=document.getElementById('route-'+id);
+ if(card) card.classList.toggle('open');
+}
+
+// Resources 
+async function loadResources(){
+ const container=document.getElementById('resource-list');
+ // Curated list only — no /api/resources merge (that serves Diya's GCSE library; GCSE content stays off Jemma's page)
+ const resources=[
+ {name:'UKMT JMC Past Papers', desc:'Junior Maths Challenge past papers — free downloads', category:'maths', file:'https://ukmt.org.uk/junior-mathematical-challenge', size:'Web'},
+ {name:'UK Bebras', desc:'Bebras challenge — past puzzles and practice', category:'computing', file:'https://bebras.uk', size:'Web'},
+ {name:'GCSE Art Guide', desc:'GCSE Art portfolio & exam prep guide', category:'jemma', file:'/resources/books/', size:'--'},
+ {name:'BPhO Resources', desc:'UK BPhO Junior Resources', category:'science', file:'/resources/', size:'--'},
+ {name:'Jemma Planning Docs', desc:'GCSE + academic planning', category:'jemma', file:'/Jemma_Plan.html', size:'--'},
+ {name:'Jemma Summer Guide', desc:'2026 summer guide', category:'jemma', file:'/Jemma_2026_Summer_Guide.html', size:'--'},
+ {name:'Growth Route Overview', desc:'Jemma growth plan', category:'jemma', file:'/Jemma_Plan.html', size:'--'},
+ {name:'NRICH Maths', desc:'Cambridge University maths puzzles — 10 min a day', category:'maths', file:'https://nrich.maths.org', size:'Web'},
+ {name:'Raspberry Pi Projects', desc:'Free structured Python project path (ages 10-13)', category:'computing', file:'https://projects.raspberrypi.org/en/pathways/python-intro', size:'Web'},
+ {name:'Tinkercad', desc:'Free browser 3D modelling + circuits simulator', category:'computing', file:'https://www.tinkercad.com', size:'Web'},
+ {name:'micro:bit', desc:'Code a real micro:bit — simulator + projects', category:'computing', file:'https://microbit.org/projects/', size:'Web'},
+ ];
+ allResources=resources;
+ renderResources();
+}
+function renderResources(){
+ const container=document.getElementById('resource-list');
+ if(!container) return;
+ const filtered=allResources.filter(r=>{
+ if(resourceFilter==='all') return true;
+ if(resourceFilter==='books') return r.category==='books';
+ return r.category===resourceFilter;
+ });
+ if(filtered.length===0){
+ container.innerHTML='<div class="section"><div class="empty-state">No resources</div></div>';
+ return;
+ }
+ container.innerHTML=filtered.map(r=>`
+ <div class="resource-item" onclick="window.open('${r.file}','_blank')">
+ <span class="ri-icon">${getResourceIcon(r.category)}</span>
+ <div class="ri-info">
+ <div class="ri-name">${r.name}</div>
+ <div class="ri-desc">${r.desc||''}</div>
+ ${r.size?'<div class="ri-meta">'+r.size+'</div>':''}
+ </div>
+ <span class="ri-arrow">→</span>
+ </div>
+ `).join('');
+}
+function getResourceIcon(cat){
+ const icons={maths:'📐',science:'🔬',books:'📚',jemma:'⭐',both:'🔗',computing:'💻'};
+ return icons[cat]||'📁';
+}
+function filterResources(f){
+ resourceFilter=f;
+ document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+ document.querySelector(`.filter-btn[data-filter="${f}"]`).classList.add('active');
+ renderResources();
+}
+
+// Tab Navigation 
+function switchTab(tab){
+ document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+ document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));
+ const panel=document.getElementById('tab-'+tab);
+ if(panel) panel.classList.add('active');
+ const nav=document.querySelector('.sidebar-nav a[data-tab="'+tab+'"]');
+ if(nav) nav.classList.add('active');
+ // Load data for each tab
+ if(tab==='dashboard') loadDashboard();
+ if(tab==='planner') loadPlannerView();
+ if(tab==='routes') loadRoutes();
+ if(tab==='resources') loadResources();
+ if(tab==='chat') loadChatHistory();
+ if(tab==='errors') loadErrorBook();
+ if(tab==='notes') loadNotes();
+ if(tab==='weekly-review') loadNotes();
+}
+
+// Study Tips Rotator — Updated 01 Sep 2026: 8 tips — structured Python path + debugging + self-directed learning + focus windows + STEM identity
+const STUDY_TIPS_JEMMA = [
+ // === KEPT: Core foundation (3) ===
+ {id:'tip_02',cat:'general',p:'p0', head:'🧠 Active Recall: Close the book & explain — the stumble IS the learning', detail:'Reading the same page 5 times feels like studying but it\'s the weakest way to learn. Your brain tricks you: "yeah I know this." Instead: read ONCE, close the book, explain it out loud. If you stumble, THAT\'S what you need to study — the stumble is not failure, it\'s a map. Research shows students using active recall remember 50% more after one week than re-readers. Works for EVERYTHING — coding concepts, science facts, maths methods.', action:'Today: pick ONE concept from Python you learned this week. Close your laptop. Explain it out loud. Where did you stumble? Re-read ONLY that part. Try again. Then do the same with a science fact. 10 minutes total.'},
+ {id:'j_new50',cat:'computing',p:'p0', head:'🐍 Escape “tutorial hell”: build first, then look up only what you’re stuck on', detail:'The biggest trap for new coders is watching tutorial after tutorial and still not being able to build anything on your own (Chinese learners call it “会写但不会用” — can write it, but can’t use it). The fix is project-first learning: pick a small real project, try to build it with ONLY what you already know, and look up just the one thing you’re stuck on. Perfect first projects: (1) Rock Paper Scissors (use the random module so the computer chooses), (2) Mad Libs (ask for words, then fill them into a funny story), (3) a number-guessing game, (4) a password generator. Each is 10–25 lines and teaches input, output, if/else, loops and random. When you finish, CHANGE something (add a score, add lives) — that “change it” step is where the real learning happens.', action:'Today: open replit.com and build Rock Paper Scissors from memory (import random → computer picks 1–3 → you pick → compare). If stuck, look up ONLY the random part, then keep going. When it works, add a score counter and show your family. Next: Mad Libs.'},
+ {id:'j_new30',cat:'maths',p:'p1', head:'🏅 UKMT JMC Past Paper Sprint: 60 minutes, 25 questions — start training for your first maths competition medal', detail:'The UKMT Junior Maths Challenge (JMC) is for Years 7-8, and with your Bebras Distinction, you\'re already at medal level. The JMC format: 25 multiple-choice questions, 60 minutes. First 15 are easier (standard KS3 maths), last 10 are HARD puzzles. Scoring: +4 correct, -1 wrong, 0 blank. The training plan: (1) Download ONE past JMC paper from ukmt.org.uk (free → Past Papers → Junior). (2) Set a 60-minute timer. (3) Do questions 1-15 FIRST — these are your "banker" marks. Aim for 13+/15. (4) Questions 16-20: try them all, but if stuck for >3 minutes, SKIP. (5) Questions 21-25: these are genius-level. Try them for fun, but BLANK any you\'re unsure of (better 0 than -1). (6) Mark yourself. Bronze ≈ 30-40 marks. Silver ≈ 40-50. Gold ≈ 50+. (7) For every wrong answer, read the SOLUTION (included in the PDF) — this is where the real learning happens. UKMT solutions teach you problem-solving tricks you can\'t learn in class. Do one paper every 2 weeks. Track your score. Watch it climb.', action:'This week: download the most recent JMC paper from ukmt.org.uk → Past Papers → Junior. Print it. Set 60 min timer. Do questions 1-15 first. Mark yourself. Read EVERY solution — even for the ones you got right, because UKMT solutions often show shortcuts you didn\'t think of. Write down 3 new problem-solving tricks you learned. Do another paper in 2 weeks.'},
+
+ // === NEW: structured path + debugging + self-directed learning + windows + STEM identity (5) ===
+ {id:'j_s01',cat:'computing',p:'p0', head:'🧭 Follow ONE free structured path — stop hopping between random tutorials', detail:'You learn fastest when you follow a single, well-designed course instead of bouncing between YouTube videos. Two excellent free options: (1) Raspberry Pi Foundation\'s "Introduction to Python" project path (projects.raspberrypi.org) — written for ages 10-13, each project builds on the last; (2) PyCrafters from the Python Institute — a free course with two levels: "Explorer" (guided, step-by-step, ages 11-12, perfect for you) and "Adventurer" (independent challenges, ages 13-14). PyCrafters even teaches you to plan projects with a Kanban board and document your work — real engineer habits. Pick one, and finish it before starting another.', action:'Today: open projects.raspberrypi.org and start the first "Introduction to Python" project (or sign up for PyCrafters Explorer). Complete ONE full project this week. When it works, change one thing (colour, speed, message) and show someone.'},
+ {id:'j_s02',cat:'computing',p:'p1', head:'🐞 Become a debugger: read the error message first, then the line number — before asking for help', detail:'Real programmers spend more time reading error messages than writing code — and so should you. The error message is not scary, it is a map: it tells you the exact LINE where Python got stuck and usually WHAT went wrong ("NameError: name x is not defined" = you used a variable before creating it; "SyntaxError" = a typo like a missing colon; "IndentationError" = your spacing is off). The habit that makes you independent: (1) read the last line of the error, (2) go to the line number it names, (3) look at that line and the line above, (4) try ONE fix yourself, (5) only then ask for help. Students who do this before asking learn much faster.', action:'This week: the next time your code throws an error (it will!), write the error type and line number in your learning log, guess the fix, try it, and note what worked — all BEFORE asking anyone. Keep a mini list of "errors I now understand".'},
+ {id:'j_s03',cat:'general',p:'p1', head:'🧭 Run your own learning: the 6-step self-directed loop (goal → "done?" → steps → timeline → resources → reflect)', detail:'Independent learners (the ones who thrive later) plan their own learning instead of waiting to be told. Researchers describe a 6-step loop you can use for any new skill — coding, maths, a science topic: (1) set a specific GOAL ("build a quiz game", not "get better at Python"); (2) decide what "done" looks like ("it runs and keeps score"); (3) list the steps in order; (4) put a timeline on them; (5) gather your resources (tutorials, docs, books); (6) after you finish, reflect on what worked. This is metacognition — thinking about your own thinking — and it is the single strongest predictor of long-term success.', action:'This week: write one 6-step plan for a small project you actually want to build (a quiz, a game, a calculator). Use your learning log. Tick off the steps as you go, and on Sunday write two lines: what worked + what you would change next time.'},
+ {id:'j_s04',cat:'general',p:'p0', head:'⏱️ Tiny focused windows: 15-30 minutes, ONE skill, at a fixed time', detail:'You do not need hours — you need consistency. Study-skill research for your age says short, focused sessions beat long ones, and a regular time beats willpower. The formula: (1) pick a fixed daily time (e.g. right after school, after a snack); (2) set a 15-30 minute timer; (3) work on ONE thing only (one Python project, one puzzle, one science topic) — no phone, no extra tabs; (4) stop when the timer ends. Repeat most days. This builds a habit that carries you through GCSE and A-level without ever feeling like a grind. Aim for "most days", not "perfect".', action:'This week: choose your daily window (15-25 min) and a fixed time. Do it 5 out of 7 days — one coding session, one NRICH puzzle, one science recap. Set a phone timer each time. At the end of the week, count the days you hit it and celebrate.'},
+ {id:'j_s05',cat:'general',p:'p1', head:'🌟 You are 12 — STEM interest in girls peaks at 11 and drops at 13. Protect your spark.', detail:'Here is a number worth knowing: girls show equal interest in STEM as boys at primary school, but confidence starts dropping in middle school — and only about 21% of engineering students are women. You are exactly at the age where the spark is easiest to lose, so protect it on purpose. The two things research says keep girls in STEM: (1) role models you can see yourself in — watch "day in the life" videos of women engineers and coders, and ask Diya about her "Girls into Electronics" day; (2) make your work visible — show your projects, enter competitions, so it feels real and public, not just a private hobby. You already have a Bebras Distinction (top 10% nationally) — that is proof you belong.', action:'This week: watch ONE "women in tech / engineering, day in the life" video and write in your learning log "which part of her job looks fun to me?". Then show your latest Python project to one family member and explain how it works.'},
+];
+
+let todayTips = [];
+let currentTipIndex = 0;
+
+function loadStudyTips(){
+ const el = document.getElementById('study-tips');
+ if(!el) return;
+
+ const STORAGE_KEY = 'study_tips_viewed_jemma';
+ let viewed = {};
+ try { viewed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+
+ let pool = STUDY_TIPS_JEMMA.filter(t => (viewed[t.id] || 0) < 3);
+ if (pool.length < 5) {
+  localStorage.removeItem(STORAGE_KEY);
+  viewed = {};
+  pool = [...STUDY_TIPS_JEMMA];
+ }
+
+ const shuffled = [...pool].sort(() => Math.random() - 0.5);
+ todayTips = shuffled.slice(0, 8);
+ currentTipIndex = 0;
+
+ if (todayTips.length > 0) {
+  const t = todayTips[0];
+  viewed[t.id] = (viewed[t.id] || 0) + 1;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(viewed)); } catch(e) {}
+ }
+
+ renderTipCard(el);
+}
+
+function renderTipCard(el){
+ if (!el) el = document.getElementById('study-tips');
+ if (!el || todayTips.length === 0) return;
+
+ const t = todayTips[currentTipIndex];
+ const rem = 3 - (JSON.parse(localStorage.getItem('study_tips_viewed_jemma')||'{}')[t.id] || 0);
+ const isFirst = currentTipIndex === 0;
+ const isLast = currentTipIndex === todayTips.length - 1;
+
+ el.innerHTML = `
+ <div class="tips-header"> Today's Tip <span class="tips-refresh">· ${rem} views left for this tip</span></div>
+ <div class="tip-single-card">
+  <span class="tip-cat-badge ${t.cat}">${t.cat.toUpperCase()}</span>
+  <div class="tip-single-head">${t.head}</div>
+  <div class="tip-single-detail">${t.detail}</div>
+  <div class="tip-single-action">${t.action}</div>
+ </div>
+ <div class="tip-nav">
+  <button onclick="prevTip()" id="tip-prev-btn"${isFirst?' disabled':''}>Previous</button>
+  <span class="tip-counter">Tip ${currentTipIndex + 1} / ${todayTips.length}</span>
+  <button onclick="nextTip()" id="tip-next-btn"${isLast?' disabled':''}>Next</button>
+ </div>`;
+}
+
+function nextTip(){
+ if (currentTipIndex < todayTips.length - 1) {
+  currentTipIndex++;
+  const t = todayTips[currentTipIndex];
+  const STORAGE_KEY = 'study_tips_viewed_jemma';
+  let viewed = {};
+  try { viewed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+  viewed[t.id] = (viewed[t.id] || 0) + 1;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(viewed)); } catch(e) {}
+  renderTipCard();
+ }
+}
+
+function prevTip(){
+ if (currentTipIndex > 0) {
+  currentTipIndex--;
+  renderTipCard();
+ }
+}
+
+// Dashboard 
+async function loadDashboard(){
+ try{
+ const dj = await fetch('/api/dashboard/jemma').then(r=>r.json()).catch(()=>({tasks_done:0,tasks_total:0}));
+ const dp=dj.tasks_total>0?Math.round(dj.tasks_done/dj.tasks_total*100):0;
+ document.getElementById('dash-jemma-pct').textContent=dp+'%';
+ document.getElementById('dash-jemma-sub').textContent=`${dj.tasks_done||0}/${dj.tasks_total||0} tasks`;
+ }catch(e){console.error('dash load err',e)}
+ loadStudyTips();
+ drawMainRadar();
+ initSubjectAnalysis();
+ // Also load child data (banner, tasks, planner)
+ loadChild('jemma');
+ renderCountdown();
+}
+
+function initSubjectAnalysis(){
+ const subjects=[
+ {name:'Maths', grade:'88%', status:'above', trend:'13pts above median — Exceptional', bar:95, tag:'Extension Ready', tagClass:'green'},
+ {name:'Physics', grade:'82%', status:'above', trend:'14pts above median — Strong', bar:88, tag:'Top Performer', tagClass:'green'},
+ {name:'German', grade:'15/15', status:'above', trend:'Perfect writing assessment', bar:95, tag:'TU9 Ready 🇩🇪', tagClass:'green'},
+ {name:'Computing', grade:'Outstanding', status:'above', trend:'Python coding — real progress', bar:92, tag:'Coding Talent', tagClass:'green'},
+ {name:'Art Textiles', grade:'Exceptional', status:'above', trend:'Bright future in the Hive', bar:93, tag:'Creative Star', tagClass:'green'},
+ {name:'Chemistry', grade:'74% (+2)', status:'above', trend:'Above median by 2pts', bar:80, tag:'Solid', tagClass:'green'},
+ {name:'Biology', grade:'72% (−5)', status:'meeting', trend:'5pts below median', bar:70, tag:'Add Detail', tagClass:'yellow'},
+ {name:'History', grade:'Above', status:'above', trend:'Highly structured + analytical', bar:82, tag:'Strong Writer', tagClass:'green'},
+ {name:'English', grade:'71% (=)', status:'meeting', trend:'Matched median — confidence focus', bar:68, tag:'Build Confidence', tagClass:'yellow'},
+ {name:'Spanish', grade:'Above', status:'above', trend:'From zero to Above in 1 year', bar:78, tag:'Fast Learner', tagClass:'green'},
+ {name:'Latin', grade:'57.5%', status:'meeting', trend:'Verbs strong, nouns need work', bar:55, tag:'Consider Drop?', tagClass:'yellow'},
+ {name:'Philosophy', grade:'Above', status:'above', trend:'Confident discussion + analysis', bar:80, tag:'Thinker', tagClass:'green'},
+ {name:'Piano', grade:'Grade 8 Prep', status:'above', trend:'Year 8 playing Grade 8!', bar:98, tag:'Exceptional 🎹', tagClass:'green'},
+ ];
+ const grid=document.getElementById('subject-grid');
+ if(!grid) return;
+ grid.innerHTML=subjects.map(s=>{
+ const cardClass=s.status==='risk'?' subject-card risk':s.status==='above'?' subject-card excellent':' subject-card';
+ return `<div class="${cardClass.trim()}">
+ <div class="sj-name">${s.name}</div>
+ <div class="sj-grade ${s.status}">${s.grade}</div>
+ <div class="sj-trend">${s.trend}</div>
+ <div class="sj-bar"><div class="sj-bar-fill" style="width:${s.bar}%;background:${s.status==='risk'?'var(--red)':s.status==='above'?'var(--accent2)':'var(--accent)'}"></div></div>
+ ${s.tag?`<span class="sj-tag tag ${s.tagClass}">${s.tag}</span>`:''}
+ </div>`;
+ }).join('');
+
+ // Single critical countdown in stat card
+ updateKeyTimer();
+ setInterval(updateKeyTimer, 60000);
+}
+
+function updateKeyTimer(){
+ const gcseDate=new Date('2029-05-01');
+ const now=new Date();
+ const diff=gcseDate-now;
+ const days=Math.floor(diff/86400000);
+ const el=document.getElementById('dash-key-timer');
+ const lbl=document.getElementById('dash-key-label');
+ if(el) el.textContent=days+' days';
+ if(lbl) lbl.textContent='Until GCSE 2029.5';
+}
+
+// Radar Chart 
+function drawRadar(canvasId, labels, datasets, legendId){
+ const canvas=document.getElementById(canvasId);
+ if(!canvas) return;
+ const ctx=canvas.getContext('2d');
+ const cx=canvas.width/2, cy=canvas.height/2, r=Math.min(cx,cy)*0.55;
+ const n=labels.length, angleStep=2*Math.PI/n;
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ // Draw grid
+ for(let ring=1;ring<=4;ring++){
+ ctx.beginPath();
+ for(let i=0;i<=n;i++){
+ const angle=i*angleStep-Math.PI/2;
+ const x=cx+r*ring/4*Math.cos(angle), y=cy+r*ring/4*Math.sin(angle);
+ i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+ }
+ ctx.closePath();
+ ctx.strokeStyle='rgba(255,255,255,0.08)';
+ ctx.stroke();
+ }
+ // Draw axes
+ for(let i=0;i<n;i++){
+ const angle=i*angleStep-Math.PI/2;
+ ctx.beginPath();
+ ctx.moveTo(cx,cy);
+ ctx.lineTo(cx+r*Math.cos(angle),cy+r*Math.sin(angle));
+ ctx.strokeStyle='rgba(255,255,255,0.1)';
+ ctx.stroke();
+ // Label
+ const lx=cx+(r+40)*Math.cos(angle), ly=cy+(r+40)*Math.sin(angle);
+ ctx.fillStyle='#b0b8d0';
+ ctx.font='12px -apple-system,sans-serif';
+ ctx.textAlign=Math.cos(angle)>0.2?'start':Math.cos(angle)<-0.2?'end':'center';
+ ctx.textBaseline='middle';
+ ctx.fillText(labels[i],lx,ly);
+ }
+ // Draw data
+ datasets.forEach((data,di)=>{
+ ctx.beginPath();
+ data.forEach((val,i)=>{
+ const angle=i*angleStep-Math.PI/2;
+ const x=cx+r*val/100*Math.cos(angle), y=cy+r*val/100*Math.sin(angle);
+ ctx.lineTo(x,y);
+ });
+ ctx.closePath();
+ ctx.fillStyle=di===0?'rgba(79,140,255,0.25)':'rgba(56,217,169,0.25)';
+ ctx.fill();
+ ctx.strokeStyle=di===0?'#4f8cff':'#38d9a9';
+ ctx.lineWidth=2;
+ ctx.stroke();
+ });
+ // Legend
+ const leg=document.getElementById(legendId);
+ if(leg&&datasets.length>0){
+ if(datasets.length>1){
+ leg.innerHTML='<span style="color:#4f8cff"> Jemma</span>';
+ } else {
+ leg.innerHTML='<span style="color:#4f8cff"> Jemma</span>';
+ }
+ }
+}
+function drawMainRadar(){
+ const labels=['Maths','Physics','Computing','German','History','English'];
+ drawRadar('radarCanvas', labels, [[88,82,92,95,82,68]], 'radar-legend');
+ const leg=document.getElementById('radar-legend');
+ if(leg) leg.innerHTML='<span style="color:#4f8cff"> Jemma</span>';
+}
+
+// Child Panel Loader 
+async function loadChild(child){
+ await Promise.all([loadTasks(child), loadPlanner(child)]);
+}
+
+// Chat 
+let currentChatChild='jemma';
+function switchChatChild(child){
+ currentChatChild=child;
+ document.getElementById('chat-hdr-title').textContent='Chat with Jemma';
+ loadChatHistory();
+}
+async function loadChatHistory(){
+ const container=document.getElementById('chat-messages');
+ if(!container) return;
+ try{
+ const r=await fetch('/api/chat/jemma?limit=50');
+ const data=await r.json();
+ const msgs=Array.isArray(data)?data:(data.messages||[]);
+ container.innerHTML='';
+ msgs.forEach(m=>appendChatMsg(m.role,m.content));
+ container.scrollTop=container.scrollHeight;
+ }catch(e){
+ container.innerHTML='<div style="color:var(--text2);padding:20px;text-align:center">Load failed</div>';
+ }
+}
+function markdownToHtml(md){
+ if(!md) return '';
+ let html=md;
+ html=html.replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>');
+ html=html.replace(/`([^`]+)`/g,'<code>$1</code>');
+ html=html.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+ html=html.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+ html=html.replace(/\*(.+?)\*/g,'<em>$1</em>');
+ html=html.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+ html=html.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+ html=html.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+ html=html.replace(/^[\-\*] (.+)$/gm,'<li>$1</li>');
+ html=html.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+ html=html.replace(/((?:<li>.*<\/li>\n?)+)/g,'<ul>$1</ul>');
+ html=html.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+ html=html.replace(/^---$/gm,'<hr>');
+ html=html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');
+ html=html.replace(/\n\n+/g,'</p><p>');
+ html='<p>'+html+'</p>';
+ html=html.replace(/<p><\/p>/g,'');
+ return html;
+}
+function appendChatMsg(role,content){
+ const container=document.getElementById('chat-messages');
+ const div=document.createElement('div');
+ div.className='msg '+role;
+ const bubble=document.createElement('div');
+ bubble.className='bubble';
+ const clean=(content||'').replace(/<think>[\s\S]*?<\/think>/g,'').trim();
+ bubble.innerHTML=markdownToHtml(clean);
+ div.appendChild(bubble);
+ container.appendChild(div);
+ requestAnimationFrame(()=>{container.scrollTop=container.scrollHeight;});
+}
+async function sendChatMsg(){
+ const input=document.getElementById('chat-msg-input');
+ const btn=document.getElementById('chat-send-btn');
+ if(!input) return;
+ const text=input.value.trim();
+ if(!text) return;
+ appendChatMsg('user',text);
+ input.value='';
+ btn.disabled=true;
+
+ const container=document.getElementById('chat-messages');
+ const thinkDiv=document.createElement('div');
+ thinkDiv.className='thinking-msg';
+ thinkDiv.id='thinking-indicator';
+ thinkDiv.innerHTML=' Jemma is thinking <span class="thinking-dots"><span></span><span></span><span></span></span>';
+ container.appendChild(thinkDiv);
+ container.scrollTop=container.scrollHeight;
+
+ try{
+ const resp=await fetch('/api/chat/stream',{
+ method:'POST',
+ headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({message:text,user:'jemma'})
+ });
+ const thinkEl=document.getElementById('thinking-indicator');
+ if(thinkEl) thinkEl.remove();
+
+ const div=document.createElement('div');
+ div.className='msg ai';
+ const bubble=document.createElement('div');
+ bubble.className='bubble';
+ bubble.id='streaming-bubble';
+ div.appendChild(bubble);
+ container.appendChild(div);
+
+ let fullText='';
+ const reader=resp.body.getReader();
+ const decoder=new TextDecoder();
+ let buffer='';
+
+ while(true){
+ const {done,value}=await reader.read();
+ if(done) break;
+ buffer+=decoder.decode(value,{stream:true});
+ const lines=buffer.split('\n');
+ buffer=lines.pop()||'';
+ for(const line of lines){
+ if(line.startsWith('data: ')){
+ try{
+ const data=JSON.parse(line.slice(6));
+ if(data.token){
+ fullText+=data.token;
+ let html=fullText.replace(/<think>[\s\S]*?<\/think>/g,'').trim();
+ // Escape HTML then apply markdown
+ html=html.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+ html=html.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+ html=html.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+ html=html.replace(/\*(.+?)\*/g,'<em>$1</em>');
+ html=html.replace(/`(.+?)`/g,'<code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:3px">$1</code>');
+ html=html.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+ html=html.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+ html=html.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+ html=html.replace(/^[\-\*] (.+)$/gm,'<li>$1</li>');
+ html=html.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+ html=html.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+ html=html.replace(/\\n\\n/g,'<br><br>');
+ html=html.replace(/\\n/g,'<br>');
+ bubble.innerHTML=html;
+ container.scrollTop=container.scrollHeight;
+ }else if(data.error){
+ bubble.innerHTML='<span style="color:var(--red)"> '+data.error+'</span>';
+ }
+ }catch(e){}
+ }
+ }
+ }
+ bubble.removeAttribute('id');
+ // Re-render with full markdown for final polish
+ let clean=fullText.replace(/<think>[\s\S]*?<\/think>/g,'').trim();
+ if(clean) bubble.innerHTML=markdownToHtml(clean);
+ container.scrollTop=container.scrollHeight;
+ }catch(e){
+ const thinkEl=document.getElementById('thinking-indicator');
+ if(thinkEl) thinkEl.remove();
+ appendChatMsg('ai',' Network error, retry');
+ }
+ btn.disabled=false;
+}
+async function clearChatHistory(){
+ if(!confirm('Clear chat history?')) return;
+ try{
+ await fetch('/api/chat/jemma',{method:'DELETE'});
+ document.getElementById('chat-messages').innerHTML='';
+ toast('Cleared');
+ }catch(e){toast('Clear failed');}
+}
+
+// Logout 
+function logout(){
+ window.location.replace('index.html');
+}
+const AVATARS=['\uD83D\uDC67','\uD83D\uDC69\u200D\uD83D\uDD2C','\uD83D\uDC69\u200D\uD83D\uDCBB','\uD83D\uDC69\u200D\uD83C\uDFA8','\uD83D\uDC69\u200D\uD83D\uDD27','\uD83D\uDC69\u200D\uD83D\uDE80','\uD83C\uDF1F','\uD83C\uDFAF','\uD83D\uDD2C','\uD83D\uDCA1','\uD83E\uDDE0','\uD83D\uDCD0','\uD83D\uDC31','\uD83E\uDD8A','\uD83C\uDF38','\uD83C\uDF0D','\uD83C\uDF0A','\uD83C\uDF08','\u2601\uFE0F','\u2728','\uD83D\uDD25','\uD83D\uDCA5','\uD83C\uDFB5','\uD83C\uDFAE','\uD83D\uDCDA','\uD83D\uDC8E','\uD83D\uDD2E','\uD83D\uDD2D','\uD83E\uDDD0','\uD83C\uDF0C','\u2699\uFE0F','\u26A1'];
+const THEMES={
+ blue:{accent:'#4f8cff',accent2:'#38d9a9'},
+ purple:{accent:'#a855f7',accent2:'#c084fc'},
+ pink:{accent:'#f472b6',accent2:'#f9a8d4'},
+ green:{accent:'#34d399',accent2:'#6ee7b7'},
+ orange:{accent:'#fb923c',accent2:'#fbbf24'}
+};
+function loadProfile(){
+ const p=JSON.parse(localStorage.getItem('profile_jemma')||'{}');
+ document.getElementById('profile-avatar').textContent=p.avatar||'\uD83D\uDC67';
+ document.getElementById('profile-name').value=p.name||'Jemma';
+ applyTheme(p.theme||'blue');
+ updateStreak();
+}
+function saveProfile(){
+ const name=document.getElementById('profile-name').value.trim()||'Jemma';
+ const p=JSON.parse(localStorage.getItem('profile_jemma')||'{}');
+ p.name=name; localStorage.setItem('profile_jemma',JSON.stringify(p));
+ document.getElementById('profile-name').value=name;
+}
+function showAvatarPicker(){
+ const grid=document.getElementById('avatar-picker-grid');
+ const cur=document.getElementById('profile-avatar').textContent;
+ grid.innerHTML=AVATARS.map(a=>`<div class="avatar-option${a===cur?' selected':''}" onclick="selectAvatar('${a}')">${a}</div>`).join('');
+ document.getElementById('avatar-modal').classList.add('open');
+}
+function selectAvatar(emoji){
+ document.getElementById('profile-avatar').textContent=emoji;
+ const p=JSON.parse(localStorage.getItem('profile_jemma')||'{}');
+ p.avatar=emoji; localStorage.setItem('profile_jemma',JSON.stringify(p));
+ document.getElementById('avatar-modal').classList.remove('open');
+}
+function setTheme(theme){
+ applyTheme(theme);
+ const p=JSON.parse(localStorage.getItem('profile_jemma')||'{}');
+ p.theme=theme; localStorage.setItem('profile_jemma',JSON.stringify(p));
+ document.querySelectorAll('.theme-dot').forEach(d=>d.classList.remove('active'));
+ document.querySelector(`.theme-dot[data-theme="${theme}"]`)?.classList.add('active');
+}
+function applyTheme(theme){
+ const t=THEMES[theme]||THEMES.blue;
+ document.documentElement.style.setProperty('--accent',t.accent);
+ document.documentElement.style.setProperty('--accent2',t.accent2);
+}
+function updateStreak(){
+ // Fixed template: count days with any content
+ const data=plannerData['jemma']||{};
+ const dayKeys=['mon','tue','wed','thu','fri','sat','sun'];
+ let filledDays=0;
+ dayKeys.forEach(dk=>{
+ if(Object.values(data[dk]||{}).some(v=>v&&v.trim())) filledDays++;
+ });
+ document.getElementById('profile-streak').textContent=`${filledDays}/7 days · plans set`;
+ const hdr=document.getElementById('header-streak'); if(hdr) hdr.textContent=`${filledDays}/7 days`;
+ const lv=1+Math.floor(filledDays/2);
+ document.getElementById('profile-level').textContent=lv;
+ document.getElementById('profile-xp-fill').style.width=Math.round(filledDays/7*100)+'%';
+ const p=JSON.parse(localStorage.getItem('profile_jemma')||'{}');
+ p.streak=filledDays; p.level=lv; localStorage.setItem('profile_jemma',JSON.stringify(p));
+}
+
+function logout(){
+ sessionStorage.removeItem('jemma_auth');
+ window.location.replace('index.html');
+}
+
+// Countdown 
+function renderCountdown(){
+ const today=new Date(); today.setHours(0,0,0,0);
+ const events = [
+ {label:'UKMT IMC 2027', date:'2027-01-27', emoji:'🥇', color:'#8e44ad'},
+ {label:'Bebras 2026', date:'2026-11-01', emoji:'🦫', color:'#2980b9'},
+  {label:'GCSE Starts', date:'2029-05-01', emoji:'📚', color:'#e74c3c'}
+ ];
+ const strip=document.getElementById('countdown-strip');
+ if(!strip) return;
+ strip.innerHTML = events.map(e=>{
+ const d=new Date(e.date); d.setHours(0,0,0,0);
+ const diff=Math.ceil((d-today)/86400000);
+ let text;
+ if(diff<0) text='Done!';
+ else if(diff===0) text='TODAY';
+ else if(diff===1) text='Tomorrow';
+ else text=diff+' days';
+ return `<div style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;text-align:center;${diff<=7?'border-color:'+e.color+';box-shadow:0 0 8px '+e.color+'44':''}">
+ <div style="font-size:24px">${e.emoji}</div>
+ <div style="font-size:11px;color:var(--text2);margin-top:4px">${e.label}</div>
+ <div style="font-size:20px;font-weight:700;color:${e.color};margin-top:2px" class="${diff<=7?'pulse-glow':''}">${text}</div>
+ <div style="font-size:10px;color:var(--text2)">${d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+ </div>`;
+ }).join('');
+}
+
+// Init 
+document.addEventListener('DOMContentLoaded',()=>{
+ loadProfile();
+ loadDashboard();
+});
+</script>
+
+<!-- Avatar Picker Modal -->
+<!-- Error Modal -->
+<div class="modal-overlay" id="error-modal">
+<div class="modal">
+<h3 id="error-modal-title">Add Error</h3>
+<input type="hidden" id="error-edit-id">
+<div class="form-group">
+<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">Subject</label>
+<select id="error-subject-input" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px">
+<option value="Maths">Maths</option>
+<option value="Physics">Physics</option>
+<option value="Chemistry">Chemistry</option>
+<option value="Biology">Biology</option>
+<option value="English">English</option>
+<option value="German">German</option>
+<option value="Geography">Geography</option>
+<option value="History">History</option>
+<option value="Art">Art</option>
+<option value="Computing">Computing</option>
+</select>
+</div>
+<div class="form-group">
+<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">Date</label>
+<input type="date" id="error-date-input" style="width:auto">
+</div>
+<div class="form-group">
+<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">Question / Error</label>
+<textarea id="error-question-input" placeholder="Describe your error..." rows="3"></textarea>
+</div>
+<div class="form-group">
+<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">Solution / Explanation</label>
+<textarea id="error-solution-input" placeholder="Correct approach..." rows="3"></textarea>
+</div>
+<div class="form-group">
+<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">Error Type</label>
+<select id="error-type-input" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px">
+<option value="concept">Concept Unclear</option>
+<option value="calc">Calculation Error</option>
+<option value="reading">Misreading</option>
+<option value="analysis">Insufficient Analysis</option>
+<option value="structure">Structure Issue</option>
+<option value="timing">Time Management</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div class="form-group">
+<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">Tags (comma-separated)</label>
+<input type="text" id="error-tags-input" placeholder="e.g. algebra, fractions, exam_q3">
+</div>
+<div class="modal-actions">
+<button class="btn" onclick="closeErrorModal()">Cancel</button>
+<button class="btn" onclick="saveError()" style="background:var(--accent);color:#fff">Save</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="avatar-modal">
+<div class="modal">
+<h3> Choose Your Avatar</h3>
+<div class="avatar-picker" id="avatar-picker-grid"></div>
+<div class="modal-actions">
+<button class="btn-sm" onclick="document.getElementById('avatar-modal').classList.remove('open')">Close</button>
+</div>
+</div>
+</div>
+
+</body>
+</html>

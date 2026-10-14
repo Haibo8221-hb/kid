@@ -1,0 +1,222 @@
+[
+  {
+    "idx": 0,
+    "text": "The image displays a section of a physics exam page, numbered 42, with instructions and questions. Below is a word-for-word transcription:\n\n---\n\n**Use the Physics Equations Sheet to answer questions 10.2 and 10.3.**\n\n**10.2** Write down the equation which links energy (E), power (P), and time (t).  \n[1 mark]  \n\\[ E = \\frac{P}{t} \\ \\text{(Incorrect, should be } E = P \\times t\\text{)} \\]  \n*Correction: The equation written is incorrect. The correct equation is \\( E = P \\times t \\).*\n\n**10.3** A nuclear power station has a power output of 500 MW.  \nCalculate the energy output in 3600 s.  \nGive your answer in J.  \n[3 marks]  \n\\[ \\frac{500}{3600} = 0.139 \\]  \nEnergy output = \\( 0.139 \\)  \n*Correction: The student's calculation is incorrect. The correct calculation is:  \nEnergy = Power × Time = 500 × 10⁶ W × 3600 s = \\( 1.8 \\times 10^9 \\) J.*\n\n**10.4** Radioactive waste produced by nuclear power stations has a long half-life.  \nSuggest one precaution taken to reduce the hazard caused by radioactive waste from power stations.  \n[1 mark]  \nOnly short amount of time interacted with the radioactive waste.  \n*Correction: The student’s answer is unclear and grammatically incorrect. A better answer might be: \"Radioactive waste is stored in secure, shielded containers for long periods until it decays to safe levels.\"*\n\n---",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 1,
+    "text": "The document is a page from an exam paper focused on the process of nuclear fission used in nuclear power stations, referencing Figure 17 which illustrates uranium undergoing fission. Below is a transcription of all text as it appears on the page, including question numbers, questions, answer options, student answers, and mark allocations:\n\n---\n\n**Page 41**\n\n[Box labeled \"1 0\"] The process of nuclear fission is used in nuclear power stations.\n\nFigure 17 shows the process of nuclear fission.\n\n**Figure 17**\n[Diagram] \n- A central circle labeled \"Uranium\"\n- Arrows pointing from the central circle to three smaller circles, representing particles.\n- Arrows pointing to the central circle from two other circles.\n\n---\n\n**[1 0.1]** Complete the sentences.\nChoose answers from the box. \n**[3 marks]**\n\n**Box with options:**  \n- electrons\n- gamma rays\n- neutrons\n- nuclei\n- protons\n\n1. In nuclear power stations, energy is released from uranium _______.  \nStudent answer: *nuclei*\n\n2. The uranium in Figure 17 splits into two parts and releases three _______.  \nStudent answer: *electrons* (handwritten note: \"haven't finish learning :)\")\n\n3. The process of nuclear fission releases electromagnetic radiation in the form of _______.  \nStudent answer: *gamma rays*\n\n--- \n\nEnd of page transcription.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 2,
+    "text": "0 9 . 4 Decreasing the amount of carbon dioxide released by different activities will help slow down climate change.\nTransport and generating electricity are the two activities that released the largest amounts of carbon dioxide in the UK in 2018.\nExplain one change that would reduce the amount of carbon dioxide released by each activity. [4 marks]\nTransport \nGenerating electricity \nI haven't yet learned this topic :)",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 3,
+    "text": "The image shows a page from an exam paper, numbered 39, with a question and a student's response. Here is a transcription of all the text, including question numbers, question text, student answers, and marks:\n\n**09.3** Table 4 shows information about the two methods of storing energy.\n\n**Table 4**\n\n| Method | Energy stored per 100 kg of water in kJ | Percentage of stored energy wasted | Installation      |\n|--------|----------------------------------------|-----------------------------------|-------------------|\n| A: Increasing water temperature by 80 °C | 33 600                              | 40%                               | Anywhere          |\n| B: Pumping water uphill to a height of 500 m | 490                                | 25%                               | High mountains    |\n\nCompare the advantages and disadvantages of the two methods of storing energy.\n\nInclude calculations in your answer.\n\n**[4 marks]**\n\n**Student Answer:**\n33600 × 0.6 = 20160 useful energy.\n490 × 0.75 = 367.5 useful energy.\n\nThe percentage of stored energy wasted is very high in the increase of water temperature. Whereas the percentage of wasted energy in the pumping water method is relatively smaller lower. On the other hand one advantage of increasing Water temperature is it Can be installed anywhere whereas the pumping only limits to high mountains.\n\n---\n\nQuestion 9 continues on the next page.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 4,
+    "text": "The image is a page from an exam paper, numbered 38. Here is a transcription of all text, including question numbers, question text, student answers, and marks:\n\n---\n\n**0 9**  \nFigure 16 shows a wind turbine.  \n*Figure 16* [Image of a wind turbine]  \n\nWind turbines may generate electricity when the electricity is not needed.  \nTwo methods that can be used to store the energy from the turbine are:  \n**Method A:** Heating water to a high temperature.  \n**Method B:** Pumping water uphill into a reservoir.  \n\n**0 9.1** Which energy store increases when water is heated?  \n[1 mark]  \nThermal  \n\n**0 9.2** Which energy store increases when water is pumped uphill into a reservoir?  \n[1 mark]  \nKinetic (Note: The correct term here would typically be \"gravitational potential\" energy. However, the student's answer as transcribed is \"Kinetic.\")",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 5,
+    "text": "37\n08.3 Complete the sentence.\nChoose the answer from the box. [1 mark]\n\n[decreases | stays the same | increases]\n\nAs the potential difference across the component increases, the gradient of the graph \\text{ } \\underline{increases} \\text{ }.\n\n08.4 What is the component in the sealed box?\n[1 mark]\nTick (✓) one box.\n\n☐ Diode\n☐ Filament lamp\n☑ Resistor at constant temperature\n\nTurn over for the next question",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 6,
+    "text": "The image displays a page from an exam paper, which includes a graph and a question. Here is a transcription of all text:\n\n---\n\n**Figure 15 shows the results.**\n\n**Figure 15**\n\n[Graph with labeled axes: \"Current in amps\" on the vertical axis, and \"Potential difference in volts\" on the horizontal axis. The graph is a curve showing the relationship between current and potential difference.]\n\n**08.2** Calculate the power of the component when the potential difference across the component is 3.0 V.\n\nUse Figure 15 and the equation:\n\n\\[ \\text{power} = \\text{potential difference} \\times \\text{current} \\]\n\n[3 marks]\n\n\\[ 0.17 \\times 3 = 0.51 \\]\n\nPower = **0.51**",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 7,
+    "text": "A student had an unknown electrical component inside a sealed box.\nFigure 14 shows the circuit the student used to identify the component.\n[Diagram of a circuit with an ammeter (A) in series with a box, a voltmeter (V) in parallel with the box, and a switch]\nThe student varied the potential difference across the component and measured the current in the component.\nTable 3 shows the results when the potential difference across the component was 6.0 V.\n\n| Potential difference in volts | Current in amps |  |  | Mean |\n| :---: | :---: | :---: | :---: | :---: |\n| 6.0 | 1st reading 0.26 | 2nd reading 0.21 | 3rd reading 0.25 | X |\n\n08.1 Calculate value X in Table 3. [2 marks]\n$\\frac{0.26+0.21+0.25}{3}=\\frac{0.72}{3}$\n$X=\\quad 0.24 \\quad A$",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 8,
+    "text": "### Question 07.5\nThe mass of the wire is 0.016 g.\nspecific latent heat of fusion of the wire = 60 000 J/kg\n\nCalculate the change in thermal energy needed to melt the wire.\nUse the Physics Equations Sheet. [3 marks]\n\nStudent Answer:\nLfxm\n60,000 x 0.016 = 960 J\n\nChange in thermal energy = 960 J\n\n### Question 07.6\nThe fuse transfers some energy to the surroundings as it melts.\nHow does transferring energy to the surroundings affect the total energy needed to melt the fuse? [1 mark]\n\nTick (✓) one box.\n- The total energy will be smaller.\n- The total energy will be the same. ✓\n- The total energy will be greater.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 9,
+    "text": "The plug connected to the cable contains a fuse.\nA fuse contains a wire that is designed to melt when the current is too great.\n07.3 What is the circuit symbol for a fuse? [1 mark]\nTick (✓) one box.\n(Symbols with one ticked: the third one, resembling a rectangle with a tilted line inside)\n07.4 The wire in the fuse melts when there is a charge flow of 2.0 C in a time of 0.40 s.\nCalculate the current in the wire when it melts.\nUse the equation:\ncurrent = charge flow / time\n[2 marks]\n2 / 0.4 = 5 A\nCurrent = 5 A\nQuestion 7 continues on the next page",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 10,
+    "text": "46\n\n1 1 . 3 The student used a cell that had a potential difference of 1.50 V.\nExplain why the cell was not an electrical hazard to the student in the investigation. [2 marks]\nThe potential difference is much lower than the maximum electrical voltage.\n\n9\nEND OF QUESTIONS",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 11,
+    "text": "A handwritten note at the top of the page says \"to be kept constant.\" Below the handwritten note, there are horizontal lines presumably for the student's name or other details.\nThe printed content begins with a question numbered as \"11.2.\" The question reads: \"Which graph shows the relationship between the resistance of a wire at constant temperature and its length? [1 mark]\" Below the question, the instruction says \"Tick (✓) one box.\"\nThere are three graphs presented as options:\n1. The first graph has a downward-sloping line. The label \"Resistance\" is on the vertical axis, and \"Length\" is on the horizontal axis. This box has a tick mark (✓) in it.\n2. The second graph has a curve that starts steep and then levels off. The label \"Resistance\" is on the vertical axis, and \"Length\" is on the horizontal axis. The box is empty.\n3. The third graph has an upward-sloping straight line passing through the origin. The label \"Resistance\" is on the vertical axis, and \"Length\" is on the horizontal axis. The box is empty.\nAt the bottom of the page, a note says \"Question 11 continues on the next page.\"",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 12,
+    "text": "The image shows a physics exam question and a student's handwritten answer. Here's the transcription:\n\n**Question 11**\nA student investigated how the length of a wire affects the resistance of the wire at constant temperature. Figure 18 shows the circuit used.\n\n**Figure 18**\n[Diagram of a circuit with a switch, cell, resistor, wire laid out with crocodile clips attached, and ammeter and voltmeter.]\n\n**11.1** The student plotted a graph of resistance against the length of wire.\nDescribe a method the student could have used to collect the data needed to plot the graph.\n\n**[6 marks]**\n\n**Student Answer:**\nAs the student sets up the equipments, they could move the distance between the crocodile clips to each change the length of the wire and reads of the ammeter and voltmeter to write down the on a table. Then the student could use the data written down to plot the graph. Remember, the rest temperature of the resistor needs...",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 13,
+    "text": "The image shows a page from an exam paper. Here is the transcription of all text:\n\n**Page 43**\n\n**10.5** Nuclear power stations do not generate electricity every day of the year.\nOne nuclear power station generated electricity for 92% of a year.\none year = 365 days\n\nCalculate the number of days during the year that the nuclear power station generated electricity. [2 marks]\n\n\\[ 365 \\times 0.92 = 335.8 \\]\n\\[ = 336 \\]\n\nNumber of days = **836** (Note: There is a mistake here; the correct calculation is 336, not 836.)\n\nTurn over for the next question",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 14,
+    "text": "07 An electrical appliance is connected to the mains electricity supply using a three-core cable.\nFigure 13 shows a three-core cable.             Figure 13\n\n07.1 What colour is the insulation covering the live wire inside the cable? [1 mark]\nTick (✓) one box.\n\nBlue \nBrown ✓\nGreen and yellow \nOrange \n\n07.2 What colour is the insulation covering the neutral wire inside the cable? [1 mark]\nTick (✓) one box.\n\nBlue \nBrown \nGreen and yellow ✓\nOrange",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 15,
+    "text": "31\n\n06.6 How does the activity of a radioactive source affect the risk of harm from the source [1 ma (presumably \"mark\" or \"marks\")]\n\nTick (✓) one box.\n\nThe smaller the activity, the greater the risk of harm. \n\nThe activity does not affect the risk of harm.\n\nThe greater the activity, the greater the risk of harm. ✓\n\nTurn over for the next question",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 16,
+    "text": "The image displays a section of an exam page with two questions:\n\n**06.4**\nThe teacher took safety precautions during the experiment.\nWhich precaution would prevent the teacher from becoming contaminated by the radioactive rocks?\nTick (✓) one box. [1 mark]\n- Displaying the radiation hazard symbol [ ]\n- Handling the rocks with clean hands [ ]\n- Wearing protective gloves [✓]\n\n**06.5**\nWhat is the activity of each rock after one half-life?\nTick (✓) one box. [1 mark]\n- The activity is a quarter of the original activity. [ ]\n- The activity is half the original activity. [✓]\n- The activity is double the original activity. [ ]\n- The activity is zero. [ ]",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 17,
+    "text": "The image shows a section of an exam page numbered 29, containing two questions, each worth [2 marks]. Below is a word-for-word transcription of all text, including question numbers, question text, student answers, and marks.\n\n---\n\n### 06.2\n**Which radioactive rock emitted only alpha radiation?**  \nGive a reason for your answer.  \n[2 marks]  \n\nTick (✓) one box.  \n\n- [ ] Rock A  \n- [✓] Rock A (student's selection, but next to Rock B's reason (?) - Wait, in the image validation: the student actually put tick on Rock A for Q2 and Rock B for Q3!)\n\nLet me reassess:\n\n**Question 06.2 Student's Answer:**\n- Rock A: Ticked (✓)\n- Reason: *Most of the particles passed through a sheet of paper, which is the penetration for alpha particles.*\n\n---\n\n### 06.3\n**Which radioactive rock emitted only beta radiation?**  \nGive a reason for your answer.  \n[2 marks]  \n\nTick (✓) one box.  \n\n- [ ] Rock A  \n- [✓] Rock B  \n- [ ] Rock C  \n- [ ] Rock D  \n\n**Reason provided by student:**\n*Most of the particles passed through a sheet of paper, which is the penetration for beta particles.*\n\n---\n\n### Strucutred Summary:\n1. **06.2**:\n   - **Question:** Which radioactive rock emitted only alpha radiation?\n   - **Selected Answer:** Rock A (✓)\n   - **Reason:** \"Most of the particles passed through a sheet of paper, which is the penetration for alpha particles.\" *(Note: This reason is misleading because alpha radiation is generally stopped by paper, so the reasoning conflicts with the selection. It’s likely a misunderstanding.)*\n\n2. **06.3**:\n   - **Question:** Which radioactive rock emitted only beta radiation?\n   - **Selected Answer:** Rock B (✓)\n   - **Reason:** \"Most of the particles passed through a sheet of paper, which is the penetration for beta particles.\" *(Note: This is correct reasoning for beta, as beta particles can penetrate paper but are usually stopped by thinner metals like aluminum.)*",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 18,
+    "text": "The teacher measured the radiation emitted by four different types of radioactive rock.\nFigure 12 shows the equipment used.\n[Diagram labeled Figure 12 showing a stand, clamp, counter labeled 241, detector, and radioactive rock.]\nEach radioactive rock was placed below the detector one at a time.\nThe radiation was recorded as the number of counts in 1 minute.\nThe experiment was repeated with different materials between each rock and the detector.\nTable 2 shows the results.\nTable 2\n|  | Number of counts in 1 minute |  |  |\n| --- | --- | --- | --- |\n|  | No material | One sheet of paper | Thick aluminium sheet |\n| No rock | 21 | 20 | 22 |\n| Rock A | 450 | 448 | 18 |\n| Rock B | 385 | 387 | 356 |\n| Rock C | 870 | 21 | 20 |\n| Rock D | 620 | 473 | 214 |",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 19,
+    "text": "A teacher measured the background radiation in a laboratory.\n\n**06.**\n**06.1** Which sources of background radiation are natural and which are man-made? [2 marks]\nTick (✓) one box in each row.\n\n| Source of background radiation | Natural | Man-made |\n| --- | --- | --- |\n| Cosmic rays | ✓ |  |\n| Medical X-rays |  | ✓ |\n| Nuclear accidents |  | ✓ |\n| Radon gas | ✓ |  |\n\nQuestion 6 continues on the next page",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 20,
+    "text": "The image shows a page from an exam paper, numbered 25, with a physics question and a student's response. Below is a transcription of all text, including question numbers, question text, student answers, and marks.\n\n---\n\n**05.6** When the air is hot enough, a small piece of cotton wool in the piston catches fire.\n\nThe energy transferred to the air in the piston is 0.0130 J.\nThe mass of air in the piston is \\(2.60 \\times 10^{-8}\\) kg.\nSpecific heat capacity of air = 1010 J/kg °C\n\nCalculate the temperature change of the air.\n\nUse the Physics Equations Sheet. [3 marks]\n\n\\( E = mc\\Delta\\theta \\)\n\n\\( \\Delta\\theta = \\frac{E}{mc} \\)  \n\\( \\frac{0.0130}{2.6 \\times 10^{-8} \\times 1010} = 495 \\)\n\nTemperature change = **495** °C\n\n---\n\nTurn over for the next question.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 21,
+    "text": "A fire piston is a special type of syringe that can be used to start fires.\nFigure 11 shows a fire piston.\nFigure 11\nPlunger\nPiston\nAir\nCotton wool\nThe plunger is pushed quickly downwards and compresses the air.\nWhen the air is compressed quickly, the temperature of the air increases.\n05.5 How does an increase in temperature affect the mean speed of the air particles inside the syringe? [1 mark]\nTick (✓) one box.\nThe mean speed of the particles decreases. \nThe mean speed of the particles does not change. \nThe mean speed of the particles increases. ✓",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 22,
+    "text": "05.2 How did pushing the plunger in affect the distance between the air particles in the syringe? [1 mark]\nTick (✓) one box.\n- ☑️ The distance decreased.\n- ⬜ The distance stayed the same.\n- ⬜ The distance increased.\n\n05.3 How did pushing the plunger in affect the frequency of collisions between the air particles and the syringe walls? [1 mark]\nTick (✓) one box.\n- ⬜ The frequency of collisions decreased.\n- ⬜ The frequency of collisions stayed the same.\n- ☑️ The frequency of collisions increased.\n\n05.4 How did pushing the plunger in affect the air pressure in the syringe? [1 mark]\nTick (✓) one box.\n- ⬜ The air pressure decreased.\n- ⬜ The air pressure stayed the same.\n- ☑️ The air pressure increased.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 23,
+    "text": "0 5\nA student investigated how the pressure in a fixed mass of air varies with the volume of the air.\nFigure 10 shows the equipment used.\nFigure 10\nSyringe\nPressure gauge\nPlunger\nWhen the plunger was pushed slowly into the syringe, the temperature of the air stayed the same.\n0 5 . 1 How did pushing the plunger in affect the volume of air in the syringe? [1 mark]\nTick (✓) one box.\nThe volume decreased. ✓\nThe volume stayed the same.\nThe volume increased.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 24,
+    "text": "The image displays a page from a physics exam paper, here is the full transcription including questions, answers, and marks:\n\n---\n\n**21**\n\nUse the Physics Equations Sheet to answer questions 04.6 and 04.7.\n\n**04.6** Write down the equation which links density (ρ), mass (m) and volume (V).  \n[1 mark]  \n\nρ = M / V \n\n**04.7** A different metal ring has a volume of 0.3 cm³.  \nThe density of this ring is 22 g/cm³.\n\nCalculate the mass of this ring.  \nGive your answer in grams.  \n[3 marks]\n\n0.3 x 22 = 6.6 g  \n\nMass = ___6.6___\n\nTurn over for the next question",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 25,
+    "text": "04.5 The student used a balance to measure the mass of the ring.\nFigure 9 shows the balance.\nFigure 9\n[A simple drawing of a balance with a reading of 0.02g]\nThe student noticed that the balance had a reading of 0.02 g when there was no object on the balance.\nHow should the student correct this error after the mass of the ring had been measured?\nTick (✓) one box.\nAdd 0.02 to the measurement\nDivide the measurement by 0.02\nMultiply the measurement by 0.02\nSubtract 0.02 from the measurement ✓\n[1 mark]",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 26,
+    "text": "The image displays a section of an exam page numbered 19. Here is the transcription:\n\n**04.4** The student measured the volume of the ring three times. \nThe results were all the same.\n\nWhich of the following describes the student's results? [1 mark]\nTick (✓) one box.\n\n- [ ] The results are anomalies.\n- [✓] The results are repeatable.\n- [ ] The results contain random errors.\n\nQuestion 4 continues on the next page.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 27,
+    "text": "A student used the measuring cylinder to measure the volume of a metal ring.\n**04.2** The student tied the metal ring to some very thin string and lowered the ring into the measuring cylinder. \nThe student could have used thick string instead of thin string. \nHow would using thick string have affected the measured volume of the metal ring? [1 mark] \nTick (✓) one box. \nThe measured volume would be smaller. \nThe measured volume would not be affected. \nThe measured volume would be larger. ✓\n\n**04.3** Table 1 shows the results. \nTable 1\n| Volume of water in cm³ | Volume of water and ring in cm³ | Volume of ring in cm³ |\n| --- | --- | --- |\n| 5.0 | 5.4 | X |\nCalculate value X in Table 1. [1 mark] \n5.4 - 5.0 = 0.4 cm³ \nX = 0.4",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 28,
+    "text": "The image displays a portion of a physics or general science exam paper focused on a measuring cylinder. Here's the detailed transcription:\n\n---\n\n**Page 17**\n\n04 \nFigure 8 shows a measuring cylinder containing some water.\n\n**Figure 8**\n[Diagram of a measuring cylinder with water level at 4 cm³]\n\n04.1 What range of volumes can be measured using the measuring cylinder? [1 mark]\nTick (✓) one box.\n\n- ☐ 0.0 to 0.2 cm³\n- ☐ 0.0 to 2.0 cm³\n- ☑ 0.0 to 10.0 cm³\n\nQuestion 4 continues on the next page.\n\n---",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 29,
+    "text": "03.6 Why is the maximum gravitational potential energy of the pod less than the initial elastic potential energy of the bungee cords? [2 marks]\nTick (✓) two boxes.\n\nEnergy is created. \n\nEnergy is destroyed. \n\nEnergy is transferred to the surroundings. ✓\n\nWork is done against air resistance. ✓\n\nWork is done by the force of gravity. \n\nWork is done by the person in the pod. \n\nWe will learn next year :)",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 30,
+    "text": "The image displays a physics exam page numbered 15, with the following transcribed content:\n\n**At the top of the page:**\nDo not write outside the box\n\nUse the Physics Equations Sheet to answer questions 03.4 and 03.5.\n\n**Question 03.4:**\nWhich equation links gravitational field strength (g), gravitational potential energy ($E_p$), height (h) and mass (m)? [1 mark]\nTick (✓) one box.\n- $E_p=\\frac{m\\times g}{h}$  [ ]\n- $E_p=\\frac{m}{g\\times h}$  [ ]\n- $E_p = m\\times g\\times h$  [✓]\n\n**Question 03.5:**\nThe pod has 24 000 J of gravitational potential energy when at its maximum height.\nThe mass of the pod is 240 kg.\ngravitational field strength = 9.8 N/kg\n\nCalculate the maximum height reached by the pod. [3 marks]\nHandwritten calculation: \n$h=\\frac{m\\times g}{E_p} \\rightarrow \\frac{240\\times9.8}{24000} = 0.098$ \nMaximum height = 0.098 m\n\n**Bottom of the page:**\nQuestion 3 continues on the next page",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 31,
+    "text": "The image shows a page from an exam paper with the following text:\n\n**03.2**\nBefore the pod is released, the extension of each bungee cord is 7.5 m.\nspring constant of the bungee cord = 800 N/m\n\nCalculate the elastic potential energy stored in each stretched bungee cord.\nUse the equation:\nelastic potential energy = 0.5 × spring constant × (extension)^2\n[2 marks]\n\n0.5 × 800 × 7.5^2 = 22500\n\nElastic potential energy = _____22500_____ J\n(Handwritten note: \"We will learn next year :)\")\n\n**03.3**\nThe maximum speed of the pod is 15 m/s.\nThe mass of the pod is 240 kg.\n\nCalculate the maximum kinetic energy of the pod.\nUse the equation:\nkinetic energy = 0.5 × mass × (speed)^2\n[2 marks]\n\n0.5 × 240 × 15^2 = 27000\n\nMaximum kinetic energy = _____27000_____ J",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 32,
+    "text": "The image shows a page from an exam paper with the following text:\n\n**Page 15 (top center)**\n\n**Question 03**\nIn a ride at a theme park, a person is strapped into a pod that is attached to two stretched bungee cords.\nThe bungee cords behave like springs.\nFigure 7 shows a person using the ride.\n\n*[Figure 7]*\n*(Two diagrams:)*\n- **Before release**: Labels include \"Support tower,\" \"Stretched bungee cords,\" and \"Pod.\"\n- **After release**: Shows the pod in a lower position, with the bungee cords less stretched.\n\n**Question 03.1** [1 mark]\nHow is the extension of each bungee cord calculated?\nTick (✓) one box.\n\nOptions:\n- [ ] stretched length + original length\n- [ ] stretched length - original length  *(Handwritten note: \"We will learn next year :)\")*\n- [ ] stretched length × original length\n- [ ] stretched length ÷ original length\n\n---\n\nThis transcription includes all visible text, labels, and handwritten notes from the image.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 33,
+    "text": "Figure 6 shows how the resistance of the thermistor varies with temperature.\n\n[Graph with title \"Figure 6\" showing a plot of \"Resistance in Ω\" on the vertical axis against \"Temperature in °C\" on the horizontal axis.]\n\n02.7 When the temperature of the thermistor is 10 °C, the resistance of the thermistor is 600 Ω.\n\nCalculate the change in resistance when the temperature increased from 10 °C to 15 °C.\n[2 marks]\n\n600 - 200 = 400\n\nChange in resistance = 400",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 34,
+    "text": "The image is a scanned exam page numbered 11, featuring two questions (02.5 and 02.6) with checkboxes for answers, as well as handwritten student responses. Here's a word-for-word transcription:\n\n**Question 02.5**  \nHow could the potential difference (pd) across the resistor be calculated? [1 mark]  \nTick (✓) one box.  \n\n- pd across battery − pd across thermistor ✓  \n- pd across battery + pd across thermistor  \n- pd across battery × pd across thermistor  \n- pd across battery ÷ pd across thermistor  \n\n**Question 02.6**  \nAt one temperature, the thermistor in Figure 5 has a resistance of 200 Ω. What is the potential difference across the thermistor at this temperature? Give a reason for your answer. [2 marks]  \nTick (✓) one box.  \n\n- 0.0 V ✓ (handwritten check)  \n- 1.0 V  \n- 1.5 V ✓ (handwritten check initially scribbled, then corrected to only 0.0V checked)  \n- 2.0 V  \n\n**Reason** (handwritten):  \nNo temperature means no. The potential difference is half of the potential difference at the battery.  \n\n---  \n**Additional Notes**:  \n- The student selected \"pd across battery − pd across thermistor\" for 02.5 and \"0.0 V\" for 02.6.  \n- The handwritten reason under 02.6 is unclear (\"No temperature means no...\") but likely refers to a scenario where the thermistor’s resistance leads to negligible voltage.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 35,
+    "text": "The image shows a physics exam page, and the task is to transcribe all the text word-for-word, including question numbers, question text, student answers, and marks. Below is the transcription:\n\n---\n\n**10**\nThe temperature inside the vending machine is monitored using an electrical circuit.\nFigure 5 shows part of the circuit.\n**Figure 5**\n3.0 V\n[Circuit diagram with a 3.0 V battery, a 200 Ω resistor, a component labeled \"Thermistor,\" and a voltmeter (V) across the thermistor.]\n\n0 2 . 4 The circuit symbol for the thermistor is wrong.\nWhat is the circuit symbol for a thermistor?\n[1 mark]\n\nTick (✓) one box.\n\n[Circuit symbols with checkboxes: first is a circle with an X inside, second is a square, third is two circles connected by a line, fourth is a rectangle with a diagonal line through it, fifth is a rectangle with a checkmark inside (✓).]\n\n---\n\nThis transcription includes all visible text, question numbers, and instructions from the exam page.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 36,
+    "text": "The image shows a page from an exam paper, and here is a word-for-word transcription of all the text:\n\n**[1 mark]**\n02.2 What is the potential difference of the mains electricity supply in the UK?\nTick (✔) one box. \n12 volts \n☐\n230 volts \n☑\n20 000 volts \n☐\n\nThe vending machine identifies the value of the coin by measuring the resistance of the coin.\n\n**02.3** The machine applies a potential difference of 0.45 V across the coin.\nThe current in the coin is 0.75 A.\nCalculate the resistance of the coin.\nUse the equation: \n\\[ \\text{resistance} = \\frac{\\text{potential difference}}{\\text{current}} \\]\n\n**[2 marks]**\n\n\\[ \\frac{0.45}{0.75} = 0.6 \\Omega \\]\n\nResistance = \\( 0.6 \\Omega \\)\n\n---\n\n\"Turn over ▶\" is also visible at the bottom of the page.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 37,
+    "text": "The image displays a section of an exam page, and here is a word-for-word transcription of all visible text, including question numbers, question text, student answers, and marks:\n\n---\n\n**0 2 . 2** What is the potential difference of the mains electricity supply in the UK? [1 mark]  \nTick (✓) one box.  \n\n- 12 volts   [ ]\n- 230 volts  [✓]  \n- 20 000 volts [ ]  \n\n---\n\nThe vending machine identifies the value of the coin by measuring the resistance of the coin.  \n\n**0 2 . 3** The machine applies a potential difference of 0.45 V across the coin.  \nThe current in the coin is 0.75 A.  \n\nCalculate the resistance of the coin.  \nUse the equation:  \n\n\\[\\text{resistance} = \\frac{\\text{potential difference}}{\\text{current}}\\]  \n\n[2 marks]  \n\nStudent's work shown:  \n\n\\[\\frac{0.45}{0.75} = 0.6 \\, \\Omega\\]  \n\nResistance = **0.6** \\( \\Omega \\)  \n\n--- \n\n\"Turn over ▶\" is visible at the bottom of the page.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 38,
+    "text": "02\nFigure 4 shows a student putting a coin into a vending machine that sells food.\nFigure 4\n\nThe vending machine is connected to the mains electricity supply.\n\n02.1 What is the frequency of the mains electricity supply in the UK?\nTick (✓) one box.\n\n50 hertz \n60 hertz ✓\n100 hertz",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 39,
+    "text": "7\n0 1.7 The potential difference between the metal dome and earth is 300 000 V.\nWhen the spark jumps there is a charge flow of 0.000 002 C.\nCalculate the energy transferred by the spark.\nUse the equation:\nenergy transferred = charge flow × potential difference [2 marks]\n\n0.000 002 × 300 000 = 0.6\n\nEnergy transferred = 0.6 J\n\nTurn over for the next question",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 40,
+    "text": "The image shows a section of an exam page. Below is the word-for-word transcription of all visible text:\n\n---\n\nThe earthed conductor is moved closer to the metal dome.  \nA spark jumps from the dome to the earthed conductor.  \n\n**01.5** Complete the sentence.  \nChoose the answer from the box.  \n[1 mark]  \n\n[earthed   ionised   neutral]  \n\nThe spark jumps because the air around the charged dome has become **neutral**.  \n\n**01.6** Which particles are transferred when the spark jumps from the negatively charged metal dome to the earthed conductor?  \n\nTick (✓) one box.  \n[1 mark]  \n\n- Electrons [ ]  \n- Neutrons [ ]  \n- Protons [✓]  \n\n---\n\nThis transcription includes all question numbers, questions, answer options, and marks as shown in the image.",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 41,
+    "text": "Figure 3 shows the negatively charged metal dome and an earthed conductor.\nFigure 3\nMetal dome\nEarthed conductor\n\n0 1 . 4 The air between the dome and the earthed conductor is an insulator.\nComplete the sentence.\nChoose the answer from the box. [1 mark]\n\n| efficiency | resistance | temperature |\n\nThe air between the dome and the earthed conductor has a high resistance.\n\nQuestion 1 continues on the next page",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 42,
+    "text": "01.2 Complete the sentence.\nChoose the answer from the box. [1 mark]\n\n[attraction] [gravity] [repulsion]\n\nThe hair on the student's head stands up because the strands of hair experience forces of repulsion.\n\n01.3 Which of the following diagrams shows the electric field pattern around the negatively charged metal dome?\nTick (✓) one box. [1 mark]\n\n[Negatively charged dome with arrows pointing towards it] ☐\n\n[Negatively charged dome with arrows pointing away from it - marked with ✓] ☑\n\n[Negatively charged dome with arrows pointing outwards unevenly] ☐",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  },
+  {
+    "idx": 43,
+    "text": "Figure 2 shows a student touching the metal dome of the static electricity generator. The dome is negatively charged.\nFigure 2\n\n01.1 Complete the sentence.\nChoose the answer from the box. [1 mark]\n\n| negative | neutral | positive |\n\nWhen the student touches the negatively charged metal dome the student's hair gains a **Positive** charge.\n\nQuestion 1 continues on the next page",
+    "model": "baidu/ernie-4.5-vl-424b-a47b"
+  }
+]

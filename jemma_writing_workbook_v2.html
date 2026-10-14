@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jemma's Writing Workbook v2 — Creative Writing &amp; PEEL Analysis</title>
+<style>
+  :root {
+    --bg: #faf9f7;
+    --card: #ffffff;
+    --text: #2d2a26;
+    --text-secondary: #5c5752;
+    --accent: #7c6f64;
+    --accent-light: #e8e4df;
+    --creative: #4a7c59;
+    --creative-bg: #edf5ef;
+    --analysis: #5b6e8a;
+    --analysis-bg: #f0f3f7;
+    --border: #e0dcd7;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 10px;
+    --gold: #c9a84c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 17px;
+  }
+  .header {
+    background: linear-gradient(135deg, #3a4a40 0%, #5c7a68 40%, #7caa8c 100%);
+    color: #fff;
+    padding: 56px 24px 44px;
+    text-align: center;
+  }
+  .header h1 { font-size: 2em; font-weight: 400; letter-spacing: 0.02em; margin-bottom: 6px; }
+  .header .subtitle { font-size: 1em; opacity: 0.85; font-style: italic; }
+  .header .meta { margin-top: 16px; font-size: 0.82em; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.06em; }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+  .tabs { display: flex; gap: 0; margin-top: -1px; position: sticky; top: 0; z-index: 10; background: var(--bg); padding-top: 24px; border-bottom: 2px solid var(--border); }
+  .tab {
+    padding: 14px 28px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+    letter-spacing: 0.03em; border: none; background: none; color: var(--text-secondary);
+    border-bottom: 3px solid transparent; transition: all 0.2s; font-family: inherit;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .score-banner {
+    display: flex; gap: 16px; margin-top: -30px; position: relative; z-index: 2; flex-wrap: wrap;
+  }
+  .score-card {
+    flex: 1; min-width: 130px; background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow-lg); padding: 18px 14px; text-align: center; border: 1px solid var(--border);
+  }
+  .score-card .label { font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); margin-bottom: 4px; }
+  .score-card .value { font-size: 2em; font-weight: 700; line-height: 1.2; }
+  section { margin-top: 44px; }
+  .section-title {
+    font-size: 1.3em; font-weight: 400; padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-light); margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title .badge {
+    font-size: 0.65em; padding: 4px 12px; border-radius: 12px;
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;
+  }
+  .badge.creative { background: var(--creative-bg); color: var(--creative); }
+  .badge.analysis { background: var(--analysis-bg); color: var(--analysis); }
+  .exercise {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 28px; margin: 20px 0; border: 1px solid var(--border);
+    border-left: 5px solid var(--accent);
+  }
+  .exercise.creative-ex { border-left-color: var(--creative); }
+  .exercise.analysis-ex { border-left-color: var(--analysis); }
+  .ex-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .ex-num {
+    width: 38px; height: 38px; border-radius: 50%; text-align: center; line-height: 38px;
+    font-size: 0.9em; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .creative-ex .ex-num { background: var(--creative); }
+  .analysis-ex .ex-num { background: var(--analysis); }
+  .ex-header h3 { font-size: 1.1em; font-weight: 600; }
+  .ex-header .difficulty {
+    font-size: 0.7em; padding: 3px 10px; border-radius: 10px;
+    text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-left: auto;
+  }
+  .diff-easy { background: #edf5ef; color: #4a7c59; }
+  .diff-medium { background: #fef3cd; color: #997a00; }
+  .diff-hard { background: #fde8e8; color: #b85c38; }
+  .ex-instructions { font-size: 0.92em; color: var(--text-secondary); line-height: 1.75; }
+  .ex-instructions ol, .ex-instructions ul { padding-left: 22px; margin: 8px 0; }
+  .ex-instructions li { margin-bottom: 5px; }
+  .ex-prompt {
+    background: #f8f6f4; border-radius: 8px; padding: 18px 22px; margin: 14px 0;
+    font-style: italic; font-size: 0.95em; line-height: 1.7; border: 1px dashed var(--border);
+  }
+  .ex-prompt strong { font-style: normal; }
+  .ex-tip {
+    background: #fef9f0; border-radius: 6px; padding: 12px 16px; margin-top: 12px;
+    font-size: 0.84em; color: #8b6914; border-left: 3px solid #e8c547;
+  }
+  .ex-tip::before { content: '💡 Tip: '; font-weight: 700; }
+  .ex-checklist {
+    margin-top: 14px; padding: 14px 18px; background: #f8faf7; border-radius: 8px; font-size: 0.85em;
+  }
+  .ex-checklist h4 { font-size: 0.88em; margin-bottom: 8px; color: var(--text); }
+  .ex-checklist li { margin-bottom: 3px; color: var(--text-secondary); }
+  .framework {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+    padding: 28px; margin: 24px 0; border: 2px solid var(--analysis);
+  }
+  .framework h3 { font-size: 1.15em; color: var(--analysis); margin-bottom: 16px; }
+  .framework .step { margin-bottom: 18px; }
+  .framework .step h4 {
+    font-size: 0.92em; font-weight: 700; color: var(--text);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+  }
+  .framework .step p { font-size: 0.88em; color: var(--text-secondary); line-height: 1.7; }
+  .framework .step .example {
+    background: #f5f6f8; padding: 12px 16px; border-radius: 6px; margin-top: 6px;
+    font-size: 0.84em; font-style: italic; color: var(--text-secondary);
+    border-left: 3px solid var(--analysis);
+  }
+  .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+  @media (max-width: 600px) { .ba-grid { grid-template-columns: 1fr; } }
+  .ba-col { padding: 16px; border-radius: 8px; font-size: 0.88em; line-height: 1.7; }
+  .ba-col.bad { background: #fef5f2; border: 1px solid #f0d5cb; }
+  .ba-col.good { background: #f2f8f4; border: 1px solid #c8ddcf; }
+  .ba-col .ba-label {
+    font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 8px;
+  }
+  .ba-col.bad .ba-label { color: #b85c38; }
+  .ba-col.good .ba-label { color: #4a7c59; }
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.88em; margin: 16px 0; }
+  .ref-table th {
+    text-align: left; padding: 10px 14px; font-size: 0.75em; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-secondary); border-bottom: 2px solid var(--border);
+  }
+  .ref-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+  .ref-table tr:hover { background: #fafaf8; }
+  @media print {
+    .tabs { display: none; }
+    .tab-content { display: block !important; margin-top: 30px; }
+    .exercise { break-inside: avoid; }
+    .header { padding: 20px 24px; }
+  }
+  footer {
+    text-align: center; padding: 40px 24px; color: var(--text-secondary);
+    font-size: 0.82em; border-top: 1px solid var(--border); margin-top: 60px;
+  }
+  .highlight-target { animation: highlightFade 2s ease-out; }
+  @keyframes highlightFade {
+    0% { background-color: #fef9c3; }
+    100% { background-color: transparent; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Jemma's Writing Workbook v2</h1>
+  <div class="subtitle">Creative Writing &amp; PEEL Analysis — Year 8-9</div>
+  <div class="meta">Headington School &middot; 28 Exercises &middot; Self-Paced &middot; Updated May 2026</div>
+</div>
+
+<div class="container">
+
+<div class="score-banner">
+  <div class="score-card">
+    <div class="label">Creative Writing</div>
+    <div class="value" style="color:var(--creative);">18</div>
+    <div class="label">Exercises</div>
+  </div>
+  <div class="score-card">
+    <div class="label">PEEL Analysis</div>
+    <div class="value" style="color:var(--analysis);">10</div>
+    <div class="label">Exercises</div>
+  </div>
+  <div class="score-card">
+    <div class="label">Difficulty Range</div>
+    <div class="value" style="color:var(--gold);">&#9733; &#9733;&#9733;</div>
+    <div class="label">Easy → Challenging</div>
+  </div>
+  <div class="score-card">
+    <div class="label">Time Per Exercise</div>
+    <div class="value" style="color:var(--accent);">10-25</div>
+    <div class="label">Minutes</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('creative')">&#9998; Creative Writing</button>
+  <button class="tab" onclick="switchTab('analysis')">&#128270; PEEL Analysis</button>
+  <button class="tab" onclick="switchTab('reference')">&#128218; Quick Reference</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- CREATIVE WRITING TAB -->
+<!-- ============================================================ -->
+<div class="tab-content active" id="tab-creative">
+
+<section id="cw-warmup">
+  <div class="section-title">
+    &#127777; Warm-Up Drills
+    <span class="badge creative">5 min each</span>
+  </div>
+  <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom:16px;">
+    Quick, low-pressure exercises to get words flowing. Do one before a longer writing session — like stretching before a run.
+  </p>
+
+  <div class="exercise creative-ex" id="cw1">
+    <div class="ex-header"><div class="ex-num">1</div><h3>Five Senses in Five Minutes</h3><span class="difficulty diff-easy">&#9733; Easy</span></div>
+    <div class="ex-instructions">
+      <p>Pick an object near you right now. Write exactly <strong>one sentence for each sense</strong> that describes it. The catch: <strong>you cannot name the object</strong>.</p>
+      <div class="ex-prompt">
+        <strong>Sight:</strong> _______________________________________________<br>
+        <strong>Sound:</strong> _______________________________________________<br>
+        <strong>Smell:</strong> _______________________________________________<br>
+        <strong>Touch:</strong> _______________________________________________<br>
+        <strong>Taste:</strong> (imaginative) _______________________________________________
+      </div>
+      <div class="ex-tip">If you're stuck on 'taste', think metaphorically. A dusty old book might taste "of forgotten afternoons."</div>
+    </div>
+  </div>
+
+  <div class="exercise creative-ex" id="cw2">
+    <div class="ex-header"><div class="ex-num">2</div><h3>The Sentence Stretch</h3><span class="difficulty diff-easy">&#9733; Easy</span></div>
+    <div class="ex-instructions">
+      <p>Start with a bare 3-word sentence. Rewrite it five times, <strong>adding one new detail each time</strong> without changing the core meaning.</p>
+      <div class="ex-prompt">
+        <strong>Start:</strong> "The bottle arrived."<br><br>
+        <strong>Version 1 (add colour):</strong> ________________________________<br>
+        <strong>Version 2 (add texture/surface):</strong> ______________________<br>
+        <strong>Version 3 (add sound):</strong> _______________________________<br>
+        <strong>Version 4 (add emotion/atmosphere):</strong> _________________<br>
+        <strong>Version 5 (add a simile or metaphor):</strong> ________________
+      </div>
+    </div>
+  </div>
+
+  <div class="exercise creative-ex" id="cw3">
+    <div class="ex-header"><div class="ex-num">3</div><h3>Mood Flip</h3><span class="difficulty diff-easy">&#9733; Easy</span></div>
+    <div class="ex-instructions">
+      <p>Describe the same scene twice — once <strong>peaceful and safe</strong>, once <strong>threatening and dangerous</strong>. Only change the descriptive words.</p>
+      <div class="ba-grid">
+        <div class="ba-col good"><div class="ba-label">Peaceful Version</div>"The waves whispered against the shore. The bottle, smooth as sea-glass, caught the last light of the sun."</div>
+        <div class="ba-col bad"><div class="ba-label">Threatening Version</div>"The waves hissed against the shore. The bottle, slick and wet like something drowned, caught the jagged last light."</div>
+      </div>
+      <div class="ex-prompt">
+        <strong>Your scene:</strong> A forest at dusk.<br>
+        <strong>Peaceful:</strong> ________________________________________________<br>
+        <strong>Threatening:</strong> ____________________________________________
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cw-character">
+  <div class="section-title">&#128100; Character &amp; Voice<span class="badge creative">10-15 min</span></div>
+
+  <div class="exercise creative-ex" id="cw4">
+    <div class="ex-header"><div class="ex-num">4</div><h3>The Outsider's Diary</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Jemma, your story's narrator is an exile — this is your strength. Write a <strong>diary entry (200 words)</strong> from the perspective of someone who doesn't belong. Choose one:</p>
+      <ul>
+        <li>A mermaid who has just grown legs and is walking on land for the first time</li>
+        <li>A ghost watching their own family eat dinner without them</li>
+        <li>The last person on Earth who remembers how to read</li>
+        <li>A dragon disguised as a human, attending a normal school</li>
+      </ul>
+      <div class="ex-checklist"><h4>Must Include</h4>
+        <ul>
+          <li>At least <strong>two sensory details</strong> that show their difference</li>
+          <li>One moment of <strong>longing</strong> for their original world</li>
+          <li>One moment of <strong>unexpected joy</strong> in the new world</li>
+          <li>A closing line that leaves the reader thinking</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="exercise creative-ex" id="cw5">
+    <div class="ex-header"><div class="ex-num">5</div><h3>Voice Transplant</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Describe the same event from <strong>three different narrators</strong>. The event: <em>finding a strange key on the pavement.</em></p>
+      <div class="ex-prompt">
+        <strong>Narrator A — a curious 8-year-old:</strong><br>
+        ____________________________________________________________<br><br>
+        <strong>Narrator B — a tired police officer at the end of a shift:</strong><br>
+        ____________________________________________________________<br><br>
+        <strong>Narrator C — an antique collector who loves old objects:</strong><br>
+        ____________________________________________________________
+      </div>
+      <div class="ex-tip">Don't just change the facts — change the <em>words they use</em>. The child says "shiny", the officer says "metallic", the collector says "tarnished brass."</div>
+    </div>
+  </div>
+
+  <div class="exercise creative-ex" id="cw6">
+    <div class="ex-header"><div class="ex-num">6</div><h3>The Unreliable Narrator</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Write a <strong>150-word scene</strong> from a narrator who is <strong>not telling the whole truth</strong>. The reader should gradually realise something is wrong.</p>
+      <div class="ex-prompt">
+        <strong>Ideas:</strong><br>
+        &bull; A character describing a "perfect" family dinner — but the details keep slipping<br>
+        &bull; Someone explaining why they're late — each sentence makes it less believable<br>
+        &bull; A diary entry that contradicts itself between the first and last paragraph
+      </div>
+    </div>
+  </div>
+
+  <div class="exercise creative-ex" id="cw7">
+    <div class="ex-header"><div class="ex-num">7</div><h3>Show, Don't Tell: Emotions</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>For each emotion below, write <strong>two sentences that SHOW it</strong> without naming the emotion or any synonym.</p>
+      <div class="ex-prompt">
+        <strong>Fear:</strong><br>
+        1. ____________________________________________________________<br>
+        2. ____________________________________________________________<br><br>
+        <strong>Joy:</strong><br>
+        1. ____________________________________________________________<br>
+        2. ____________________________________________________________<br><br>
+        <strong>Guilt:</strong><br>
+        1. ____________________________________________________________<br>
+        2. ____________________________________________________________
+      </div>
+      <div class="ex-tip">Don't write "She was scared." Write "Her fingers found the edge of the table and held on." The reader <em>feels</em> the emotion through physical details.</div>
+    </div>
+  </div>
+</section>
+
+<section id="cw-setting">
+  <div class="section-title">&#127758; Setting &amp; Atmosphere<span class="badge creative">15 min</span></div>
+
+  <div class="exercise creative-ex" id="cw8">
+    <div class="ex-header"><div class="ex-num">8</div><h3>Describe a Place in 150 Words</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Describe one of these places using <strong>all five senses</strong> and at least <strong>two similes or metaphors</strong>:</p>
+      <ul>
+        <li>A school corridor at 3:45pm, after everyone has left</li>
+        <li>A beach at sunrise, before anyone arrives</li>
+        <li>A library during a thunderstorm</li>
+        <li>A train station platform at midnight</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="exercise creative-ex" id="cw9">
+    <div class="ex-header"><div class="ex-num">9</div><h3>Weather as Emotion</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Write <strong>two short descriptions</strong> of the same street — one where the weather reflects <strong>hope and new beginnings</strong>, one where it reflects <strong>loss and endings</strong>.</p>
+      <div class="ex-prompt">
+        <strong>Hope & Beginnings:</strong><br>
+        ____________________________________________________________<br><br>
+        <strong>Loss & Endings:</strong><br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cw-story">
+  <div class="section-title">&#128196; Story Structure<span class="badge creative">20-25 min</span></div>
+
+  <div class="exercise creative-ex" id="cw10">
+    <div class="ex-header"><div class="ex-num">10</div><h3>Opening Lines That Hook</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Write <strong>five different opening sentences</strong> for a story that begins with: <em>A character receives a message meant for someone else.</em></p>
+      <p style="margin-top:8px;">Try these approaches:</p>
+      <ul>
+        <li>Start in the middle of action</li>
+        <li>Start with a strange detail</li>
+        <li>Start with dialogue</li>
+        <li>Start with a question</li>
+        <li>Start with a contradiction</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="exercise creative-ex" id="cw11">
+    <div class="ex-header"><div class="ex-num">11</div><h3>Write a Complete Flash Fiction (300 words)</h3><span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span></div>
+    <div class="ex-instructions">
+      <p>Write a complete story in exactly <strong>300 words</strong> with a beginning, middle, and end. Choose one prompt:</p>
+      <ul>
+        <li>"The door had never been there before."</li>
+        <li>"She was the only one who noticed the colour had changed."</li>
+        <li>"The message said 'don't open it' — so of course, she did."</li>
+      </ul>
+      <div class="ex-checklist"><h4>Must Include</h4>
+        <ul><li>A clear change between the beginning and end</li><li>At least one moment of tension</li><li>A satisfying final sentence</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="exercise creative-ex" id="cw12">
+    <div class="ex-header"><div class="ex-num">12</div><h3>Constraint Writing</h3><span class="difficulty diff-hard">&#9733;&#9733;&#9733; Challenging</span></div>
+    <div class="ex-instructions">
+      <p>Write a 150-word scene with <strong>strict constraints</strong>. Constraints force creativity.</p>
+      <div class="ex-prompt">
+        <strong>Scene:</strong> A character discovers a hidden door.<br><br>
+        <strong>Constraints:</strong><br>
+        &bull; No adverbs ending in -ly<br>
+        &bull; No form of the verb "to be" (is, was, were, are, am, been, being)<br>
+        &bull; Must include one colour and one sound
+      </div>
+      <div class="ex-tip">Removing "to be" verbs forces active, vivid sentences. Instead of "The door was old", write "The door sagged on its hinges" or "Centuries had warped the oak."</div>
+    </div>
+  </div>
+</section>
+
+</div><!-- end creative tab -->
+
+<!-- ============================================================ -->
+<!-- PEEL ANALYSIS TAB -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-analysis">
+
+<section>
+  <div class="section-title">&#128214; The PEEL Framework<span class="badge analysis">Foundation</span></div>
+
+  <div class="framework">
+    <h3>How to Write a PEEL Analysis Paragraph</h3>
+    <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom: 16px;">
+      PEEL is your formula for explaining <strong>how</strong> a writer creates an effect — not just what happens. Use it for any text: novels, short stories, poems, articles.
+    </p>
+
+    <div class="step">
+      <h4><span style="color:var(--analysis);">P</span> — Point</h4>
+      <p>One clear sentence stating your argument. What effect does the writer create?</p>
+      <div class="example">"Rowling creates a sense of wonder and unfamiliarity as Harry enters Diagon Alley for the first time."</div>
+    </div>
+
+    <div class="step">
+      <h4><span style="color:var(--analysis);">E</span> — Evidence</h4>
+      <p>A short, embedded quotation that supports your point. <strong>Embed</strong> means weave it into your sentence.</p>
+      <div class="example">The description of Harry "wishing he had about eight more eyes" to take in everything conveys...</div>
+    </div>
+
+    <div class="step">
+      <h4><span style="color:var(--analysis);">E</span> — Explain</h4>
+      <p>Name the writer's technique and explain its effect. What does it make the reader think or feel? <strong>Pick specific words</strong> and explore their connotations.</p>
+      <div class="example">The hyperbole of "eight more eyes" emphasises the overwhelming sensory overload. The verb "wishing" suggests a childlike eagerness — Harry isn't just observing; he's <em>desperate</em> to absorb every detail, which makes the reader share his excitement.</div>
+    </div>
+
+    <div class="step">
+      <h4><span style="color:var(--analysis);">L</span> — Link</h4>
+      <p>Connect back to the wider text, the writer's purpose, or the reader's response. Why does this matter?</p>
+      <div class="example">This moment of wonder is important because it marks Harry's first real taste of the magical world — and the reader discovers it alongside him, building our sympathy for his journey from the ordinary into the extraordinary.</div>
+    </div>
+  </div>
+
+  <div style="margin:24px 0;">
+    <h3 style="font-size:1.05em; margin-bottom:12px;">Technique Glossary</h3>
+    <table class="ref-table">
+      <thead><tr><th style="width:20%">Technique</th><th style="width:30%">Definition</th><th style="width:50%">Example from Modern Texts</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Simile</strong></td><td>Comparison using "like" or "as"</td><td>"The lake was as smooth as dark glass" — <em>Holes</em>, Louis Sachar</td></tr>
+        <tr><td><strong>Metaphor</strong></td><td>Direct comparison (says it IS something else)</td><td>"Memories are bullets" — <em>The Graveyard Book</em>, Neil Gaiman</td></tr>
+        <tr><td><strong>Personification</strong></td><td>Giving human qualities to non-human things</td><td>"The house seemed to be holding its breath" — <em>Coraline</em>, Neil Gaiman</td></tr>
+        <tr><td><strong>Sensory imagery</strong></td><td>Description that appeals to the five senses</td><td>"The smell of chocolate and fresh-baked bread drifted through the train window" — <em>Harry Potter</em>, J.K. Rowling</td></tr>
+        <tr><td><strong>Pathetic fallacy</strong></td><td>Weather/setting reflecting characters' emotions</td><td>"The rain hammered against the windows, matching August's frustration" — <em>Wonder</em>, R.J. Palacio</td></tr>
+        <tr><td><strong>Short sentence</strong></td><td>A brief sentence for emphasis or shock</td><td>"He stopped. Listened. Nothing." — <em>Ghost</em>, Jason Reynolds</td></tr>
+        <tr><td><strong>Adjective choice</strong></td><td>Carefully chosen describing words</td><td>"the <em>brittle</em> silence" — suggests silence that could shatter, tension underneath</td></tr>
+        <tr><td><strong>Verb choice</strong></td><td>Specific action words that create effect</td><td>"The wind <em>clawed</em> at the tent" — wind as predator, not just weather</td></tr>
+        <tr><td><strong>Juxtaposition</strong></td><td>Placing contrasting things side by side</td><td>Auggie's first day at school: excitement vs. stares; hope vs. cruelty — <em>Wonder</em></td></tr>
+        <tr><td><strong>Repetition</strong></td><td>Repeating a word or phrase for emphasis</td><td>"I am not strange. I am not a monster. I am not a mistake." — <em>Wonder</em></td></tr>
+        <tr><td><strong>First-person narration</strong></td><td>"I" voice — limited to one character's view</td><td>"There was a hand in the darkness, and it held a knife." — <em>The Graveyard Book</em></td></tr>
+        <tr><td><strong>Foreshadowing</strong></td><td>Hinting at what will happen later</td><td>The mysterious locked door that characters keep mentioning but never open</td></tr>
+        <tr><td><strong>Symbolism</strong></td><td>An object representing a bigger idea</td><td>Stanley's empty canteen in <em>Holes</em> — thirst representing the search for truth</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="section-title">&#128270; PEEL Analysis Exercises<span class="badge analysis">Year 8-9 Level</span></div>
+
+  <!-- A1: Spot the Technique -->
+  <div class="exercise analysis-ex" id="a1">
+    <div class="ex-header"><div class="ex-num">A1</div><h3>Spot the Technique</h3><span class="difficulty diff-easy">&#9733; Easy</span></div>
+    <div class="ex-instructions">
+      <p>Read this extract from <strong><em>Harry Potter and the Philosopher's Stone</em> by J.K. Rowling</strong>. For each quotation, <strong>name the technique</strong> and explain its effect in one sentence.</p>
+      <div class="ex-prompt" style="margin-bottom:12px;">
+        <em>"Harry had never been to London before. Although Hagrid seemed to know where he was going, he was obviously not used to getting there in an ordinary way. He got stuck in the ticket barrier on the Underground and complained loudly that the seats were too small and the trains too slow. 'I don't know how the Muggles manage without magic,' he said, as they climbed a broken-down escalator that led up to a bustling road lined with shops."</em>
+      </div>
+      <div class="ex-prompt">
+        <strong>1.</strong> "He got stuck in the ticket barrier on the Underground"<br>
+        Technique: _________________ &nbsp; Effect: _______________________________<br><br>
+        <strong>2.</strong> "'I don't know how the Muggles manage without magic'"<br>
+        Technique: _________________ &nbsp; Effect: _______________________________<br><br>
+        <strong>3.</strong> "a <em>bustling</em> road lined with shops"<br>
+        Technique: _________________ &nbsp; Effect: _______________________________<br><br>
+        <strong>4.</strong> "a <em>broken-down</em> escalator that led up to a bustling road"<br>
+        Technique: _________________ &nbsp; Effect: _______________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- A2: PEEL Builder -->
+  <div class="exercise analysis-ex" id="a2">
+    <div class="ex-header"><div class="ex-num">A2</div><h3>PEEL Builder: Fill the Gaps</h3><span class="difficulty diff-easy">&#9733; Easy</span></div>
+    <div class="ex-instructions">
+      <p>Read this extract from <strong><em>Wonder</em> by R.J. Palacio</strong>. Then <strong>fill in the missing parts</strong> of the PEEL paragraph below.</p>
+      <div class="ex-prompt" style="margin-bottom:12px;">
+        <em>"I know I'm not an ordinary ten-year-old kid. I mean, sure, I do ordinary things. I eat ice cream. I ride my bike. I play ball. I have an Xbox. Stuff like that makes me ordinary. I guess. And I feel ordinary. Inside. But I know ordinary kids don't make other ordinary kids run away screaming in playgrounds. I know ordinary kids don't get stared at wherever they go."</em>
+      </div>
+      <div class="ex-prompt">
+        <strong>Point:</strong> Palacio presents Auggie as someone caught between feeling ordinary inside and being treated as different by the world.<br><br>
+        <strong>Evidence:</strong> Auggie lists ordinary things he does — "___________________________" and "___________________________" — but immediately follows with the contrast that "___________________________."<br><br>
+        <strong>Explain:</strong> The structure of the paragraph mirrors Auggie's experience: Palacio uses the word "___________________________" four times in quick succession, which creates a sense of ___________________________. The contrast between the list of normal activities and the image of kids "___________________________" is a powerful example of ___________________________.<br><br>
+        <strong>Link:</strong> This opening is effective because ____________________________________________________________.
+      </div>
+    </div>
+  </div>
+
+  <!-- A3: Write a PEEL Paragraph -->
+  <div class="exercise analysis-ex" id="a3">
+    <div class="ex-header"><div class="ex-num">A3</div><h3>Write a Full PEEL Paragraph: Holes</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Read this opening from <strong><em>Holes</em> by Louis Sachar</strong>. Write a complete PEEL paragraph analysing <strong>how Sachar creates a sense of a harsh, unwelcoming place</strong>.</p>
+      <div class="ex-prompt" style="margin-bottom:12px;">
+        <em>"There is no lake at Camp Green Lake. There once was a very large lake here, the largest lake in Texas. That was over a hundred years ago. Now it is just a dry, flat wasteland. There used to be a town of Green Lake as well. The town shrivelled and dried up along with the lake, and the people who lived there. During the summer the daytime temperature hovers around ninety-five degrees in the shade — if you can find any shade. There's not much shade in a big dry lake."</em>
+      </div>
+      <div class="ex-prompt">
+        <strong>Your PEEL paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+      <div class="ex-checklist"><h4>Self-Check</h4>
+        <ul>
+          <li>Point makes a clear argument?</li>
+          <li>Evidence embedded in your sentence?</li>
+          <li>At least <strong>two techniques</strong> named and explained?</li>
+          <li>Specific words explored for connotations?</li>
+          <li>Link connects to the reader's experience?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- A4: Comparative Analysis -->
+  <div class="exercise analysis-ex" id="a4">
+    <div class="ex-header"><div class="ex-num">A4</div><h3>Comparative: Two Openings</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Below are two descriptions of entering a new place — one plain, one from <strong><em>The Explorer</em> by Katherine Rundell</strong>. Write a PEEL paragraph explaining <strong>how Rundell's version creates a more vivid atmosphere</strong>.</p>
+      <div class="ba-grid">
+        <div class="ba-col bad"><div class="ba-label">Version A (Plain)</div>They walked into the jungle. It was very big and green. There were lots of trees and plants everywhere. They could hear animals in the distance. It felt mysterious.</div>
+        <div class="ba-col good"><div class="ba-label">Version B (Rundell)</div>"The jungle was a thousand shades of green, stacked one on top of another: emerald, lime, sage. Butterflies the size of dinner plates hung in the air. Somewhere, a howler monkey roared — a sound like the tearing of a great sheet of canvas — and was answered by another, deeper in the trees."</div>
+      </div>
+      <div class="ex-prompt" style="margin-top:12px;">
+        <strong>Your comparative PEEL paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- A5: Word-Level Drill -->
+  <div class="exercise analysis-ex" id="a5">
+    <div class="ex-header"><div class="ex-num">A5</div><h3>The Word-Level Drill</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>For each word below (taken from the extracts in this workbook), write <strong>three connotations</strong> and explain what they add to the text.</p>
+      <div class="ex-prompt">
+        <strong>1. "shrivelled"</strong> (from <em>Holes</em>: "The town shrivelled and dried up")<br>
+        Connotation 1: _________________ → suggests _______________________________<br>
+        Connotation 2: _________________ → suggests _______________________________<br>
+        Connotation 3: _________________ → suggests _______________________________<br><br>
+        <strong>2. "bustling"</strong> (from <em>Harry Potter</em>: "a bustling road lined with shops")<br>
+        Connotation 1: _________________ → suggests _______________________________<br>
+        Connotation 2: _________________ → suggests _______________________________<br>
+        Connotation 3: _________________ → suggests _______________________________<br><br>
+        <strong>3. "stacked"</strong> (from <em>The Explorer</em>: "a thousand shades of green, stacked one on top of another")<br>
+        Connotation 1: _________________ → suggests _______________________________<br>
+        Connotation 2: _________________ → suggests _______________________________<br>
+        Connotation 3: _________________ → suggests _______________________________
+      </div>
+      <div class="ex-tip">"Shrivelled" connotes decay, something that was once alive now dying, and — importantly — a <em>shrinking away</em>. The town didn't just die; it <em>shrank</em> from existence, as if hiding from the harshness of the place. This layered thinking is what makes analysis powerful.</div>
+    </div>
+  </div>
+
+  <!-- A6: Structure -->
+  <div class="exercise analysis-ex" id="a6">
+    <div class="ex-header"><div class="ex-num">A6</div><h3>Structure Analysis: Before and After</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Read this extract from <strong><em>Ghost</em> by Jason Reynolds</strong>. Write a PEEL paragraph analysing <strong>how Reynolds uses structure to show Castle's transformation</strong>.</p>
+      <div class="ex-prompt" style="margin-bottom:12px;">
+        <em>"The first time I ever ran was the night my father chased us. I was in fourth grade. Ma, she was holding my hand so tight it felt like my bones might crack. We ran past the corner store, past the basketball court with the bent rims, past the church where we went every Sunday. My father's footsteps were loud behind us. Loud and getting louder."</em>
+        <br><br>
+        <em>"Now, running is different. Now, when I run, my feet don't pound the pavement — they kiss it. My arms don't flail — they pump, like pistons. And my father's footsteps? I can't hear them anymore. All I hear is my own breath. Steady. Strong. Mine."</em>
+      </div>
+      <p style="margin-top:8px;">Think about: how the two paragraphs mirror each other, the shift from past to present tense, the change in verbs ("pound" vs "kiss"), and the final word "Mine."</p>
+      <div class="ex-prompt">
+        <strong>Your structure PEEL paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- A7: Character -->
+  <div class="exercise analysis-ex" id="a7">
+    <div class="ex-header"><div class="ex-num">A7</div><h3>Character Analysis: Coraline</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Read this extract from <strong><em>Coraline</em> by Neil Gaiman</strong>. Write a PEEL paragraph answering: <strong>How does Gaiman present Coraline as brave but vulnerable?</strong></p>
+      <div class="ex-prompt">
+        <em>"Coraline was small for her age, but she was also stubborn and curious and the most determined person her own age that she had ever met. She had a very good imagination, which sometimes got her into trouble, but more often got her out of it. When she was scared — and she was often scared — she would take a deep breath and count to ten. 'Fear is not a bad thing,' she told herself. 'It just means you're about to do something very, very brave.'"</em>
+      </div>
+      <div class="ex-prompt" style="margin-top:12px;">
+        <strong>Your PEEL paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+      <div class="ex-tip">This extract connects to your own writing, Jemma — Coraline uses self-talk ("she told herself") to manage fear, the same way your narrator in "The Message in the Bottle" reflects internally on their situation.</div>
+    </div>
+  </div>
+
+  <!-- A8: Mark a Model -->
+  <div class="exercise analysis-ex" id="a8">
+    <div class="ex-header"><div class="ex-num">A8</div><h3>Mark a Model Paragraph</h3><span class="difficulty diff-medium">&#9733;&#9733; Medium</span></div>
+    <div class="ex-instructions">
+      <p>Below is a student's analysis paragraph about the <em>Holes</em> opening (see A3). <strong>Give it a score out of 8</strong> and write <strong>two specific suggestions</strong> for improvement.</p>
+      <div class="ex-prompt">
+        <em>"The writer uses good words to describe the place. The writer says 'there is no lake' which shows that the place is different from its name. This is ironic. The writer also uses the word 'wasteland' which makes the place sound bad. The writer makes the reader feel sorry for the characters because they have to be there. I think this is an effective opening."</em>
+      </div>
+      <div class="ex-prompt" style="margin-top:12px;">
+        <strong>Your score: ____ / 8</strong><br><br>
+        <strong>What's missing?</strong><br>
+        1. ____________________________________________________________<br>
+        2. ____________________________________________________________<br><br>
+        <strong>Now rewrite it as a strong PEEL paragraph:</strong><br>
+        ____________________________________________________________<br>
+        ____________________________________________________________<br>
+        ____________________________________________________________
+      </div>
+      <div class="ex-tip">Marking someone else's work is one of the fastest ways to improve your own. You'll spot weaknesses you didn't realise you also had.</div>
+    </div>
+  </div>
+
+  <!-- A9: Opening Lines -->
+  <div class="exercise analysis-ex" id="a9">
+    <div class="ex-header"><div class="ex-num">A9</div><h3>Opening Lines Analysis</h3><span class="difficulty diff-easy">&#9733; Easy</span></div>
+    <div class="ex-instructions">
+      <p>Read these famous opening lines from modern children's and YA books. For each, write <strong>one sentence naming a technique and explaining its effect</strong>.</p>
+      <div class="ex-prompt">
+        <strong>1.</strong> "There was a hand in the darkness, and it held a knife." (<em>The Graveyard Book</em>, Neil Gaiman)<br>
+        ____________________________________________________________<br><br>
+        <strong>2.</strong> "I know I'm not an ordinary ten-year-old kid." (<em>Wonder</em>, R.J. Palacio)<br>
+        ____________________________________________________________<br><br>
+        <strong>3.</strong> "There is no lake at Camp Green Lake." (<em>Holes</em>, Louis Sachar)<br>
+        ____________________________________________________________<br><br>
+        <strong>4.</strong> "The sky above the port was the colour of television, tuned to a dead channel." (<em>Neuromancer</em>, William Gibson)<br>
+        ____________________________________________________________
+      </div>
+    </div>
+  </div>
+
+  <!-- A10: Vocabulary Upgrade -->
+  <div class="exercise analysis-ex" id="a10">
+    <div class="ex-header"><div class="ex-num">A10</div><h3>Vocabulary of Analysis: Upgrade Your Words</h3><span class="difficulty diff-easy">&#9733; Easy</span></div>
+    <div class="ex-instructions">
+      <p>Replace each weak analytical phrase with a stronger alternative. The first one is done for you.</p>
+      <table class="ref-table" style="margin-top:12px;">
+        <thead><tr><th>Weak Phrase</th><th>Your Stronger Alternative</th></tr></thead>
+        <tbody>
+          <tr><td>"This shows that..."</td><td>"This suggests / implies / conveys / evokes..."</td></tr>
+          <tr><td>"The writer uses good words"</td><td>_______________________________________________</td></tr>
+          <tr><td>"It makes the reader interested"</td><td>_______________________________________________</td></tr>
+          <tr><td>"It stands out"</td><td>_______________________________________________</td></tr>
+          <tr><td>"The writer does this to..."</td><td>_______________________________________________</td></tr>
+          <tr><td>"It creates a picture in your head"</td><td>_______________________________________________</td></tr>
+          <tr><td>"It makes you feel..."</td><td>_______________________________________________</td></tr>
+          <tr><td>"This is effective because..."</td><td>_______________________________________________</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</div><!-- end analysis tab -->
+
+<!-- ============================================================ -->
+<!-- QUICK REFERENCE TAB -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-reference">
+
+<section>
+  <div class="section-title">&#128203; Weekly Practice Schedule</div>
+  <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom:20px;">
+    Consistency beats intensity. Aim for 3-4 short sessions per week.
+  </p>
+  <table class="ref-table">
+    <thead><tr><th>Day</th><th>Focus</th><th>Exercise</th><th>Time</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Monday</strong></td><td>Creative warm-up</td><td>CW1 (Five Senses) or CW2 (Sentence Stretch)</td><td>10 min</td></tr>
+      <tr><td><strong>Wednesday</strong></td><td>PEEL skill</td><td>A1 (Spot the Technique) or A2 (PEEL Builder)</td><td>15 min</td></tr>
+      <tr><td><strong>Friday</strong></td><td>Creative deep dive</td><td>One medium exercise (CW4-CW9) or CW11 (Flash Fiction)</td><td>20-25 min</td></tr>
+      <tr><td><strong>Weekend</strong></td><td>Full PEEL paragraph</td><td>A3, A6, or A7 (Character/Structure analysis)</td><td>20 min</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="section-title">&#127919; Writing Level Descriptors</div>
+  <table class="ref-table">
+    <thead><tr><th style="width:12%">Level</th><th style="width:44%">Creative Writing</th><th style="width:44%">Analysis Paragraph</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Confident</strong></td>
+        <td>Ambitious vocabulary; controlled structure; distinctive voice; figurative language used precisely; writing is convincing and compelling</td>
+        <td>Perceptive analysis of language AND structure; explores specific words with layered connotations; considers alternative interpretations; links to writer's purpose</td>
+      </tr>
+      <tr>
+        <td><strong>Developing</strong></td>
+        <td>Clear control of tone; some successful figurative language; mostly secure paragraphing; vocabulary is appropriate</td>
+        <td>Clear explanation of effects; names techniques accurately; uses relevant quotations; explains what words suggest; some exploration of connotations</td>
+      </tr>
+      <tr>
+        <td><strong>Building</strong></td>
+        <td>Some control of basic structure; simple vocabulary; attempts description but may be generic; limited paragraphing</td>
+        <td>Identifies obvious techniques; uses quotations but may not embed them; describes what happens rather than analysing how; limited technical vocabulary</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="section-title">&#128218; Recommended Reading</div>
+  <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom:16px;">
+    These are rich in techniques, engaging, and right for Year 8-9.
+  </p>
+  <table class="ref-table">
+    <thead><tr><th>Book</th><th>Author</th><th>Why It's Great</th></tr></thead>
+    <tbody>
+      <tr><td><em>Holes</em></td><td>Louis Sachar</td><td>Masterful structure, dark humour, interwoven timelines, powerful symbolism</td></tr>
+      <tr><td><em>Wonder</em></td><td>R.J. Palacio</td><td>Multiple narrators, emotional depth, shows not tells, empathy-driven</td></tr>
+      <tr><td><em>The Graveyard Book</em></td><td>Neil Gaiman</td><td>Atmospheric, beautiful prose, found-family theme, each chapter a self-contained story</td></tr>
+      <tr><td><em>Coraline</em></td><td>Neil Gaiman</td><td>Unreliable world-building, brave protagonist, creepy atmosphere, visual detail</td></tr>
+      <tr><td><em>The Explorer</em></td><td>Katherine Rundell</td><td>Lush sensory imagery, survival adventure, vivid Amazon setting, strong character voice</td></tr>
+      <tr><td><em>Ghost</em></td><td>Jason Reynolds</td><td>Rhythmic prose, authentic voice, sports as metaphor, powerful use of contrast</td></tr>
+      <tr><td><em>Harry Potter</em> (Book 1)</td><td>J.K. Rowling</td><td>Accessible, rich in techniques, world-building through detail, humour and heart</td></tr>
+      <tr><td><em>The Girl of Ink and Stars</em></td><td>Kiran Millwood Hargrave</td><td>Mythic quality, maps as storytelling, beautiful descriptive language</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="section-title">&#128221; PEEL Sentence Starters</div>
+  <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom:16px;">
+    Print this and keep it next to you when writing analysis paragraphs.
+  </p>
+  <table class="ref-table">
+    <thead><tr><th style="width:15%">Part</th><th style="width:85%">Sentence Starters</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Point</strong></td><td>"The writer presents...", "Through the use of...", "The writer creates a sense of...", "The author establishes..."</td></tr>
+      <tr><td><strong>Evidence</strong></td><td>"This is evident when...", "The description of '...' conveys...", "The phrase '...' suggests...", "The writer's choice of '...' implies..."</td></tr>
+      <tr><td><strong>Explain</strong></td><td>"The [technique] creates the effect of...", "This evokes a feeling of...", "By using [technique], the writer emphasises...", "The word '...' is particularly significant because its connotations include...", "On a deeper level, '...' could also suggest..."</td></tr>
+      <tr><td><strong>Link</strong></td><td>"This connects to the wider theme of...", "Ultimately, this makes the reader consider...", "The writer may be suggesting that...", "This contributes to the overall impression that...", "This moment is important because..."</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</div><!-- end reference tab -->
+
+</div><!-- container -->
+
+<footer>
+  Jemma's Writing Workbook v2 &middot; Headington School, Year 8 &middot; May 2026<br>
+  <span style="font-size:0.85em;">Designed for self-paced practice. Aim for 3-4 sessions per week.</span>
+</footer>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+</script>
+
+</body>
+</html>

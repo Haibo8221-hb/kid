@@ -1,0 +1,583 @@
+{
+  "exam_title": "GCSE Physics",
+  "total_score": "46/80",
+  "grade_estimate": "5",
+  "questions": [
+    {
+      "number": "Q01.1",
+      "topic": "Static Electricity",
+      "max_marks": 1,
+      "student_answer": "Positive",
+      "mark": 0,
+      "correct_answer": "Negative",
+      "feedback": "The student's hair gains a negative charge because it is in contact with the negatively charged dome and electrons are transferred to the hair."
+    },
+    {
+      "number": "Q01.2",
+      "topic": "Static Electricity",
+      "max_marks": 1,
+      "student_answer": "repulsion",
+      "mark": 1,
+      "correct_answer": "repulsion",
+      "feedback": "Correct. Like charges repel, causing the hair strands to stand up."
+    },
+    {
+      "number": "Q01.3",
+      "topic": "Electric Fields",
+      "max_marks": 1,
+      "student_answer": "Negatively charged dome with arrows pointing away from it",
+      "mark": 1,
+      "correct_answer": "Negatively charged dome with arrows pointing away from it",
+      "feedback": "Correct. Electric field lines point away from a negative charge."
+    },
+    {
+      "number": "Q01.4",
+      "topic": "Insulators and Resistance",
+      "max_marks": 1,
+      "student_answer": "resistance",
+      "mark": 1,
+      "correct_answer": "resistance",
+      "feedback": "Correct. Air is an insulator and has a high resistance."
+    },
+    {
+      "number": "Q01.5",
+      "topic": "Static Electricity / Ionisation",
+      "max_marks": 1,
+      "student_answer": "neutral",
+      "mark": 0,
+      "correct_answer": "ionised",
+      "feedback": "Incorrect. The air becomes ionised (conductive) before a spark jumps, not neutral."
+    },
+    {
+      "number": "Q01.6",
+      "topic": "Static Electricity / Charge Carriers",
+      "max_marks": 1,
+      "student_answer": "Protons",
+      "mark": 0,
+      "correct_answer": "Electrons",
+      "feedback": "Incorrect. Electrons are the particles that are transferred when a spark jumps from a negatively charged object."
+    },
+    {
+      "number": "Q01.7",
+      "topic": "Electrical Energy Transfer",
+      "max_marks": 2,
+      "student_answer": "0.6 J",
+      "mark": 2,
+      "correct_answer": "0.6 J",
+      "feedback": "Correct calculation using E = QV."
+    },
+    {
+      "number": "Q02.1",
+      "topic": "Mains Electricity",
+      "max_marks": 1,
+      "student_answer": "60 hertz",
+      "mark": 0,
+      "correct_answer": "50 hertz",
+      "feedback": "Incorrect. The frequency of the UK mains supply is 50 Hz."
+    },
+    {
+      "number": "Q02.2",
+      "topic": "Mains Electricity",
+      "max_marks": 1,
+      "student_answer": "230 volts",
+      "mark": 1,
+      "correct_answer": "230 volts",
+      "feedback": "Correct. The UK mains supply is 230 V."
+    },
+    {
+      "number": "Q02.3",
+      "topic": "Ohm's Law / Resistance",
+      "max_marks": 2,
+      "student_answer": "0.6 Ω",
+      "mark": 2,
+      "correct_answer": "0.6 Ω",
+      "feedback": "Correct calculation using R = V/I."
+    },
+    {
+      "number": "Q02.4",
+      "topic": "Circuit Symbols",
+      "max_marks": 1,
+      "student_answer": "Rectangle with a diagonal line through it",
+      "mark": 1,
+      "correct_answer": "Rectangle with a diagonal line through it",
+      "feedback": "Correct. This is the standard symbol for a thermistor."
+    },
+    {
+      "number": "Q02.5",
+      "topic": "Series Circuits / Potential Difference",
+      "max_marks": 1,
+      "student_answer": "pd across battery − pd across thermistor",
+      "mark": 1,
+      "correct_answer": "pd across battery − pd across thermistor",
+      "feedback": "Correct. In a series circuit, the sum of pds equals the supply pd."
+    },
+    {
+      "number": "Q02.6",
+      "topic": "Series Circuits / Potential Difference",
+      "max_marks": 2,
+      "student_answer": "0.0 V",
+      "mark": 0,
+      "correct_answer": "1.5 V",
+      "feedback": "Incorrect. With equal resistances (200 Ω each), the pd is shared equally, so it is 1.5 V. The reason given is also incorrect."
+    },
+    {
+      "number": "Q02.7",
+      "topic": "Thermistors / Graph Interpretation",
+      "max_marks": 2,
+      "student_answer": "400",
+      "mark": 2,
+      "correct_answer": "400 Ω",
+      "feedback": "Correct. The change in resistance is 600 Ω - 200 Ω = 400 Ω."
+    },
+    {
+      "number": "Q03.1",
+      "topic": "Forces and Elasticity / Extension",
+      "max_marks": 1,
+      "student_answer": "stretched length - original length",
+      "mark": 1,
+      "correct_answer": "stretched length - original length",
+      "feedback": "Correct. Extension is the increase in length."
+    },
+    {
+      "number": "Q03.2",
+      "topic": "Elastic Potential Energy",
+      "max_marks": 2,
+      "student_answer": "22500 J",
+      "mark": 2,
+      "correct_answer": "22500 J",
+      "feedback": "Correct calculation using Ee = 0.5 × k × e²."
+    },
+    {
+      "number": "Q03.3",
+      "topic": "Kinetic Energy",
+      "max_marks": 2,
+      "student_answer": "27000 J",
+      "mark": 2,
+      "correct_answer": "27000 J",
+      "feedback": "Correct calculation using Ek = 0.5 × m × v²."
+    },
+    {
+      "number": "Q03.4",
+      "topic": "Gravitational Potential Energy",
+      "max_marks": 1,
+      "student_answer": "Ep = m × g × h",
+      "mark": 1,
+      "correct_answer": "Ep = m × g × h",
+      "feedback": "Correct equation selected."
+    },
+    {
+      "number": "Q03.5",
+      "topic": "Gravitational Potential Energy Calculation",
+      "max_marks": 3,
+      "student_answer": "0.098 m",
+      "mark": 0,
+      "correct_answer": "10.2 m",
+      "feedback": "Incorrect. The formula was rearranged incorrectly. It should be h = Ep / (m × g) = 24000 / (240 × 9.8) = 10.2 m."
+    },
+    {
+      "number": "Q03.6",
+      "topic": "Energy Conservation / Dissipation",
+      "max_marks": 2,
+      "student_answer": "Energy is transferred to the surroundings. Work is done against air resistance.",
+      "mark": 2,
+      "correct_answer": "Energy is transferred to the surroundings. Work is done against air resistance.",
+      "feedback": "Correct. Both are valid reasons why maximum GPE is less than initial EPE."
+    },
+    {
+      "number": "Q04.1",
+      "topic": "Measurement / Measuring Cylinder",
+      "max_marks": 1,
+      "student_answer": "0.0 to 10.0 cm³",
+      "mark": 1,
+      "correct_answer": "0.0 to 10.0 cm³",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q04.2",
+      "topic": "Measurement / Displacement",
+      "max_marks": 1,
+      "student_answer": "The measured volume would be larger.",
+      "mark": 1,
+      "correct_answer": "The measured volume would be larger.",
+      "feedback": "Correct. Thick string would displace more water, increasing the measured volume."
+    },
+    {
+      "number": "Q04.3",
+      "topic": "Measurement / Volume Calculation",
+      "max_marks": 1,
+      "student_answer": "0.4 cm³",
+      "mark": 1,
+      "correct_answer": "0.4 cm³",
+      "feedback": "Correct calculation."
+    },
+    {
+      "number": "Q04.4",
+      "topic": "Experimental Errors / Repeatability",
+      "max_marks": 1,
+      "student_answer": "The results are repeatable.",
+      "mark": 1,
+      "correct_answer": "The results are repeatable.",
+      "feedback": "Correct. Identical results indicate repeatability."
+    },
+    {
+      "number": "Q04.5",
+      "topic": "Measurement / Zero Error",
+      "max_marks": 1,
+      "student_answer": "Subtract 0.02 from the measurement",
+      "mark": 1,
+      "correct_answer": "Subtract 0.02 from the measurement",
+      "feedback": "Correct. This corrects the zero error."
+    },
+    {
+      "number": "Q04.6",
+      "topic": "Density Equation",
+      "max_marks": 1,
+      "student_answer": "ρ = M / V",
+      "mark": 1,
+      "correct_answer": "ρ = m / V",
+      "feedback": "Correct equation."
+    },
+    {
+      "number": "Q04.7",
+      "topic": "Density Calculation",
+      "max_marks": 3,
+      "student_answer": "6.6 g",
+      "mark": 3,
+      "correct_answer": "6.6 g",
+      "feedback": "Correct calculation using m = ρ × V."
+    },
+    {
+      "number": "Q05.1",
+      "topic": "Gas Pressure / Volume",
+      "max_marks": 1,
+      "student_answer": "The volume decreased.",
+      "mark": 1,
+      "correct_answer": "The volume decreased.",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q05.2",
+      "topic": "Gas Pressure / Particle Model",
+      "max_marks": 1,
+      "student_answer": "The distance decreased.",
+      "mark": 1,
+      "correct_answer": "The distance decreased.",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q05.3",
+      "topic": "Gas Pressure / Particle Model",
+      "max_marks": 1,
+      "student_answer": "The frequency of collisions increased.",
+      "mark": 1,
+      "correct_answer": "The frequency of collisions increased.",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q05.4",
+      "topic": "Gas Pressure / Particle Model",
+      "max_marks": 1,
+      "student_answer": "The air pressure increased.",
+      "mark": 1,
+      "correct_answer": "The air pressure increased.",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q05.5",
+      "topic": "Kinetic Theory / Temperature",
+      "max_marks": 1,
+      "student_answer": "The mean speed of the particles increases.",
+      "mark": 1,
+      "correct_answer": "The mean speed of the particles increases.",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q05.6",
+      "topic": "Specific Heat Capacity",
+      "max_marks": 3,
+      "student_answer": "495 °C",
+      "mark": 3,
+      "correct_answer": "495 °C",
+      "feedback": "Correct calculation using Δθ = E / (m × c)."
+    },
+    {
+      "number": "Q06.1",
+      "topic": "Background Radiation",
+      "max_marks": 2,
+      "student_answer": "Cosmic rays: Natural, Medical X-rays: Man-made, Nuclear accidents: Man-made, Radon gas: Natural",
+      "mark": 2,
+      "correct_answer": "Cosmic rays: Natural, Medical X-rays: Man-made, Nuclear accidents: Man-made, Radon gas: Natural",
+      "feedback": "All correct."
+    },
+    {
+      "number": "Q06.2",
+      "topic": "Radioactivity / Alpha Radiation",
+      "max_marks": 2,
+      "student_answer": "Rock A. Most of the particles passed through a sheet of paper, which is the penetration for alpha particles.",
+      "mark": 0,
+      "correct_answer": "Rock C. The count rate dropped to near background with paper, showing it was stopped by paper, which is characteristic of alpha.",
+      "feedback": "Incorrect. Alpha radiation is stopped by paper. Rock C's count dropped to background with paper, so Rock C emits alpha. The reason given is also wrong."
+    },
+    {
+      "number": "Q06.3",
+      "topic": "Radioactivity / Beta Radiation",
+      "max_marks": 2,
+      "student_answer": "Rock B. Most of the particles passed through a sheet of paper, which is the penetration for beta particles.",
+      "mark": 2,
+      "correct_answer": "Rock B. The count rate was not significantly reduced by paper but was reduced by aluminium, which is characteristic of beta.",
+      "feedback": "Correct rock selected. The reason is partially correct but could be more precise. Beta can pass through paper but is stopped by aluminium."
+    },
+    {
+      "number": "Q06.4",
+      "topic": "Radiation Safety",
+      "max_marks": 1,
+      "student_answer": "Wearing protective gloves",
+      "mark": 1,
+      "correct_answer": "Wearing protective gloves",
+      "feedback": "Correct. Gloves prevent contamination."
+    },
+    {
+      "number": "Q06.5",
+      "topic": "Half-life",
+      "max_marks": 1,
+      "student_answer": "The activity is half the original activity.",
+      "mark": 1,
+      "correct_answer": "The activity is half the original activity.",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q06.6",
+      "topic": "Radioactivity / Risk",
+      "max_marks": 1,
+      "student_answer": "The greater the activity, the greater the risk of harm.",
+      "mark": 1,
+      "correct_answer": "The greater the activity, the greater the risk of harm.",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q07.1",
+      "topic": "Wiring Colours",
+      "max_marks": 1,
+      "student_answer": "Brown",
+      "mark": 1,
+      "correct_answer": "Brown",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q07.2",
+      "topic": "Wiring Colours",
+      "max_marks": 1,
+      "student_answer": "Green and yellow",
+      "mark": 0,
+      "correct_answer": "Blue",
+      "feedback": "Incorrect. The neutral wire is blue. Green and yellow is the earth wire."
+    },
+    {
+      "number": "Q07.3",
+      "topic": "Circuit Symbols",
+      "max_marks": 1,
+      "student_answer": "Rectangle with a tilted line inside",
+      "mark": 1,
+      "correct_answer": "Rectangle with a tilted line inside",
+      "feedback": "Correct. This is the symbol for a fuse."
+    },
+    {
+      "number": "Q07.4",
+      "topic": "Current / Charge Flow",
+      "max_marks": 2,
+      "student_answer": "5 A",
+      "mark": 2,
+      "correct_answer": "5 A",
+      "feedback": "Correct calculation using I = Q / t."
+    },
+    {
+      "number": "Q07.5",
+      "topic": "Specific Latent Heat",
+      "max_marks": 3,
+      "student_answer": "960 J",
+      "mark": 0,
+      "correct_answer": "0.96 J",
+      "feedback": "Incorrect. The mass must be converted to kg (0.016 g = 0.000016 kg). Then E = 60000 × 0.000016 = 0.96 J."
+    },
+    {
+      "number": "Q07.6",
+      "topic": "Energy Conservation",
+      "max_marks": 1,
+      "student_answer": "The total energy will be the same.",
+      "mark": 0,
+      "correct_answer": "The total energy will be greater.",
+      "feedback": "Incorrect. If energy is transferred to the surroundings, more total energy is needed to melt the fuse."
+    },
+    {
+      "number": "Q08.1",
+      "topic": "Calculating Mean",
+      "max_marks": 2,
+      "student_answer": "0.24 A",
+      "mark": 2,
+      "correct_answer": "0.24 A",
+      "feedback": "Correct calculation of the mean."
+    },
+    {
+      "number": "Q08.2",
+      "topic": "Electrical Power",
+      "max_marks": 3,
+      "student_answer": "0.51 W",
+      "mark": 3,
+      "correct_answer": "0.51 W",
+      "feedback": "Correct calculation using P = V × I."
+    },
+    {
+      "number": "Q08.3",
+      "topic": "IV Characteristics / Resistors",
+      "max_marks": 1,
+      "student_answer": "increases",
+      "mark": 1,
+      "correct_answer": "increases",
+      "feedback": "Correct. For a resistor at constant temperature, the gradient (resistance) is constant, but the question likely refers to a different component. However, the answer 'increases' is correct for the graph shown."
+    },
+    {
+      "number": "Q08.4",
+      "topic": "IV Characteristics / Component Identification",
+      "max_marks": 1,
+      "student_answer": "Resistor at constant temperature",
+      "mark": 1,
+      "correct_answer": "Resistor at constant temperature",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q09.1",
+      "topic": "Energy Stores",
+      "max_marks": 1,
+      "student_answer": "Thermal",
+      "mark": 1,
+      "correct_answer": "Thermal",
+      "feedback": "Correct."
+    },
+    {
+      "number": "Q09.2",
+      "topic": "Energy Stores",
+      "max_marks": 1,
+      "student_answer": "Kinetic",
+      "mark": 0,
+      "correct_answer": "Gravitational potential",
+      "feedback": "Incorrect. When water is pumped uphill, its gravitational potential energy store increases."
+    },
+    {
+      "number": "Q09.3",
+      "topic": "Energy / Advantages & Disadvantages",
+      "max_marks": 4,
+      "student_answer": "33600 × 0.6 = 20160 useful energy. 490 × 0.75 = 367.5 useful energy. The percentage of stored energy wasted is very high in the increase of water temperature. Whereas the percentage of wasted energy in the pumping water method is relatively smaller lower. On the other hand one advantage of increasing Water temperature is it Can be installed anywhere whereas the pumping only limits to high mountains.",
+      "mark": 3,
+      "correct_answer": "Calculations showing useful energy for each method. Method A stores more energy but wastes a higher percentage. Method B stores less energy but wastes a lower percentage. Method A can be installed anywhere, Method B is limited to high mountains.",
+      "feedback": "Good calculations and comparison of advantages/disadvantages. The answer is slightly unclear in wording but covers the key points. Awarded 3/4."
+    },
+    {
+      "number": "Q09.4",
+      "topic": "Climate Change / Carbon Dioxide Reduction",
+      "max_marks": 4,
+      "student_answer": "I haven't yet learned this topic :)",
+      "mark": 0,
+      "correct_answer": "Transport: Use electric vehicles / use public transport / cycle / walk. Generating electricity: Use renewable energy sources (wind, solar, nuclear) / reduce energy use.",
+      "feedback": "No attempt made. This topic is part of the GCSE Physics specification."
+    },
+    {
+      "number": "Q10.1",
+      "topic": "Nuclear Fission",
+      "max_marks": 3,
+      "student_answer": "1. nuclei, 2. electrons, 3. gamma rays",
+      "mark": 2,
+      "correct_answer": "1. nuclei, 2. neutrons, 3. gamma rays",
+      "feedback": "Q10.1.1: Correct. Q10.1.2: Incorrect. Uranium splits and releases neutrons. Q10.1.3: Correct."
+    },
+    {
+      "number": "Q10.2",
+      "topic": "Energy / Power / Time Equation",
+      "max_marks": 1,
+      "student_answer": "E = P / t",
+      "mark": 0,
+      "correct_answer": "E = P × t",
+      "feedback": "Incorrect. The correct equation linking energy, power, and time is E = P × t."
+    },
+    {
+      "number": "Q10.3",
+      "topic": "Energy Calculation",
+      "max_marks": 3,
+      "student_answer": "0.139 J",
+      "mark": 0,
+      "correct_answer": "1.8 × 10⁹ J",
+      "feedback": "Incorrect. The power must be converted to watts (500 MW = 500 × 10⁶ W). Then E = 500 × 10⁶ × 3600 = 1.8 × 10⁹ J."
+    },
+    {
+      "number": "Q10.4",
+      "topic": "Radioactive Waste Management",
+      "max_marks": 1,
+      "student_answer": "Only short amount of time interacted with the radioactive waste.",
+      "mark": 0,
+      "correct_answer": "Store in shielded containers / bury deep underground / vitrification.",
+      "feedback": "Incorrect. The answer is unclear and does not describe a specific precaution. A valid precaution is storing waste in secure, shielded containers."
+    },
+    {
+      "number": "Q10.5",
+      "topic": "Percentage Calculation",
+      "max_marks": 2,
+      "student_answer": "836 days",
+      "mark": 0,
+      "correct_answer": "336 days",
+      "feedback": "Incorrect. The calculation is correct (365 × 0.92 = 335.8 ≈ 336), but the final answer written is 836, which is a transcription error."
+    },
+    {
+      "number": "Q11.1",
+      "topic": "Required Practical: Resistance and Length of Wire",
+      "max_marks": 6,
+      "student_answer": "As the student sets up the equipments, they could move the distance between the crocodile clips to each change the length of the wire and reads of the ammeter and voltmeter to write down the on a table. Then the student could use the data written down to plot the graph. Remember, the rest temperature of the resistor needs...",
+      "mark": 3,
+      "correct_answer": "A method including: set up circuit with wire, ammeter in series, voltmeter in parallel. Use crocodile clips to vary length. Measure current and pd for each length. Calculate resistance (R = V/I). Repeat for each length. Control temperature (keep current low / allow wire to cool). Plot graph of resistance against length.",
+      "feedback": "The answer describes the basic method but lacks detail on how to measure/calculate resistance, repeat readings, and control variables. The answer is incomplete. Awarded 3/6."
+    },
+    {
+      "number": "Q11.2",
+      "topic": "Resistance and Length of Wire",
+      "max_marks": 1,
+      "student_answer": "Downward-sloping line",
+      "mark": 0,
+      "correct_answer": "Upward-sloping straight line through the origin",
+      "feedback": "Incorrect. Resistance is directly proportional to length, so the graph should be a straight line through the origin."
+    },
+    {
+      "number": "Q11.3",
+      "topic": "Electrical Safety / Potential Difference",
+      "max_marks": 2,
+      "student_answer": "The potential difference is much lower than the maximum electrical voltage.",
+      "mark": 1,
+      "correct_answer": "1.5 V is a low voltage / below the safe limit (usually 50 V). It is not enough to cause a dangerous current through the body.",
+      "feedback": "Partially correct. The answer identifies that the voltage is low, but does not explain why this makes it safe (e.g., low current, cannot overcome body resistance). Awarded 1/2."
+    }
+  ],
+  "strengths": [
+    "Good at performing standard calculations (e.g., power, resistance, kinetic energy, specific heat capacity).",
+    "Correctly identifies basic concepts and definitions (e.g., energy stores, circuit symbols, background radiation sources).",
+    "Shows willingness to attempt questions and provide reasoning, even when unsure."
+  ],
+  "weaknesses": [
+    {
+      "topic": "Nuclear Physics and Radioactivity",
+      "issue": "Significant gaps in understanding nuclear fission, radioactive decay, and half-life calculations. Incorrectly identified particles and radiation types.",
+      "advice": "Review the process of nuclear fission (neutrons released) and the properties of alpha, beta, and gamma radiation (penetration power, what stops them). Practice half-life calculations."
+    },
+    {
+      "topic": "Energy Equations and Unit Conversions",
+      "issue": "Frequent errors in recalling and rearranging key equations (e.g., E = P/t instead of E = Pt, incorrect rearrangement for GPE). Also fails to convert units (e.g., MW to W, g to kg).",
+      "advice": "Create a flashcard set of all equations from the Physics Equation Sheet. Practice rearranging them for different variables. Always check units before calculating."
+    },
+    {
+      "topic": "Required Practicals and Extended Writing",
+      "issue": "Answers for method questions (Q11.1) lack detail, structure, and key steps (e.g., repeats, control variables, calculations). Some questions left blank or answered with 'not learned'.",
+      "advice": "Use the '6-mark question' structure: aim for 6 clear steps. Include how to set up equipment, what to measure, how to calculate, repeats, and control variables. Attempt all questions."
+    }
+  ],
+  "study_priorities": [
+    "1. Master all equations from the Physics Equation Sheet, including rearrangements and unit conversions.",
+    "2. Revise the Nuclear Physics topic: fission, fusion, alpha/beta/gamma properties, half-life, and waste management.",
+    "3. Practice writing detailed methods for Required Practicals, focusing on variables, repeats, and calculations."
+  ]
+}

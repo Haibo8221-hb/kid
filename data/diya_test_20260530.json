@@ -1,0 +1,15 @@
+{
+  "date": "2026-05-30",
+  "chemistry": {
+    "paper": "AQA IGCSE 9202/1",
+    "score": 62,
+    "total": 90,
+    "percent": 69,
+    "grade": 7
+  },
+  "maths": {
+    "topic": "Indices & Relativity",
+    "score": "20/20 (indices)",
+    "notes": "Indices perfect; relativity algebra partial"
+  }
+}

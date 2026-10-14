@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Study Compass · Jemma</title>
+<link rel="stylesheet" href="shared/widgets.css?v=18">
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d28; --surface2: #232736;
+    --text: #e2e6f0; --text2: #8892b0; --border: #2a2f42;
+    --accent: #10b981; --accent2: #a78bfa;
+    --red: #ff6b6b;
+    --orange: #ffa94d; --green: #69db7c; --purple: #a78bfa;
+  }
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg class="logo-icon" width="44" height="44" viewBox="0 0 44 44">
+      <path d="M6 10 C6 6, 10 5, 14 5 L22 9 L30 5 C34 5, 38 6, 38 10 L38 34 C38 37, 34 38, 30 38 L22 34 L14 38 C10 38, 6 37, 6 34 Z" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linejoin="round"/>
+      <line x1="22" y1="9" x2="22" y2="34" stroke="var(--accent)" stroke-width="1.2" opacity="0.6"/>
+      <circle cx="22" cy="21" r="7" fill="none" stroke="var(--accent2)" stroke-width="1.5"/>
+      <polyline points="18.5,21 21,23.5 25.5,19" fill="none" stroke="var(--accent2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1>Study Compass</h1>
+    <p>Academic Planner</p>
+  </div>
+  <ul class="sidebar-nav">
+    <li><a href="#" class="active" onclick="switchTab('dashboard')">🏠 Dashboard</a></li>
+    <li><a href="#" onclick="switchTab('tasks')">✅ Tasks</a></li>
+    <li><a href="#" onclick="switchTab('errors')">❌ Error Book</a></li>
+    <li><a href="#" onclick="switchTab('planner')">📋 Weekly Plan</a></li>
+    <li><a href="#" onclick="switchTab('wiki')">📖 Wiki Logs</a></li>
+    <li><a href="#" onclick="switchTab('chat')">💬 AI Chat</a></li>
+  </ul>
+  <div class="profile-card">
+    <div class="profile-avatar" id="profile-avatar" onclick="showAvatarPicker()" title="Change Avatar"></div>
+    <input class="profile-name" id="profile-name" value="Diya" maxlength="12" onchange="W.Profile.save()" title="Change Name">
+    <div class="profile-streak" id="profile-streak">Streak 0 days</div>
+    <div class="theme-dots">
+      <span class="theme-dot active" style="background:#4f8cff" onclick="setTheme('blue')" title="Ocean Blue"></span>
+      <span class="theme-dot" style="background:#a855f7" onclick="setTheme('purple')" title="Dream Purple"></span>
+      <span class="theme-dot" style="background:#f472b6" onclick="setTheme('pink')" title="Sakura Pink"></span>
+      <span class="theme-dot" style="background:#34d399" onclick="setTheme('green')" title="Forest Green"></span>
+      <span class="theme-dot" style="background:#fb923c" onclick="setTheme('orange')" title="Sunset Orange"></span>
+    </div>
+  </div>
+  <div class="sidebar-bottom">
+    <div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Planning Docs</div>
+    <a href="/Jemma_Plan.html" target="_blank">Jemma Full Plan</a>
+    <a href="/Jemma_Plan.html" target="_blank">Route Overview</a>
+    <a href="/Jemma_2026_Summer_Guide.html" target="_blank">Summer Guide</a>
+    <a href="#" onclick="logout()" style="color:var(--red);font-size:11px;display:block;padding-top:6px">Logout</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <div class="header-bar">
+    <h2>Explore, Build, Grow</h2>
+    <div class="header-actions">
+      <button class="config-btn" onclick="W.openConfig()" title="Widget Settings">⚙️</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD — Grid: drag-to-reorder -->
+  <div id="tab-dashboard" class="tab-panel active">
+    <div class="widget-grid" id="widget-grid">
+      <div id="widget-risksw"></div>
+      <div id="widget-countdown"></div>
+      <div id="widget-radar"></div>
+      <div id="widget-subjects"></div>
+      <div id="widget-summer"></div>
+      <div id="widget-route"></div>
+      <div id="widget-tips"></div>
+      <div id="widget-tasks-dash"></div>
+    </div>
+  </div>
+
+  <!-- TASKS -->
+  <div id="tab-tasks" class="tab-panel"><div id="widget-tasks"></div></div>
+
+  <!-- ERROR BOOK -->
+  <div id="tab-errors" class="tab-panel"><div id="widget-errors"></div></div>
+
+  <!-- WEEKLY PLANNER -->
+  <div id="tab-planner" class="tab-panel"><div id="widget-planner"></div></div>
+
+  <!-- WIKI -->
+  <div id="tab-wiki" class="tab-panel"><div id="widget-wiki"></div></div>
+
+  <!-- CHAT -->
+  <div id="tab-chat" class="tab-panel"><div id="widget-chat"></div></div>
+</main>
+</div>
+
+<!-- Config Panel -->
+<div id="config-overlay" class="config-overlay" onclick="W.closeConfig()"></div>
+<div id="config-panel" class="config-panel">
+  <button class="config-close" onclick="W.closeConfig()">✕</button>
+</div>
+
+<!-- Avatar Modal -->
+<div id="avatar-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center" onclick="event.target===this&&this.classList.remove('open')">
+  <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:380px;width:90%">
+    <h3 style="margin-bottom:14px">Choose Avatar</h3>
+    <div class="avatar-picker" id="avatar-picker-grid"></div>
+    <button onclick="document.getElementById('avatar-modal').classList.remove('open')" style="margin-top:14px;padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;width:100%">Done</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="shared/config.js?v=14"></script>
+<script src="shared/widgets.js?v=25"></script>
+<script>
+CONFIG.active = 'jemma';
+var V2_TIPS_POOL = [
+  {id:'jm01',title:'The Feynman Technique',icon:'📝',cat:'science',
+   concept:'If you cannot explain it simply, you do not understand it well enough. — Richard Feynman',
+   why:'When you try to teach something, your brain has to organise it logically. The moment you get stuck is the exact moment you discover a gap in your understanding. This is the fastest way to find out what you actually know vs what you THINK you know.',
+   steps:['Pick something cool you learned today — a chemistry reaction, a maths trick, a science fact','Explain it to your mum, your sister, or even your teddy bear — no big words allowed!','If you get stuck, go look it up. Then try explaining again.','Make it even simpler — draw a picture, use a story, compare it to something everyday'],
+   practice:'Pick one thing: why does baking soda + vinegar fizz? Explain it in 3 sentences to someone. Use the word "reaction" and "carbon dioxide". Can you do it without saying "because it just does"?',
+   apply:['Chemistry: Explain why ice floats to a 6-year-old','Physics: Explain why you feel heavier in a lift going up','Maths: Explain what a prime number is — using pizza slices as an example']},
+  
+  {id:'jm02',title:'Mind Mapping — Visual Thinking',icon:'🗺️',cat:'general',
+   concept:'A Mind Map is a diagram that starts with one central idea and branches out into related ideas. It uses colours, pictures, and keywords — not long sentences. Your brain thinks in connections, not in lists.',
+   why:'Tony Buzan developed Mind Mapping based on how the brain naturally works. Traditional linear notes use only the left brain (logic, words). Mind Maps engage BOTH hemispheres — adding colour, images, and spatial layout. Studies show Mind Maps improve recall by 32% compared to linear notes.',
+   steps:['Turn your paper SIDEWAYS (landscape) — start in the CENTRE with the main topic','Draw thick branches for main ideas — use ONE keyword per branch, add a small drawing','Add thinner sub-branches for details — use different colours for different branches','Make it personal — the weirder the picture, the better you will remember it'],
+   practice:'Take one topic from this week — "The Solar System" or "Types of Chemical Reactions." Create a Mind Map. Use at least 3 colours. Add at least 5 drawings. Take a photo — this is your revision poster.',
+   apply:['Science: Central idea = "Forces" → branches: Push/Pull, Gravity, Friction, Magnetism','History/Geography: Central idea = "Roman Empire" → branches: Leaders, Battles, Daily Life, Fall','English: Central idea = "Macbeth" → branches: Characters, Themes, Key Quotes, Symbols']},
+  
+  {id:'jm03',title:'The 5 Whys — Think Like a Scientist',icon:'🔍',cat:'science',
+   concept:'Ask "Why?" five times in a row. Each answer becomes the basis for the next "Why?" This simple technique, developed at Toyota, uncovers the ROOT CAUSE of anything — in science AND in life.',
+   why:'Children naturally ask "why" repeatedly. As we grow up, we stop — but this is exactly how scientific discoveries happen. Newton asked "why does the apple fall?" Einstein asked "why does time slow down?" The 5 Whys trains your brain to never stop at surface-level answers.',
+   steps:['Start with an observation: "Plants grow towards the window"','Why? → "Because they need light"','Why? → "Because light powers photosynthesis"','Why? → "Because chloroplasts convert light to chemical energy"','Why? → "Because chlorophyll molecules absorb photons and..." — see how deep you can go!'],
+   practice:'Take one everyday observation. Ask "why?" 5 times. Write each answer. Where did you get stuck? That is the boundary of your knowledge — the most exciting place to be!',
+   apply:['Why does bread rise? → yeast → CO2 → fermentation → cellular respiration','Why is the sky blue? → light scattering → wavelength → Rayleigh scattering','Why do we need to breathe? → oxygen → cellular respiration → ATP → energy for cells']},
+  
+  {id:'jm04',title:'Spaced Repetition — Build the Habit Early',icon:'🔄',cat:'general',
+   concept:'Review new information at set intervals: 1 day → 3 days → 1 week → 1 month. Each review takes LESS time and lasts LONGER. Start this habit now, and GCSE revision will be easy.',
+   why:'Your brain is like a muscle — it forgets things unless you use them. But each time you "forget and recall," the memory gets stronger. Spacing your reviews makes your brain work harder (in a good way). Students who use spaced repetition from Year 8 perform dramatically better at GCSE.',
+   steps:['After learning something new, test yourself the NEXT DAY (5 minutes)','Test yourself again 3 DAYS later (3 minutes)','Then 1 WEEK later (2 minutes)','Then 1 MONTH later (1 minute — it should be almost instant by now)'],
+   practice:'Pick 3 new things you learned this week. Write each on a flashcard (question on front, answer on back). Put them where you will see them. Tomorrow: test yourself WITHOUT looking.',
+   apply:['Science: Flashcard = "What is the chemical formula for photosynthesis?" / "6CO2 + 6H2O → C6H12O6 + 6O2"','Maths: Flashcard = "What is the formula for area of a circle?" / "πr²"','German: Flashcard = "What is the past tense of gehen?" / "ging"']},
+  
+  {id:'jm05',title:'Elaborative Interrogation — Ask "How?" and "Why?"',icon:'❓',cat:'general',
+   concept:'Every time you learn a fact, ask yourself: "Why is this true?" and "How does this connect to what I already know?" This turns passive reading into active thinking.',
+   why:'Research by Pressley et al. found that students who asked "why" while reading remembered 72% more than those who just read. The brain stores information in NETWORKS, not isolated facts. Asking "how does this connect?" builds those networks.',
+   steps:['Read ONE paragraph or fact','Pause. Ask: "Why does this make sense?"','Try to connect it to something you already know: "This is like..."','Write down your connection — one sentence is enough'],
+   practice:'Read one page of your science textbook. After EVERY paragraph, stop and ask "why?" Write your answer. You should have at least 5 "why" answers for one page.',
+   apply:['"Mitochondria are the powerhouse of the cell" → Why? Because they produce ATP through cellular respiration. How? Like a battery converting fuel into electricity.','"Henry VIII had six wives" → Why? Because he needed a male heir. How does this connect to the Reformation? He broke from the Catholic Church to divorce his first wife.']},
+  
+  {id:'jm06',title:'Growth Mindset — "I Cannot Do This... YET"',icon:'🌱',cat:'general',
+   concept:'Your abilities are not fixed — they grow with effort. The word "yet" changes everything. "I am not good at maths" → "I am not good at maths YET." This is the single most powerful belief for long-term success.',
+   why:'Carol Dweck\'s research tracked thousands of students over decades. Those with a "growth mindset" (believing abilities can improve) consistently outperformed those with a "fixed mindset." When you believe you can improve, you try harder, seek challenges, and bounce back from failure faster.',
+   steps:['Notice when you say "I can\'t do this" or "I\'m bad at X"','Add the word "YET" to the end. Say it out loud.','Think of ONE small thing you can do to improve — just 5 minutes','Celebrate effort, not just results. "I worked hard on this" is more important than "I got it right"'],
+   practice:'Write down one thing you think you are "bad at." Now write: "I am not good at [thing] YET." Underneath, write 3 TINY steps you could take this week. Pick the easiest one. Do it today.',
+   apply:['"I\'m bad at writing essays" → "I\'m not good at writing essays YET." Steps: (1) Read one good essay, (2) Copy its structure, (3) Write one paragraph','"I don\'t understand algebra" → "I don\'t understand algebra YET." Steps: (1) Do 5 easy questions, (2) Watch one 5-min video, (3) Try 2 harder ones']},
+  
+  {id:'jm07',title:'Cornell Notes — Capture, Question, Summarise',icon:'📒',cat:'general',
+   concept:'Split your page: Notes (right side), Questions (left side), Summary (bottom). After class, write questions on the left. Later, cover the notes and answer from the questions. This is note-taking that actually works.',
+   why:'Most students write notes and never look at them again. The Cornell system forces TWO rounds of active thinking: (1) generating questions tests your understanding, (2) writing a summary forces you to identify the main point. Both are proven to improve memory.',
+   steps:['During class: write key points on the RIGHT side — use bullet points, not sentences','After class (same day!): write QUESTIONS on the LEFT that your notes answer','Before next class: cover the RIGHT side. Answer the questions from memory','At the bottom: write a 2-sentence summary — "The main thing I learned was..."'],
+   practice:'Take tomorrow\'s science or history notes using the Cornell format. After class, write at least 5 questions on the left. The next morning: answer them without looking.',
+   apply:['Science: Right = "Photosynthesis: 6CO2+6H2O→C6H12O6+6O2. Occurs in chloroplasts. Needs light." Left = "What is the equation? Where does it happen? What does it need?"','History: Right = "Battle of Hastings 1066. William of Normandy defeated Harold Godwinson." Left = "Who fought? When? Why did William win?"']},
+  
+  {id:'jm08',title:'The Zettelkasten — Smart Notes That Connect',icon:'🗃️',cat:'general',
+   concept:'Instead of notebooks full of pages you never re-read, write ONE idea per card. Link cards together. Over time, your cards become a personal knowledge web — like your own Wikipedia.',
+   why:'A German professor named Niklas Luhmann used this method to write 70 books and 400+ articles. The secret: each card contains ONE atomic idea. Cards link to other cards. When you write, you do not start from scratch — you arrange existing ideas into new patterns.',
+   steps:['Get a box of index cards (or a simple app like Notion)','When you learn something interesting, write ONE idea per card — in your OWN words','At the bottom, write: "See also: [card about related topic]"','Review your cards once a week — shuffle them, find new connections'],
+   practice:'Start with 3 cards today. Card 1: "Photosynthesis turns light into food for plants." Card 2: "Cellular respiration turns food into energy." Card 3: "Photosynthesis and respiration are opposites — one stores energy, one releases it." Link cards 1 and 2 to card 3.',
+   apply:['Science: Build a web of connected concepts — forces, energy, matter, reactions','English: One card per character, one per theme, one per quote — link them','History: One card per event — link by cause and effect']}
+];
+const AVATARS = ['\uD83D\uDC67','\uD83D\uDC69\u200D\uD83D\uDD2C','\uD83D\uDC69\u200D\uD83D\uDCBB','\uD83D\uDC69\u200D\uD83C\uDFA8','\uD83D\uDC69\u200D\uD83D\uDD27','\uD83D\uDC69\u200D\uD83D\uDE80','\uD83C\uDF1F','\uD83C\uDFAF','\uD83D\uDD2C','\uD83D\uDCA1','\uD83E\uDDE0','\uD83D\uDCD0','\uD83D\uDC31','\uD83E\uDD8A','\uD83C\uDF38','\uD83C\uDF0D','\uD83C\uDF0A','\uD83C\uDF08','\u2601\uFE0F','\u2728','\uD83D\uDD25','\uD83D\uDCA5','\uD83C\uDFB5','\uD83C\uDFAE','\uD83D\uDCDA','\uD83D\uDC8E','\uD83D\uDD2E','\uD83D\uDD2D','\uD83E\uDDD0','\uD83C\uDF0C','\u2699\uFE0F','\u26A1'];
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  const panel = document.getElementById('tab-' + tab);
+  if (panel) panel.classList.add('active');
+  const link = document.querySelector(`.sidebar-nav a[onclick*="${tab}"]`);
+  if (link) link.classList.add('active');
+
+  // Lazy-render tab content
+  if (tab === 'tasks') W.Tasks.load('widget-tasks');
+  if (tab === 'errors') W.ErrorBook.load('widget-errors');
+  if (tab === 'planner') W.Planner.load('widget-planner');
+  if (tab === 'wiki') W.Wiki.load('widget-wiki');
+  if (tab === 'chat') W.Chat.load('widget-chat');
+}
+
+function setTheme(theme) {
+  const themes = {
+    blue:   { accent: '#4f8cff', accent2: '#10b981' },
+    purple: { accent: '#a855f7', accent2: '#c084fc' },
+    pink:   { accent: '#f472b6', accent2: '#f9a8d4' },
+    green:  { accent: '#10b981', accent2: '#34d399' },
+    orange: { accent: '#f59e0b', accent2: '#fbbf24' }
+  };
+  const t = themes[theme] || themes.blue;
+  document.documentElement.style.setProperty('--accent', t.accent);
+  document.documentElement.style.setProperty('--accent2', t.accent2);
+  localStorage.setItem('theme_jemma', theme);
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+  document.querySelector(`.theme-dot[data-theme="${theme}"]`)?.classList.add('active');
+}
+
+function showAvatarPicker() {
+  const grid = document.getElementById('avatar-picker-grid');
+  const cur = document.getElementById('profile-avatar').textContent;
+  grid.innerHTML = AVATARS.map(a => `<div class="avatar-option${a===cur?' selected':''}" onclick="selectAvatar('${a}')">${a}</div>`).join('');
+  const modal = document.getElementById('avatar-modal');
+  modal.style.display = 'flex'; modal.classList.add('open');
+}
+
+function selectAvatar(emoji) {
+  document.getElementById('profile-avatar').textContent = emoji;
+  W.Profile.save();
+  const modal = document.getElementById('avatar-modal');
+  modal.style.display = 'none'; modal.classList.remove('open');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block'; t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.style.display = 'none', 300); }, 2000);
+}
+
+function logout() { localStorage.clear(); location.reload(); }
+
+(function init() {
+  const savedTheme = localStorage.getItem('theme_jemma') || 'green';
+  setTheme('green');
+  W.Profile.load();
+  W.Streak.load();
+  W.config.init();
+  W.renderAll();
+  // Countdown live update every minute
+  setInterval(W.updateCountdown, 60000);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') W.closeConfig();
+  });
+})();
+</script>
+</body>
+</html>

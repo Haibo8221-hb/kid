@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Jemma — Plan</title><style>* { box-sizing: border-box; }
+body { font-family: -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif; max-width: 960px; margin: 0 auto; padding: 20px; line-height: 1.7; color: #222; font-size: 15px; }
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1 { font-size: 1.6em; border-bottom: 2px solid #2563eb; padding-bottom: 8px; margin-top: 30px; color: #111; }
+h2 { font-size: 1.3em; margin-top: 28px; border-left: 3px solid #2563eb; padding-left: 10px; color: #1a1a1a; }
+h3 { font-size: 1.1em; margin-top: 22px; color: #333; }
+table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14px; }
+th, td { border: 1px solid #d0d0d0; padding: 7px 10px; text-align: left; }
+th { background: #f3f4f6; font-weight: 600; }
+tr:nth-child(even) { background: #fafafa; }
+code { background: #f0f0f0; padding: 2px 7px; border-radius: 3px; font-size: 13px; }
+pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+pre code { background: none; padding: 0; color: inherit; }
+blockquote { border-left: 4px solid #2563eb; margin: 12px 0; padding: 8px 16px; background: #f8fafc; border-radius: 0 4px 4px 0; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+hr { border: none; border-top: 1px solid #e0e0e0; margin: 30px 0; }
+.resource-box { background: #f8fafc; border: 1px solid #d0e0f0; border-radius: 8px; padding: 16px 20px; margin: 20px 0; }
+.resource-box h3 { margin: 0 0 10px 0; font-size: 1em; color: #1a1a1a; border: none; padding: 0; }
+.resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.resource-item { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px 12px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.resource-item:hover { border-color: #2563eb; }
+.resource-item .icon { font-size: 16px; }
+.resource-item .name { flex: 1; color: #333; }
+.resource-item .size { color: #999; font-size: 11px; }
+.resource-section { margin-bottom: 16px; }
+.resource-section .section-title { font-size: 14px; font-weight: 600; color: #444; margin-bottom: 6px; }
+.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.nav-link { font-size: 14px; }
+</style></head>
+<body>
+<div class="top-bar"><span class="nav-link"><a href="/">← 返回首页</a></span><span><a href="/download/Jemma_Plan.md" style="font-size:13px;background:#e8f0fe;padding:4px 14px;border-radius:4px;">⬇ 下载原版MD</a></span></div>
+<h1>Jemma 英国名校冲刺规划</h1>
+<blockquote>
+<p>建立时间：2026-05-18 | 最新更新：2026-05-18（v1）
+目标：Oxford / Cambridge / Imperial / G5 工程/数学/自然科学方向</p>
+</blockquote>
+<hr />
+<h2>零、术语表（重要缩写全称）</h2>
+<table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>全称</th>
+<th>简单注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UCAS</strong></td>
+<td>Universities and Colleges Admissions Service</td>
+<td>英国大学本科申请系统，相当于英国的"填报志愿"系统</td>
+</tr>
+<tr>
+<td><strong>GCSE</strong></td>
+<td>General Certificate of Secondary Education</td>
+<td>英国两年制初中毕业考试，Year 10-11，相当于英国"中考"</td>
+</tr>
+<tr>
+<td><strong>A-level</strong></td>
+<td>General Certificate of Education Advanced Level</td>
+<td>英国两年制高中课程，Year 12-13，相当于英国"高考"，申请大学的核心成绩</td>
+</tr>
+<tr>
+<td><strong>FMaths</strong></td>
+<td>Further Maths（高等数学）</td>
+<td>A-level选修科目，理工科申请王牌科目，难度高于普通Maths</td>
+</tr>
+<tr>
+<td><strong>MAT</strong></td>
+<td>Mathematics Admissions Test</td>
+<td>Oxford数学系和Imperial工程系的入学笔试，100分满分，通常65+可获面试</td>
+</tr>
+<tr>
+<td><strong>STEP</strong></td>
+<td>Sixth Term Examination Paper</td>
+<td>Cambridge数学系和工程系的入学笔试，STEP 2/3难度高，S级为最高</td>
+</tr>
+<tr>
+<td><strong>ENGAA</strong></td>
+<td>Engineering Admissions Assessment</td>
+<td>Oxford工程系的入学笔试，包含数学和物理选择题</td>
+</tr>
+<tr>
+<td><strong>ESAT</strong></td>
+<td>Engineering Science Assessment Test</td>
+<td>Cambridge工程系的入学笔试，2023年由ENGAA改革而来</td>
+</tr>
+<tr>
+<td><strong>UCAT</strong></td>
+<td>University Clinical Aptitude Test</td>
+<td>医学方向笔试（KCL/UCL等医学院需要）</td>
+</tr>
+<tr>
+<td><strong>UKMT</strong></td>
+<td>United Kingdom Mathematics Trust</td>
+<td>英国数学奥林匹克组织，下设SMC/BMO等竞赛</td>
+</tr>
+<tr>
+<td><strong>SMC</strong></td>
+<td>Senior Mathematical Challenge</td>
+<td>UKMT旗下竞赛（Year 12级别），晋级BMO</td>
+</tr>
+<tr>
+<td><strong>JMC</strong></td>
+<td>Junior Mathematical Challenge</td>
+<td>UKMT旗下竞赛（Year 8-9级别），UKMT入门级</td>
+</tr>
+<tr>
+<td><strong>IMC</strong></td>
+<td>Intermediate Mathematical Challenge</td>
+<td>UKMT旗下竞赛（Year 10-11级别），介于JMC和SMC之间</td>
+</tr>
+<tr>
+<td><strong>BMO</strong></td>
+<td>British Mathematical Olympiad</td>
+<td>UKMT最高级别数学竞赛，金牌是牛剑申请加分项</td>
+</tr>
+<tr>
+<td><strong>BPhO</strong></td>
+<td>British Physics Olympiad</td>
+<td>英国物理奥林匹克，Gold是申请加分项</td>
+</tr>
+<tr>
+<td><strong>UKChO</strong></td>
+<td>UK Chemistry Olympiad</td>
+<td>英国化学奥林匹克，Silver以上是申请加分项</td>
+</tr>
+<tr>
+<td><strong>PS</strong></td>
+<td>Personal Statement</td>
+<td>个人陈述，UCAS申请的必要文书，4000字符</td>
+</tr>
+<tr>
+<td><strong>EPQ</strong></td>
+<td>Extended Project Qualification</td>
+<td>研究性学习项目，相当于半个A-level，面试加分项</td>
+</tr>
+<tr>
+<td><strong>UNIQ</strong></td>
+<td>-</td>
+<td>Oxford大学官方夏校，面向Year 11-12学生，免费但竞争激烈</td>
+</tr>
+<tr>
+<td><strong>Headington</strong></td>
+<td>Headington School</td>
+<td>牛津顶级私立女校，Diya和Jemma就读</td>
+</tr>
+<tr>
+<td><strong>G5</strong></td>
+<td>-</td>
+<td>5所精英大学：Oxford、Cambridge、Imperial、UCL、LSE</td>
+</tr>
+<tr>
+<td><strong>Imperial</strong></td>
+<td>Imperial College London</td>
+<td>帝国理工学院，G5之一，工程/CS/医学王牌</td>
+</tr>
+<tr>
+<td><strong>KCL</strong></td>
+<td>King's College London</td>
+<td>伦敦国王学院，G5之外，医学/工程很强</td>
+</tr>
+<tr>
+<td><strong>AoPS</strong></td>
+<td>Art of Problem Solving</td>
+<td>国际数学竞赛学习平台，community强大</td>
+</tr>
+<tr>
+<td><strong>Isaac Physics</strong></td>
+<td>-</td>
+<td>剑桥运营的物理奥赛训练平台，免费</td>
+</tr>
+<tr>
+<td><strong>YYGS</strong></td>
+<td>Yale Young Global Scholars</td>
+<td>耶鲁大学全球学者项目，热门夏校</td>
+</tr>
+<tr>
+<td><strong>BMAT</strong></td>
+<td>BioMedical Admissions Test</td>
+<td>医学方向笔试</td>
+</tr>
+<tr>
+<td><strong>iWS</strong></td>
+<td>-</td>
+<td>英国私教平台，The Independent School</td>
+</tr>
+<tr>
+<td><strong>Sparx Maths</strong></td>
+<td>-</td>
+<td>学校指定数学作业平台，自适应难度</td>
+</tr>
+<tr>
+<td><strong>UK Bebras</strong></td>
+<td>-</td>
+<td>英国计算思维挑战赛，编程/CS方向竞赛</td>
+</tr>
+<tr>
+<td><strong>Tinkercad</strong></td>
+<td>-</td>
+<td>3D建模+电路设计平台（Computing老师推荐）</td>
+</tr>
+<tr>
+<td><strong>IMK</strong></td>
+<td>Intermediate Kangaroo</td>
+<td>UKMT旗下Kangaroo系列竞赛（介于IMC和SMC之间）</td>
+</tr>
+<tr>
+<td><strong>National</strong></td>
+<td>-</td>
+<td>UK Bebras Challenge全国排名前10%获奖等级</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>当前位置</h3>
+<ul>
+<li><strong>Jemma</strong>: Year 8，Headington School</li>
+<li><strong>March 2026成绩单亮点</strong>：</li>
+<li>Mathematics: <strong>Exceptional</strong>（95%）🏆 — 🎯 理工种子</li>
+<li>Chemistry: <strong>Exceptional</strong>（97%）🏆 — 🎯 科学潜力</li>
+<li>Computing: <strong>UK Bebras Distinction</strong>（全国前10%）🏆 — 🎯 编程天赋</li>
+<li>Art: <strong>Exceptional</strong>（老师评"talented Artist"）🎯 — 艺术才华</li>
+<li>Physics: <strong>Above Standard</strong> ✅ — 稳定</li>
+<li>English/History/Drama/Music: <strong>Meeting Standard</strong> ➖ — 稳定，参与度可提升</li>
+<li><strong>自我反思</strong>：Jemma自己写了100+字的总结，显示她自我驱动力强、有目标意识</li>
+<li><strong>核心判断</strong>：和Diya一样是明显的理工科方向，数学+编程+科学三核强，还有艺术天赋不冲突。英语自信需要培养（不是能力问题，是confidence问题）</li>
+<li><strong>暑假专属规划</strong>：详见 <code>Jemma_2026_Summer_Guide.md</code>（和Diya的规划不同，Jemma以低压力、高兴趣、打基础为核心）</li>
+</ul>
+<hr />
+<h2>二、目标学校体系</h2>
+<h3>与Diya共享的目标体系</h3>
+<table>
+<thead>
+<tr>
+<th>梯队</th>
+<th>学校</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>冲刺档</td>
+<td>Oxford / Cambridge / Imperial</td>
+<td>理工方向G5三强</td>
+</tr>
+<tr>
+<td>主攻档</td>
+<td>Edinburgh / UCL / Manchester / KCL</td>
+<td>扩招，录取率较高</td>
+</tr>
+<tr>
+<td>稳保档</td>
+<td>Durham / Warwick / Bristol / Southampton</td>
+<td>工程学院声誉好</td>
+</tr>
+</tbody>
+</table>
+<h3>UCAS志愿梯度建议</h3>
+<div class="codehilite"><pre><span></span><code>冲刺档（2个）：Oxford + Imperial
+主攻档（2个）：Edinburgh + UCL
+稳保档（1个）：Bristol / Warwick / Durham
+</code></pre></div>
+
+<blockquote>
+<p>注意：Jemma UCAS申请预计在2030年左右，届时竞争情况可能有变，但梯度策略不变。</p>
+</blockquote>
+<hr />
+<h2>三、完整时间线（Year 8 → Year 13）</h2>
+<h3>【Phase A】Year 8-9 — 探索期</h3>
+<div class="codehilite"><pre><span></span><code>目标：发现1-2个真正的学科热情 + 英语学术写作起步 + 数学竞赛入门
+</code></pre></div>
+
+<h4>学科探索（Year 8-9）</h4>
+<ul>
+<li>[ ] 多尝试：理工科夏令营/科学馆活动/编程体验</li>
+<li>[ ] 观察哪一科让她真正"入迷"而不是完成任务</li>
+<li>[ ] 记录：每次学到有趣的东西，写下来（未来PS素材）</li>
+<li>[ ] 和姐姐Diya聊聊她的学习体验（榜样的力量）</li>
+</ul>
+<h4>英语学术写作（最高优先级，长期进行）</h4>
+<div class="codehilite"><pre><span></span><code>这是中国学生在英国申请的最大短板
+Jemma现在Year 8开始，有充足时间系统性训练
+目标：到Year 13时能够用英语流畅表达复杂学术思想
+
+校内资源：
+- Headington English department：告诉老师Jemma有理工方向意向，请老师推荐书单
+- 学校写作俱乐部/辩论社（展示表达能力和逻辑思维）
+
+校外资源（Year 8-9开始）：
+- 英国私教（iWS平台，£40-80/小时）：找教GCSE/A-level英语写作的老师
+- 线上平台：The Student Room（英国学生论坛，学术写作社区）
+- Khan Academy English（学术写作系统课，免费）
+
+关键：不是考雅思，而是学术写作思维方式的训练
+</code></pre></div>
+
+<h4>课外活动体系化</h4>
+<ul>
+<li>[ ] 乐器/运动（保持1-2个精通，不要太多）</li>
+<li>[ ] 学校社团领导力（Year 9争取一个领导岗位）</li>
+<li>[ ] 义工/社区服务（英国大学看重，全人发展）</li>
+<li>[ ] 跟随姐姐的理工科学习：可以借Diya的阅读书单来试读</li>
+</ul>
+<h4>数学基础（Year 8-9）</h4>
+<ul>
+<li>[ ] UKMT Intermediate Math Challenge（Year 9参加，目标Gold）</li>
+<li>[ ] 如果能力达到：开始挑战Senior级别</li>
+<li>[ ] 建立数学竞赛体系感：每周1-2道难题</li>
+<li>[ ] 和Diya一起准备UKMT（姐姐Year 10，Jemma Year 9，可以互相激励）</li>
+</ul>
+<hr />
+<h3>【Phase B】Year 10-11 — 积累期</h3>
+<div class="codehilite"><pre><span></span><code>目标：GCSE高分 + 竞赛体系 + Summer School + PS素材池
+</code></pre></div>
+
+<h4>GCSE（Year 10-11）</h4>
+<div class="codehilite"><pre><span></span><code>目标：8-9个A*-A（含Maths + Science核心）
+选课建议（参考Diya经验）：
+  <span class="k">-</span> 必须：Maths, English, Physics, Chemistry（理工必备）
+  <span class="k">-</span> 强烈建议：Further Maths（如Headington提供，理工王牌）
+  <span class="k">-</span> 考虑：Computer Science（现代工程申请加分项）
+  <span class="k">-</span> 其他：根据兴趣选择（不要太多，理工核心优先）
+
+注意：Jemma选课时可借鉴Diya的选课策略，少走弯路
+</code></pre></div>
+
+<h4>UKMT + BMO体系（Year 10-11）</h4>
+<div class="codehilite"><pre><span></span><code>Year 10: UKMT Senior Math Challenge → 晋级BMO Round 1
+Year 11: BMO Round 1 + BMO Round 2（如晋级）
+
+目标：Year 11时能拿到BMO Medal（和牛剑申请直接挂钩）
+优势：有Diya的经验可以借鉴，备考更有效率
+</code></pre></div>
+
+<h4>物理/化学 Olympiad（Year 10-11）</h4>
+<ul>
+<li>[ ] BPhO Physics Olympiad R1（Year 11，目标Gold）</li>
+<li>[ ] UK Chemistry Olympiad R1（Year 11，目标Silver）</li>
+<li>[ ] 训练资源：Isaac Physics（剑桥，免费）+ BPhO官网</li>
+</ul>
+<h4>Summer School（Year 10-11暑假）</h4>
+<p><strong>Year 10暑假：</strong>
+- Headington或其他英国私校夏令营（体验英国教育）
+- 科学类夏令营（STEM方向）
+- 和姐姐一起参加（如果有适合的项目）</p>
+<p><strong>Year 11暑假（关键窗口）：</strong>
+- <strong>UNIQ</strong>（Oxford免费夏校）— 必须申请
+- <strong>Imperial Engineering Summer School</strong> — 工程方向最对口
+- 科研项目（国内：中科院/清华/北大暑期实验室）
+- <strong>YYGS Yale Young Global Scholars</strong>（美国藤校夏校）</p>
+<h4>PS素材积累（Year 10-11）</h4>
+<div class="codehilite"><pre><span></span><code>- 学术阅读笔记：每学期至少2本课外学术书籍（数学/物理/工程）
+- EPQ准备：Year 11确定选题方向
+- 项目经历：任何独立完成的工程/科学项目都算
+- 跟随Diya的项目：如果Diya做了某个Engineering shadowing，
+  Jemma可以作为观察者参与（从小积累经验）
+</code></pre></div>
+
+<hr />
+<h3>【Phase C】Year 12-13 — 冲刺期</h3>
+<div class="codehilite"><pre><span></span><code>目标：对标Diya的路径，但提前布局，更从容
+</code></pre></div>
+
+<h4>A-level选课</h4>
+<div class="codehilite"><pre><span></span><code>Headington A-level组合（确认Headington提供哪些）：
+标准理工组合：Maths + Further Maths + Physics + Chemistry（4门）
+可加：Computer Science（CS是现代工程申请加分项）
+
+注意：和Diya选同样的组合，Headington会提供
+</code></pre></div>
+
+<h4>附加考试准备（Year 12）</h4>
+<div class="codehilite"><pre><span></span><code>根据方向：
+- 数学/工程：MAT（Year 12十月）+ STEP（Year 12六月）
+- 医学：UCAT + BMAT
+- 自然科学：物理/化学 Olympiad成绩 + 附加考试
+
+优势：Diya已经走过一遍，Jemma有姐姐的经验指导
+</code></pre></div>
+
+<h4>UCAS申请（Year 13，2030年申请季）</h4>
+<div class="codehilite"><pre><span></span><code>时间线同Diya
+优势：Jemma有Diya的经验可以借鉴，路径更清晰
+更从容：Diya的时间表就是Jemma的参考模板
+</code></pre></div>
+
+<hr />
+<h2>四、英国本地备考资源</h2>
+<blockquote>
+<p>与Diya共享资源池</p>
+</blockquote>
+<h3>数学竞赛（UKMT / BMO）</h3>
+<table>
+<thead>
+<tr>
+<th>资源</th>
+<th>说明</th>
+<th>费用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UKMT官网</td>
+<td>SMC/BMO历年真题</td>
+<td>免费</td>
+</tr>
+<tr>
+<td>AoPS (Art of Problem Solving)</td>
+<td>竞赛圣经+community</td>
+<td>免费+付费</td>
+</tr>
+<tr>
+<td>UKMT Online Skills Builder</td>
+<td>梯度训练</td>
+<td>免费</td>
+</tr>
+<tr>
+<td>Mathsaurus YouTube</td>
+<td>UKMT/MAT专项</td>
+<td>免费</td>
+</tr>
+</tbody>
+</table>
+<h3>物理/化学 Olympiad</h3>
+<table>
+<thead>
+<tr>
+<th>资源</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BPhO官网</td>
+<td>R1/R2历年真题</td>
+</tr>
+<tr>
+<td>Isaac Physics（剑桥运营）</td>
+<td>物理奥赛训练，免费</td>
+</tr>
+<tr>
+<td>RSC官网</td>
+<td>UKChO历年真题</td>
+</tr>
+</tbody>
+</table>
+<h3>附加考试备考</h3>
+<table>
+<thead>
+<tr>
+<th>资源</th>
+<th>说明</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cambridge Admission Testing官网</td>
+<td>MAT/STEP syllabus + 历年真题</td>
+<td>MAT/STEP</td>
+</tr>
+<tr>
+<td>Tonycrypt YouTube</td>
+<td>MAT真题精讲</td>
+<td>MAT</td>
+</tr>
+<tr>
+<td>剑桥STEP Support Programme</td>
+<td>官方免费培训</td>
+<td>STEP</td>
+</tr>
+<tr>
+<td>Cambridge官网</td>
+<td>ENGAA/ESAT syllabus + 样题</td>
+<td>ENGAA/ESAT</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>五、广深/国内资源</h2>
+<h3>国内理工科暑期项目（暑假）</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>机构</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>中科院暑期科研</td>
+<td>中科院</td>
+<td>竞争激烈，含金量高</td>
+</tr>
+<tr>
+<td>清华/北大实验室</td>
+<td>大学官方</td>
+<td>需内部渠道</td>
+</tr>
+<tr>
+<td>丘成桐科学奖</td>
+<td>清华大学</td>
+<td>数学/物理/化学，Year 11-12</td>
+</tr>
+<tr>
+<td>全国青少年科技创新大赛</td>
+<td>中国科协</td>
+<td>理工科背景提升</td>
+</tr>
+</tbody>
+</table>
+<h3>竞赛培训（深圳/广州）</h3>
+<table>
+<thead>
+<tr>
+<th>机构</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MathMaster（深圳/广州）</td>
+<td>AMC/欧几里得/AIME培训</td>
+</tr>
+<tr>
+<td>思汇教育（深圳）</td>
+<td>ALEVEL+竞赛</td>
+</tr>
+<tr>
+<td>新东方国际学科</td>
+<td>ALEVEL/AP/IB+竞赛</td>
+</tr>
+</tbody>
+</table>
+<h3>在线学习平台</h3>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Brilliant.org</td>
+<td>数学/科学思维训练</td>
+</tr>
+<tr>
+<td>Coursera/edX</td>
+<td>英国大学工程课先修</td>
+</tr>
+<tr>
+<td>Khan Academy</td>
+<td>数学+物理基础，免费</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注意：国内培训主要针对AMC/AIME，美国方向。对英国附加考试针对性有限。以英国本地免费资源为主，国内作补充。</p>
+</blockquote>
+<hr />
+<h2>六、Summer School + 背景提升</h2>
+<h3>英国Summer School（最推荐）</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>方向</th>
+<th>费用</th>
+<th>难度</th>
+<th>价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UNIQ</strong>（Oxford官方）</td>
+<td>不限</td>
+<td><strong>免费</strong></td>
+<td>高</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Imperial Engineering</strong></td>
+<td>工程</td>
+<td>£2000-3000</td>
+<td>中</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Imperial Science</strong></td>
+<td>自然科学</td>
+<td>£2000-3000</td>
+<td>中</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>UCL Summer School</strong></td>
+<td>不限</td>
+<td>£2000-3500</td>
+<td>中</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>YYGS Yale</strong></td>
+<td>不限</td>
+<td>£3000+</td>
+<td>高</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3>美国藤校夏校</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YYGS Yale Young Global Scholars</td>
+<td>热门，竞争激烈</td>
+</tr>
+<tr>
+<td>Harvard Summer School</td>
+<td>高难度，高价值</td>
+</tr>
+<tr>
+<td>Stanford Summer School</td>
+<td>工程/理科方向</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>七、PS + 面试策略</h2>
+<blockquote>
+<p>Jemma Year 12-13时，可以直接使用Diya的经验和模板</p>
+</blockquote>
+<h3>PS写作时间线</h3>
+<div class="codehilite"><pre><span></span><code>Year 10-11：素材积累期（阅读/竞赛/项目/夏校）
+Year 12（9月）：初稿
+Year 12（10月）：修改
+Year 12（11月）：定稿
+</code></pre></div>
+
+<h3>理工科PS加分项</h3>
+<ul>
+<li>独立项目（数学建模/物理研究/编程项目）</li>
+<li>深度阅读（读完专业书后有自己的思考）</li>
+<li>竞赛成绩（BMO Medal/BPhO Gold是硬通货）</li>
+<li>Summer School经历（UNIQ/Imperial夏校）</li>
+</ul>
+<h3>面试准备</h3>
+<ul>
+<li>不要猜答案，要展现思考过程</li>
+<li>画图/列公式是好的沟通方式</li>
+<li>不懂就说不懂，但尝试给思路</li>
+</ul>
+<hr />
+<h2>八、关键执行清单</h2>
+<h3>Year 8-9（本学期+年度）</h3>
+<ul>
+<li>[ ] 和Jemma聊兴趣方向（观察不是灌输）</li>
+<li>[ ] 找英语学术写作资源（开始建立习惯）</li>
+<li>[ ] UKMT Intermediate Math Challenge报名</li>
+<li>[ ] 建立学术阅读习惯（每学期至少1本）</li>
+<li>[ ] 和Diya建立学习互助关系（姐姐是榜样）</li>
+</ul>
+<h3>Year 8（暑假）</h3>
+<ul>
+<li>[ ] STEM夏令营体验（英国/国内）</li>
+<li>[ ] 英语学术写作开始（找私教或线上课）</li>
+<li>[ ] 跟随Diya的学习节奏（借姐姐的书单试读）</li>
+</ul>
+<h3>Year 9（学年）</h3>
+<ul>
+<li>[ ] UKMT Intermediate Math Challenge，目标Gold</li>
+<li>[ ] 探索物理/化学基础（和Diya一起做实验？）</li>
+<li>[ ] 英语写作持续训练</li>
+</ul>
+<h3>Year 9（暑假）</h3>
+<ul>
+<li>[ ] 继续英语学术写作</li>
+<li>[ ] 准备Year 10 UKMT Senior Math Challenge</li>
+</ul>
+<h3>Year 10-11（积累期）</h3>
+<ul>
+<li>[ ] UKMT SMC → BMO Round 1</li>
+<li>[ ] BPhO/UKChO Olympiad参赛</li>
+<li>[ ] GCSE备考（目标8-9个A*-A）</li>
+<li>[ ] Summer School申请（UNIQ必申）</li>
+<li>[ ] EPQ准备</li>
+</ul>
+<hr />
+<h2>九、预算参考</h2>
+<p>与Diya共享预算框架：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>预算</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>英国本地备考</td>
+<td>£0-3000/年</td>
+<td>以免费资源为主</td>
+</tr>
+<tr>
+<td>Summer School</td>
+<td>£0-4000/次</td>
+<td>UNIQ免费，Imperial自费</td>
+</tr>
+<tr>
+<td>英语私教（英国）</td>
+<td>£40-80/小时</td>
+<td>£800-2000/暑假</td>
+</tr>
+<tr>
+<td>英语私教（国内）</td>
+<td>¥300-600/小时</td>
+<td>约¥5000-15000/暑假</td>
+</tr>
+<tr>
+<td>国内竞赛培训</td>
+<td>¥5000-20000/期</td>
+<td>视具体项目</td>
+</tr>
+<tr>
+<td>模拟面试（Year 13）</td>
+<td>£200-500/次</td>
+<td>非必需</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>十、姐姐Diya的经验借鉴</h2>
+<blockquote>
+<p>Jemma的最大优势：有姐姐的路径可参考，少走弯路</p>
+</blockquote>
+<h3>Jemma可以从Diya身上学到的</h3>
+<ol>
+<li><strong>Diya的选课</strong>：JemmaYear 10选课时直接复制Diya策略</li>
+<li><strong>Diya的竞赛经验</strong>：UKMT/BMO备赛方法论直接复用</li>
+<li><strong>Diya的暑假安排</strong>：2027年Diya的暑假计划就是Jemma 2028年的参考</li>
+<li><strong>Diya的PS素材</strong>：Jemma可以跟着Diya做项目（双份经历）</li>
+<li><strong>Diya的错误</strong>：Jemma避免Diya犯过的错误（尤其是English）</li>
+</ol>
+<h3>两姐妹的协作</h3>
+<ul>
+<li>一起准备UKMT（一个Year 10，一个Year 9）</li>
+<li>共享阅读书单和资源</li>
+<li>Diya的Engineering shadowing经验可以分享给Jemma</li>
+<li>UCAS申请经验：2028年Diya申请后，Jemma2030年申请有完整参照</li>
+</ul>
+<hr />
+<p><strong>文档状态：v1，2026-05-18</strong>
+<strong>Jemma规划，Year 8起，长期规划</strong></p>
+
+<div class="footer" style="margin-top:40px;padding-top:16px;border-top:1px solid #e0e0e0;font-size:13px;color:#888;">最后更新：2026-05-22 13:38</div>
+</body></html>

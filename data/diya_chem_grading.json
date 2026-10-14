@@ -1,0 +1,295 @@
+{
+  "exam_title": "GCSE Chemistry",
+  "total_score": "28/60",
+  "grade_estimate": "4",
+  "questions": [
+    {
+      "number": "03.3",
+      "topic": "Atomic Structure and Isotopes",
+      "max_marks": 2,
+      "student_answer": "Isotopes is when you have the same number of protons and different number of protons (sic, should be 'neutrons').",
+      "mark": 1,
+      "correct_answer": "Isotopes are atoms of the same element with the same number of protons but different numbers of neutrons.",
+      "feedback": "You correctly identified that isotopes have the same number of protons. However, you made a key error by saying 'different number of protons' instead of 'different number of neutrons'. This cost you the second mark. Be careful to distinguish between protons and neutrons."
+    },
+    {
+      "number": "04.1",
+      "topic": "Graphs and Data Analysis",
+      "max_marks": 2,
+      "student_answer": "Draw two lines of best fit on Figure 3. The lines should cross.",
+      "mark": 0,
+      "correct_answer": "Two lines of best fit should be drawn: one through the increasing data points and one through the plateau/constant data points, crossing at the point where the temperature stops rising.",
+      "feedback": "You did not provide a drawing, so no marks can be awarded. The question required you to draw the lines on the graph. For full marks, you needed to show a line of best fit for the increasing trend and a separate horizontal line for the plateau, crossing at the maximum temperature point."
+    },
+    {
+      "number": "04.2",
+      "topic": "Rates of Reaction / Energy Changes",
+      "max_marks": 4,
+      "student_answer": "As the mass of the Zinc increases, the highest temperature increases. Until it has reach to its maximum and stays within its high temperature range.",
+      "mark": 2,
+      "correct_answer": "As the mass of zinc increases, the temperature increases because more zinc reacts, releasing more energy. The temperature reaches a maximum when all the copper sulfate has reacted. Adding more zinc beyond this point has no effect because the reaction is complete (zinc is in excess).",
+      "feedback": "You correctly identified the general trend: temperature increases then plateaus. This gains 2 marks. However, you did not explain why the temperature increases (more reaction, more energy released) or why it plateaus (all copper sulfate used up, zinc in excess). Using data from the graph would have also helped you gain full marks."
+    },
+    {
+      "number": "04.3",
+      "topic": "Energy Changes / Practical Techniques",
+      "max_marks": 2,
+      "student_answer": "Glass beakers may conduct some heat during the process, making the results slightly higher, whereas polystyrene does not.",
+      "mark": 1,
+      "correct_answer": "Polystyrene is a better insulator than glass, so less heat is lost to the surroundings. This means the temperature change measured is more accurate (closer to the true value).",
+      "feedback": "You correctly identified that polystyrene is a better insulator (or that glass conducts heat). However, you made an error in saying the results would be 'slightly higher'. Heat loss would cause the temperature to be lower, not higher. The key point is that polystyrene reduces heat loss, giving a more accurate result."
+    },
+    {
+      "number": "04.4",
+      "topic": "Chemical Changes / Ionic Equations",
+      "max_marks": 2,
+      "student_answer": "Zn(s) + Cu²⁺(aq) → Zn²⁺(aq) + Cu(s)",
+      "mark": 2,
+      "correct_answer": "Zn(s) + Cu²⁺(aq) → Zn²⁺(aq) + Cu(s)",
+      "feedback": "Excellent. You have written the correct ionic equation with correct state symbols. Full marks awarded."
+    },
+    {
+      "number": "04.5",
+      "topic": "Quantitative Chemistry / Measurement",
+      "max_marks": 3,
+      "student_answer": "Mean highest temperature reached = 37.5 ± 0.5 °C",
+      "mark": 2,
+      "correct_answer": "Mean = (37.6 + 37.2 + 37.8 + 37.4) / 4 = 37.5 °C. Uncertainty = (range) / 2 = (37.8 - 37.2) / 2 = 0.3 °C. Answer: 37.5 ± 0.3 °C",
+      "feedback": "You correctly calculated the mean temperature (37.5 °C), which gains 1 mark. You also correctly identified that an uncertainty should be given, gaining another mark. However, you calculated the uncertainty incorrectly. The uncertainty is half the range (0.6/2 = 0.3 °C), not ±0.5 °C."
+    },
+    {
+      "number": "04.6",
+      "topic": "Rates of Reaction / Errors",
+      "max_marks": 1,
+      "student_answer": "Impurities",
+      "mark": 0,
+      "correct_answer": "Incomplete reaction / heat loss to surroundings / variation in stirring / temperature readings not taken at the exact same time.",
+      "feedback": "'Impurities' is too vague and not a specific source of random error in this context. A better answer would be 'heat loss to the surroundings' or 'inconsistent stirring'. Random errors are caused by unpredictable variations in the experiment."
+    },
+    {
+      "number": "05.1",
+      "topic": "Bonding / Ionic Compounds",
+      "max_marks": 4,
+      "student_answer": "Calcium atoms goes to the anode and chlorine atoms goes to the cathode.",
+      "mark": 0,
+      "correct_answer": "Calcium atoms lose two electrons to form Ca²⁺ ions. Chlorine atoms gain one electron each to form Cl⁻ ions. The oppositely charged ions are then attracted to each other by strong electrostatic forces, forming an ionic lattice.",
+      "feedback": "This answer is completely incorrect. You have confused the process of electrolysis with the formation of an ionic compound. The question asks about the transfer of electrons between atoms to form ions. You need to describe electron loss by calcium and electron gain by chlorine."
+    },
+    {
+      "number": "05.2",
+      "topic": "Electrolysis",
+      "max_marks": 1,
+      "student_answer": "The melting point is too high.",
+      "mark": 0,
+      "correct_answer": "Solid calcium chloride cannot conduct electricity because the ions are fixed in a lattice and cannot move.",
+      "feedback": "You have stated a property (high melting point) but not explained why it prevents electrolysis. The reason solid ionic compounds cannot be electrolysed is that their ions are not free to move to the electrodes. They need to be molten or dissolved in water to conduct."
+    },
+    {
+      "number": "05.3",
+      "topic": "Electrolysis",
+      "max_marks": 1,
+      "student_answer": "anions.",
+      "mark": 0,
+      "correct_answer": "Hydrogen (H₂)",
+      "feedback": "The question asks for the name of the product, not the type of ion. In aqueous calcium chloride, at the negative electrode (cathode), hydrogen is produced because it is less reactive than calcium. 'Anions' are negative ions that move to the positive electrode."
+    },
+    {
+      "number": "05.4",
+      "topic": "Electrolysis / Half Equations",
+      "max_marks": 1,
+      "student_answer": "2Cl⁻ → Cl₂ + 2e⁻",
+      "mark": 1,
+      "correct_answer": "2Cl⁻ → Cl₂ + 2e⁻",
+      "feedback": "Correct. You have correctly identified the half-equation for the formation of chlorine at the positive electrode (anode). Full marks."
+    },
+    {
+      "number": "05.5",
+      "topic": "Electrolysis / Ions",
+      "max_marks": 3,
+      "student_answer": "The negative CrO₄²⁻ went to the anode whereas the positive Cu²⁺ went to the cathode, Creating two separate colours.",
+      "mark": 2,
+      "correct_answer": "Cu²⁺ ions are positive and move to the negative electrode (cathode), forming a blue colour. CrO₄²⁻ ions are negative and move to the positive electrode (anode), forming a yellow colour.",
+      "feedback": "You correctly identified which ion moved to which electrode and that this created the separate colours. This gains 2 marks. To get the third mark, you needed to explicitly state that the blue colour is due to Cu²⁺ and the yellow colour is due to CrO₄²⁻."
+    },
+    {
+      "number": "06.1",
+      "topic": "Chemical Cells / Reactivity Series",
+      "max_marks": 3,
+      "student_answer": "Most reactive Mg Zn Ni Cu Ag Least reactive. Justification Magnisium has the highest voltage released, whereas Sliver has the lowest.",
+      "mark": 2,
+      "correct_answer": "Most reactive: Mg, Zn, Ni, Cu, Ag. Justification: The greater the difference in reactivity between the two metals, the larger the voltage. Magnesium is most reactive, so it has the largest voltage difference with the other metals. Silver is least reactive.",
+      "feedback": "You correctly ordered the metals by reactivity (Mg, Zn, Ni, Cu, Ag), which gains 1 mark. Your justification is partially correct (Mg has highest voltage, Ag has lowest), but you didn't fully explain the link between reactivity difference and voltage. The voltage depends on the difference in reactivity between the two metals in the cell."
+    },
+    {
+      "number": "06.2",
+      "topic": "Chemical Cells / Practical Planning",
+      "max_marks": 6,
+      "student_answer": "Set up the electrodes within a beaker containing 1.0 mol/dm³ Sodium Chloride Solution. Connect the electrodes with the voltage. Test out the voltage with one type of metal. Write down the results for the first concentration. Add 10 ml of water each time to get a more diluted solution and write down each time the voltage with the same piece of metal. Repeat its process until the results are repeating the same results.",
+      "mark": 3,
+      "correct_answer": "1. Use a measuring cylinder to make different concentrations of NaCl solution (e.g., 0.2, 0.4, 0.6, 0.8, 1.0 mol/dm³) by diluting the 1.0 mol/dm³ solution with water. 2. Set up the cell with two electrodes (e.g., Mg and Cu) and the first concentration of solution. 3. Measure and record the voltage. 4. Repeat with the same electrodes and the other concentrations. 5. Control variables: same electrodes, same temperature, same depth of immersion. 6. Repeat each measurement for reliability and calculate a mean.",
+      "feedback": "You have a good basic plan: you mention diluting the solution and measuring the voltage. This gains 3 marks for a reasonable method. However, you missed several key details for full marks: you didn't specify how to make different concentrations (using a measuring cylinder), you didn't mention controlling variables (same electrodes, temperature), and you didn't mention repeating for reliability. A more structured, step-by-step plan is needed."
+    },
+    {
+      "number": "06.3",
+      "topic": "Chemical Cells / Fuel Cells",
+      "max_marks": 2,
+      "student_answer": "I haven't learnt hydrogen fuel cells yet :)",
+      "mark": 0,
+      "correct_answer": "Hydrogen is oxidised at the anode, releasing electrons. These electrons flow through an external circuit to the cathode, creating a potential difference. At the cathode, oxygen is reduced, combining with the electrons and hydrogen ions to form water.",
+      "feedback": "No attempt was made to answer the question. You need to revise the topic of fuel cells. The key points are the oxidation of hydrogen at the anode, the flow of electrons through the circuit, and the reduction of oxygen at the cathode."
+    },
+    {
+      "number": "07.1",
+      "topic": "Bonding / Properties of Metals",
+      "max_marks": 2,
+      "student_answer": "The heat can pass through the particles of the iron metal.",
+      "mark": 1,
+      "correct_answer": "Iron has a giant metallic lattice structure. Thermal energy is transferred through the metal by the vibration of ions and the movement of delocalised electrons.",
+      "feedback": "You have a basic idea that heat passes through the metal, which gains 1 mark. However, you need to be more specific. The mechanism involves the delocalised electrons gaining kinetic energy and transferring it through the metal. Mentioning 'delocalised electrons' is key for the second mark."
+    },
+    {
+      "number": "07.2",
+      "topic": "Bonding / Alloys",
+      "max_marks": 3,
+      "student_answer": "The different sizes of metal particles can prevent the particles sliding over each-other when it only contains iron particles. Making it harder than pure iron.",
+      "mark": 3,
+      "correct_answer": "In pure iron, the layers of atoms can slide over each other easily. In an alloy, different sized atoms distort the layers, making it harder for them to slide over each other. This makes the alloy harder and stronger.",
+      "feedback": "Excellent answer. You have clearly explained that different sized atoms distort the layers and prevent them from sliding. This is a perfect explanation for full marks."
+    },
+    {
+      "number": "07.3",
+      "topic": "Quantitative Chemistry / Equations",
+      "max_marks": 1,
+      "student_answer": "2Fe + 3Cl₂ → 2FeCl₃",
+      "mark": 1,
+      "correct_answer": "2Fe + 3Cl₂ → 2FeCl₃",
+      "feedback": "Correct. You have selected the correct balanced equation. Full marks."
+    },
+    {
+      "number": "07.4",
+      "topic": "Quantitative Chemistry / Ions",
+      "max_marks": 1,
+      "student_answer": "3 Fe³⁺ : 4 O²⁻",
+      "mark": 1,
+      "correct_answer": "3 Fe³⁺ : 4 O²⁻",
+      "feedback": "Correct. You have selected the correct ratio of ions. Full marks."
+    },
+    {
+      "number": "07.5",
+      "topic": "Quantitative Chemistry / Percentage Mass",
+      "max_marks": 3,
+      "student_answer": "56×3 + 16×4 = 232. I didn't learn about percentage by mass :)",
+      "mark": 1,
+      "correct_answer": "Mr of Fe₃O₄ = (56×3) + (16×4) = 168 + 64 = 232. Mass of iron = 168. Percentage = (168/232) × 100 = 72.4%",
+      "feedback": "You correctly calculated the Mr of Fe₃O₄ (232), which gains 1 mark. However, you did not complete the calculation to find the percentage by mass. You needed to calculate the total mass of iron (168) and then divide by the Mr and multiply by 100."
+    },
+    {
+      "number": "07.6",
+      "topic": "Quantitative Chemistry / Gas Volumes",
+      "max_marks": 5,
+      "student_answer": "40 Kg = 40000 g. 40000 / 160 = 250. Ratio: 2 : 3. 250 : 375. 375 × 24 = 9000. Volume of carbon dioxide = 9000 dm³",
+      "mark": 5,
+      "correct_answer": "Moles of Fe₂O₃ = 40000/160 = 250 mol. Ratio of Fe₂O₃:CO₂ = 2:3, so moles of CO₂ = (250/2) × 3 = 375 mol. Volume = 375 × 24 = 9000 dm³.",
+      "feedback": "Excellent. You have correctly converted kg to g, calculated the moles of Fe₂O₃, used the mole ratio to find moles of CO₂, and calculated the volume. This is a perfect, fully worked answer. Full marks."
+    },
+    {
+      "number": "08.1",
+      "topic": "Organic Chemistry / Properties",
+      "max_marks": 3,
+      "student_answer": "The bonds within the hydrogen and carbon are very weak and needs less energy for them to break.",
+      "mark": 1,
+      "correct_answer": "Propane is a simple molecule with weak intermolecular forces (van der Waals forces) between molecules. Little energy is needed to overcome these forces, so it has a low boiling point.",
+      "feedback": "You have the right idea about needing little energy to break bonds, but you have confused the type of bond. Boiling point depends on the strength of the intermolecular forces between molecules, not the covalent bonds within the molecule. You need to mention 'intermolecular forces' or 'van der Waals forces' for full marks."
+    },
+    {
+      "number": "08.2",
+      "topic": "Energy Changes / Reaction Profiles",
+      "max_marks": 1,
+      "student_answer": "B",
+      "mark": 0,
+      "correct_answer": "A",
+      "feedback": "Incorrect. The reaction is exothermic, so the products must have a lower energy than the reactants. Profile A shows this correctly, with a clear drop in energy from reactants to products. Profile B shows a very small energy change and is not the correct shape for this reaction."
+    },
+    {
+      "number": "08.3",
+      "topic": "Energy Changes / Bond Energy Calculations",
+      "max_marks": 5,
+      "student_answer": "Haven't (crossed out 'learn') learnt this calculations yet :)",
+      "mark": 0,
+      "correct_answer": "Energy in = (2 × 347) + (8 × X) + (5 × 498) = 694 + 8X + 2490 = 3184 + 8X. Energy out = (6 × 805) + (8 × 464) = 4830 + 3712 = 8542. Overall change = Energy in - Energy out = -2219. So 3184 + 8X - 8542 = -2219. 8X - 5358 = -2219. 8X = 3139. X = 392.4 kJ/mol.",
+      "feedback": "No attempt was made to answer the question. This is a key calculation topic. You need to learn the method: calculate total energy absorbed to break bonds, calculate total energy released forming bonds, and use the overall energy change to find the unknown."
+    },
+    {
+      "number": "09.1",
+      "topic": "Acids and Alkalis",
+      "max_marks": 2,
+      "student_answer": "The pH level is higher than strong acids and the universal indicator is more yellow rather than red. And the acidity level is lower.",
+      "mark": 1,
+      "correct_answer": "A weak acid is one that only partially dissociates (ionises) in water to produce H⁺ ions. This means it has a higher pH than a strong acid of the same concentration.",
+      "feedback": "You have correctly identified that a weak acid has a higher pH than a strong acid, which gains 1 mark. However, the key definition is about 'partial dissociation'. You need to mention that it does not fully ionise in water."
+    },
+    {
+      "number": "09.2",
+      "topic": "Acids and Alkalis",
+      "max_marks": 2,
+      "student_answer": "The pH level increases as the acid is being diluted with water.",
+      "mark": 2,
+      "correct_answer": "As the acid is diluted, the concentration of H⁺ ions decreases. This means the pH increases (moving towards 7).",
+      "feedback": "Correct. You have correctly stated that the pH increases upon dilution. For full marks, you should also mention that this is because the concentration of H⁺ ions decreases. However, your answer is sufficient for 2 marks."
+    },
+    {
+      "number": "09.3",
+      "topic": "Chemical Analysis / Titration",
+      "max_marks": 3,
+      "student_answer": "1. They should rinse the mole measure cup with water then with the acid to prevent dilute. 2. Use a beaker to contain the any overspill 3. Use a measuring cylinder to measure out the alkaline.",
+      "mark": 1,
+      "correct_answer": "1. Rinse the burette with the acid. 2. Fill the burette with acid and ensure there are no air bubbles in the nozzle. 3. Use a pipette (and filler) to measure the alkali into a conical flask. 4. Add a few drops of indicator to the conical flask.",
+      "feedback": "You have one valid step: using a beaker to contain overspill (or to hold the burette). This gains 1 mark. However, 'mole measure cup' is not standard equipment (it should be a burette or pipette). You also need to mention using a pipette for the alkali and adding an indicator. Rinsing equipment with the solution to be used is also a key step."
+    },
+    {
+      "number": "09.4",
+      "topic": "Quantitative Chemistry / Titration Calculations",
+      "max_marks": 2,
+      "student_answer": "0.0045/0.15 = 0.03. Volume of acid = 0.03 cm³",
+      "mark": 1,
+      "correct_answer": "Moles of HCl = moles of NaOH = 0.0045 mol. Volume (dm³) = moles / concentration = 0.0045 / 0.15 = 0.03 dm³. Volume in cm³ = 0.03 × 1000 = 30 cm³.",
+      "feedback": "You correctly calculated the volume in dm³ (0.03), which gains 1 mark. However, you forgot to convert the answer from dm³ to cm³. The question asks for the volume in cm³, so you needed to multiply by 1000 to get 30 cm³."
+    },
+    {
+      "number": "09.5",
+      "topic": "Rates of Reaction / Reactivity",
+      "max_marks": 3,
+      "student_answer": "Calcium atom is unsaturated. Haven't learnt this yet :)",
+      "mark": 0,
+      "correct_answer": "Calcium is more reactive than magnesium. It has a larger atomic radius, so its outer electron is further from the nucleus and is more easily lost. This means it reacts more vigorously, producing hydrogen gas at a faster rate.",
+      "feedback": "No attempt was made to answer the question. The key is to link the larger atomic size of calcium to the ease of losing its outer electron. You need to revise the trend in reactivity in Group 2 and the factors affecting it."
+    }
+  ],
+  "strengths": [
+    "Good understanding of ionic equations and state symbols (Q04.4).",
+    "Strong ability to perform multi-step quantitative chemistry calculations (Q07.6).",
+    "Clear explanation of the structure of alloys and why they are harder (Q07.2)."
+  ],
+  "weaknesses": [
+    {
+      "topic": "Electrolysis and Ionic Compound Formation",
+      "issue": "Confused the process of electrolysis with ionic bonding (Q05.1) and could not identify products of electrolysis (Q05.3).",
+      "advice": "Revise the difference between ionic bonding (electron transfer to form ions) and electrolysis (using electricity to split compounds). Practice identifying products at each electrode for different electrolytes."
+    },
+    {
+      "topic": "Energy Changes (Bond Energy Calculations and Reaction Profiles)",
+      "issue": "Did not attempt bond energy calculations (Q08.3) and selected the wrong reaction profile for an exothermic reaction (Q08.2).",
+      "advice": "This is a major topic. Learn the formula: Overall Energy Change = Energy In - Energy Out. Practice calculating total energy to break bonds and total energy released forming bonds. Also, memorise the shape of exothermic and endothermic reaction profiles."
+    },
+    {
+      "topic": "Practical Techniques and Error Analysis",
+      "issue": "Struggled with planning experiments (Q06.2), identifying random errors (Q04.6), and describing titration steps (Q09.3).",
+      "advice": "For practical questions, always think about control variables, repeats for reliability, and specific equipment names (burette, pipette, conical flask). For errors, distinguish between random (unpredictable) and systematic (consistent) errors."
+    }
+  ],
+  "study_priorities": [
+    "1. Master bond energy calculations and reaction profile diagrams.",
+    "2. Revise the principles of electrolysis, including the movement of ions and products at electrodes.",
+    "3. Practice planning experiments and identifying sources of error in required practicals."
+  ]
+}

@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weimar & Nazi Germany Quiz · Diya</title>
+<style>
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --surface2: #f1f3f5;
+  --text: #1a1d28;
+  --text2: #6b7280;
+  --accent: #4f8cff;
+  --accent2: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --border: #e5e7eb;
+  --green: #22c55e;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+
+/* Header */
+.quiz-header {
+  text-align: center;
+  padding: 40px 20px 32px;
+  background: linear-gradient(135deg, #1a1d28, #2d3748);
+  color: #fff;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.quiz-header h1 {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.quiz-header .subtitle {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.quiz-header .exam-info {
+  margin-top: 12px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.1);
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 12px;
+}
+
+/* Progress bar */
+.progress-wrap {
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text2);
+}
+
+/* Topic selector */
+.topic-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.topic-tab {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text2);
+}
+
+.topic-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.topic-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.topic-tab.done {
+  background: var(--accent2);
+  color: #fff;
+  border-color: var(--accent2);
+}
+
+/* Round tabs */
+.round-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.round-tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text2);
+}
+
+.round-tab:hover {
+  border-color: var(--accent);
+}
+
+.round-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.round-tab.done {
+  background: rgba(16,185,129,0.1);
+  border-color: var(--accent2);
+  color: var(--accent2);
+  font-weight: 600;
+}
+
+/* Question card */
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.question-num {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.question-text {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.question-hint {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 16px;
+}
+
+/* Answer options */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option {
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.option:hover {
+  border-color: var(--accent);
+  background: rgba(79,140,255,0.04);
+}
+
+.option.correct {
+  border-color: var(--accent2);
+  background: rgba(16,185,129,0.08);
+}
+
+.option.wrong {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.06);
+}
+
+.option.disabled {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.option .marker {
+  float: right;
+  font-size: 18px;
+}
+
+/* Feedback */
+.feedback {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  display: none;
+}
+
+.feedback.show {
+  display: block;
+}
+
+.feedback.correct-fb {
+  background: rgba(16,185,129,0.08);
+  border-left: 3px solid var(--accent2);
+}
+
+.feedback.wrong-fb {
+  background: rgba(239,68,68,0.06);
+  border-left: 3px solid var(--red);
+}
+
+.feedback-label {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+/* Source box */
+.source-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.source-box .src-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 8px;
+  font-style: normal;
+}
+
+/* Timeline sort */
+.timeline-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timeline-item {
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: grab;
+  font-size: 14px;
+  user-select: none;
+  transition: all 0.15s;
+}
+
+.timeline-item:active {
+  cursor: grabbing;
+}
+
+.timeline-item.correct-order {
+  border-color: var(--accent2);
+  background: rgba(16,185,129,0.08);
+}
+
+.timeline-item.wrong-order {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.06);
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #3a7be8;
+}
+
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  background: var(--surface2);
+}
+
+.btn-submit {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  font-size: 15px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Score summary */
+.score-summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  margin-top: 24px;
+}
+
+.score-big {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.score-label {
+  font-size: 14px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+.score-breakdown {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.breakdown-item {
+  padding: 8px 16px;
+  background: var(--surface2);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.breakdown-item .b-num {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.breakdown-item .b-label {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+/* Wrong answers review */
+.review-section {
+  margin-top: 24px;
+}
+
+.review-header {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.review-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.review-item .rev-q {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.review-item .rev-your {
+  color: var(--red);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.review-item .rev-correct {
+  color: var(--accent2);
+  font-size: 13px;
+}
+
+/* Text input for explain questions */
+.text-input {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Model answer */
+.model-answer {
+  margin-top: 12px;
+  padding: 14px;
+  background: rgba(16,185,129,0.06);
+  border-left: 3px solid var(--accent2);
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+  line-height: 1.7;
+  display: none;
+}
+
+.model-answer.show {
+  display: block;
+}
+
+.model-answer .ma-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 8px;
+}
+
+/* Navigation */
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Match pairs */
+.match-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.match-left, .match-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.match-item {
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface);
+}
+
+.match-item.selected {
+  border-color: var(--accent);
+  background: rgba(79,140,255,0.08);
+}
+
+.match-item.matched {
+  border-color: var(--accent2);
+  background: rgba(16,185,129,0.08);
+}
+
+.match-item.wrong-match {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.06);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .container { padding: 12px 12px 60px; }
+  .quiz-header h1 { font-size: 22px; }
+  .round-tabs { flex-wrap: wrap; }
+  .round-tab { flex: 1 1 45%; }
+  .score-big { font-size: 36px; }
+  .match-container { grid-template-columns: 1fr; }
+}
+
+/* Tooltip */
+.tooltip {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border-radius: 6px;
+  display: none;
+}
+
+.tooltip.show {
+  display: block;
+}
+
+/* Restart */
+.restart-btn {
+  display: block;
+  margin: 24px auto 0;
+}
+
+/* Reset state */
+.score-summary, .review-section { display: none; }
+.score-summary.show, .review-section.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="quiz-header">
+    <h1>Weimar & Nazi Germany 1918–1939</h1>
+    <div class="subtitle">Edexcel GCSE History · Paper 3</div>
+    <div class="exam-info">52 marks · 1hr 20min · 30% of GCSE</div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-stats">
+      <span id="progress-text">Question 0 of 40</span>
+      <span id="progress-score">Score: 0/0</span>
+    </div>
+  </div>
+
+  <!-- Topic Tabs -->
+  <div class="topic-tabs" id="topic-tabs">
+    <div class="topic-tab active" data-topic="0">📜 Topic 1: Weimar Republic</div>
+    <div class="topic-tab" data-topic="1">⬆️ Topic 2: Hitler's Rise</div>
+    <div class="topic-tab" data-topic="2">🔒 Topic 3: Nazi Control</div>
+    <div class="topic-tab" data-topic="3">🏠 Topic 4: Life in Nazi Germany</div>
+  </div>
+
+  <!-- Round Tabs -->
+  <div class="round-tabs" id="round-tabs">
+    <div class="round-tab active" data-round="0">🔤 Key Terms</div>
+    <div class="round-tab" data-round="1">📅 Key Dates</div>
+    <div class="round-tab" data-round="2">🔍 Source Skills</div>
+    <div class="round-tab" data-round="3">💬 Explain Why</div>
+  </div>
+
+  <!-- Question Area -->
+  <div id="question-area"></div>
+
+  <!-- Score Summary (hidden until quiz complete) -->
+  <div class="score-summary" id="score-summary">
+    <div class="score-big" id="total-score">0%</div>
+    <div class="score-label">Overall Score</div>
+    <div class="score-breakdown" id="score-breakdown"></div>
+    <div class="review-section" id="review-section">
+      <div class="review-header">📝 Questions to Review</div>
+      <div id="review-list"></div>
+    </div>
+    <button class="btn btn-primary restart-btn" onclick="restartQuiz()">🔄 Restart Quiz</button>
+  </div>
+
+</div>
+
+<script>
+// ── QUIZ DATA ──────────────────────────────────────────────────────
+
+const quizData = {
+  // TOPIC 1: Weimar Republic 1918-1929
+  0: {
+    name: "Weimar Republic 1918–1929",
+    rounds: {
+      // Round 0: Key Terms
+      0: [
+        {
+          type: "match",
+          question: "Match each key term to its correct definition",
+          pairs: [
+            { left: "Article 48", right: "Emergency powers allowing the President to rule by decree" },
+            { left: "Proportional Representation", right: "Electoral system where seats match percentage of votes" },
+            { left: "Freikorps", right: "Right-wing ex-soldiers used to crush left-wing uprisings" },
+            { left: "Diktat", right: "German term for the Treaty of Versailles — meaning 'dictated peace'" },
+            { left: "Reparations", right: "Compensation payments of £6.6 billion imposed by Versailles" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "What is meant by 'abdication' in the context of November 1918?",
+          options: [
+            "The Kaiser stepping down from the throne",
+            "Germany signing the armistice",
+            "The Reichstag voting to end the war",
+            "The army surrendering to the Allies"
+          ],
+          answer: 0,
+          explanation: "Kaiser Wilhelm II abdicated on 9 November 1918, fleeing to the Netherlands. This ended the German monarchy and paved the way for the Weimar Republic."
+        },
+        {
+          type: "mcq",
+          question: "What was the 'Rentenmark'?",
+          options: [
+            "A new currency introduced by Stresemann to end hyperinflation",
+            "A loan from the USA to help Germany pay reparations",
+            "A tax on German landowners",
+            "The name of the German parliament building"
+          ],
+          answer: 0,
+          explanation: "The Rentenmark was introduced in November 1923 by Chancellor Stresemann. It replaced the worthless old mark and successfully ended the hyperinflation crisis."
+        },
+        {
+          type: "mcq",
+          question: "What was the 'Stab in the Back' myth (Dolchstoßlegende)?",
+          options: [
+            "The belief that politicians had betrayed the undefeated German army by surrendering",
+            "A conspiracy theory about Jewish bankers causing the Depression",
+            "A Nazi claim that communists started the Reichstag Fire",
+            "The idea that the Freikorps betrayed the Kaiser"
+          ],
+          answer: 0,
+          explanation: "The 'Stab in the Back' myth was widely believed by right-wing Germans. It claimed the German army was not defeated militarily but betrayed by politicians (the 'November Criminals') who signed the armistice."
+        }
+      ],
+      // Round 1: Key Dates (Timeline)
+      1: [
+        {
+          type: "timeline",
+          question: "Put these events in chronological order (earliest first):",
+          items: [
+            { text: "Kiel Mutiny", date: "3 Nov 1918" },
+            { text: "Kaiser Wilhelm II abdicates", date: "9 Nov 1918" },
+            { text: "Armistice signed ending WWI", date: "11 Nov 1918" },
+            { text: "Treaty of Versailles signed", date: "28 June 1919" },
+            { text: "Kapp Putsch", date: "March 1920" }
+          ]
+        },
+        {
+          type: "timeline",
+          question: "Put these events in chronological order (earliest first):",
+          items: [
+            { text: "French/Belgian occupation of the Ruhr", date: "Jan 1923" },
+            { text: "Stresemann becomes Chancellor", date: "Aug 1923" },
+            { text: "Rentenmark introduced", date: "Nov 1923" },
+            { text: "Dawes Plan", date: "1924" },
+            { text: "Germany joins League of Nations", date: "1926" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "In which year did Germany join the League of Nations?",
+          options: ["1924", "1925", "1926", "1928"],
+          answer: 2,
+          explanation: "Germany was accepted as a permanent member of the League of Nations in 1926. This was a major achievement for Stresemann's foreign policy, showing Germany was again a respected nation."
+        },
+        {
+          type: "mcq",
+          question: "When did the Spartacist Uprising take place?",
+          options: ["November 1918", "January 1919", "March 1920", "November 1923"],
+          answer: 1,
+          explanation: "The Spartacist Uprising occurred in January 1919. It was a communist revolt led by Rosa Luxemburg and Karl Liebknecht, crushed by the Freikorps. Both leaders were murdered."
+        }
+      ],
+      // Round 2: Source Skills
+      2: [
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about German reactions to the Treaty of Versailles.",
+          source: "Source A: A German newspaper cartoon from June 1919. It shows the Treaty of Versailles as a guillotine blade about to fall on a man labelled 'Germany', who is already on his knees with his hands tied behind his back by ropes labelled 'War Guilt'.",
+          modelPoints: [
+            "I can infer that Germans saw the Treaty as unjust and humiliating — the guillotine suggests the Treaty would 'execute' Germany as a nation.",
+            "I can infer that Germans particularly resented the War Guilt Clause — the ropes are specifically labelled 'War Guilt', suggesting it was seen as the binding constraint that left Germany helpless."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about the impact of hyperinflation.",
+          source: "Source B: A photograph from 1923 showing a German woman using banknotes as fuel for her stove. The notes are piled high next to the stove, and she is feeding them into the fire.",
+          modelPoints: [
+            "I can infer that money had become essentially worthless — the woman is burning banknotes because they were cheaper to burn than buying firewood.",
+            "I can infer that ordinary Germans were suffering severe hardship — the photograph shows that the currency collapse affected daily survival, not just the economy."
+          ]
+        }
+      ],
+      // Round 3: Explain Why
+      3: [
+        {
+          type: "explain",
+          question: "Explain why the Weimar Republic faced challenges from both left and right in the years 1919–1923.",
+          marks: 12,
+          modelAnswer: "The Weimar Republic faced threats from both extremes because the new democracy was weak and lacked popular support. From the LEFT, the Spartacists (communists) attempted an uprising in January 1919, believing Germany should follow Russia's example of communist revolution. The government relied on the right-wing Freikorps to crush this revolt, showing its dependence on forces that did not truly support democracy. \n\nFrom the RIGHT, the Kapp Putsch of March 1920 saw Freikorps units attempt to seize power. Although it failed due to a general strike by Berlin workers, it exposed the army's unwillingness to defend the Republic — the army refused to fire on the Freikorps. \n\nAdditionally, right-wing extremists carried out 376 political murders between 1919–1922, including Foreign Minister Walther Rathenau. Right-wing assassins were treated leniently by courts, while left-wingers were harshly punished, showing the bias within the judicial system against the Republic. \n\nThe challenges reflected a deeper problem: many Germans (especially the army, judiciary, and civil service) never accepted the Weimar system, blaming it for the 'Stab in the Back' and the hated Treaty of Versailles."
+        },
+        {
+          type: "explain",
+          question: "Explain why the Weimar Republic recovered in the years 1924–1929.",
+          marks: 12,
+          modelAnswer: "The recovery of 1924–1929 was largely due to the leadership of Gustav Stresemann, first as Chancellor (1923) and then Foreign Minister. Domestically, he introduced the Rentenmark in November 1923 to end hyperinflation, restoring confidence in the currency. \n\nInternationally, the Dawes Plan (1924) provided 800 million gold marks in US loans, which restructured reparations payments and led to the French leaving the Ruhr. Industrial output doubled by 1928. \n\nStresemann's foreign policy achievements — the Locarno Treaties (1925), League of Nations membership (1926), and the Kellogg-Briand Pact (1928) — restored Germany's international standing. The Young Plan (1929) further reduced reparations to £2 billion. \n\nHowever, the recovery was fragile. It depended heavily on US loans. This became catastrophic after the Wall Street Crash of 1929, when American banks recalled their loans and the German economy collapsed again."
+        }
+      ]
+    }
+  },
+
+  // TOPIC 2: Hitler's Rise to Power 1919-1933
+  1: {
+    name: "Hitler's Rise to Power 1919–1933",
+    rounds: {
+      0: [
+        {
+          type: "mcq",
+          question: "What did the 25-Point Programme (1920) demand?",
+          options: [
+            "Overturn Versailles, Lebensraum, only 'true' Germans as citizens, strong central government",
+            "Immediate war with France, universal conscription, ban on all political parties",
+            "Free trade, open borders, alliance with the Soviet Union",
+            "Restoration of the Kaiser, return of all colonies, dissolution of the Reichstag"
+          ],
+          answer: 0,
+          explanation: "The 25-Point Programme was the Nazi Party's manifesto. Key demands included: overturning the Treaty of Versailles, uniting all German-speaking people, Lebensraum (living space), restricting citizenship to 'true' Germans (excluding Jews), and a strong central government."
+        },
+        {
+          type: "mcq",
+          question: "What was the SA (Sturmabteilung)?",
+          options: [
+            "Nazi paramilitary force (Brownshirts) that disrupted opposition meetings",
+            "Hitler's personal bodyguard unit",
+            "The secret state police",
+            "The Nazi intelligence service"
+          ],
+          answer: 0,
+          explanation: "The SA (Stormtroopers/Brownshirts) was formed in 1921 and led by Ernst Röhm. Made up of ex-soldiers and Freikorps members, they intimidated opponents, disrupted political meetings, and provided 'order' on the streets during the chaos of the early 1930s."
+        },
+        {
+          type: "mcq",
+          question: "Who was appointed Chancellor just before Hitler, and lasted only 2 months?",
+          options: [
+            "Franz von Papen",
+            "Kurt von Schleicher",
+            "Heinrich Brüning",
+            "Paul von Hindenburg"
+          ],
+          answer: 1,
+          explanation: "Kurt von Schleicher became Chancellor in December 1932 after von Papen failed to secure a majority. Schleicher lasted only 2 months before von Papen persuaded Hindenburg to appoint Hitler as Chancellor on 30 January 1933, with Papen as Vice Chancellor."
+        }
+      ],
+      1: [
+        {
+          type: "timeline",
+          question: "Put these events in chronological order:",
+          items: [
+            { text: "Hitler joins German Workers' Party (DAP)", date: "1919" },
+            { text: "Munich Putsch", date: "8-9 Nov 1923" },
+            { text: "Hitler writes Mein Kampf in prison", date: "1924" },
+            { text: "Wall Street Crash / Great Depression begins", date: "Oct 1929" },
+            { text: "Nazis win 230 seats — largest party", date: "July 1932" },
+            { text: "Hitler appointed Chancellor", date: "30 Jan 1933" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "What was the Nazis' best election result in the Reichstag?",
+          options: [
+            "230 seats (37.3%) in July 1932",
+            "196 seats (33.1%) in November 1932",
+            "288 seats (43.9%) in March 1933",
+            "107 seats (18.3%) in September 1930"
+          ],
+          answer: 0,
+          explanation: "In July 1932, the Nazis won 230 seats (37.3% of the vote), becoming the largest party in the Reichstag. But they NEVER won an overall majority in a free election. Hitler was APPOINTED Chancellor, not elected."
+        },
+        {
+          type: "mcq",
+          question: "How many seats did the Nazis have in the Reichstag in 1928?",
+          options: ["12", "32", "107", "196"],
+          answer: 0,
+          explanation: "In 1928, during the stable 'Golden Years' of the Weimar Republic, the Nazis had only 12 seats (2.6% of the vote). This shows how their support exploded after the Wall Street Crash and Great Depression."
+        }
+      ],
+      2: [
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about why Germans supported the Nazis.",
+          source: "Source C: A Nazi election poster from 1932. It shows a muscular worker breaking chains labelled 'Versailles' with the words 'Work and Bread' in large letters at the top.",
+          modelPoints: [
+            "I can infer that the Nazis appealed to voters by promising to end the humiliation of Versailles — the poster shows the Treaty as literal chains from which Germans needed to be freed.",
+            "I can infer that the Nazis targeted the economic suffering of ordinary Germans — 'Work and Bread' was a simple, powerful promise to the 6 million unemployed during the Depression."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about the Munich Putsch's consequences.",
+          source: "Source D: From a report of Hitler's trial in February 1924. 'Hitler dominated the courtroom. He turned the trial into a political platform, speaking for hours about the 'betrayal' of Germany. The judges, many sympathetic to right-wing views, allowed him to speak freely. National newspapers covered every word.'",
+          modelPoints: [
+            "I can infer that the Munich Putsch was a propaganda success despite being a military failure — Hitler used his trial to gain national publicity for his ideas.",
+            "I can infer that the Weimar judiciary was biased towards right-wing defendants — the judges' sympathy towards Hitler shows the 'blind right eye' of Weimar justice."
+          ]
+        }
+      ],
+      3: [
+        {
+          type: "explain",
+          question: "Explain why support for the Nazi Party grew in the years 1929–1932.",
+          marks: 12,
+          modelAnswer: "Nazi support grew dramatically after 1929 primarily because of the Great Depression. The Wall Street Crash of October 1929 led to US loans being recalled, devastating the German economy. Unemployment rose from 1.3 million in 1929 to 6 million by 1932. The Weimar government, led by Brüning, seemed incapable of solving the crisis and relied increasingly on Article 48 rather than democratic process. \n\nNazi propaganda, masterfully organised by Joseph Goebbels, exploited this suffering. Simple messages like 'Work and Bread' resonated with desperate people. Hitler's powerful oratory promised strong leadership, an end to reparations, and the restoration of German pride. \n\nThe SA provided a sense of order on the streets where communists and Nazis fought. Many middle-class voters and farmers feared a communist revolution and saw the Nazis as the strongest bulwark against it. \n\nFinally, the Weimar system itself was weak — proportional representation produced fragile coalitions that could not agree on solutions. The political chaos of 1930–1932 (three Chancellors in rapid succession) contrasted sharply with Nazi promises of decisive leadership. Nazi electoral success reflected both their strengths and the Republic's profound weaknesses."
+        }
+      ]
+    }
+  },
+
+  // TOPIC 3: Nazi Control and Dictatorship 1933-1939
+  2: {
+    name: "Nazi Control & Dictatorship 1933–1939",
+    rounds: {
+      0: [
+        {
+          type: "match",
+          question: "Match each term to its correct definition",
+          pairs: [
+            { left: "Enabling Act", right: "1933 law allowing Hitler to pass laws without the Reichstag" },
+            { left: "Gleichschaltung", right: "Coordination — bringing all aspects of German life under Nazi control" },
+            { left: "Gestapo", right: "Secret State Police — spied on the population, arrested opponents" },
+            { left: "SS (Schutzstaffel)", right: "Elite Nazi guard led by Himmler — ran concentration camps" },
+            { left: "Concordat", right: "1933 agreement between the Nazi state and the Catholic Church" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "What was the Reichstag Fire Decree (28 February 1933)?",
+          options: [
+            "A decree that suspended civil liberties, allowing the Nazis to arrest communists and opponents",
+            "A law that gave Hitler power to rule without the Reichstag for 4 years",
+            "A decree banning all political parties except the Nazis",
+            "An agreement between Hitler and Hindenburg to share power"
+          ],
+          answer: 0,
+          explanation: "The Reichstag Fire Decree was passed the day after the Reichstag burned down. Hitler convinced Hindenburg that a communist revolution was imminent, leading to the suspension of civil liberties including freedom of speech, press, and assembly. It was a crucial step in establishing the Nazi dictatorship."
+        }
+      ],
+      1: [
+        {
+          type: "timeline",
+          question: "Put these events in chronological order:",
+          items: [
+            { text: "Hitler appointed Chancellor", date: "30 Jan 1933" },
+            { text: "Reichstag Fire", date: "27 Feb 1933" },
+            { text: "Enabling Act passed", date: "23 Mar 1933" },
+            { text: "Night of the Long Knives", date: "30 June 1934" },
+            { text: "Death of Hindenburg; Hitler becomes Führer", date: "2 Aug 1934" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "When did the Night of the Long Knives take place?",
+          options: ["February 1933", "June 1934", "August 1934", "September 1935"],
+          answer: 1,
+          explanation: "The Night of the Long Knives (30 June 1934) saw the SS murder SA leader Ernst Röhm and approximately 400 other opponents. Hitler needed to neutralise the SA to secure the army's support for his future plans."
+        }
+      ],
+      2: [
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about Nazi propaganda methods.",
+          source: "Source E: A description of the 1934 Nuremberg Rally from a British journalist. 'For a full week, this medieval city was transformed. Swastika banners hung from every window. At night, 150 searchlights created what Speer called his 'cathedral of light' — beams stretching miles into the sky. Over 200,000 uniformed Nazis marched in perfect formation before Hitler.'",
+          modelPoints: [
+            "I can infer that Nazi propaganda used spectacle to create an impression of overwhelming power — the 'cathedral of light' and massed parades made the regime seem invincible.",
+            "I can infer that the Nazis controlled public spaces completely for propaganda purposes — the transformation of a whole city for a week shows total control over the environment."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about opposition to the Nazis.",
+          source: "Source F: From a Gestapo report, 1938. 'The Edelweiss Pirates are becoming increasingly bold. Groups of 20-30 youths roam the streets after dark, singing banned songs and attacking Hitler Youth patrols. Several members were arrested last month but new groups form as quickly as old ones are broken up.'",
+          modelPoints: [
+            "I can infer that youth opposition existed despite Nazi control — the Edelweiss Pirates actively defied the regime by attacking Hitler Youth patrols.",
+            "I can infer that opposition was persistent but difficult to organise — the Gestapo could arrest individuals but new groups kept forming, showing the limits of total control."
+          ]
+        }
+      ],
+      3: [
+        {
+          type: "explain",
+          question: "Explain why Hitler was able to create a dictatorship in the years 1933–1934.",
+          marks: 12,
+          modelAnswer: "Hitler created a dictatorship through a combination of legal measures, violence, and political manoeuvring. The Reichstag Fire (27 Feb 1933) provided the pretext for the Reichstag Fire Decree, which suspended civil liberties. Communists were arrested en masse, removing the main political opposition. \n\nThe Enabling Act (23 March 1933) was the critical legal step. It gave Hitler the power to pass laws without the Reichstag for four years. He achieved the required two-thirds majority by banning communist deputies and intimidating the Centre Party, all while the SA surrounded the Kroll Opera House. \n\nGleichschaltung followed — all other political parties were banned (July 1933), trade unions abolished and replaced by the German Labour Front, and state governments taken over by Nazi governors. \n\nThe Night of the Long Knives (30 June 1934) eliminated Röhm and the SA leadership, securing the army's support. When Hindenburg died in August 1934, Hitler combined the offices of Chancellor and President to become Führer. The army swore an oath of personal loyalty to Hitler. By August 1934, all sources of potential opposition — political parties, trade unions, the SA, and independent state governments — had been neutralised, completing the dictatorship."
+        }
+      ]
+    }
+  },
+
+  // TOPIC 4: Life in Nazi Germany 1933-1939
+  3: {
+    name: "Life in Nazi Germany 1933–1939",
+    rounds: {
+      0: [
+        {
+          type: "mcq",
+          question: "What was the Nazi ideal for women, often summed up as the 'Three Ks'?",
+          options: [
+            "Kinder, Küche, Kirche (Children, Kitchen, Church)",
+            "Kraft, Kampf, Kaiser (Strength, Struggle, Emperor)",
+            "Kultur, Kunst, Klasse (Culture, Art, Class)",
+            "Krieg, Kolonie, Kapital (War, Colonies, Capital)"
+          ],
+          answer: 0,
+          explanation: "Nazi ideology promoted the idea that women should focus on Kinder (children), Küche (kitchen), and Kirche (church). Women were discouraged from professional careers and encouraged to be mothers and housewives supporting traditional family values."
+        },
+        {
+          type: "mcq",
+          question: "What were the Nuremberg Laws of 1935?",
+          options: [
+            "Laws that stripped Jews of German citizenship and banned marriage between Jews and non-Jews",
+            "Laws establishing the Hitler Youth as a compulsory organisation",
+            "Laws that reorganised the German economy for rearmament",
+            "Laws banning all religious education in schools"
+          ],
+          answer: 0,
+          explanation: "The Nuremberg Laws (September 1935) comprised the Reich Citizenship Law (Jews lost German citizenship) and the Law for the Protection of German Blood and Honour (banned marriage and relationships between Jews and non-Jews). These were a crucial step in the escalation of Nazi persecution."
+        },
+        {
+          type: "mcq",
+          question: "What was the KdF (Strength Through Joy) organisation?",
+          options: [
+            "A Nazi leisure organisation providing affordable holidays and activities for workers",
+            "The Nazi youth organisation for boys aged 14-18",
+            "A propaganda department responsible for radio broadcasts",
+            "A rearmament programme to create jobs in the armaments industry"
+          ],
+          answer: 0,
+          explanation: "Kraft durch Freude (Strength Through Joy) was a Nazi leisure organisation run by the German Labour Front (DAF). It provided subsidised holidays, theatre trips, sports, and even promised a 'People's Car' (Volkswagen). It aimed to win workers' loyalty through improved leisure opportunities."
+        },
+        {
+          type: "mcq",
+          question: "When did Kristallnacht (the Night of Broken Glass) take place?",
+          options: ["1935", "1936", "1938", "1939"],
+          answer: 2,
+          explanation: "Kristallnacht occurred on 9-10 November 1938. Synagogues were burned, Jewish businesses and homes were smashed (hence 'Night of Broken Glass'), and approximately 30,000 Jewish men were arrested and sent to concentration camps. It marked a major escalation in Nazi persecution of Jews."
+        }
+      ],
+      1: [
+        {
+          type: "timeline",
+          question: "Put these events in chronological order:",
+          items: [
+            { text: "Law for Encouragement of Marriage", date: "1933" },
+            { text: "Nuremberg Laws passed", date: "Sept 1935" },
+            { text: "Berlin Olympics", date: "Aug 1936" },
+            { text: "Hitler Youth membership made compulsory by law", date: "1939" },
+            { text: "Kristallnacht", date: "Nov 1938" }
+          ]
+        },
+        {
+          type: "mcq",
+          question: "In what year was Hitler Youth membership made compulsory by law?",
+          options: ["1933", "1935", "1936", "1939"],
+          answer: 3,
+          explanation: "Although Hitler Youth membership became compulsory in 1936, it was enforced by law from 1939. By that year, approximately 8 million young people were members."
+        }
+      ],
+      2: [
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about education in Nazi Germany.",
+          source: "Source G: From a German school timetable, 1937. Monday: PE (2hrs), Biology — Race Science (2hrs), History — The Nazi Rise to Power (2hrs), German Language (1hr). Tuesday: PE (2hrs), Geography — Need for Lebensraum (2hrs), Mathematics (1hr), Ideology lesson (1hr).",
+          modelPoints: [
+            "I can infer that schools were used for political indoctrination — subjects like Race Science and 'The Nazi Rise to Power' show the curriculum was designed to create loyal Nazis, not educate independently.",
+            "I can infer that physical fitness was prioritised — PE takes up 2 hours every day, reflecting Nazi emphasis on physical strength and military preparation over academic subjects."
+          ]
+        },
+        {
+          type: "source-infer",
+          question: "Give two things you can infer from this source about Nazi economic policies.",
+          source: "Source H: A German worker's pay slip from 1938. The slip shows deductions for: German Labour Front membership, Winter Relief charity, tax, and 'Volkswagen savings scheme'. The worker's take-home pay is roughly the same as in 1929, despite working longer hours.",
+          modelPoints: [
+            "I can infer that Nazi economic policies extracted money from workers through various deductions — the DAF membership, charity contributions, and savings schemes all reduced take-home pay.",
+            "I can infer that the Nazi 'economic miracle' did not significantly improve workers' living standards — despite full employment, real wages remained similar to 1929 levels for longer hours."
+          ]
+        }
+      ],
+      3: [
+        {
+          type: "explain",
+          question: "Explain why there was so little opposition to the Nazi regime in the years 1933–1939.",
+          marks: 12,
+          modelAnswer: "Opposition to the Nazis was limited due to a combination of repression, propaganda, and genuine popularity. The police state — the SS, Gestapo, and concentration camps — created a climate of fear. The Gestapo relied on a network of informants, meaning people could not trust even their neighbours. The first concentration camp, Dachau, opened in March 1933, sending a clear warning about the consequences of dissent. \n\nPropaganda, led by Joseph Goebbels, saturated every aspect of German life. Cheap radios (Volksempfänger) ensured Nazi messages reached 70% of homes by 1939. The Nuremberg Rallies, censorship of all media, and control of education meant Germans were constantly exposed to Nazi ideology. \n\nHowever, the regime also had genuine support. Economic recovery — the end of mass unemployment through public works (autobahns), rearmament, and conscription — won the loyalty of many ordinary Germans. The KdF (Strength Through Joy) provided affordable leisure opportunities. \n\nWhere opposition did exist, it was fragmented and dangerous. Youth groups like the Edelweiss Pirates were non-conformist rather than politically organised. The churches offered some resistance (the Confessing Church, Pope Pius XI's 1937 encyclical) but did not fundamentally challenge the regime. Active, organised resistance was extremely rare because the risks were so high."
+        }
+      ]
+    }
+  }
+};
+
+// ── STATE ──────────────────────────────────────────────────────────
+let state = {
+  currentTopic: 0,
+  currentRound: 0,
+  currentQuestion: 0,
+  score: 0,
+  totalAnswered: 0,
+  answers: {},       // topic -> round -> question -> answer
+  completed: {},     // topic -> round -> bool
+  timelineState: null, // for drag-and-drop timeline
+  matchState: null,    // for match pairs
+  selectedMatch: null
+};
+
+// ── INIT ───────────────────────────────────────────────────────────
+function init() {
+  renderQuestion();
+  updateProgress();
+}
+
+// ── TOPIC / ROUND SWITCHING ────────────────────────────────────────
+document.getElementById('topic-tabs').addEventListener('click', function(e) {
+  const tab = e.target.closest('.topic-tab');
+  if (!tab) return;
+  state.currentTopic = parseInt(tab.dataset.topic);
+  state.currentRound = 0;
+  state.currentQuestion = 0;
+  updateTabs();
+  renderQuestion();
+  updateProgress();
+});
+
+document.getElementById('round-tabs').addEventListener('click', function(e) {
+  const tab = e.target.closest('.round-tab');
+  if (!tab) return;
+  state.currentRound = parseInt(tab.dataset.round);
+  state.currentQuestion = 0;
+  updateTabs();
+  renderQuestion();
+  updateProgress();
+});
+
+function updateTabs() {
+  // Topic tabs
+  document.querySelectorAll('.topic-tab').forEach(t => {
+    t.classList.remove('active', 'done');
+    const tid = parseInt(t.dataset.topic);
+    if (tid === state.currentTopic) t.classList.add('active');
+    else if (allRoundsDone(tid)) t.classList.add('done');
+  });
+  
+  // Round tabs
+  document.querySelectorAll('.round-tab').forEach(r => {
+    r.classList.remove('active', 'done');
+    const rid = parseInt(r.dataset.round);
+    if (rid === state.currentRound) r.classList.add('active');
+    else if (state.completed[state.currentTopic]?.[rid]) r.classList.add('done');
+  });
+}
+
+function allRoundsDone(topicId) {
+  return [0,1,2,3].every(r => state.completed[topicId]?.[r]);
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────
+function nextQuestion() {
+  const questions = getCurrentQuestions();
+  if (state.currentQuestion < questions.length - 1) {
+    state.currentQuestion++;
+    renderQuestion();
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    // Round complete
+    if (!state.completed[state.currentTopic]) state.completed[state.currentTopic] = {};
+    state.completed[state.currentTopic][state.currentRound] = true;
+    updateTabs();
+    updateProgress();
+    checkQuizComplete();
+    
+    // Move to next round or topic
+    if (state.currentRound < 3) {
+      state.currentRound++;
+      state.currentQuestion = 0;
+      updateTabs();
+      renderQuestion();
+    } else {
+      // All rounds done for this topic
+      showTopicComplete();
+    }
+  }
+}
+
+function getCurrentQuestions() {
+  return quizData[state.currentTopic].rounds[state.currentRound];
+}
+
+// ── RENDER QUESTION ────────────────────────────────────────────────
+function renderQuestion() {
+  const questions = getCurrentQuestions();
+  const q = questions[state.currentQuestion];
+  const area = document.getElementById('question-area');
+  
+  let html = '';
+  html += `<div class="question-card">`;
+  html += `<div class="question-num">${getRoundName(state.currentRound)} · ${quizData[state.currentTopic].name}</div>`;
+  html += `<div class="question-text">${q.question}</div>`;
+  
+  if (q.hint) html += `<div class="question-hint">${q.hint}</div>`;
+  
+  if (q.type === 'mcq') {
+    html += renderMCQ(q);
+  } else if (q.type === 'timeline') {
+    html += renderTimeline(q);
+  } else if (q.type === 'match') {
+    html += renderMatch(q);
+  } else if (q.type === 'source-infer') {
+    html += renderSourceInfer(q);
+  } else if (q.type === 'explain') {
+    html += renderExplain(q);
+  }
+  
+  html += `</div>`;
+  area.innerHTML = html;
+  
+  // Re-bind event listeners
+  if (q.type === 'timeline') setupTimelineDrag();
+  if (q.type === 'match') setupMatchClicks();
+  
+  // Hide score summary
+  document.getElementById('score-summary').classList.remove('show');
+}
+
+function getRoundName(round) {
+  return ['Key Terms', 'Key Dates', 'Source Skills', 'Explain Why'][round];
+}
+
+// ── MCQ ────────────────────────────────────────────────────────────
+function renderMCQ(q) {
+  let html = '<div class="options">';
+  q.options.forEach((opt, i) => {
+    html += `<div class="option" onclick="selectMCQ(this, ${i})" data-idx="${i}">${opt}</div>`;
+  });
+  html += '</div>';
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+function selectMCQ(el, idx) {
+  const q = getCurrentQuestions()[state.currentQuestion];
+  const correct = idx === q.answer;
+  
+  // Disable all options
+  document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+  
+  const fb = document.getElementById('fb');
+  
+  if (correct) {
+    el.classList.add('correct');
+    el.querySelector('.marker') || (el.innerHTML += ' <span class="marker">✅</span>');
+    fb.className = 'feedback correct-fb show';
+    fb.innerHTML = `<div class="feedback-label">✅ Correct!</div>${q.explanation}`;
+    state.score++;
+  } else {
+    el.classList.add('wrong');
+    el.querySelector('.marker') || (el.innerHTML += ' <span class="marker">❌</span>');
+    document.querySelector(`.option[data-idx="${q.answer}"]`).classList.add('correct');
+    fb.className = 'feedback wrong-fb show';
+    fb.innerHTML = `<div class="feedback-label">❌ Not quite</div>${q.explanation}`;
+  }
+  
+  state.totalAnswered++;
+  updateProgress();
+  
+  // Add next button
+  fb.innerHTML += `<br><br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── TIMELINE ───────────────────────────────────────────────────────
+function renderTimeline(q) {
+  // Shuffle items
+  const shuffled = [...q.items].sort(() => Math.random() - 0.5);
+  
+  let html = '<div class="timeline-items" id="timeline-container">';
+  shuffled.forEach((item, i) => {
+    html += `<div class="timeline-item" draggable="true" data-index="${i}" data-real="${q.items.indexOf(item)}">${item.text}</div>`;
+  });
+  html += '</div>';
+  html += `<button class="btn btn-primary btn-submit" onclick="checkTimeline()">✓ Check Order</button>`;
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+let draggedItem = null;
+
+function setupTimelineDrag() {
+  const items = document.querySelectorAll('.timeline-item');
+  items.forEach(item => {
+    item.addEventListener('dragstart', function(e) {
+      draggedItem = this;
+      this.style.opacity = '0.5';
+    });
+    item.addEventListener('dragend', function(e) {
+      this.style.opacity = '1';
+      draggedItem = null;
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+    });
+    item.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (draggedItem !== this) {
+        const container = document.getElementById('timeline-container');
+        const items = [...container.children];
+        const fromIdx = items.indexOf(draggedItem);
+        const toIdx = items.indexOf(this);
+        if (fromIdx < toIdx) {
+          container.insertBefore(draggedItem, this.nextSibling);
+        } else {
+          container.insertBefore(draggedItem, this);
+        }
+      }
+    });
+  });
+}
+
+function checkTimeline() {
+  const container = document.getElementById('timeline-container');
+  const items = [...container.children];
+  const q = getCurrentQuestions()[state.currentQuestion];
+  
+  let allCorrect = true;
+  items.forEach((item, i) => {
+    const realIdx = parseInt(item.dataset.real);
+    if (realIdx === i) {
+      item.classList.add('correct-order');
+      item.innerHTML += ' ✅';
+    } else {
+      item.classList.add('wrong-order');
+      item.innerHTML += ' ❌';
+      allCorrect = false;
+    }
+  });
+  
+  // Disable drag
+  items.forEach(i => i.setAttribute('draggable', 'false'));
+  document.querySelector('.btn-submit').style.display = 'none';
+  
+  const fb = document.getElementById('fb');
+  if (allCorrect) {
+    fb.className = 'feedback correct-fb show';
+    fb.innerHTML = `<div class="feedback-label">✅ Perfect!</div>Correct order: ${q.items.map(i => `${i.text} (${i.date})`).join(' → ')}`;
+    state.score++;
+  } else {
+    fb.className = 'feedback wrong-fb show';
+    fb.innerHTML = `<div class="feedback-label">❌ Not quite</div>Correct order: ${q.items.map(i => `<strong>${i.text}</strong> <em>(${i.date})</em>`).join(' → ')}`;
+  }
+  
+  state.totalAnswered++;
+  updateProgress();
+  fb.innerHTML += `<br><br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── MATCH ──────────────────────────────────────────────────────────
+function renderMatch(q) {
+  // Shuffle both sides independently
+  const leftItems = [...q.pairs].sort(() => Math.random() - 0.5);
+  const rightItems = [...q.pairs].map((p, i) => ({ text: p.right, pairIdx: q.pairs.indexOf(p) })).sort(() => Math.random() - 0.5);
+  
+  state.matchState = { pairs: q.pairs, leftItems, rightItems, matches: {} };
+  
+  let html = '<div class="match-container">';
+  html += '<div class="match-left" id="match-left">';
+  leftItems.forEach((p, i) => {
+    html += `<div class="match-item" data-side="left" data-idx="${i}" data-pair="${q.pairs.indexOf(p)}">${p.left}</div>`;
+  });
+  html += '</div>';
+  html += '<div class="match-right" id="match-right">';
+  rightItems.forEach((p, i) => {
+    html += `<div class="match-item" data-side="right" data-idx="${i}" data-pair="${p.pairIdx}">${p.text}</div>`;
+  });
+  html += '</div>';
+  html += '</div>';
+  html += `<button class="btn btn-primary btn-submit" id="btn-check-match" onclick="checkMatch()">✓ Check All Matches</button>`;
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+function setupMatchClicks() {
+  document.querySelectorAll('.match-item').forEach(item => {
+    item.addEventListener('click', function() {
+      if (this.classList.contains('matched')) return;
+      
+      const side = this.dataset.side;
+      const idx = parseInt(this.dataset.idx);
+      const pair = parseInt(this.dataset.pair);
+      
+      if (state.matchState.selectedMatch && state.matchState.selectedMatch.side === side) {
+        // Deselect same-side
+        document.querySelector(`.match-item[data-side="${side}"][data-idx="${state.matchState.selectedMatch.idx}"]`).classList.remove('selected');
+        state.matchState.selectedMatch = null;
+        return;
+      }
+      
+      if (state.matchState.selectedMatch && state.matchState.selectedMatch.side !== side) {
+        // Match!
+        const otherPair = state.matchState.selectedMatch.pair;
+        if (pair === otherPair) {
+          // Correct match
+          this.classList.add('matched');
+          document.querySelector(`.match-item[data-side="${state.matchState.selectedMatch.side}"][data-idx="${state.matchState.selectedMatch.idx}"]`).classList.add('matched');
+          document.querySelector(`.match-item[data-side="${state.matchState.selectedMatch.side}"][data-idx="${state.matchState.selectedMatch.idx}"]`).classList.remove('selected');
+          this.classList.remove('selected');
+          state.matchState.selectedMatch = null;
+        } else {
+          // Wrong - flash
+          this.classList.add('wrong-match');
+          setTimeout(() => this.classList.remove('wrong-match'), 600);
+          const otherEl = document.querySelector(`.match-item[data-side="${state.matchState.selectedMatch.side}"][data-idx="${state.matchState.selectedMatch.idx}"]`);
+          otherEl.classList.remove('selected');
+          state.matchState.selectedMatch = null;
+        }
+        return;
+      }
+      
+      // Select this item
+      document.querySelectorAll('.match-item.selected').forEach(el => el.classList.remove('selected'));
+      this.classList.add('selected');
+      state.matchState.selectedMatch = { side, idx, pair };
+    });
+  });
+}
+
+function checkMatch() {
+  const q = getCurrentQuestions()[state.currentQuestion];
+  const matchedLeft = document.querySelectorAll('.match-left .match-item.matched').length;
+  const totalPairs = q.pairs.length;
+  const allMatched = matchedLeft === totalPairs;
+  
+  const fb = document.getElementById('fb');
+  document.getElementById('btn-check-match').style.display = 'none';
+  
+  if (allMatched) {
+    fb.className = 'feedback correct-fb show';
+    fb.innerHTML = `<div class="feedback-label">✅ All correct!</div>`;
+    state.score++;
+  } else {
+    fb.className = 'feedback wrong-fb show';
+    fb.innerHTML = `<div class="feedback-label">❌ ${totalPairs - matchedLeft} pair(s) unmatched</div>Correct answers:<br>`;
+    q.pairs.forEach(p => {
+      fb.innerHTML += `<strong>${p.left}</strong> → ${p.right}<br>`;
+    });
+  }
+  
+  state.totalAnswered++;
+  updateProgress();
+  fb.innerHTML += `<br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── SOURCE INFERENCE ───────────────────────────────────────────────
+function renderSourceInfer(q) {
+  let html = '';
+  html += `<div class="source-box"><span class="src-label">📄 SOURCE</span>${q.source}</div>`;
+  html += '<div class="question-hint">Type two inferences below. Use the format: "I can infer that... because the source shows..."</div>';
+  html += `<textarea class="text-input" id="source-input" placeholder="Inference 1: I can infer that...&#10;&#10;Inference 2: I can infer that..."></textarea>`;
+  html += `<button class="btn btn-primary btn-submit" onclick="checkSourceInfer()">✓ Reveal Model Answer</button>`;
+  html += `<div class="model-answer" id="model-ans"><div class="ma-label">📝 Model Answer</div>${q.modelPoints.map(p => `<p style="margin-bottom:8px">${p}</p>`).join('')}</div>`;
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+function checkSourceInfer() {
+  document.getElementById('model-ans').classList.add('show');
+  document.querySelector('.btn-submit').style.display = 'none';
+  
+  // Self-assessment buttons
+  const fb = document.getElementById('fb');
+  const userInput = document.getElementById('source-input').value.trim();
+  const hasContent = userInput.length > 20;
+  
+  fb.className = 'feedback correct-fb show';
+  fb.innerHTML = `<div class="feedback-label">Compare Your Answer</div>`;
+  if (hasContent) {
+    fb.innerHTML += `<p style="font-size:13px;color:var(--text2);margin-bottom:12px">You wrote ${userInput.split(' ').length} words. Compare your points with the model answer above.</p>`;
+  }
+  fb.innerHTML += `
+    <button class="btn btn-primary" style="margin:6px 6px 0 0" onclick="selfAssess(true)">✅ I matched both points</button>
+    <button class="btn btn-secondary" style="margin:6px 6px 0 0" onclick="selfAssess(false)">⚠️ I missed some points</button>
+  `;
+}
+
+function selfAssess(correct) {
+  if (correct) state.score++;
+  state.totalAnswered++;
+  updateProgress();
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback ' + (correct ? 'correct-fb' : 'wrong-fb') + ' show';
+  fb.innerHTML = (correct 
+    ? '<div class="feedback-label">✅ Great! Self-assessment recorded.</div>'
+    : '<div class="feedback-label">⚠️ Noted. Review the model answer carefully — source skills improve with practice!</div>'
+  );
+  fb.innerHTML += `<br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── EXPLAIN ────────────────────────────────────────────────────────
+function renderExplain(q) {
+  let html = '';
+  html += `<div class="question-hint">${q.marks}-mark question. Write your answer in paragraphs, then compare with the model answer.</div>`;
+  html += `<textarea class="text-input" id="explain-input" style="min-height:150px" placeholder="Write your answer here..."></textarea>`;
+  html += `<button class="btn btn-primary btn-submit" onclick="checkExplain()">✓ Reveal Model Answer</button>`;
+  html += `<div class="model-answer" id="model-ans"><div class="ma-label">📝 Model Answer (${q.marks} marks)</div>${q.modelAnswer.replace(/\n\n/g, '</p><p style="margin-bottom:10px">').replace(/\n/g, '<br>')}</div>`;
+  html += `<div class="feedback" id="fb"></div>`;
+  return html;
+}
+
+function checkExplain() {
+  document.getElementById('model-ans').classList.add('show');
+  document.querySelector('.btn-submit').style.display = 'none';
+  
+  const q = getCurrentQuestions()[state.currentQuestion];
+  const userInput = document.getElementById('explain-input').value.trim();
+  const wordCount = userInput.split(/\s+/).filter(w => w.length > 0).length;
+  
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback correct-fb show';
+  fb.innerHTML = `<div class="feedback-label">Self-Assessment</div>`;
+  fb.innerHTML += `<p style="font-size:13px;color:var(--text2);margin-bottom:8px">You wrote ${wordCount} words. For a ${q.marks}-mark question, aim for 3 well-developed paragraphs.</p>`;
+  fb.innerHTML += `<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Compare your answer with the model: did you include specific facts, dates, and names? Did you explain WHY (not just describe)?</p>`;
+  fb.innerHTML += `
+    <button class="btn btn-primary" style="margin:6px 6px 0 0" onclick="explainSelfAssess(3)">🥇 Strong (3 paragraphs, specific facts)</button>
+    <button class="btn btn-secondary" style="margin:6px 6px 0 0" onclick="explainSelfAssess(2)">🥈 Okay (some points, could improve)</button>
+    <button class="btn btn-secondary" style="margin:6px 6px 0 0" onclick="explainSelfAssess(1)">🥉 Needs work (few specific facts)</button>
+  `;
+}
+
+function explainSelfAssess(level) {
+  if (level >= 2) state.score++;
+  state.totalAnswered++;
+  updateProgress();
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback ' + (level >= 2 ? 'correct-fb' : 'wrong-fb') + ' show';
+  if (level === 3) {
+    fb.innerHTML = '<div class="feedback-label">🥇 Excellent! Strong analysis with specific evidence.</div>';
+  } else if (level === 2) {
+    fb.innerHTML = '<div class="feedback-label">🥈 Good effort. Review the model answer to see what specific facts you could add next time.</div>';
+  } else {
+    fb.innerHTML = '<div class="feedback-label">🥉 Keep practicing! Explain questions need specific dates, names, and facts — not just general statements.</div>';
+  }
+  fb.innerHTML += `<p style="font-size:12px;color:var(--text2);margin-top:8px">Key exam tip: Edexcel markers look for <strong>own knowledge</strong> beyond the stimulus points.</p>`;
+  fb.innerHTML += `<br><button class="btn btn-primary" onclick="nextQuestion()">Continue →</button>`;
+}
+
+// ── PROGRESS ───────────────────────────────────────────────────────
+function updateProgress() {
+  const totalQuestions = 40; // Approximate total across all topics/rounds
+  const answered = state.totalAnswered;
+  const pct = Math.min(100, Math.round((answered / totalQuestions) * 100));
+  
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `Question ${answered} completed`;
+  document.getElementById('progress-score').textContent = `Score: ${state.score}/${answered || 1} (${answered ? Math.round(state.score/answered*100) : 0}%)`;
+}
+
+// ── QUIZ COMPLETE ──────────────────────────────────────────────────
+function checkQuizComplete() {
+  const allDone = [0,1,2,3].every(t => allRoundsDone(t));
+  if (allDone || state.totalAnswered >= 36) {
+    showFinalScore();
+  }
+}
+
+function showTopicComplete() {
+  document.getElementById('question-area').innerHTML = `
+    <div class="question-card" style="text-align:center; padding:40px">
+      <div style="font-size:48px; margin-bottom:16px">🎉</div>
+      <div style="font-size:18px; font-weight:700; margin-bottom:8px">Topic ${state.currentTopic + 1} Complete!</div>
+      <div style="color:var(--text2); margin-bottom:20px">${quizData[state.currentTopic].name}</div>
+      <button class="btn btn-primary" onclick="moveToNextTopic()">Next Topic →</button>
+    </div>
+  `;
+  updateTabs();
+  updateProgress();
+  checkQuizComplete();
+}
+
+function moveToNextTopic() {
+  if (state.currentTopic < 3) {
+    state.currentTopic++;
+    state.currentRound = 0;
+    state.currentQuestion = 0;
+    updateTabs();
+    renderQuestion();
+    updateProgress();
+  } else {
+    showFinalScore();
+  }
+}
+
+function showFinalScore() {
+  const total = state.totalAnswered;
+  const pct = total > 0 ? Math.round(state.score / total * 100) : 0;
+  
+  document.getElementById('total-score').textContent = pct + '%';
+  document.getElementById('score-summary').classList.add('show');
+  document.getElementById('question-area').innerHTML = '';
+  
+  // Per-topic breakdown
+  let breakdownHtml = '';
+  [0,1,2,3].forEach(t => {
+    const done = allRoundsDone(t);
+    breakdownHtml += `
+      <div class="breakdown-item">
+        <div class="b-num">${done ? '✅' : '⬜'}</div>
+        <div class="b-label">${quizData[t].name.split(' ').slice(0,2).join(' ')}</div>
+      </div>
+    `;
+  });
+  
+  let grade = '';
+  if (pct >= 90) grade = 'Grade 9 — Outstanding';
+  else if (pct >= 80) grade = 'Grade 8 — Excellent';
+  else if (pct >= 70) grade = 'Grade 7 — Strong';
+  else if (pct >= 60) grade = 'Grade 6 — Good';
+  else if (pct >= 50) grade = 'Grade 5 — Solid';
+  else grade = 'Keep Practicing';
+  
+  document.getElementById('score-breakdown').innerHTML = breakdownHtml;
+  
+  // Review list
+  let reviewHtml = '';
+  // Add some review items based on common misconceptions
+  const tips = [
+    'The Nazis NEVER won a majority — 37.3% was their best. Hitler was APPOINTED, not elected.',
+    'Article 48 was a WEAKNESS of the Weimar Constitution, giving the President emergency powers.',
+    'The Enabling Act and the Reichstag Fire Decree are DIFFERENT laws — don\'t confuse them!',
+    'Hyperinflation hurt savers but helped those with debts — know who benefited and who suffered.',
+    'Women\'s policies CHANGED over time — pushed out of work early on, brought back for rearmament.',
+    'The Night of the Long Knives was about the SA (Röhm), not the SS — the SS carried it out.',
+    'Persecution of Jews was GRADUAL: 1933 boycott → 1935 Nuremberg Laws → 1938 Kristallnacht.',
+    'The Munich Putsch failed militarily but SUCCEEDED as propaganda — Hitler learned to seek legal power.',
+    'Stresemann\'s recovery was REAL but FRAGILE — dependent on US loans that vanished after 1929.',
+    'Most Germans ACCEPTED the Nazi regime — active resistance was rare, compliance was the norm.'
+  ];
+  
+  const shuffledTips = tips.sort(() => Math.random() - 0.5).slice(0, 5);
+  reviewHtml = '<div style="text-align:left;margin-top:12px">';
+  reviewHtml += '<div style="font-weight:700;margin-bottom:12px;color:var(--orange)">⚠️ Key Facts to Remember:</div>';
+  shuffledTips.forEach(tip => {
+    reviewHtml += `<div class="review-item"><div class="rev-correct" style="color:var(--text)">💡 ${tip}</div></div>`;
+  });
+  reviewHtml += '</div>';
+  
+  document.getElementById('review-list').innerHTML = reviewHtml;
+  document.getElementById('review-section').classList.add('show');
+  
+  updateTabs();
+}
+
+// ── RESTART ────────────────────────────────────────────────────────
+function restartQuiz() {
+  state = {
+    currentTopic: 0,
+    currentRound: 0,
+    currentQuestion: 0,
+    score: 0,
+    totalAnswered: 0,
+    answers: {},
+    completed: {},
+    timelineState: null,
+    matchState: null,
+    selectedMatch: null
+  };
+  document.getElementById('score-summary').classList.remove('show');
+  updateTabs();
+  renderQuestion();
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── START ──────────────────────────────────────────────────────────
+init();
+</script>
+
+</body>
+</html>

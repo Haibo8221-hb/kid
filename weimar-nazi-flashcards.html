@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Weimar & Nazi Germany · Key Knowledge Flashcards</title>
+<style>
+:root{
+  --bg:#f8f9fa;--card-bg:#ffffff;--border:#e5e7eb;--text:#1a1d28;--text2:#6b7280;
+  --accent:#4f8cff;--green:#10b981;--red:#ef4444;--orange:#f59e0b;--purple:#8b5cf6;
+  --weimar:#4f8cff;--rise:#f59e0b;--control:#ef4444;--life:#10b981
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;gap:10px;flex-wrap:wrap;background:var(--card-bg)}
+.topbar h1{font-size:16px;white-space:nowrap}
+.topbar .count{font-size:12px;color:var(--text2)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{padding:4px 12px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);color:var(--text2);cursor:pointer;font-size:11px;transition:all 0.15s;white-space:nowrap}
+.filter-btn:hover{color:var(--text);border-color:var(--text2)}
+.filter-btn.active{color:#fff;border-color:transparent;font-weight:600}
+.filter-btn[data-filter="weimar"].active,.filter-btn[data-filter="weimar"]:hover{background:var(--weimar);border-color:var(--weimar);color:#fff}
+.filter-btn[data-filter="rise"].active,.filter-btn[data-filter="rise"]:hover{background:var(--rise);border-color:var(--rise);color:#fff}
+.filter-btn[data-filter="control"].active,.filter-btn[data-filter="control"]:hover{background:var(--control);border-color:var(--control);color:#fff}
+.filter-btn[data-filter="life"].active,.filter-btn[data-filter="life"]:hover{background:var(--green);border-color:var(--green);color:#fff}
+
+/* Card area */
+.card-area{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;perspective:1200px;min-height:0}
+.card-container{width:100%;max-width:620px;height:100%;max-height:460px;position:relative}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);cursor:pointer}
+.card-inner.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px;border:1px solid var(--border);background:var(--card-bg);display:flex;flex-direction:column;padding:28px 30px;overflow-y:auto;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.card-back{transform:rotateY(180deg)}
+
+/* Front */
+.card-front .topic-badge{position:absolute;top:16px;left:16px;font-size:10px;padding:3px 12px;border-radius:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#fff}
+.badge-weimar{background:var(--weimar)}
+.badge-rise{background:var(--rise)}
+.badge-control{background:var(--control)}
+.badge-life{background:var(--green)}
+
+.card-front .card-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);margin-bottom:20px;margin-top:10px}
+.card-front .key-text{font-size:20px;font-weight:700;line-height:1.4;text-align:center;color:var(--text);margin-bottom:12px;flex:1;display:flex;align-items:center;justify-content:center}
+.card-front .date-text{font-size:14px;color:var(--accent);text-align:center;font-weight:600}
+.card-front .tap-hint{position:absolute;bottom:14px;font-size:11px;color:var(--text2);opacity:0.5;width:100%;text-align:center;left:0}
+.card-front .card-number{position:absolute;top:16px;right:16px;font-size:11px;color:var(--text2)}
+
+/* Back */
+.card-back .topic-badge{position:absolute;top:16px;left:16px;font-size:10px;padding:3px 12px;border-radius:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#fff}
+.card-back .key-mini{font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);text-align:center;width:100%}
+.card-back .detail-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;font-weight:700}
+.card-back .detail-text{font-size:14px;line-height:1.75;text-align:left;width:100%}
+.card-back .detail-text strong{color:var(--accent)}
+.card-back .detail-text .highlight{background:rgba(79,140,255,0.1);padding:1px 4px;border-radius:3px}
+.card-back .significance{font-size:12px;color:var(--text2);margin-top:14px;padding:10px 14px;background:var(--bg);border-radius:8px;line-height:1.6}
+.card-back .significance strong{color:var(--orange)}
+.card-back .card-number{position:absolute;top:16px;right:16px;font-size:11px;color:var(--text2)}
+.card-back .tap-hint{position:absolute;bottom:14px;font-size:11px;color:var(--text2);opacity:0.5;width:100%;text-align:center;left:0}
+
+/* Nav */
+.nav-bar{display:flex;align-items:center;justify-content:center;gap:20px;padding:10px 16px;border-top:1px solid var(--border);flex-shrink:0;background:var(--card-bg)}
+.nav-btn{padding:8px 20px;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);cursor:pointer;font-size:13px;transition:all 0.15s;min-width:80px}
+.nav-btn:hover{background:var(--bg);border-color:var(--accent)}
+.nav-btn:disabled{opacity:0.3;cursor:not-allowed}
+.nav-info{font-size:12px;color:var(--text2);min-width:60px;text-align:center}
+.nav-shuffle{margin-left:12px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:14px;cursor:pointer;font-size:12px;transition:all 0.15s}
+.nav-shuffle:hover{opacity:0.85}
+
+/* Progress dots */
+.progress-dots{display:flex;gap:4px;justify-content:center;margin-top:4px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all 0.2s}
+.dot.seen{background:var(--accent);opacity:0.4}
+.dot.current{background:var(--accent);opacity:1}
+
+/* Mobile */
+@media (max-width:600px){
+  .card-inner{max-height:380px}
+  .card-front .key-text{font-size:17px}
+  .card-back .detail-text{font-size:13px}
+  .topbar{gap:6px;padding:8px 10px}
+  .filter-btn{padding:3px 8px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🇩🇪 Weimar & Nazi Germany</h1>
+  <div class="count" id="filter-count">50 cards</div>
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="weimar">📜 Weimar</button>
+    <button class="filter-btn" data-filter="rise">⬆️ Rise</button>
+    <button class="filter-btn" data-filter="control">🔒 Control</button>
+    <button class="filter-btn" data-filter="life">🏠 Life</button>
+  </div>
+</div>
+
+<div class="card-area">
+  <div class="card-container">
+    <div class="card-inner" id="card-inner" onclick="flipCard()">
+      <div class="card-face card-front" id="card-front"></div>
+      <div class="card-face card-back" id="card-back"></div>
+    </div>
+    <div class="progress-dots" id="progress-dots"></div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn" id="prev-btn" onclick="prevCard()">← Prev</button>
+  <span class="nav-info" id="nav-info">1 / 50</span>
+  <button class="nav-btn" id="next-btn" onclick="nextCard()">Next →</button>
+  <button class="nav-shuffle" onclick="shuffleCards()">🔀 Shuffle</button>
+</div>
+
+<script>
+// ── FLASHCARD DATA ─────────────────────────────────────────────
+const cards = [
+  // ══ TOPIC 1: WEIMAR REPUBLIC ══
+  {topic:"weimar",type:"KEY DATE",front:"When did Kaiser Wilhelm II abdicate?",date:"9 November 1918",back:"The Kaiser abdicated after the Kiel Mutiny and widespread unrest. He fled to the Netherlands. Friedrich Ebert (SPD leader) became leader of the new German Republic. The armistice ending WWI was signed two days later, on 11 November 1918.",significance:"Ended the German monarchy and created a power vacuum that the Weimar Republic filled — but the Republic was immediately associated with defeat and the hated 'Stab in the Back' myth."},
+  {topic:"weimar",type:"KEY TERM",front:"What was the 'Stab in the Back' myth (Dolchstoßlegende)?",back:"The belief that the German army was NOT defeated militarily in WWI, but was betrayed by politicians (the 'November Criminals') who signed the armistice and accepted the Treaty of Versailles. This myth was widely believed by right-wing Germans and fatally undermined the Weimar Republic from the start.",significance:"The myth meant many Germans — especially the army, judiciary, and civil service — never accepted the Weimar Republic as legitimate. It fuelled right-wing opposition throughout the 1920s."},
+  {topic:"weimar",type:"KEY TERM",front:"What were the strengths and weaknesses of the Weimar Constitution?",back:"<strong>Strengths:</strong> All Germans had equal rights including the vote. Proportional representation — fair, each party got seats in proportion to votes. Women over 20 could vote. Full democracy at all levels.<br><br><strong>Weaknesses:</strong> <span class='highlight'>Article 48</span> — the President could rule by decree in an emergency without the Reichstag. Proportional representation led to many small parties and weak coalitions. Key groups (army, judges, civil servants) did not support democracy.",significance:"Article 48 was used increasingly in 1930-1933, effectively ending parliamentary democracy before Hitler even came to power."},
+  {topic:"weimar",type:"KEY DATE",front:"When was the Treaty of Versailles signed?",date:"28 June 1919",back:"The peace treaty ending WWI. Key terms: <strong>War Guilt Clause (Article 231)</strong> — Germany had to accept full blame. <strong>Reparations</strong> of £6.6 billion. <strong>Territorial losses</strong> — 13% of land, all colonies, Alsace-Lorraine, the Polish Corridor. <strong>Military restrictions</strong> — army limited to 100,000, no air force, no submarines, no tanks. Rhineland demilitarised.",significance:"Germans called it the 'Diktat' (dictated peace). Resentment over Versailles was a constant theme in Weimar politics and a key Nazi campaigning point."},
+  {topic:"weimar",type:"KEY EVENT",front:"What happened in the Spartacist Uprising?",date:"January 1919",back:"A communist uprising in Berlin led by <strong>Rosa Luxemburg and Karl Liebknecht</strong>. They wanted a revolution like Russia's. The government used the right-wing <strong>Freikorps</strong> (ex-soldiers) to crush the revolt. Both leaders were murdered.",significance:"Showed the government's dependence on right-wing forces that did not truly support democracy — the Republic crushed the left using the right. A pattern that would repeat."},
+  {topic:"weimar",type:"KEY EVENT",front:"What was the Kapp Putsch?",date:"March 1920",back:"A right-wing attempt to seize power led by <strong>Wolfgang Kapp</strong> and Freikorps units. They took control of Berlin. The government fled. The putsch FAILED because Berlin workers organised a <strong>general strike</strong> — without workers, the city could not function.",significance:"Exposed that the army could not be relied upon to defend the Republic — the army refused to fire on the Freikorps. 'Reichswehr does not fire on Reichswehr.'"},
+  {topic:"weimar",type:"KEY TERM",front:"What caused the hyperinflation crisis of 1923?",back:"<strong>Cause 1:</strong> Germany missed a reparations payment in late 1922. <strong>Cause 2:</strong> France and Belgium occupied the Ruhr (Jan 1923) to take resources in kind. <strong>Cause 3:</strong> The government ordered <strong>passive resistance</strong> — workers went on strike but were still paid. <strong>Cause 4:</strong> The government printed more money to pay striking workers, destroying the currency's value.",significance:"By November 1923, bread cost 200,000 billion marks. Middle-class savings were wiped out. This permanently damaged faith in Weimar democracy and made many receptive to extremist solutions."},
+  {topic:"weimar",type:"KEY TERM",front:"Who benefited and who suffered from hyperinflation?",back:"<strong>Suffered:</strong> Savers (life savings wiped out), people on fixed incomes, pensioners, those reliant on wages.<br><br><strong>Benefited:</strong> People with debts/mortgages (could pay them off with worthless money), landowners with produce to sell or barter, those with foreign currency.",significance:"The uneven impact created deep social divisions. The middle class — Weimar's potential base of support — was devastated economically and psychologically."},
+  {topic:"weimar",type:"KEY PERSON",front:"Who was Gustav Stresemann and what did he achieve?",date:"Chancellor Aug-Nov 1923, Foreign Minister 1923-1929",back:"<strong>As Chancellor (1923):</strong> Ended passive resistance in the Ruhr, introduced the <strong>Rentenmark</strong> to end hyperinflation.<br><br><strong>As Foreign Minister:</strong> Dawes Plan (1924) — US loans, reparations restructured. Locarno Treaties (1925) — Germany accepted western borders. Germany joined the League of Nations (1926). Kellogg-Briand Pact (1928). Young Plan (1929) — reduced reparations to £2 billion.",significance:"Stresemann brought stability and international respect. But the recovery depended on US loans — when they were recalled after the Wall Street Crash (1929), the economy collapsed again. Awarded Nobel Peace Prize."},
+  {topic:"weimar",type:"KEY TERM",front:"What was the Dawes Plan (1924)?",back:"A plan negotiated by Stresemann with the USA. <strong>US loaned Germany 800 million gold marks.</strong> Reparations payments were restructured to be more manageable. The French agreed to leave the Ruhr.",significance:"Triggered economic recovery — industrial output doubled by 1928. But it made Germany dangerously dependent on American loans."},
+  {topic:"weimar",type:"KEY EVENT",front:"What were the 'Golden Years' of the Weimar Republic?",date:"1924-1929",back:"A period of cultural flowering and relative stability. <strong>Culture:</strong> Berlin became Europe's cultural capital — Bauhaus architecture (Walter Gropius), Expressionist art (Otto Dix, George Grosz), cinema (Fritz Lang's Metropolis, 1927), cabaret nightlife. <strong>Society:</strong> The 'New Woman' — greater independence, smoking, drinking, short hair. Censorship ended.<br><br>BUT: not 'golden' for everyone — farmers and traditional middle class often struggled. Many conservative Germans were horrified by the perceived moral decline.",significance:"Represents both the achievements and the contradictions of Weimar. The cultural experimentation that made Berlin famous was exactly what the Nazis would later attack as 'degenerate' and un-German."},
+  {topic:"weimar",type:"KEY TERM",front:"How many political murders were there in Weimar Germany, 1919-1922?",back:"<strong>376 political murders</strong> between 1919-1922. Right-wing assassins were treated leniently by courts; left-wing perpetrators were treated harshly. A famous victim was <strong>Walther Rathenau</strong> (Foreign Minister), assassinated in 1922 by right-wing extremists.",significance:"Demonstrates the 'blind right eye' of the Weimar judiciary — the courts were biased towards right-wing defendants, reflecting the fact that key institutions never accepted the Republic."},
+
+  // ══ TOPIC 2: HITLER'S RISE TO POWER ══
+  {topic:"rise",type:"KEY PERSON",front:"What was Hitler's background before joining the DAP?",back:"Born 1889 in Austria. Fought in WWI, won the <strong>Iron Cross</strong> (a bravery medal). After the war, he stayed in the army and was sent to spy on the <strong>German Workers' Party (DAP)</strong>, a small far-right group set up by <strong>Anton Drexler</strong>. Instead, he joined it and quickly became its most powerful speaker.",significance:"Hitler's war experience shaped his worldview — he believed in the 'Stab in the Back' myth and was radicalised by Germany's defeat. His oratory skills, discovered at DAP meetings, became his most powerful political weapon."},
+  {topic:"rise",type:"KEY TERM",front:"What was the 25-Point Programme (1920)?",back:"The Nazi Party's manifesto. Key demands: <strong>1)</strong> Overturn the Treaty of Versailles. <strong>2)</strong> Unite all German-speaking people. <strong>3)</strong> Lebensraum (living space) for Germans. <strong>4)</strong> Only 'true' Germans could be citizens — no Jews. <strong>5)</strong> Strong central government. <strong>6)</strong> Nationalisation of industry.",significance:"The Programme combined nationalism, anti-Semitism, and socialist-sounding economic promises. It appealed to a broad range of disaffected Germans."},
+  {topic:"rise",type:"KEY TERM",front:"What was the SA (Sturmabteilung)?",back:"The <strong>Stormtroopers / Brownshirts</strong> — the Nazi paramilitary force. Formed in 1921, led by <strong>Ernst Röhm</strong>. Made up of ex-soldiers and Freikorps members. They disrupted opposition political meetings, intimidated voters, and provided the appearance of order on chaotic streets.",significance:"The SA was crucial to Nazi growth — they projected strength, fought communists in street battles, and created an atmosphere where voting Nazi seemed like the 'safe' choice for order."},
+  {topic:"rise",type:"KEY EVENT",front:"What happened at the Munich Putsch?",date:"8-9 November 1923",back:"Hitler attempted to seize power in Munich, inspired by Mussolini's March on Rome. He burst into a beer hall and declared a 'national revolution', with support from General Ludendorff. The next day, they marched through Munich but were stopped by police — <strong>16 Nazis were killed</strong>. Hitler was arrested and charged with treason.",significance:"A military FAILURE but a propaganda SUCCESS. At his trial, Hitler used the courtroom as a national platform. He served only 9 months in prison (lenient right-wing judges), where he wrote Mein Kampf. Crucially, he learned that power must be achieved LEGALLY, through the ballot box."},
+  {topic:"rise",type:"KEY TERM",front:"What was Mein Kampf?",back:"'My Struggle' — Hitler's book, written while in Landsberg Prison (1924). It outlined his ideology: <strong>Lebensraum</strong> (living space in the East), <strong>racial hierarchy</strong> with Aryans at the top and Jews at the bottom, overturning Versailles, and the need for a strong dictator.",significance:"Mein Kampf became the ideological foundation of the Nazi movement. It was widely distributed but its violent and extreme content was largely ignored by those who later claimed they 'didn't know' what the Nazis stood for."},
+  {topic:"rise",type:"KEY TERM",front:"What were the 'Lean Years' for the Nazi Party?",date:"1924-1929",back:"During Stresemann's economic recovery, the Nazis were politically irrelevant. By <strong>1928</strong>, they had only <strong>12 seats</strong> (2.6% of the vote) in the Reichstag. Party membership grew slowly to about 100,000. BUT during this period, they built up party organisation across Germany and Hitler established his absolute leadership.",significance:"Demonstrates that Nazi success depended on economic crisis. During prosperity, extremist parties struggled. After 1929, everything changed."},
+  {topic:"rise",type:"KEY EVENT",front:"How did the Wall Street Crash affect Germany?",date:"October 1929",back:"The US stock market crash led to American banks recalling their loans to Germany. The German economy collapsed. <strong>Unemployment rose from 1.3 million (1929) to 6 million (1932).</strong> Banks failed, businesses closed. The Weimar government under Chancellor Brüning seemed unable to cope — he used Article 48 to pass measures, bypassing the Reichstag.",significance:"The Depression was THE critical factor in Nazi electoral breakthrough. Nazi seats went from 12 (1928) → 107 (1930) → 230 (July 1932). Desperation drove voters to extremes."},
+  {topic:"rise",type:"KEY TERM",front:"Why did different social groups support the Nazis?",back:"<strong>Working class:</strong> Promised 'Work and Bread'. <strong>Middle class:</strong> Feared communism, wanted traditional values restored. <strong>Farmers:</strong> Promised better prices. <strong>Businessmen:</strong> Promised to control trade unions. <strong>Young people:</strong> Excitement, purpose, uniforms. <strong>Women:</strong> Traditional family values.",significance:"The Nazis were a 'catch-all' party of protest — different groups voted Nazi for different reasons, often contradictory ones. Goebbels tailored propaganda to each audience."},
+  {topic:"rise",type:"KEY EVENT",front:"What were the Nazis' election results, 1928-1932?",back:"<strong>1928:</strong> 12 seats (2.6%)<br><strong>1930:</strong> 107 seats (18.3%)<br><strong>July 1932:</strong> <span class='highlight'>230 seats (37.3%)</span> — largest party<br><strong>November 1932:</strong> 196 seats (33.1%) — still largest but declining",significance:"CRITICAL POINT: The Nazis NEVER won an overall majority in a free election. Their best was 37.3%. Hitler was APPOINTED as Chancellor, not elected. This is a very common exam mistake."},
+  {topic:"rise",type:"KEY PERSON",front:"Who were the key figures in Hitler's appointment as Chancellor?",back:"<strong>Paul von Hindenburg</strong> (President) — did not trust Hitler, called him a 'Bohemian corporal'. <strong>Franz von Papen</strong> — former Chancellor (May-Nov 1932), persuaded Hindenburg to appoint Hitler, believing they could 'control' him. Papen became Vice Chancellor.<br><br><strong>Kurt von Schleicher</strong> — Chancellor Dec 1932-Jan 1933, lasted only 2 months. Their scheming created the opening for Hitler.",significance:"Hitler became Chancellor through backstairs intrigue, not mass electoral victory. Von Papen famously said: 'In two months we'll have pushed Hitler so far into a corner that he'll squeak.' He was catastrophically wrong."},
+  {topic:"rise",type:"KEY DATE",front:"When was Hitler appointed Chancellor?",date:"30 January 1933",back:"After months of political manoeuvring, President Hindenburg appointed Hitler as Chancellor. The cabinet contained only 3 Nazis (Hitler, Göring, Frick) out of 12 positions — von Papen believed this would limit Nazi power.<br><br>Hitler immediately called new elections for March 1933, planning to use his new position to secure an outright majority.",significance:"The single most important date in the topic. Within 18 months, Hitler would transform Germany from a democracy into a dictatorship."},
+
+  // ══ TOPIC 3: NAZI CONTROL & DICTATORSHIP ══
+  {topic:"control",type:"KEY EVENT",front:"What was the Reichstag Fire?",date:"27 February 1933",back:"The Reichstag building was burned down. A Dutch communist, <strong>Marinus van der Lubbe</strong>, was arrested and later executed. Hitler used the fire to claim a communist revolution was imminent. He convinced Hindenburg to pass the <strong>Reichstag Fire Decree</strong>, which suspended civil liberties — freedom of speech, press, assembly.",significance:"The Fire Decree was the first major step in establishing the dictatorship. Communists were arrested en masse, removing the main political opposition before the March 1933 elections."},
+  {topic:"control",type:"KEY TERM",front:"What was the Enabling Act?",date:"23 March 1933",back:"The law that <strong>allowed Hitler to pass laws without the Reichstag for 4 years</strong>. Required a two-thirds majority. Achieved by: banning communist deputies, intimidating the Centre Party into support, and having the SA surround the Kroll Opera House during the vote. The Act effectively ended democracy in Germany.",significance:"THE critical legal step in creating the dictatorship. Hitler no longer needed the Reichstag or the President to govern. The Enabling Act and the Reichstag Fire Decree are DIFFERENT laws — a common exam mistake."},
+  {topic:"control",type:"KEY TERM",front:"What was Gleichschaltung?",back:"'Coordination' or 'Nazification' — bringing ALL aspects of German life under Nazi control. Key steps: <strong>1)</strong> All other political parties banned (July 1933). <strong>2)</strong> Trade unions abolished and replaced by the German Labour Front (DAF). <strong>3)</strong> State governments taken over by Nazi governors (Reichsstatthalter). <strong>4)</strong> Civil service purged. <strong>5)</strong> Local government taken over.",significance:"Gleichschaltung went far beyond just banning parties. It meant the Nazis controlled every institution — from the national government down to local clubs and societies."},
+  {topic:"control",type:"KEY EVENT",front:"What was the Night of the Long Knives?",date:"30 June 1934",back:"The SS murdered <strong>SA leader Ernst Röhm</strong> and approximately 400 other perceived opponents. Why? Röhm wanted the SA (3 million members) to replace the army. Army leaders were alarmed. Hitler needed the army's support for his future plans. He also used the opportunity to eliminate other rivals (von Schleicher, Gregor Strasser).",significance:"IMPORTANT: The target was the SA (Röhm), but the purge was carried out by the SS. This secured army support, removed a radical element within the Nazi movement, and demonstrated Hitler's willingness to use murder against his own side."},
+  {topic:"control",type:"KEY DATE",front:"When did Hitler become Führer?",date:"2 August 1934",back:"President Hindenburg died. Hitler combined the offices of Chancellor and President to become <strong>Führer</strong> (Leader). The army swore an oath of <strong>personal loyalty to Hitler</strong>, not to Germany or the constitution. A plebiscite was held — 90% approved Hitler as Führer.",significance:"By August 1934, Hitler's dictatorship was complete. All potential sources of opposition — political parties, trade unions, the SA, independent state governments — had been neutralised."},
+  {topic:"control",type:"KEY TERM",front:"What organisations made up the Nazi police state?",back:"<strong>SS (Schutzstaffel):</strong> Led by Heinrich Himmler. Most powerful organisation. Controlled all police forces, ran concentration camps.<br><br><strong>Gestapo:</strong> Secret State Police. Led by Reinhard Heydrich. Spied on population, arrested suspects. Relied on informants and denunciations.<br><br><strong>SD (Sicherheitsdienst):</strong> SS intelligence service — monitored public opinion.<br><br><strong>Concentration Camps:</strong> First camp — Dachau (March 1933). By 1939, 150,000+ imprisoned.",significance:"The police state created a climate of fear where compliance was the safest option. The Gestapo's network of informants meant even neighbours could not be trusted."},
+  {topic:"control",type:"KEY PERSON",front:"Who was Joseph Goebbels and what did he control?",back:"<strong>Minister of Propaganda and Enlightenment</strong>. Controlled ALL media — newspapers, radio, film, art, literature. Organised the Nuremberg Rallies. Distributed cheap <strong>Volksempfänger</strong> radios — 70% of homes had one by 1939. Loudspeakers in streets and factories. Overseen book burnings (May 1933) and the campaign against 'degenerate' art.",significance:"Goebbels understood that controlling what people read, heard, and saw was as important as the police state. Propaganda made the regime seem popular, powerful, and inevitable."},
+  {topic:"control",type:"KEY EVENT",front:"What were the Nuremberg Rallies?",back:"Massive annual propaganda events held in Nuremberg. The 1934 rally was filmed by Leni Riefenstahl as <strong>'Triumph of the Will'</strong>. Features: Albert Speer's 'cathedral of light' (150 searchlights), 200,000+ uniformed Nazis marching in perfect formation, Hitler's speeches. Designed to show Nazi power, unity, and discipline.",significance:"The rallies were masterpieces of propaganda — they created an impression of overwhelming strength and national unity, even if the reality was more complex."},
+  {topic:"control",type:"KEY TERM",front:"What opposition existed to the Nazi regime?",back:"<strong>Youth:</strong> Edelweiss Pirates (working-class, beat up Hitler Youth), Swing Youth (middle-class, listened to jazz).<br><br><strong>Churches:</strong> Confessing Church (Niemöller, Bonhoeffer — Protestant). Pope Pius XI's 1937 encyclical 'Mit brennender Sorge' (Catholic). But the Concordat of 1933 had limited Church opposition.<br><br><strong>Other:</strong> Communist/Socialist underground networks, the Red Orchestra (Soviet spy ring), some army officers (General Beck resigned 1938).",significance:"KEY POINT: Active, organised resistance was EXTREMELY RARE. Most Germans accepted or supported the regime. Non-conformity was more common than resistance. The distinction matters in exams."},
+
+  // ══ TOPIC 4: LIFE IN NAZI GERMANY ══
+  {topic:"life",type:"KEY TERM",front:"What was the Nazi ideal for women?",back:"<strong>Kinder, Küche, Kirche</strong> (Children, Kitchen, Church). Women were expected to be mothers and housewives, not professionals. Ideal appearance: natural, no makeup, hair in buns/plaits, flat shoes, modest dress.<br><br><strong>Policies:</strong> Law for Encouragement of Marriage (1933) — 1,000 mark loan, 1/4 written off per child. Mother's Cross: Bronze (4), Silver (6), Gold (8+ children). Women barred from professional jobs (lawyers, judges, doctors) from 1936.",significance:"BUT: policies were inconsistent. By the late 1930s, rearmament created labour shortages and women were encouraged BACK into the workforce. The birth rate rose, but many women also resented being pushed out of careers."},
+  {topic:"life",type:"KEY TERM",front:"How did the Nazis control education?",back:"Schools became tools of indoctrination. <strong>Curriculum changes:</strong> PE — 15% of timetable. Biology became 'Race Science'. History taught the Nazi version of events. Geography focused on the 'need for Lebensraum'.<br><br>Teachers had to join the Nazi Teachers' League. Subjects were gender-segregated: boys did science and military training; girls did domestic science.",significance:"The Nazis understood that controlling the young was key to long-term power. Education + Hitler Youth = a generation raised entirely within Nazi ideology."},
+  {topic:"life",type:"KEY TERM",front:"What was the Hitler Youth?",back:"<strong>Boys 10-14:</strong> Deutsches Jungvolk (German Young People). <strong>Boys 14-18:</strong> Hitler Jugend (Hitler Youth). Activities: camping, hiking, map-reading, military drills, sports, weapons training.<br><br><strong>Girls 10-14:</strong> Jungmädel. <strong>Girls 14-18:</strong> BDM (League of German Maidens). Focus: domestic skills, motherhood training, physical fitness.<br><br>Membership: compulsory from 1936, enforced by law from <strong>1939</strong>. By 1939: ~8 million members.",significance:"Some young people genuinely enjoyed the activities and friendships. Others resented the strict discipline and lack of freedom. Youth opposition groups like the Edelweiss Pirates emerged as a reaction."},
+  {topic:"life",type:"KEY TERM",front:"How did the Nazis reduce unemployment?",back:"<strong>1) Public works:</strong> Construction of autobahns (motorways), public buildings.<br><strong>2) Rearmament:</strong> Massive expansion of the arms industry, conscription introduced (1935).<br><strong>3) Removing groups from the statistics:</strong> Women pushed out of work, Jews dismissed from jobs, political opponents imprisoned — these people were NOT counted as 'unemployed'.<br><br>Result: unemployment fell from 6 million (1932) to virtually zero by 1939.",significance:"The Nazi 'economic miracle' was partly real (public works, rearmament) and partly a statistical trick. Real wages for many workers did NOT improve significantly — take-home pay in 1938 was similar to 1929, for longer hours."},
+  {topic:"life",type:"KEY TERM",front:"What was the KdF (Strength Through Joy)?",back:"<strong>Kraft durch Freude</strong> — the Nazi leisure organisation run by the German Labour Front (DAF). Provided subsidised holidays, theatre trips, concerts, sports, and cruises for workers. Promised a 'People's Car' (Volkswagen) — workers paid into a savings scheme, though few received a car before the war.",significance:"KdF was a clever way to win workers' loyalty — if workers had leisure opportunities and felt the regime cared about them, they were less likely to resist. It also kept them busy outside work hours."},
+  {topic:"life",type:"KEY EVENT",front:"What were the Nuremberg Laws?",date:"September 1935",back:"Two laws: <strong>1) Reich Citizenship Law:</strong> Jews lost German citizenship — they became 'subjects' with no political rights. <strong>2) Law for the Protection of German Blood and Honour:</strong> Banned marriage and sexual relations between Jews and non-Jews. Jews were defined by having three or four Jewish grandparents.",significance:"A crucial escalation in Nazi persecution. The laws legalised discrimination and created a 'racial' definition of Jewishness. They paved the way for further restrictions."},
+  {topic:"life",type:"KEY EVENT",front:"What was Kristallnacht?",date:"9-10 November 1938",back:"The 'Night of Broken Glass'. A Nazi-organised pogrom across Germany. Synagogues were burned, Jewish businesses and homes were smashed and looted, and approximately <strong>30,000 Jewish men were arrested</strong> and sent to concentration camps. The violence was presented as 'spontaneous' but was organised by Goebbels and the SA.",significance:"Marked a major escalation from legal discrimination to open violence. The international reaction was largely negative, but no country took significant action. For German Jews, it was a terrifying turning point."},
+  {topic:"life",type:"KEY TERM",front:"How did Nazi persecution of Jews escalate over time?",back:"<strong>1933:</strong> Boycott of Jewish businesses (April). Jews dismissed from civil service.<br><strong>1935:</strong> Nuremberg Laws — Jews lose citizenship, banned from marrying non-Jews.<br><strong>1938:</strong> Kristallnacht — open violence, mass arrests, destruction of synagogues.<br><br>This escalation is a KEY THEME: persecution was GRADUAL, not a single event.",significance:"The gradual nature of persecution is crucial for understanding how it was possible. Each step seemed less extreme than it was, and by the time of Kristallnacht, most Germans were either complicit, indifferent, or too afraid to protest."},
+  {topic:"life",type:"KEY TERM",front:"What was the 1936 Berlin Olympics used for?",back:"The Nazis used the Olympics as a propaganda showcase. A new stadium for 100,000 was built. Anti-Semitic signs were temporarily removed to present a positive image to the world. The event showed Nazi Germany as modern, organised, and peaceful.<br><br>BUT: African-American athlete <strong>Jesse Owens</strong> won 4 gold medals, undermining Nazi racial ideology. Hitler reportedly refused to shake his hand.",significance:"The Olympics were a masterclass in international propaganda — hiding the regime's true nature behind a carefully constructed image. It also showed the limits of Nazi racial ideology when confronted with reality."},
+
+  // Extra cards for depth
+  {topic:"weimar",type:"KEY TERM",front:"What was the Kellogg-Briand Pact?",date:"1928",back:"An international agreement signed by 62 nations, including Germany, agreeing NOT to use war to settle disputes. It was a major foreign policy achievement for Stresemann's Weimar Germany.",significance:"Showed Germany was once again a respected member of the international community — a dramatic change from the isolation of 1919."},
+  {topic:"rise",type:"KEY PERSON",front:"What was the role of the SS in the Nazi Party?",back:"The <strong>Schutzstaffel</strong> (Protection Squad) was formed in 1925 as Hitler's personal bodyguard. Under <strong>Heinrich Himmler</strong> (from 1929), it grew into the most powerful organisation in Nazi Germany — controlling the police, running concentration camps, and carrying out the Night of the Long Knives.",significance:"The SS and SA are easy to confuse: SA = mass paramilitary (Brownshirts), purged in 1934. SS = elite guard (black uniforms), became the regime's enforcers."},
+  {topic:"control",type:"KEY TERM",front:"What was the Concordat (1933)?",back:"An agreement between the Nazi state and the Catholic Church. The Church promised to stay out of politics; in return, the Nazis guaranteed religious freedom. The Nazis quickly broke this promise — Catholic schools and youth groups were closed down.",significance:"The Concordat limited Catholic opposition to the regime. When Pope Pius XI issued 'Mit brennender Sorge' in 1937 condemning the Nazis, it was significant but came too late to mobilise effective resistance."},
+  {topic:"control",type:"KEY TERM",front:"What happened to the legal system under the Nazis?",back:"<strong>Judges</strong> had to swear an oath of loyalty to Hitler. <strong>Lawyers</strong> had to join the Nazi Lawyers' Association. <strong>Jury trials were abolished.</strong> The number of <strong>death penalty offences</strong> increased dramatically — from 3 to over 40. Courts became instruments of Nazi control, not independent justice.",significance:"The transformation of the legal system shows how Gleichschaltung penetrated every institution. There was no independent check on Nazi power."},
+  {topic:"life",type:"KEY TERM",front:"What was autarky?",back:"<strong>Self-sufficiency</strong> — the Nazi policy of making Germany economically independent, so it could not be weakened by blockades as in WWI. This drove policies like developing synthetic rubber and oil, and the drive for Lebensraum to secure resources.",significance:"Autarky was a key Nazi economic goal. It was never fully achieved (Germany remained dependent on imports), but it drove rearmament and expansionist foreign policy."}
+];
+
+// ── STATE ──────────────────────────────────────────────────────
+let filteredCards = [...cards];
+let currentIndex = 0;
+let flipped = false;
+let seenCards = new Set();
+let currentFilter = 'all';
+
+// ── RENDER ─────────────────────────────────────────────────────
+function renderCard() {
+  const card = filteredCards[currentIndex];
+  const front = document.getElementById('card-front');
+  const back = document.getElementById('card-back');
+  
+  const topicNames = {weimar:'Weimar Republic',rise:'Rise to Power',control:'Nazi Control',life:'Life in Nazi Germany'};
+  const topicBadge = `badge-${card.topic}`;
+  
+  // Front
+  front.innerHTML = `
+    <div class="topic-badge ${topicBadge}">${topicNames[card.topic]}</div>
+    <div class="card-number">${currentIndex + 1} / ${filteredCards.length}</div>
+    <div class="card-type">${card.type}</div>
+    <div class="key-text">${card.front}</div>
+    ${card.date ? `<div class="date-text">${card.date}</div>` : ''}
+    <div class="tap-hint">tap to reveal</div>
+  `;
+  
+  // Back
+  back.innerHTML = `
+    <div class="topic-badge ${topicBadge}">${topicNames[card.topic]}</div>
+    <div class="card-number">${currentIndex + 1} / ${filteredCards.length}</div>
+    <div class="key-mini">${card.front}</div>
+    <div class="detail-title">DETAIL</div>
+    <div class="detail-text">${card.back}</div>
+    <div class="significance"><strong>⚠ EXAM SIGNIFICANCE:</strong> ${card.significance}</div>
+    <div class="tap-hint">tap to flip back</div>
+  `;
+  
+  // Track as seen
+  seenCards.add(currentIndex);
+  updateDots();
+  
+  // Unflip
+  const inner = document.getElementById('card-inner');
+  inner.classList.remove('flipped');
+  flipped = false;
+  
+  // Update nav
+  document.getElementById('nav-info').textContent = `${currentIndex + 1} / ${filteredCards.length}`;
+  document.getElementById('prev-btn').disabled = currentIndex === 0;
+  document.getElementById('next-btn').disabled = currentIndex === filteredCards.length - 1;
+}
+
+function updateDots() {
+  const container = document.getElementById('progress-dots');
+  let html = '';
+  for (let i = 0; i < filteredCards.length; i++) {
+    let cls = 'dot';
+    if (i === currentIndex) cls += ' current';
+    else if (seenCards.has(i)) cls += ' seen';
+    html += `<span class="${cls}"></span>`;
+  }
+  container.innerHTML = html;
+}
+
+// ── FLIP ───────────────────────────────────────────────────────
+function flipCard() {
+  const inner = document.getElementById('card-inner');
+  flipped = !flipped;
+  if (flipped) {
+    inner.classList.add('flipped');
+  } else {
+    inner.classList.remove('flipped');
+  }
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────
+function nextCard() {
+  if (currentIndex < filteredCards.length - 1) {
+    currentIndex++;
+    renderCard();
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderCard();
+  }
+}
+
+function shuffleCards() {
+  // Fisher-Yates shuffle
+  for (let i = filteredCards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [filteredCards[i], filteredCards[j]] = [filteredCards[j], filteredCards[i]];
+  }
+  currentIndex = 0;
+  seenCards.clear();
+  renderCard();
+}
+
+// ── FILTERS ────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentFilter = this.dataset.filter;
+    
+    if (currentFilter === 'all') {
+      filteredCards = [...cards];
+    } else {
+      filteredCards = cards.filter(c => c.topic === currentFilter);
+    }
+    
+    currentIndex = 0;
+    seenCards.clear();
+    document.getElementById('filter-count').textContent = `${filteredCards.length} cards`;
+    renderCard();
+  });
+});
+
+// ── KEYBOARD ───────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') nextCard();
+  if (e.key === 'ArrowLeft') prevCard();
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    flipCard();
+  }
+});
+
+// ── TOUCH SWIPE ────────────────────────────────────────────────
+let touchStartX = 0;
+document.getElementById('card-inner').addEventListener('touchstart', function(e) {
+  touchStartX = e.touches[0].clientX;
+});
+
+document.getElementById('card-inner').addEventListener('touchend', function(e) {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 60) {
+    if (diff > 0) nextCard();
+    else prevCard();
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+renderCard();
+</script>
+</body>
+</html>

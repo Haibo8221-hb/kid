@@ -1,0 +1,42 @@
+# =============================================================================
+# kid-main 部署到阿里云 112.74.40.8（宝塔 / nginx）的版本控制忽略规则
+# 原则：代码 + 内容数据入庫；密钥、大体积资源、备份、临时/运行时产物不入库。
+# =============================================================================
+
+# ── 密钥 / 环境变量（绝不入库）──
+.env
+.env.local
+.env.docker
+.env.*
+!.env.example
+
+# ── 含硬编码 Key 的采集脚本（P0-1 未完成前排除；完成密钥外置后可纳入）──
+research_collector.py
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+*.corrupt/
+
+# ── 备份 / 临时 / 日志 ──
+backups/
+*.bak
+*.bak2
+*.html.bak
+*.html.bak2
+*.pdf.bak
+index.html.bak
+error_images/
+clawd/
+node_modules/
+*.log
+
+# ── 大体积静态资源（走 OSS / workbench-kit 单独通道，不进 git，避免仓库膨胀）──
+resources/
+downloads/
+
+# ── 运行时数据临时文件 ──
+data/*.tmp

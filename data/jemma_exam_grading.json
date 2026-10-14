@@ -1,0 +1,358 @@
+{
+  "exam_title": "GCSE Science Exam",
+  "total_score": "30/49",
+  "grade_estimate": "5",
+  "questions": [
+    {
+      "number": "Q1",
+      "topic": "Skeletal System",
+      "max_marks": 2,
+      "student_answer": "invertebrate is when you dont have a backbone/spine. Vertebrate is when you have bone (include backbone/spine).",
+      "mark": 2,
+      "correct_answer": "Invertebrates do not have a backbone; vertebrates have a backbone (spine).",
+      "feedback": "Correct. You have accurately defined both terms, though the phrasing is a little informal."
+    },
+    {
+      "number": "Q1 (Endoskeleton/Exoskeleton)",
+      "topic": "Skeletal System",
+      "max_marks": 2,
+      "student_answer": "have bone (include endoskeleton is when you have bone) inside your skin. backbone/spine). Exoskeleton is when you have bone) outside your skin.",
+      "mark": 1,
+      "correct_answer": "An endoskeleton is an internal skeleton (e.g., bones inside the body). An exoskeleton is an external skeleton (e.g., shell on the outside of the body).",
+      "feedback": "You have the right idea about inside vs. outside, but the answer is poorly structured and contains repeated phrases. An exoskeleton is not made of 'bone' but of chitin (in insects) or calcium carbonate (in crustaceans)."
+    },
+    {
+      "number": "Q1 (Osteoporosis)",
+      "topic": "Skeletal System",
+      "max_marks": 1,
+      "student_answer": "Is when you have really low density bone.",
+      "mark": 1,
+      "correct_answer": "A condition where bones become weak and brittle due to low bone density.",
+      "feedback": "Correct. A clear and accurate description."
+    },
+    {
+      "number": "Q1 (Functions of Skeletal System)",
+      "topic": "Skeletal System",
+      "max_marks": 2,
+      "student_answer": "",
+      "mark": 0,
+      "correct_answer": "Functions: support, protection, movement, blood cell production, mineral storage. Aspects: bones (rigidity), joints (movement), marrow (blood cell production).",
+      "feedback": "No answer was provided for this question. You must attempt all parts of a question to gain marks."
+    },
+    {
+      "number": "Q2 (a)(i)",
+      "topic": "Atmosphere",
+      "max_marks": 1,
+      "student_answer": "",
+      "mark": 0,
+      "correct_answer": "Nitrogen",
+      "feedback": "No label was written on the pie chart. The most abundant gas in air is nitrogen."
+    },
+    {
+      "number": "Q2 (a)(ii)",
+      "topic": "Atmosphere",
+      "max_marks": 1,
+      "student_answer": "☌ 20",
+      "mark": 1,
+      "correct_answer": "20%",
+      "feedback": "Correct. Oxygen makes up approximately 20% of the air."
+    },
+    {
+      "number": "Q2 (b)(i)",
+      "topic": "Acid Rain",
+      "max_marks": 1,
+      "student_answer": "sulphuric acid",
+      "mark": 1,
+      "correct_answer": "Sulfuric acid (H₂SO₄)",
+      "feedback": "Correct. Sulfur dioxide reacts with water to form sulfurous acid, which then oxidises to form sulfuric acid. 'Sulphuric acid' is accepted."
+    },
+    {
+      "number": "Q2 (b)(ii)",
+      "topic": "Acid Rain",
+      "max_marks": 1,
+      "student_answer": "nitrous oxides",
+      "mark": 1,
+      "correct_answer": "Nitrogen oxides (NOx) / Nitrogen dioxide",
+      "feedback": "Correct. Nitrogen oxides are a major cause of acid rain."
+    },
+    {
+      "number": "Q2 (b)(iii)",
+      "topic": "Acid Rain",
+      "max_marks": 2,
+      "student_answer": "1. affect trees and leaves 2. toxic to aquatic creatures",
+      "mark": 2,
+      "correct_answer": "1. Damages trees/plants/forests. 2. Kills aquatic life / makes lakes acidic.",
+      "feedback": "Correct. You have identified two valid problems caused by acid rain."
+    },
+    {
+      "number": "Q4 (a)",
+      "topic": "Separation Techniques",
+      "max_marks": 2,
+      "student_answer": "X ....Glass rod........................................ Y ....Bunsen burner..................................",
+      "mark": 2,
+      "correct_answer": "X = Glass rod / Stirring rod. Y = Bunsen burner / Heat source.",
+      "feedback": "Correct. Both pieces of apparatus are correctly identified."
+    },
+    {
+      "number": "Q4 (b)(i)",
+      "topic": "Solutions",
+      "max_marks": 1,
+      "student_answer": "☒ C solvent",
+      "mark": 1,
+      "correct_answer": "Solvent",
+      "feedback": "Correct. A solvent is the liquid that dissolves a solute."
+    },
+    {
+      "number": "Q4 (b)(ii)",
+      "topic": "Solutions",
+      "max_marks": 1,
+      "student_answer": "☒ B solution",
+      "mark": 1,
+      "correct_answer": "Solution",
+      "feedback": "Correct. The clear liquid formed after filtration is a solution of salt in water."
+    },
+    {
+      "number": "Q4 (c)(i)",
+      "topic": "Separation Techniques",
+      "max_marks": 1,
+      "student_answer": "....Stage 2...........................................",
+      "mark": 1,
+      "correct_answer": "Stage 2",
+      "feedback": "Correct. Sand is insoluble and is collected as the residue on the filter paper in stage 2."
+    },
+    {
+      "number": "Q4 (c)(ii)",
+      "topic": "Separation Techniques",
+      "max_marks": 1,
+      "student_answer": "....Stage 3...........................................",
+      "mark": 1,
+      "correct_answer": "Stage 3",
+      "feedback": "Correct. Salt is recovered by evaporating the water in stage 3."
+    },
+    {
+      "number": "Q4 (d)",
+      "topic": "Separation Techniques",
+      "max_marks": 1,
+      "student_answer": "....Evaporates......................................",
+      "mark": 1,
+      "correct_answer": "It evaporates / turns into water vapour / boils away.",
+      "feedback": "Correct. The water is removed by evaporation."
+    },
+    {
+      "number": "Q5 (a)(i)",
+      "topic": "Chromatography",
+      "max_marks": 1,
+      "student_answer": "☒ D",
+      "mark": 1,
+      "correct_answer": "D",
+      "feedback": "Correct. Dye D separates into three distinct spots, indicating three colours."
+    },
+    {
+      "number": "Q5 (a)(ii)",
+      "topic": "Chromatography",
+      "max_marks": 1,
+      "student_answer": "☒ A",
+      "mark": 1,
+      "correct_answer": "A",
+      "feedback": "Correct. Dye A shows only one spot, indicating it is a pure colour."
+    },
+    {
+      "number": "Q5 (b)",
+      "topic": "Chromatography",
+      "max_marks": 2,
+      "student_answer": "The Incorrect result is **B** because **there isn't a colour that is not matching with red, yellow or blue.**",
+      "mark": 1,
+      "correct_answer": "Dye B is incorrect because it shows a yellow spot, but yellow is not one of the primary colours (blue, red, yellow) used to make the other dyes, OR because the yellow spot in B does not match the yellow spot in any other dye.",
+      "feedback": "You correctly identified dye B as the incorrect result. However, your explanation is unclear. You need to state that the yellow spot in B does not match the yellow spot in any of the other dyes (or that it is a different shade of yellow)."
+    },
+    {
+      "number": "Q6 (a)",
+      "topic": "Lab Apparatus",
+      "max_marks": 4,
+      "student_answer": "balance: mass, g/kg; stop clock: time, s; gas syringe: volume, cm3; ruler: length, cm/m",
+      "mark": 4,
+      "correct_answer": "Balance: mass, g/kg; Stop clock: time, s; Gas syringe: volume, cm³; Ruler: length, cm/m.",
+      "feedback": "Excellent. All quantities and units are correctly identified."
+    },
+    {
+      "number": "Q6 (b)",
+      "topic": "Chromatography",
+      "max_marks": 1,
+      "student_answer": "☒ C ruler",
+      "mark": 1,
+      "correct_answer": "Ruler",
+      "feedback": "Correct. A ruler is used to measure the distance the solvent and dyes have travelled to calculate Rf values."
+    },
+    {
+      "number": "Q7 (a)",
+      "topic": "Chemical Reactions",
+      "max_marks": 1,
+      "student_answer": "copper oxide + nitric acid → copper nitrate + water",
+      "mark": 1,
+      "correct_answer": "copper oxide + nitric acid → copper nitrate + water",
+      "feedback": "Correct. The word equation is balanced and accurate."
+    },
+    {
+      "number": "Q7 (b)(i)",
+      "topic": "Rates of Reaction",
+      "max_marks": 1,
+      "student_answer": "to speed up the mixing process",
+      "mark": 1,
+      "correct_answer": "To increase the rate of reaction / to speed up the reaction.",
+      "feedback": "Correct. Warming the acid increases the rate of reaction."
+    },
+    {
+      "number": "Q7 (b)(ii)",
+      "topic": "Practical Chemistry",
+      "max_marks": 1,
+      "student_answer": "When the copper oxide doesn't dissolve in nitric acid anymore",
+      "mark": 1,
+      "correct_answer": "When no more copper oxide reacts/dissolves and excess solid remains at the bottom of the beaker.",
+      "feedback": "Correct. Excess is indicated by undissolved solid remaining after stirring."
+    },
+    {
+      "number": "Q7 (b)(iii)",
+      "topic": "Crystallisation",
+      "max_marks": 1,
+      "student_answer": "You can see the crystal at the bottom of the beaker",
+      "mark": 0,
+      "correct_answer": "When a drop of the solution on a cold surface (e.g., a glass rod) forms crystals / when a crust forms on the surface of the solution.",
+      "feedback": "Incorrect. The crystallisation point is reached *before* crystals form in the bulk solution. A common test is to dip a cold glass rod into the solution; if crystals form on the rod, the point has been reached."
+    },
+    {
+      "number": "Q7 (b)(iv)",
+      "topic": "Filtration",
+      "max_marks": 1,
+      "student_answer": "Stage 3",
+      "mark": 1,
+      "correct_answer": "Stage 3",
+      "feedback": "Correct. Filtration (Stage 3) removes the insoluble impurities."
+    },
+    {
+      "number": "Q9 (a)",
+      "topic": "Gas Tests",
+      "max_marks": 1,
+      "student_answer": "it splint → squeaky pop",
+      "mark": 1,
+      "correct_answer": "A lit splint held near the gas produces a 'squeaky pop' sound.",
+      "feedback": "Correct. You have correctly described the test for hydrogen."
+    },
+    {
+      "number": "Q9 (b)(i)",
+      "topic": "Water Test",
+      "max_marks": 2,
+      "student_answer": "test: cobalt paper result: blue → pink",
+      "mark": 2,
+      "correct_answer": "Test: Anhydrous cobalt(II) chloride paper. Result: Turns from blue to pink.",
+      "feedback": "Correct. This is a standard chemical test for water."
+    },
+    {
+      "number": "Q9 (b)(ii)",
+      "topic": "Purity Test",
+      "max_marks": 2,
+      "student_answer": "test: heat to boiling result: boils at 100°C",
+      "mark": 2,
+      "correct_answer": "Test: Boil the liquid and measure the boiling point. Result: Pure water boils at 100°C at standard pressure.",
+      "feedback": "Correct. A fixed boiling point is a physical test for purity."
+    },
+    {
+      "number": "Q9 (b)(iii)",
+      "topic": "Limewater Test",
+      "max_marks": 2,
+      "student_answer": "☒ carbon dioxide from the air reacts to cause the cloudiness ☒ the cloudiness is caused by the formation of a white precipitate",
+      "mark": 2,
+      "correct_answer": "☒ carbon dioxide from the air reacts to cause the cloudiness ☒ the cloudiness is caused by the formation of a white precipitate",
+      "feedback": "Correct. You have correctly identified both statements."
+    },
+    {
+      "number": "Q11 (a)",
+      "topic": "Elements",
+      "max_marks": 1,
+      "student_answer": "☒ A He ☒ B H₂",
+      "mark": 0,
+      "correct_answer": "A (He)",
+      "feedback": "Incorrect. You have selected two answers. He is the correct symbol for an element (helium). H₂ is the formula for a molecule of hydrogen, not the symbol for the element itself."
+    },
+    {
+      "number": "Q11 (b)",
+      "topic": "Compounds",
+      "max_marks": 1,
+      "student_answer": "☒ D water",
+      "mark": 1,
+      "correct_answer": "Water (H₂O)",
+      "feedback": "Correct. Water is a compound made of hydrogen and oxygen."
+    },
+    {
+      "number": "Q11 (c)",
+      "topic": "Separation Techniques",
+      "max_marks": 1,
+      "student_answer": "☒ C simple distillation",
+      "mark": 1,
+      "correct_answer": "Simple distillation",
+      "feedback": "Correct. Simple distillation is used to separate a solvent (water) from a solute (salt)."
+    },
+    {
+      "number": "Q11 (d)(i)",
+      "topic": "Chromatography",
+      "max_marks": 1,
+      "student_answer": "Because it's going to spoil the experiment. Not spread into the water?",
+      "mark": 0,
+      "correct_answer": "If the solvent level is above the baseline, the samples will dissolve into the solvent in the beaker instead of being carried up the paper.",
+      "feedback": "Incorrect. The reason is that the dyes would dissolve directly into the solvent pool, rather than being drawn up the paper by capillary action, ruining the separation."
+    },
+    {
+      "number": "Q11 (d)(ii)",
+      "topic": "Chromatography",
+      "max_marks": 2,
+      "student_answer": "Dye B is also present in dye P because the two solvent dye on the same level.",
+      "mark": 2,
+      "correct_answer": "Dye B is present in ink P because they have a spot at the same height (same Rf value).",
+      "feedback": "Correct. You have correctly identified dye B and given a valid reason (same level/height)."
+    },
+    {
+      "number": "Q11 (d)(iii)",
+      "topic": "Chromatography",
+      "max_marks": 1,
+      "student_answer": "Not soluble in the solvent.",
+      "mark": 1,
+      "correct_answer": "It is insoluble in the solvent.",
+      "feedback": "Correct. If a substance is not soluble in the solvent, it will not move from the baseline."
+    },
+    {
+      "number": "Movement and Joints",
+      "topic": "Skeletal & Muscular Systems",
+      "max_marks": 4,
+      "student_answer": "1 - C, 2 - B, 3 - A, 4 - D",
+      "mark": 2,
+      "correct_answer": "1 - D (Cartilage covers bone ends), 2 - C (Ligament connects bone to bone), 3 - A (Tendon connects muscle to bone), 4 - B (Antagonistic pairs work in tandem).",
+      "feedback": "You have correctly matched Tendon (3-A) and Antagonistic Pairs (4-B). However, Cartilage (1) connects to D, not C, and Ligament (2) connects to C, not B. Review the specific functions of cartilage and ligaments."
+    }
+  ],
+  "strengths": [
+    "Good understanding of basic definitions (vertebrate/invertebrate, osteoporosis, solvent/solution).",
+    "Strong practical knowledge of separation techniques (filtration, evaporation, distillation).",
+    "Accurate recall of gas tests and chemical tests (hydrogen, water, limewater)."
+  ],
+  "weaknesses": [
+    {
+      "topic": "Skeletal System (Joints & Tissues)",
+      "issue": "Confused the functions of cartilage, ligaments, and tendons.",
+      "advice": "Create a simple mnemonic: 'Ligament Links bone to bone; Tendon Ties muscle to bone; Cartilage Cushions the joint.'"
+    },
+    {
+      "topic": "Chromatography (Methodology)",
+      "issue": "Unable to explain why the solvent level must be below the baseline.",
+      "advice": "Understand the principle: the solvent moves up the paper by capillary action. If the spots are submerged, they will wash off into the solvent pool instead of separating on the paper."
+    },
+    {
+      "topic": "Crystallisation Technique",
+      "issue": "Incorrectly described how to identify the crystallisation point.",
+      "advice": "The crystallisation point is identified by dipping a cold glass rod into the solution. If crystals form on the rod, the solution is saturated enough to crystallise upon cooling."
+    }
+  ],
+  "study_priorities": [
+    "1. Review the specific functions of cartilage, ligaments, and tendons in the skeletal system.",
+    "2. Practice explaining the methodology and underlying principles of chromatography experiments.",
+    "3. Revise the practical steps for preparing crystals, especially identifying the crystallisation point."
+  ]
+}

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPhO Resources | Diya</title>
+<style>
+  :root {
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --accent: #6366f1;
+    --accent-light: #eef2ff;
+    --border: #e5e7eb;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+    padding: 32px 24px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  h2 { font-size: 20px; font-weight: 600; margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--accent-light); }
+  h3 { font-size: 16px; font-weight: 600; margin: 16px 0 8px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+  .pathway-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 700px) { .pathway-grid { grid-template-columns: 1fr; } }
+
+  .pathway-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .pathway-card h3 { margin-top: 0; display: flex; align-items: center; gap: 8px; }
+  .pathway-card .badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+    background: var(--accent-light); color: var(--accent);
+  }
+  .pathway-card .year { font-size: 13px; color: var(--muted); margin: 4px 0 12px; }
+  .pathway-card .desc { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.6; }
+  .pathway-card .target { font-size: 13px; font-weight: 500; margin-top: 8px; }
+  .pathway-card .target span { color: var(--gold); }
+
+  .timeline {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+  }
+  .timeline h3 { margin-top: 0; }
+  .timeline-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .timeline-row:last-child { border-bottom: none; }
+  .tl-date {
+    min-width: 130px;
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 13px;
+  }
+  .tl-event { flex: 1; }
+  .tl-tag {
+    font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 8px;
+    display: inline-block; margin-left: 6px;
+  }
+  .tl-tag.now { background: #d1fae5; color: #065f46; }
+  .tl-tag.next { background: var(--accent-light); color: var(--accent); }
+  .tl-tag.future { background: #f3f4f6; color: var(--muted); }
+
+  .papers-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .paper-group { margin-bottom: 16px; }
+  .paper-group:last-child { margin-bottom: 0; }
+  .paper-group h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--accent); }
+
+  .paper-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 6px;
+  }
+  .paper-link {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg);
+    border-radius: 6px;
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s;
+  }
+  .paper-link:hover { background: var(--accent-light); }
+  .paper-link .icon { margin-right: 8px; }
+  .paper-link .size { font-size: 11px; color: var(--muted); }
+
+  .external-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .ext-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-decoration: none;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s;
+  }
+  .ext-card:hover { border-color: var(--accent); }
+  .ext-card h4 { font-size: 14px; margin-bottom: 4px; }
+  .ext-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .tip-box {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  .tip-box strong { color: #92400e; }
+
+  a.back {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  a.back:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<a href="app.html" class="back">← Back to Dashboard</a>
+
+<h1>BPhO Physics Olympiad</h1>
+<p class="subtitle">Complete competition pathway and past papers for Imperial Engineering preparation</p>
+
+<!-- Competition Pathway -->
+<h2>Competition Pathway</h2>
+<div class="pathway-grid">
+  <div class="pathway-card">
+    <h3>IPC <span class="badge">Warm-up</span></h3>
+    <div class="year">Intermediate Physics Challenge — Year 11</div>
+    <div class="desc">1-hour paper, multiple choice + short answer. Designed to stretch GCSE-level physics thinking. First exposure to Olympiad-style problems.</div>
+    <div class="target">Target: <span>Gold</span> (top 15%)</div>
+  </div>
+  <div class="pathway-card">
+    <h3>SPC <span class="badge">Bridge</span></h3>
+    <div class="year">Senior Physics Challenge — Year 12 (Jan-Mar)</div>
+    <div class="desc">1-hour paper, harder than IPC. Tests AS-level physics application. Great prep for Round 1 pacing and problem style.</div>
+    <div class="target">Target: <span>Gold</span></div>
+  </div>
+  <div class="pathway-card">
+    <h3>Round 1 <span class="badge">Main Event</span></h3>
+    <div class="year">BPhO Round 1 — Year 12 (November)</div>
+    <div class="desc">2 sections: S1 (20 MC, 40 min) + S2 (4 long-form, 80 min). The one that counts for UCAS. Top ~100 advance to Round 2.</div>
+    <div class="target">Target: <span>Top Gold / Round 2</span></div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<h2>Diya's Timeline</h2>
+<div class="timeline">
+  <div class="timeline-row">
+    <div class="tl-date">Now (Jul 2026)</div>
+    <div class="tl-event">Start weekly IPC past paper practice — 1 paper every 2 weeks, untimed<span class="tl-tag now">NOW</span></div>
+  </div>
+  <div class="timeline-row">
+    <div class="tl-date">Sep 2026</div>
+    <div class="tl-event">Ask Miss Streule to register Diya for IPC at Headington Rye (school must be BPhO-registered)<span class="tl-tag next">Next</span></div>
+  </div>
+  <div class="timeline-row">
+    <div class="tl-date">Jan–Feb 2027</div>
+    <div class="tl-event">IPC exam — target Gold. After this: transition to SPC past papers over summer</div>
+  </div>
+  <div class="timeline-row">
+    <div class="tl-date">Mar 2027</div>
+    <div class="tl-event">SPC exam (school-registered). Transition to Round 1 prep immediately after<span class="tl-tag next">Key</span></div>
+  </div>
+  <div class="timeline-row">
+    <div class="tl-date">Summer 2027</div>
+    <div class="tl-event">Intensive Round 1 training. Book: 200 Puzzling Physics Problems. Isaac Physics board: BPhO prep<span class="tl-tag next">Critical</span></div>
+  </div>
+  <div class="timeline-row">
+    <div class="tl-date">Nov 2027</div>
+    <div class="tl-event"><strong>BPhO Round 1</strong> — results before UCAS deadline. This is the main battle<span class="tl-tag future">Target</span></div>
+  </div>
+</div>
+
+<!-- Past Papers -->
+<h2>Past Papers & Mark Schemes</h2>
+
+<div class="papers-section">
+  <div class="paper-group">
+    <h4>IPC — Intermediate Physics Challenge (Y11) — Start here</h4>
+    <div class="paper-list" id="ipc-papers"></div>
+  </div>
+  <div class="paper-group">
+    <h4>SPC — Senior Physics Challenge (Y12) — Bridge</h4>
+    <div class="paper-list" id="spc-papers"></div>
+  </div>
+  <div class="paper-group">
+    <h4>Round 1 — BPhO Main Competition</h4>
+    <div class="paper-list" id="r1-papers"></div>
+  </div>
+</div>
+
+<!-- External Resources -->
+<h2>External Resources</h2>
+<div class="external-links">
+  <a href="https://isaacphysics.org/" target="_blank" class="ext-card">
+    <h4>Isaac Physics</h4>
+    <p>Free problem-solving platform by Cambridge. BPhO prep board, graded questions, instant feedback. The single best training tool.</p>
+  </a>
+  <a href="https://www.bpho.org.uk/" target="_blank" class="ext-card">
+    <h4>BPhO Official Site</h4>
+    <p>Competition dates, registration info, full paper archive including pre-2020 papers.</p>
+  </a>
+  <a href="https://www.amazon.co.uk/200-Puzzling-Physics-Problems-Peter/dp/0521774802" target="_blank" class="ext-card">
+    <h4>200 Puzzling Physics Problems</h4>
+    <p>The canonical Olympiad training book. Problems from Hungarian competitions — ideal for Round 1 deep practice.</p>
+  </a>
+</div>
+
+<div class="tip-box">
+  <strong>Strategy tip:</strong> Don't just do papers — read the mark schemes carefully. BPhO awards marks for <em>method</em> and <em>physical reasoning</em>, not just the final answer. A solution that shows clear physical thinking can score better than a lucky correct answer with no working.
+</div>
+
+<script>
+// Auto-generate paper links from the downloads directory
+const papers = {
+  ipc: [
+    { name: '2025 QP', file: '2025_IPC.pdf' },
+    { name: '2025 MS', file: '2025_IPC_Marking.pdf' },
+    { name: '2024 QP', file: '2024_IPC.pdf' },
+    { name: '2024 MS', file: '2024_IPC_Marking.pdf' },
+    { name: '2023 QP', file: '2023_IPC.pdf' },
+    { name: '2023 MS', file: '2023_IPC_Marking.pdf' },
+    { name: '2022 QP', file: '2022_IPC.pdf' },
+    { name: '2022 MS', file: '2022_IPC_Marking.pdf' },
+    { name: '2020 QP', file: '2020_IPC.pdf' },
+    { name: '2020 MS', file: '2020_IPC_Marking.pdf' },
+  ],
+  spc: [
+    { name: '2025 QP', file: 'BPhO_SPC_2025_QP.pdf' },
+    { name: '2025 MS', file: 'BPhO_SPC_2025_MS.pdf' },
+    { name: '2024 QP', file: 'BPhO_SPC_2024_QP.pdf' },
+    { name: '2024 MS', file: 'BPhO_SPC_2024_MS.pdf' },
+    { name: '2023 QP', file: 'BPhO_SPC_2023_QP.pdf' },
+    { name: '2023 MS', file: 'BPhO_SPC_2023_MS.pdf' },
+    { name: '2022 QP', file: 'BPhO_SPC_2022_QP.pdf' },
+    { name: '2022 MS', file: 'BPhO_SPC_2022_MS.pdf' },
+    { name: '2020 QP', file: 'BPhO_SPC_2020_QP.pdf' },
+    { name: '2020 MS', file: 'BPhO_SPC_2020_MS.pdf' },
+  ],
+  r1: [
+    { name: '2024 S1 QP', file: '2024_Nov_R1_S1_QP.pdf' },
+    { name: '2024 S2 QP', file: '2024_Nov_R1_S2_QP.pdf' },
+    { name: '2024 S1 MS', file: '2024_Nov_R1_S1_MS.pdf' },
+    { name: '2024 S2 MS', file: '2024_Nov_R1_S2_MS.pdf' },
+    { name: '2023 S1 QP', file: '2023Nov_R1_S1.pdf' },
+    { name: '2023 S2 QP', file: '2023Nov_R1_S2.pdf' },
+    { name: '2023 MS', file: '2023Nov_R1_Marking.pdf' },
+    { name: '2022 S1 QP', file: '2022Nov_R1_S1.pdf' },
+    { name: '2022 S2 QP', file: '2022Nov_R1_S2.pdf' },
+    { name: '2022 MS', file: '2022Nov_R1_Marking.pdf' },
+    { name: '2021 S1 QP', file: '2021Nov_R1_S1.pdf' },
+    { name: '2021 S2 QP', file: '2021Nov_R1_S2.pdf' },
+    { name: '2021 MS', file: '2021Nov_R1_Marking.pdf' },
+    { name: '2020 S1 QP', file: '2020Nov_R1_S1.pdf' },
+    { name: '2020 S2 QP', file: '2020Nov_R1_S2.pdf' },
+    { name: '2020 MS', file: '2020Nov_R1_Marking.pdf' },
+    { name: '2019 S1 QP', file: '2019Nov_R1_S1.pdf' },
+    { name: '2019 S2 QP', file: '2019Nov_R1_S2.pdf' },
+    { name: '2019 MS', file: '2019Nov_R1_Marking.pdf' },
+  ]
+};
+
+function renderPapers(sectionId, items) {
+  const el = document.getElementById(sectionId);
+  if (!el) return;
+  items.forEach(p => {
+    const a = document.createElement('a');
+    a.className = 'paper-link';
+    a.href = 'downloads/bpho/' + p.file;
+    a.target = '_blank';
+    a.innerHTML = `<span><span class="icon">📄</span>${p.name}</span><span class="size">PDF</span>`;
+    el.appendChild(a);
+  });
+}
+
+renderPapers('ipc-papers', papers.ipc);
+renderPapers('spc-papers', papers.spc);
+renderPapers('r1-papers', papers.r1);
+</script>
+
+</body>
+</html>

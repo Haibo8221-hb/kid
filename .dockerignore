@@ -1,0 +1,15 @@
+backups/
+__pycache__/
+*.bak
+*.bak2
+error_images/
+downloads/
+download/
+resources/
+.git/
+*.pyc
+.env.local
+docker-compose.yml
+Dockerfile
+.dockerignore
+backup.sh

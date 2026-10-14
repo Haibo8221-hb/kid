@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q38 — Combining Transformations: Full Solution</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f6f3; color: #2c2416; line-height: 1.85; padding: 30px 20px; }
+  .paper { max-width: 820px; margin: 0 auto; background: #fff; padding: 45px 50px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  h1 { font-size: 1.4em; margin-bottom: 4px; color: #1a1a1a; }
+  .subtitle { color: #666; font-size: 0.88em; margin-bottom: 24px; }
+  h2 { font-size: 1.15em; margin: 32px 0 10px; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; color: #1e3a5f; }
+  h3 { font-size: 1em; margin: 20px 0 8px; color: #333; }
+  
+  .concept { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px 20px; margin: 16px 0; border-radius: 0 8px 8px 0; }
+  .concept h4 { color: #1d4ed8; margin-bottom: 6px; font-size: 0.95em; }
+  
+  .step { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 14px 18px; margin: 14px 0; border-radius: 0 6px 6px 0; }
+  .step.warn { background: #fffbeb; border-left-color: #f59e0b; }
+  .step.result { background: #fef2f2; border-left-color: #ef4444; }
+  
+  .formula { font-family: 'Courier New', monospace; background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-size: 0.95em; white-space: nowrap; }
+  .highlight { background: #fef3c7; padding: 3px 6px; border-radius: 3px; font-weight: bold; }
+  .boxed { border: 2px solid #3b82f6; padding: 14px 18px; margin: 12px 0; border-radius: 6px; background: #fafbff; text-align: center; }
+  
+  svg { display: block; margin: 12px auto; }
+  .caption { font-size: 0.82em; color: #888; text-align: center; margin-top: -6px; margin-bottom: 12px; font-style: italic; }
+  
+  table { border-collapse: collapse; margin: 12px 0; font-size: 0.9em; width: 100%; }
+  table td, table th { border: 1px solid #ddd; padding: 8px 14px; }
+  table th { background: #f5f5f5; font-weight: 600; }
+  table .ans { background: #fef3c7; font-weight: bold; }
+  
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+  .compare > div { background: #fafafa; border: 1px solid #e5e5e5; padding: 12px 16px; border-radius: 6px; }
+  
+  .keypoint { display: flex; align-items: flex-start; gap: 8px; margin: 8px 0; }
+  .keypoint .icon { font-size: 1.2em; min-width: 24px; }
+  
+  .practice { background: #f5f0ff; border: 1px solid #c4b5fd; padding: 16px 20px; margin: 16px 0; border-radius: 8px; }
+  .practice h3 { color: #7c3aed; margin-top: 0; }
+</style>
+</head>
+<body>
+<div class="paper">
+
+<h1>Q38 — Combining Transformations: Full Solution</h1>
+<p class="subtitle">Year 8 Maths · Topic: Combining Transformations (★★★) · 3 marks</p>
+
+<!-- ====== THE QUESTION ====== -->
+<div class="concept">
+  <h4>📋 The Question</h4>
+  <p>Shape P is <strong>enlarged</strong> by scale factor <span class="formula">2</span> from centre <span class="formula">(0, 0)</span>, then <strong>translated</strong> by vector <span class="formula">(−3, 1)</span>.</p>
+  <p>A point on P is <span class="formula">(2, 3)</span>.</p>
+  <p style="margin-top:8px;"><strong>(a)</strong> Find the final coordinates of this point after both transformations. <em>[2 marks]</em></p>
+  <p><strong>(b)</strong> Describe a <strong>single</strong> transformation equivalent to both. <em>[1 mark]</em></p>
+</div>
+
+<!-- ====== KNOWLEDGE POINT 1: ENLARGEMENT ====== -->
+<h2>📐 Knowledge Point 1 — What is an Enlargement?</h2>
+
+<div class="concept">
+  <h4>Definition</h4>
+  <p>An <strong>enlargement</strong> changes the <strong>size</strong> of a shape by a <strong>scale factor (k)</strong> from a fixed point called the <strong>centre of enlargement</strong>.</p>
+  
+  <div class="keypoint"><span class="icon">🔑</span><span><strong>Key rule:</strong> Every point moves along a <strong>ray</strong> from the centre. The distance from the centre is <strong>multiplied by k</strong>.</span></div>
+  
+  <div class="keypoint"><span class="icon">📏</span><span>If k > 1: the shape gets <strong>bigger</strong>. If 0 < k < 1: the shape gets <strong>smaller</strong>.</span></div>
+  
+  <div class="keypoint"><span class="icon">📍</span><span>If the centre is the <strong>origin (0,0)</strong>, you simply <strong>multiply both coordinates by k</strong>:<br><span class="formula">(x, y) → (k × x, k × y)</span></span></div>
+</div>
+
+<h3>Example: Enlargement ×2 from (0,0)</h3>
+<table>
+  <tr><th>Original point</th><th>Multiply x by 2</th><th>Multiply y by 2</th><th>Image point</th></tr>
+  <tr><td>A(1, 2)</td><td>1 × 2 = 2</td><td>2 × 2 = 4</td><td>A'(2, 4)</td></tr>
+  <tr><td>B(3, 1)</td><td>3 × 2 = 6</td><td>1 × 2 = 2</td><td>B'(6, 2)</td></tr>
+  <tr style="background:#fef3c7;"><td><strong>P(2, 3)</strong></td><td><strong>2 × 2 = 4</strong></td><td><strong>3 × 2 = 6</strong></td><td><strong>P'(4, 6)</strong></td></tr>
+</table>
+
+<svg width="100%" height="260" viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg">
+  <defs><pattern id="gA" width="30" height="20" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 20" fill="none" stroke="#eaeaea" stroke-width="0.3"/></pattern></defs>
+  <rect x="50" y="15" width="330" height="240" fill="url(#gA)"/>
+  <line x1="110" y1="15" x2="110" y2="255" stroke="#333" stroke-width="1.5"/>
+  <line x1="105" y1="22" x2="110" y2="15" stroke="#333" stroke-width="1.5"/>
+  <line x1="115" y1="22" x2="110" y2="15" stroke="#333" stroke-width="1.5"/>
+  <line x1="50" y1="175" x2="380" y2="175" stroke="#333" stroke-width="1.5"/>
+  <line x1="373" y1="170" x2="380" y2="175" stroke="#333" stroke-width="1.5"/>
+  <line x1="373" y1="180" x2="380" y2="175" stroke="#333" stroke-width="1.5"/>
+  <text x="380" y="193" font-size="10">x</text><text x="115" y="18" font-size="10">y</text><text x="112" y="193" font-size="8">O</text>
+  
+  <circle cx="110" cy="175" r="4" fill="#ef4444"/><text x="95" y="168" font-size="10" fill="#dc2626" font-weight="bold">O</text>
+  
+  <!-- P(2,3): y=175-60=115 -->
+  <circle cx="170" cy="115" r="5" fill="#3b82f6"/><text x="178" y="110" font-size="11" fill="#1d4ed8" font-weight="bold">P(2,3)</text>
+  <!-- P'(4,6): y=175-120=55 -->
+  <circle cx="230" cy="55" r="5" fill="#f59e0b"/><text x="238" y="52" font-size="11" fill="#d97706" font-weight="bold">P'(4,6)</text>
+  <!-- Ray -->
+  <line x1="110" y1="175" x2="250" y2="45" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
+  
+  <!-- Distance marks -->
+  <text x="135" y="148" font-size="8" fill="#888">OP = √(4+9) = √13</text>
+  <text x="195" y="100" font-size="8" fill="#888">OP' = √(16+36) = √52</text>
+  <text x="200" y="112" font-size="8" fill="#888">= 2√13 = 2 × OP ✓</text>
+</svg>
+<p class="caption">Fig 1: Enlargement ×2 from origin O. Point P moves along ray OP — its distance from O doubles.</p>
+
+<!-- ====== KNOWLEDGE POINT 2: TRANSLATION ====== -->
+<h2>📐 Knowledge Point 2 — What is a Translation?</h2>
+
+<div class="concept">
+  <h4>Definition</h4>
+  <p>A <strong>translation</strong> <strong>slides</strong> every point of a shape by the <strong>same distance</strong> in the <strong>same direction</strong>. The shape does NOT rotate, reflect, or change size.</p>
+  
+  <div class="keypoint"><span class="icon">🔑</span><span>A translation is described by a <strong>column vector</strong> <span class="formula">(a, b)</span>:<br>• <span class="formula">a</span> = move <strong>right</strong> (positive) or <strong>left</strong> (negative) in the x-direction<br>• <span class="formula">b</span> = move <strong>up</strong> (positive) or <strong>down</strong> (negative) in the y-direction</span></div>
+  
+  <div class="keypoint"><span class="icon">✏️</span><span>To apply a translation: <strong>add</strong> the vector to each coordinate:<br><span class="formula">(x, y) → (x + a, y + b)</span></span></div>
+</div>
+
+<div class="compare">
+  <div>
+    <h4 style="font-size:0.9em;margin-top:0;">Vector (−3, 1) means:</h4>
+    <p>Move <strong>LEFT 3</strong> (x − 3)</p>
+    <p>Move <strong>UP 1</strong> (y + 1)</p>
+    <p style="margin-top:8px;"><span class="formula">(4, 6) → (4−3, 6+1) = (1, 7)</span></p>
+  </div>
+  <div>
+    <h4 style="font-size:0.9em;margin-top:0;">Visual check:</h4>
+    <p>4 − 3 = <strong>1</strong> ✓ (moved left)</p>
+    <p>6 + 1 = <strong>7</strong> ✓ (moved up)</p>
+    <p style="margin-top:8px;color:#888;">The shape keeps its size and orientation — it just slides.</p>
+  </div>
+</div>
+
+<svg width="100%" height="260" viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg">
+  <defs><pattern id="gB" width="30" height="20" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 20" fill="none" stroke="#eaeaea" stroke-width="0.3"/></pattern></defs>
+  <rect x="50" y="15" width="330" height="240" fill="url(#gB)"/>
+  <line x1="110" y1="15" x2="110" y2="255" stroke="#333" stroke-width="1.5"/>
+  <line x1="105" y1="22" x2="110" y2="15" stroke="#333" stroke-width="1.5"/>
+  <line x1="115" y1="22" x2="110" y2="15" stroke="#333" stroke-width="1.5"/>
+  <line x1="50" y1="175" x2="380" y2="175" stroke="#333" stroke-width="1.5"/>
+  <line x1="373" y1="170" x2="380" y2="175" stroke="#333" stroke-width="1.5"/>
+  <line x1="373" y1="180" x2="380" y2="175" stroke="#333" stroke-width="1.5"/>
+  <text x="380" y="193" font-size="10">x</text><text x="115" y="18" font-size="10">y</text><text x="112" y="193" font-size="8">0</text>
+
+  <!-- Axis labels -->
+  <text x="130" y="193" font-size="8" fill="#999">1</text>
+  <text x="160" y="193" font-size="8" fill="#999">2</text>
+  <text x="190" y="193" font-size="8" fill="#999">3</text>
+  <text x="220" y="193" font-size="8" fill="#999">4</text>
+  <text x="250" y="193" font-size="8" fill="#999">5</text>
+  <text x="280" y="193" font-size="8" fill="#999">6</text>
+  <text x="105" y="157" font-size="8" fill="#999" text-anchor="end">1</text>
+  <text x="105" y="137" font-size="8" fill="#999" text-anchor="end">2</text>
+  <text x="105" y="117" font-size="8" fill="#999" text-anchor="end">3</text>
+  <text x="105" y="97" font-size="8" fill="#999" text-anchor="end">4</text>
+  <text x="105" y="77" font-size="8" fill="#999" text-anchor="end">5</text>
+  <text x="105" y="57" font-size="8" fill="#999" text-anchor="end">6</text>
+  <text x="105" y="37" font-size="8" fill="#999" text-anchor="end">7</text>
+
+  <!-- P'(4,6): x=110+120=230, y=175-120=55 -->
+  <circle cx="230" cy="55" r="5" fill="#3b82f6"/><text x="238" y="52" font-size="11" fill="#1d4ed8" font-weight="bold">P'(4,6)</text>
+  <!-- Translation arrow: P'(230,55) → P''(140,35) -->
+  <defs><marker id="arrB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#22c55e"/></marker></defs>
+  <line x1="230" y1="55" x2="138" y2="33" stroke="#22c55e" stroke-width="2.5" marker-end="url(#arrB)"/>
+  <text x="175" y="42" font-size="10" fill="#16a34a" font-weight="bold">+(−3, 1)</text>
+  <!-- P''(1,7): x=110+30=140, y=175-140=35 -->
+  <circle cx="140" cy="35" r="6" fill="#22c55e" stroke="#16a34a" stroke-width="2"/><text x="148" y="32" font-size="11" fill="#16a34a" font-weight="bold">P''(1,7)</text>
+
+  <!-- Dashed lines to axes -->
+  <line x1="230" y1="55" x2="230" y2="175" stroke="#3b82f6" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.4"/>
+  <line x1="110" y1="55" x2="230" y2="55" stroke="#3b82f6" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.4"/>
+  <line x1="140" y1="35" x2="140" y2="175" stroke="#22c55e" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.4"/>
+  <line x1="110" y1="35" x2="140" y2="35" stroke="#22c55e" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.4"/>
+</svg>
+<p class="caption">Fig 2: Translation (−3,1) slides P' left 3 and up 1 to P''(1,7). Axis labels show the coordinate scale.</p>
+
+<!-- ====== PUTTING IT TOGETHER ====== -->
+<h2>🔗 Putting It Together — The Two-Step Process</h2>
+
+<div class="boxed">
+  <p style="font-size:1.1em;"><strong>Complete working for part (a):</strong></p>
+  <p style="font-size:1.15em;margin:10px 0;">
+    <span class="formula">(2, 3)</span>
+    <span style="color:#3b82f6;margin:0 8px;">— enlarge ×2 →</span>
+    <span class="formula">(4, 6)</span>
+    <span style="color:#22c55e;margin:0 8px;">— translate (−3,1) →</span>
+    <span class="formula highlight">(1, 7)</span>
+  </p>
+</div>
+
+<div class="step">
+  <strong>Answer (a):</strong> The final coordinates are <span class="highlight">(1, 7)</span>. ✓
+</div>
+
+<!-- ====== KNOWLEDGE POINT 3: SINGLE TRANSFORMATION ====== -->
+<h2>📐 Knowledge Point 3 — Finding the Single Equivalent Transformation</h2>
+
+<div class="concept">
+  <h4>Why does this matter?</h4>
+  <p>Two transformations done one after another can often be <strong>replaced by ONE transformation</strong>. This is called <strong>composition of transformations</strong>. Finding the single equivalent saves work and reveals the "net effect."</p>
+</div>
+
+<h3>Method: Algebraic Approach</h3>
+
+<div class="step">
+  <h4 style="margin-top:0;">Step 1 — Write the combined effect as a formula</h4>
+  <p>Start with any point <span class="formula">(x, y)</span> on P:</p>
+  <p style="margin:8px 0;">After enlargement: <span class="formula">(2x, 2y)</span></p>
+  <p>After translation: <span class="formula">(2x − 3, 2y + 1)</span></p>
+  <p style="margin-top:8px;color:#666;">So the combined transformation sends <span class="formula">(x, y) → (2x − 3, 2y + 1)</span></p>
+</div>
+
+<div class="step warn">
+  <h4 style="margin-top:0;">Step 2 — Guess the type of single transformation</h4>
+  <p>Since both transformations involve ×2, the single transformation is likely another <strong>enlargement with scale factor 2</strong>, but from a <strong>different centre</strong> — call it <span class="formula">C(a, b)</span>.</p>
+  <p style="margin-top:6px;color:#666;">Why not a translation? Because the coordinates have ×2 in them — that's enlargement, not translation.</p>
+  <p style="color:#666;">Why not a rotation or reflection? Because the shape changes size (×2), which only enlargement does.</p>
+</div>
+
+<div class="step">
+  <h4 style="margin-top:0;">Step 3 — Write the formula for "enlargement from C(a, b) by ×2"</h4>
+  <p>For any point <span class="formula">(x, y)</span>, enlargement ×2 from <span class="formula">C(a, b)</span>:</p>
+  <p style="margin:8px 0;">The vector from C to the point is <span class="formula">(x − a, y − b)</span></p>
+  <p>Multiply this vector by 2: <span class="formula">(2(x − a), 2(y − b)) = (2x − 2a, 2y − 2b)</span></p>
+  <p>Add back to C: <span class="formula">(a + 2x − 2a, b + 2y − 2b)</span></p>
+  <p style="font-weight:bold;margin-top:6px;">Simplified: <span class="formula">(2x − a, 2y − b)</span></p>
+</div>
+
+<div class="step warn">
+  <h4 style="margin-top:0;">Step 4 — Equate and solve</h4>
+  <p>Combined two-step result: <span class="formula">(2x − 3, 2y + 1)</span></p>
+  <p>Single enlargement from C(a, b): <span class="formula">(2x − a, 2y − b)</span></p>
+  
+  <table style="margin-top:10px;">
+    <tr><th></th><th>x-coordinate</th><th>y-coordinate</th></tr>
+    <tr><td>Two-step</td><td>2x − 3</td><td>2y + 1</td></tr>
+    <tr><td>Single enlargement</td><td>2x − a</td><td>2y − b</td></tr>
+    <tr><td>Equate</td><td>2x − 3 = 2x − a</td><td>2y + 1 = 2y − b</td></tr>
+    <tr class="ans"><td>Solve</td><td><strong>a = 3</strong></td><td><strong>b = −1</strong></td></tr>
+  </table>
+</div>
+
+<div class="step result">
+  <h4 style="margin-top:0;">Answer (b):</h4>
+  <p style="font-size:1.1em;">The single equivalent transformation is an <strong>enlargement by scale factor <span class="highlight">2</span> from centre <span class="highlight">(3, −1)</span></strong>.</p>
+</div>
+
+<!-- ====== VISUAL VERIFICATION ====== -->
+<h2>🔍 Visual Verification — Does It Work?</h2>
+
+<svg width="100%" height="320" viewBox="0 0 450 320" xmlns="http://www.w3.org/2000/svg">
+  <defs><pattern id="gC" width="30" height="20" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 20" fill="none" stroke="#e8e8e8" stroke-width="0.3"/></pattern></defs>
+  <rect x="45" y="10" width="340" height="305" fill="url(#gC)"/>
+  <line x1="105" y1="10" x2="105" y2="315" stroke="#333" stroke-width="1.5"/>
+  <line x1="100" y1="17" x2="105" y2="10" stroke="#333" stroke-width="1.5"/>
+  <line x1="110" y1="17" x2="105" y2="10" stroke="#333" stroke-width="1.5"/>
+  <line x1="45" y1="180" x2="385" y2="180" stroke="#333" stroke-width="1.5"/>
+  <line x1="378" y1="175" x2="385" y2="180" stroke="#333" stroke-width="1.5"/>
+  <line x1="378" y1="185" x2="385" y2="180" stroke="#333" stroke-width="1.5"/>
+  <text x="385" y="198" font-size="10">x</text><text x="110" y="13" font-size="10">y</text><text x="107" y="198" font-size="8">0</text>
+
+  <!-- Centre C(3,-1): y=180-(-20)=200 -->
+  <circle cx="195" cy="200" r="6" fill="#ef4444" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="206" y="197" font-size="12" fill="#dc2626" font-weight="bold">C(3,−1)</text>
+
+  <!-- P(2,3): y=180-60=120 -->
+  <circle cx="165" cy="120" r="6" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="173" y="116" font-size="11" fill="#1d4ed8" font-weight="bold">P(2,3)</text>
+
+  <!-- P''(1,7): y=180-140=40 -->
+  <circle cx="135" cy="40" r="6" fill="#22c55e" stroke="#16a34a" stroke-width="2"/>
+  <text x="143" y="44" font-size="11" fill="#16a34a" font-weight="bold">P''(1,7)</text>
+
+  <!-- Rays from C -->
+  <line x1="195" y1="200" x2="165" y2="120" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.5"/>
+  <line x1="195" y1="200" x2="130" y2="30" stroke="#22c55e" stroke-width="2"/>
+
+  <!-- Vector calculations -->
+  <text x="215" y="160" font-size="9" fill="#3b82f6">CP = (−1, 4)</text>
+  <text x="215" y="172" font-size="9" fill="#3b82f6">|CP| = √(1+16) = √17</text>
+  <text x="105" y="140" font-size="9" fill="#22c55e">CP'' = (−2, 8) = 2 × CP</text>
+  <text x="105" y="152" font-size="9" fill="#22c55e">|CP''| = √(4+64) = √68</text>
+  <text x="105" y="164" font-size="9" fill="#22c55e">= 2√17 = 2 × |CP| ✓</text>
+</svg>
+<p class="caption">Fig 3: The single enlargement from C(3,−1). Vector CP'' is exactly twice CP — proof it works.</p>
+
+<h3>Check with the formula:</h3>
+<div class="boxed">
+  <p>For <span class="formula">P(2, 3)</span>, enlargement ×2 from <span class="formula">C(3, −1)</span>:</p>
+  <p style="margin:8px 0;"><span class="formula">x → 3 + 2(2 − 3) = 3 + 2(−1) = 3 − 2 = 1</span> ✓</p>
+  <p><span class="formula">y → −1 + 2(3 − (−1)) = −1 + 2(4) = −1 + 8 = 7</span> ✓</p>
+  <p style="margin-top:8px;font-weight:bold;">Result: <span class="highlight">(1, 7)</span> — matches our two-step answer!</p>
+</div>
+
+<!-- ====== WHY ORDER MATTERS ====== -->
+<h2>⚠️ Common Mistake — Order Matters!</h2>
+
+<div class="concept">
+  <h4>Enlargement then Translation ≠ Translation then Enlargement</h4>
+  <p>Transformations are NOT commutative — changing the order gives a <strong>different result</strong>.</p>
+</div>
+
+<div class="compare">
+  <div>
+    <h4 style="font-size:0.9em;color:#22c55e;">Our question: Enlarge THEN translate</h4>
+    <p><span class="formula">(2,3) → (4,6) → (1,7)</span></p>
+    <p style="color:#22c55e;font-weight:bold;">Final: (1, 7) ✓</p>
+    <p style="margin-top:6px;color:#666;">Single equivalent: enlarge ×2 from (3,−1)</p>
+  </div>
+  <div>
+    <h4 style="font-size:0.9em;color:#ef4444;">If reversed: Translate THEN enlarge</h4>
+    <p><span class="formula">(2,3) → (−1,4) → (−2,8)</span></p>
+    <p style="color:#ef4444;font-weight:bold;">Final: (−2, 8) ✗ Different!</p>
+    <p style="margin-top:6px;color:#666;">Single equivalent: enlarge ×2 from (−3,1)</p>
+  </div>
+</div>
+
+<p style="margin-top:8px;color:#888;font-size:0.9em;">The centre of the single enlargement changes depending on the order. Always follow the order given in the question!</p>
+
+<!-- ====== FULL ANSWER SUMMARY ====== -->
+<h2>📝 Full Mark Scheme Answer</h2>
+
+<table>
+  <tr><th>Part</th><th>Marks</th><th>What to Write</th></tr>
+  <tr>
+    <td>(a)</td><td>2</td>
+    <td>Enlargement: (2,3) × 2 = (4,6)<br>Translation: (4,6) + (−3,1) = <strong>(1,7)</strong></td>
+  </tr>
+  <tr>
+    <td>(b)</td><td>1</td>
+    <td>Enlargement, scale factor <strong>2</strong>, centre <strong>(3, −1)</strong></td>
+  </tr>
+</table>
+
+<div class="step result">
+  <p style="font-weight:bold;">The trick to part (b):</p>
+  <p>The combined formula is <span class="formula">(x, y) → (2x − 3, 2y + 1)</span>.</p>
+  <p>An enlargement ×2 from (a, b) has formula <span class="formula">(x, y) → (2x − a, 2y − b)</span>.</p>
+  <p>Match the numbers: <span class="formula">a = 3</span>, <span class="formula">b = −1</span>. Done!</p>
+</div>
+
+<!-- ====== PRACTICE ====== -->
+<div class="practice">
+  <h3>🖊️ Practice Questions</h3>
+  <p><strong>1.</strong> A point (3, 2) is enlarged by ×3 from (0,0), then translated by (2, −5). Find the final coordinates and the single equivalent transformation.</p>
+  <p style="margin-top:8px;"><strong>2.</strong> A point (1, 4) is translated by (−2, 3), then enlarged by ×2 from (0,0). Find the final coordinates. (Careful — order is reversed!)</p>
+  <p style="margin-top:8px;"><strong>3.</strong> A combined transformation sends (x, y) → (3x + 2, 3y − 4). Describe this as a single enlargement. State the scale factor and centre.</p>
+  <p style="margin-top:12px;color:#7c3aed;font-size:0.85em;">(Answers: Q1 → (11,1), enlarge ×3 from (−1, 2.5). Q2 → (−2,14). Q3 → enlarge ×3 from (−1, 2).)</p>
+</div>
+
+</div>
+</body>
+</html>
