@@ -525,7 +525,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <a href="/Diya_Plan.html" target="_blank">Diya Plan</a>
 <a href="/Diya_Jemma_Oxbridge_Plan.html" target="_blank">Route Overview</a>
 <a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">Summer Guide</a>
-<a href="#" id="llm-settings-btn" title="配置 LLM 端点 / API Key / 模型" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM模块未加载(版本 20261014-1717-fix3)。很可能是浏览器或代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或改用带版本号的地址：app.html?v=20261014-1717-fix3');}}catch(e){alert('LLM设置打开失败: '+((e&&e.message)||e));} return false;">⚙️ LLM 设置</a>
+<a href="#" id="llm-settings-btn" title="配置 LLM 端点 / API Key / 模型" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM模块未加载(版本 20261014-1745-domfix)。很可能是浏览器或代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或改用带版本号的地址：app.html?v=20261014-1745-domfix');}}catch(e){alert('LLM设置打开失败: '+((e&&e.message)||e));} return false;">⚙️ LLM 设置</a>
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
@@ -976,6 +976,7 @@ Hong Kong parallel: HKUST+PolyU
 <button class="btn" onclick="document.getElementById('avatar-modal').classList.remove('open')">Cancel</button>
 </div>
 </div>
+</div>
 
 <!-- LLM Settings Modal -->
 <div class="modal-overlay" id="llm-settings-modal">
@@ -1022,7 +1023,7 @@ Hong Kong parallel: HKUST+PolyU
 
 <div class="modal-actions">
   <button class="btn btn-sm" onclick="llmTestSettings()">测试连接</button>
-  <button class="btn" onclick="document.getElementById('llm-settings-modal').classList.remove('open')">取消</button>
+  <button class="btn" onclick="closeLLMSettings()">取消</button>
   <button class="btn" onclick="llmSaveSettings()">保存</button>
 </div>
 </div>
@@ -1044,6 +1045,8 @@ window.addEventListener('error', function(e){
 });
 // ── LLM 设置按钮绑定：放在脚本最前面注册，不依赖后续代码是否执行完毕 ──
 // 用 addEventListener 而非内联 onclick：兼容 CSP，且函数声明会被提升，点击时必定可用
+// 注：结构根因已修（avatar-modal 缺失的 </div> 导致本弹窗被嵌套、祖先 display:none 使子树不渲染）
+//     此处保留兜底告警，用于未来再次出现「点击无反应」时快速定位
 (function(){
   try{
     var b=document.getElementById('llm-settings-btn');
@@ -1053,7 +1056,7 @@ window.addEventListener('error', function(e){
       var err=null;
       try{ openLLMSettings(); }catch(ex){ err=ex; }
       var m=document.getElementById('llm-settings-modal');
-      // 只有当真的没打开时才打扰用户；正常情况静默
+      // 仅在真的打不开时打扰用户（正常打开则完全静默）
       if(err||!m||!m.classList.contains('open')){
         alert('LLM设置未能打开：'+(err?(err.message||err):'弹窗未显示，请硬刷新页面 Ctrl+Shift+R'));
         if(window.console) console.error('openLLMSettings failed', err);
@@ -1064,7 +1067,7 @@ window.addEventListener('error', function(e){
 // State 
 let currentChild = 'diya';
 // 版本号（构建标识）；用于诊断“缓存了旧版 app.html”——页面左下角徽标会显示它
-const APP_VERSION = '20261014-1717-fix3';
+const APP_VERSION = '20261014-1745-domfix';
 try{ const vb=document.getElementById('ver-badge'); if(vb) vb.textContent='build '+APP_VERSION; }catch(_){}
 let plannerWeeks = {diya:0};
 let plannerData = {diya:{}};
@@ -2860,17 +2863,10 @@ function showAvatarPicker(){
 
 // ── LLM Settings (UI) ──────────────────────────────────
 function openLLMSettings(){
-  // 1) 先无条件打开弹窗；用内联样式强制可见，绕过任何可能压制 .open 类的 CSS / 祖先裁剪
+  // 先打开弹窗（结构已修正：modal 是 main 的直接子元素，不再嵌套于其它 overlay 内）
   const m = document.getElementById('llm-settings-modal');
-  if(m){
-    m.classList.add('open');
-    m.style.cssText = 'display:flex!important;position:fixed!important;inset:0!important;'
-      + 'background:rgba(0,0,0,0.6)!important;z-index:2147483647!important;'
-      + 'align-items:center;justify-content:center';
-  }
-  // 2) 必定反馈：让用户确认点击已触发（若连这个都看不到，说明 handler 没执行=旧文件/CSP）
-  try{ toast('⚙️ LLM 设置已打开'); }catch(_){}
-  // 3) 再异步填充（后端不可达也不影响弹窗）
+  if(m) m.classList.add('open');
+  // 再异步填充（后端不可达也不影响弹窗）
   try{
     const st = document.getElementById('llm-status');
     if(st){ st.textContent=''; st.className='llmset-status'; }
@@ -2889,6 +2885,11 @@ function openLLMSettings(){
         : '未配置 Key：聊天与错题解析将无法使用，请在上方填写。';
     }).catch(()=>{});
   }catch(e){ /* 弹窗已打开，忽略填充异常 */ }
+}
+
+function closeLLMSettings(){
+  const m = document.getElementById('llm-settings-modal');
+  if(m){ m.classList.remove('open'); m.style.cssText=''; }
 }
 
 function llmToggleKey(id, btn){
@@ -2910,7 +2911,7 @@ function llmSaveSettings(){
   fetch('/api/settings/llm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
     .then(r=>r.json())
     .then(d=>{
-      if(d.ok){ st.textContent='✅ 已保存'; st.className='llmset-status ok'; toast('LLM 设置已保存'); setTimeout(()=>document.getElementById('llm-settings-modal').classList.remove('open'),700); }
+      if(d.ok){ st.textContent='✅ 已保存'; st.className='llmset-status ok'; toast('LLM 设置已保存'); setTimeout(closeLLMSettings,700); }
       else { st.textContent='❌ '+(d.error||'保存失败'); st.className='llmset-status err'; }
     })
     .catch(e=>{ st.textContent='❌ 网络错误：'+e.message; st.className='llmset-status err'; });
@@ -3050,14 +3051,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  const theme = localStorage.getItem('diya_theme')||'blue';
  setTheme(theme);
  loadDashboard();
- // 防御性：显式把关键函数挂到 window，防止任何 CSP/作用域边缘情况导致全局不可见
- try{
-   window.openLLMSettings = openLLMSettings;
-   window.llmSaveSettings = llmSaveSettings;
-   window.llmTestSettings = llmTestSettings;
-   window.llmToggleKey = llmToggleKey;
- }catch(_){}
- loadStreak();
+loadStreak();
  // 自检：若 LLM 模块未就绪，页面红字提示（多为缓存旧版）
  try{
    var _btn=document.getElementById('llm-settings-btn');

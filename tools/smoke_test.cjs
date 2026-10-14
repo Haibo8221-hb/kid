@@ -109,6 +109,38 @@ setTimeout(() => {
     else fail.push(`${c.name}: 点击后未打开 (open=${hasOpen}, display=${disp})`);
   });
 
+  // 5) 【回归护栏】所有弹窗必须是 main 的直接子元素
+  //    真实根因：avatar-modal 少写一个 </div>，使 llm-settings-modal 成了它的子节点。
+  //    父级 .modal-overlay 默认 display:none —— 父级不生成 box，整棵子树都不渲染，
+  //    子元素即使自身 display:flex!important 也无法显示。而 jsdom 只算元素自身样式，
+  //    不模拟「祖先不渲染则子树不可见」，所以旧测试会假阳性通过。
+  const overlays = [...doc.querySelectorAll('.modal-overlay')];
+  let nested = 0;
+  overlays.forEach(o => {
+    const p = o.parentElement;
+    if (p && p.classList && p.classList.contains('modal-overlay')) {
+      nested++;
+      fail.push(`弹窗 #${o.id} 被错误嵌套在 #${p.id || '(匿名)'} 内：父级 display:none 会使整棵子树不渲染`);
+    }
+  });
+  if (nested === 0) {
+    pass.push(`${overlays.length} 个弹窗均为独立顶层节点，无错误嵌套`);
+    overlays.forEach(o => pass.push(`弹窗 #${o.id} 挂载于 <${o.parentElement.tagName.toLowerCase()}>`));
+  }
+
+  // 6) 【回归护栏】弹窗打开时，祖先链上不得有 display:none（否则真实浏览器不可见）
+  MODAL_CASES.forEach(c => {
+    const modal = doc.getElementById(c.modalId);
+    if (!modal) return;
+    let n = modal.parentElement, hidden = null;
+    while (n && n.tagName !== 'BODY') {
+      if (window.getComputedStyle(n).display === 'none') { hidden = n.tagName + (n.id ? '#' + n.id : ''); break; }
+      n = n.parentElement;
+    }
+    if (hidden) fail.push(`${c.name}: 祖先 ${hidden} 为 display:none，弹窗在真实浏览器中不可见`);
+    else pass.push(`${c.name}: 祖先链无 display:none 阻断`);
+  });
+
   // 输出
   console.log('\n===== 子女教育工作台 冒烟测试 =====\n');
   console.log(`通过 ${pass.length} 项：`);
