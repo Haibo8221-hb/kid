@@ -55,3 +55,52 @@ jobs:
             done
             echo "===== 服务状态 ====="
             systemctl is-active plan-api || true
+        # 上面整段脚本输出回传：改为先落文件再 cat
+      - name: Re-run and capture output to file
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            SITE="${{ secrets.SITE_ROOT }}"
+            BK=/opt/kid-backup
+            OUT=/tmp/kid-backup-setup.txt
+            {
+              echo "===== when ====="; date -Is
+              echo "===== crontab ====="; crontab -l
+              echo "===== backup dir ====="; ls -la "$BK"
+              echo "===== backup log ====="; cat "$BK/backup.log" 2>/dev/null | tail -5
+              echo "===== probe ====="
+              cat "$SITE/data/.deploy-probe" 2>/dev/null || echo "PROBE ABSENT"
+              echo "===== data listing (top 40) ====="
+              ls -la --time-style=long-iso "$SITE/data" | head -40
+              echo "===== key files ====="
+              for f in auth_state.json llm_config.json errors_diya.json errors_jemma.json planner_diya.json planner_jemma.json tasks_diya.json tasks_jemma.json wiki_diya.json wiki_jemma.json smc_records.json; do
+                if [ -f "$SITE/data/$f" ]; then echo "present: $f ($(stat -c %s "$SITE/data/$f")B, $(stat -c %y "$SITE/data/$f"))"; else echo "ABSENT : $f"; fi
+              done
+              echo "===== service ====="; systemctl is-active plan-api || true
+            } > "$OUT" 2>&1
+            cat "$OUT"
+
+      - name: Pull result back to diag-output branch
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+          ECS_HOST: ${{ secrets.ECS_HOST }}
+          ECS_PORT: ${{ secrets.ECS_PORT }}
+          ECS_USER: ${{ secrets.ECS_USER }}
+        run: |
+          echo "$KEY" > key.pem
+          chmod 600 key.pem
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git fetch origin diag-output 2>/dev/null || true
+          git checkout -B diag-output
+          mkdir -p diagnostics
+          TS=$(date -u +%Y%m%d-%H%M%S)
+          rsync -az -e "ssh -p $ECS_PORT -i key.pem -o StrictHostKeyChecking=no" \
+            "$ECS_USER@$ECS_HOST:/tmp/kid-backup-setup.txt" "diagnostics/backup-setup-$TS.txt"
+          git add diagnostics/
+          git commit -m "ops: backup setup result $TS" || exit 0
+          git push -f origin diag-output
