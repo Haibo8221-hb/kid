@@ -100,5 +100,20 @@ if recs:
     r = cc.delete(f"/api/errors/diya/{recs[0]['id']}")
     check(r.status_code == 200, f'存量记录可删除（实际 {r.status_code}）')
 
+
+print('== 登录限流（新增-D）==')
+_ip = '203.0.113.7'
+for i in range(5):
+    c.post('/api/auth/login', json={'password': 'definitely-wrong'}, environ_base={'REMOTE_ADDR': _ip})
+r = c.post('/api/auth/login', json={'password': 'definitely-wrong'}, environ_base={'REMOTE_ADDR': _ip})
+check(r.status_code == 429, f'连续失败达阈值后锁定（实际 {r.status_code}）')
+r = c.post('/api/auth/login', json={'password': 'verify-pass-123'}, environ_base={'REMOTE_ADDR': _ip})
+check(r.status_code == 429, f'锁定期内正确密码也被拒（实际 {r.status_code}）')
+r = c.post('/api/auth/login', json={'password': 'verify-pass-123'}, environ_base={'REMOTE_ADDR': '198.51.100.9'})
+check(r.status_code == 200, f'未失败来源不受影响（实际 {r.status_code}）')
+A._login_rate_clear(_ip)
+r = c.post('/api/auth/login', json={'password': 'verify-pass-123'}, environ_base={'REMOTE_ADDR': _ip})
+check(r.status_code == 200, f'清除计数后可正常登录（实际 {r.status_code}）')
+
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
 sys.exit(1 if FAILS else 0)

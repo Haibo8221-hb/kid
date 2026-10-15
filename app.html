@@ -1910,7 +1910,42 @@ async function loadResources(){
  </div>`;
 }
 
-function filterResources(cat){}
+// 资源筛选：按链接文本/href 关键词归类（避免改动 60+ 条链接的 HTML 结构）
+function _resourceCat(a){
+ const t=(a.textContent||'').toLowerCase(), h=(a.getAttribute('href')||'').toLowerCase(), s=t+' '+h;
+ if(/ukmt|smc|bpho|olympiad|tmua|step\b|\bmat\b/.test(s)) return 'olympiad';
+ if(/physics|chemistry|biology|\bscience\b/.test(s)) return 'science';
+ if(/maths|fmaths|mathematics/.test(s)) return 'maths';
+ if(/books|graff|bryson|singh|corbett/.test(s)) return 'books';
+ if(/diya|english|history|report card|planning|essay|flashcard|quiz/.test(s)) return 'diya';
+ return 'other';
+}
+function filterResources(cat){
+ const bar=document.getElementById('resource-filter');
+ if(bar) bar.querySelectorAll('.filter-btn').forEach(b=>{
+   b.classList.toggle('active', b.getAttribute('data-filter')===cat);
+ });
+ const list=document.getElementById('resource-list');
+ if(!list) return;
+ list.querySelectorAll('.rcat-section').forEach(sec=>{
+  let visible=0;
+  sec.querySelectorAll('.rcat-link').forEach(a=>{
+   const show=(cat==='all'||_resourceCat(a)===cat);
+   a.style.display=show?'':'none';
+   if(show) visible++;
+  });
+  // 子标题：其后没有任何可见链接时一并隐藏
+  sec.querySelectorAll('.rcat-sub').forEach(sub=>{
+   let any=false, n=sub.nextElementSibling;
+   while(n && !n.classList.contains('rcat-sub')){
+    if(n.classList.contains('rcat-link') && n.style.display!=='none'){ any=true; break; }
+    n=n.nextElementSibling;
+   }
+   sub.style.display=any?'':'none';
+  });
+  sec.style.display=visible?'':'none';
+ });
+}
 
 // Tab Navigation 
 function switchTab(tab){
@@ -3376,21 +3411,6 @@ function logout(){
      .catch(()=>{}).finally(()=>{ window.location.replace('index.html'); });
  }catch(e){ window.location.replace('index.html'); }
 }
-
-// Study Tips Rotator — Updated 01 Sep 2026: 8 tips — English analysis weighting + spaced repetition 2357 + RAG + SMC banker marks + bridge
-const STUDY_TIPS_DIYA = [
- // === KEPT: Core foundation (3) ===
- {id:'tip_02',cat:'general',p:'p0', head:'🧠 Active Recall: Close the book & explain — the stumble IS the learning', detail:'Reading the same page 5 times feels like studying but it\'s the weakest way to learn. Your brain tricks you: "yeah I know this." Instead: read ONCE, close the book, explain it out loud. If you stumble, THAT\'S what you need to study — the stumble is not failure, it\'s a map. Research: students using active recall remember 50% more after 1 week than re-readers. Works for EVERY subject — English quotes, Physics derivations, Chemistry equations.', action:'Today: pick ONE topic from each of 3 subjects. For each: read for 2 min → close book → explain out loud for 2 min → note where you stumbled → re-study ONLY those stumbles. 15 min total.'},
- {id:'d_new01',cat:'english',p:'p0', head:'📝 PETZAL: The 6-step paragraph formula — Point→Evidence→Technique→Zoom→Analysis→Link', detail:'Your English teacher wants ANALYSIS, not description. PETZAL is the proven GCSE structure: (1) POINT — one clear argument sentence answering the question. (2) EVIDENCE — short quote, 3-8 words. (3) TECHNIQUE — name it (metaphor, verb, simile, sibilance, personification, adjective, imperative). (4) ZOOM — pick ONE word from the quote and explode it: dictionary meaning, connotations, sound, what it suggests. (5) ANALYSIS — effect on reader: use "suggests/implies/reveals/conveys" NEVER "shows." (6) LINK — connect back to question AND to writer\'s purpose OR context. One PETZAL paragraph = 8-12 marks. Works for BOTH Language papers AND Literature essays. The key: the ZOOM step is where you jump from grade 4 to grade 7.', action:'This week: write 3 PETZAL paragraphs. Take 3 quotes from your current text. For each: write all 6 steps. Underline each step in a different colour. Then ask: did my ZOOM really examine ONE word deeply, or did I just describe the quote?'},
- {id:'d_new51',cat:'english',p:'p1', head:'🔤 Build your “effect on reader” verb bank — the gap between grade 4 and 7 is one sentence', detail:'The examiner is not looking for you to SPOT techniques — everyone can spot a metaphor. They want you to explain HOW the writer’s choice makes the reader think or feel. That means replacing “this shows” (a grade-4 phrase) with precise effect verbs and connotation. Build a personal bank of sentence starters and memorise them: “The verb ‘darted’ suggests urgency because it connotes…”, “The adjective ‘ancient’ implies…, making the reader feel…”, “The sibilance creates a sense of…”, “The short sentence mirrors…”. Then do the ZOOM step: pick ONE word from your quote and unpack it — its literal meaning, what it secretly suggests, and its sound or feel. Two or three of these sentences per paragraph is exactly what moves you from 4 to 7.', action:'This week: write a “verb bank” page with 10 sentence starters (suggests, implies, reveals, conveys, evokes, mirrors, contrasts, emphasises). For each, write one example using a quote from your current text. Then use at least TWO of them in your next practice paragraph — and ban “this shows” from now on.'},
-
- // === NEW: analysis weighting + spaced repetition + RAG + SMC + bridge (5) ===
- {id:'d_s01',cat:'english',p:'p0', head:'🎯 Analysis beats technique-spotting: the "effect on reader" sentence is where the marks live', detail:'Every student can spot a metaphor — so the examiner does NOT reward you for finding techniques. On AQA Paper 1 Q2, the mark scheme weights "the quality of your comment on the effect of language" as the MOST important of the three skills. That means your current habit — name the technique, quote it, move on — is exactly what caps you at grade 4. Two rules fix it: (1) every quote needs 3-5 sentences of sustained explanation, not one (one "explain" sentence is Level 2 at best); (2) every explanation sentence must say HOW the word makes the reader think or feel, using "suggests / implies / reveals / conveys" — never "this shows". If a sentence just describes the quote, it is not analysis. This single change is the 4→7 lever.', action:'Today: take ONE quote from your current text and write a paragraph where the explanation is 4 full sentences. Each sentence must (a) start with a different effect verb (suggests / implies / reveals / conveys) and (b) name the reader\'s reaction. Underline the effect verbs. Delete and rewrite any sentence that only describes the quote.'},
- {id:'d_s02',cat:'general',p:'p1', head:'⏰ The 2-3-5-7 review schedule: beat the forgetting curve on autopilot', detail:'Your brain forgets most of what you read within days (the "forgetting curve"). The proven fix is spaced repetition — reviewing at widening gaps. The "2-3-5-7 method" gives the exact schedule: (1) straight after the lesson, summarise the key points in your own words or make flashcards; (2) the NEXT day, test yourself with active recall — no notes; (3) THREE days later, test again and "blurt" (write down everything you remember, then check); (4) ONE week later, test and mark only what you still cannot recall, then focus on that. This is the backbone of A-level STEM revision, where the volume jumps 3-4x GCSE. Run it in tiny 10-minute blocks, not marathons.', action:'This week: pick the 3 hardest topics you are learning now. For each, make flashcards (or a 1-page summary) on the day you meet it, then review on day 1, 3 and 7. Use Anki or Quizlet so it tracks the spacing automatically. On the day-7 review, "blurt" first, then check, and list your stubborn gaps.'},
- {id:'d_s03',cat:'maths',p:'p1', head:'🚦 RAG your syllabus, then spend ~80% of your time on the Red topics', detail:'Top students do not revise everything equally — they hunt their gaps and hammer them. The RAG method (used by high-achieving A-level students): take the Maths / FMaths / Physics spec topic list and colour every topic — RED = "I would fail a question on this", AMBER = "I can do it but make mistakes", GREEN = "I could teach it". Then spend about 80% of your time on RED, doing progressive practice (easy → medium → hard questions on that one topic) until it turns AMBER, then GREEN. End each week with one full timed past paper to confirm the gaps actually closed. The r/6thForm consensus is clear: A* students agree the single biggest factor is answering past questions and checking the mark scheme — weighted toward their weakest topics.', action:'This week: print the topic list for Maths and Physics (your exam board\'s spec). RAG-colour every topic — be harsh. Pick your 3 reddest topics. For each: 15 min recap → 5 progressive practice questions → mark against the scheme. Sunday: do one full past-paper section under time and re-colour those topics.'},
- {id:'d_s04',cat:'maths',p:'p1', head:'🏆 SMC: bank questions 1-15 first, and memorise the current year\'s factors', detail:'Two SMC hacks from past gold winners. (1) Banker marks: questions 1-15 are the accessible ones — practise these until you reliably get 13-15/15. Most SMC marks come from nailing these, not from the genius-level Q21-25; if you are short on time, touch ONLY Q1-15. (2) The "current year" trick: UKMT papers almost always include a question using the year number, so know its factorisation cold. 2026 = 2 × 1013 (1013 is prime); 2027 is prime. Also learn the common-base indices trick — rewrite 4 and 8 as powers of 2 — because indices appears every single year. Free prep: Mathsaurus "Get Ready for the Senior Maths Challenge" plus past papers.', action:'This week: download one SMC past paper (ukmt.org.uk → Past Papers → Senior). Do ONLY questions 1-15 under a 60-minute timer, then mark it and write down your 3 most common mistake types. On an index card, write the factorisations of this year and next year, and the common-base indices rule — pin it above your desk.'},
- {id:'d_s05',cat:'general',p:'p0', head:'🌉 Year 10→11 bridge: consolidate, don\'t front-load new content', detail:'The summer and early Year 11 are when grades move — but the winning plan is boring, not heroic. Research and experienced tutors agree: do NOT try to teach yourself new Year 11 content over the summer. Instead, consolidate. The proven formula: 3-5 short sessions a week, 30-60 minutes each, mixing (1) weak-topic review from Year 10, (2) short practice questions, (3) light past papers, and (4) reading/vocabulary for English. The goal is to keep skills warm and close gaps, not to sprint ahead — this stops you arriving at Year 11 already burnt out while actually fixing the gaps that lose marks. English, your weakest subject, is where the biggest summer win hides: one PEEL paragraph a day compounds fast.', action:'This week: build a simple weekly plan with 4 sessions × 30-45 min. Two sessions = English (one PEEL paragraph + one effect-verb bank entry). One = a red Maths topic. One = a red Physics topic. Put them in your calendar at fixed times. Do NOT add a "teach yourself Year 11" session.'},
-];
 
 // ── 三周执行计划（Dashboard 与 Route Compare 共用渲染；数据源自 analysis/海外教育视角学习方案建议_20261015.html 第 5 节） ──
 const THREE_WEEK_PLAN = {

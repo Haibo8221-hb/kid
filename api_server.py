@@ -142,6 +142,38 @@ def _auth_gate():
     _set_cors(resp)
     return resp, 401
 
+# ── 登录限流（按来源 IP 计数，进程内内存；重启即清零，够用且无外部依赖）──
+LOGIN_FAIL_LIMIT = 5            # 连续失败达到此次数后锁定
+LOGIN_LOCKOUT_SEC = 300         # 锁定时长（秒）
+_login_fail_state = {}          # ip -> [失败次数, 首次失败时间, 锁定截止时间]
+
+
+def _login_rate_check(ip):
+    """返回 (是否允许继续尝试, 还需等待秒数)。"""
+    st = _login_fail_state.get(ip)
+    now = time.time()
+    if st and st[2] and now < st[2]:
+        return False, int(st[2] - now) + 1
+    if st and st[2] and now >= st[2]:
+        _login_fail_state.pop(ip, None)     # 锁定到期，重置
+    return True, 0
+
+
+def _login_rate_note_failure(ip):
+    now = time.time()
+    st = _login_fail_state.get(ip) or [0, now, 0]
+    st[0] += 1
+    if now - st[1] > 600:                   # 距离首次失败超过 10 分钟，重新开始计数
+        st = [1, now, 0]
+    if st[0] >= LOGIN_FAIL_LIMIT:
+        st[2] = now + LOGIN_LOCKOUT_SEC
+    _login_fail_state[ip] = st
+
+
+def _login_rate_clear(ip):
+    _login_fail_state.pop(ip, None)
+
+
 @app.route('/api/auth/login', methods=['POST', 'OPTIONS'])
 def auth_login():
     """校验密码，签发会话 cookie。错误响应不区分「密码错」与「用户不存在」（单用户场景只有前者）。"""
@@ -154,11 +186,23 @@ def auth_login():
         resp = jsonify({'ok': False, 'error': '服务端未配置 APP_PASSWORD，请联系管理员'})
         _set_cors(resp)
         return resp, 503
+    # 限流：同一来源连续失败达到阈值后锁定一段时间（防止在线爆破）
+    ip = (request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+          or request.headers.get('X-Real-IP', '').strip()
+          or (request.remote_addr or 'unknown'))
+    allowed, wait = _login_rate_check(ip)
+    if not allowed:
+        resp = jsonify({'ok': False, 'error': f'尝试过于频繁，请 {wait} 秒后重试',
+                        'retry_after': wait})
+        _set_cors(resp)
+        return resp, 429
     if not hmac.compare_digest(pwd.encode(), APP_PASSWORD.encode()):
         time.sleep(0.4)  # 恒定延迟，抬高暴力破解成本
+        _login_rate_note_failure(ip)
         resp = jsonify({'ok': False, 'error': '密码错误'})
         _set_cors(resp)
         return resp, 401
+    _login_rate_clear(ip)
     tok = _make_token()
     resp = jsonify({'ok': True, 'expires_in': AUTH_TTL})
     _set_auth_cookie(resp, tok)
