@@ -1,0 +1,104 @@
+name: Server fix - disable nginx basic auth & set APP_PASSWORD
+
+# 一次性修复（用完即删）：
+#   1) 注释掉三个 vhost 里的 auth_basic / auth_basic_user_file（消除 Windows Basic 弹窗，
+#      只保留应用层登录）；改前备份，nginx -t 失败自动还原。
+#   2) 为 plan-api 写 systemd drop-in，注入 APP_PASSWORD + APP_STRICT_PASSWORD=1，
+#      重启并自检（未登录 401 / 正确密码 200 / 首页 200）。
+# 结果（含生成的密码）写入 diag-output 分支的 diagnostics/ 供查阅。
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/triggers/server-fix-auth.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply fix on ECS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            set -u
+            OUT=/tmp/kid-fix.txt
+            STAMP=20261015
+            CONFS="/www/server/panel/vhost/nginx/grow-consultant.conf /www/server/panel/vhost/nginx/python_kid.conf /www/server/panel/vhost/nginx/112.74.40.8.conf"
+            {
+              echo "===== 1) nginx basic auth ====="
+              for f in $CONFS; do
+                if [ -f "$f" ]; then
+                  cp -n "$f" "$f.bak-$STAMP-noauth"
+                  sed -i 's/^\([[:space:]]*\)auth_basic[[:space:]]/\1# auth_basic /; s/^\([[:space:]]*\)auth_basic_user_file/\1# auth_basic_user_file/' "$f"
+                  echo "patched: $f"
+                else
+                  echo "skip (missing): $f"
+                fi
+              done
+              if nginx -t 2>&1 | tail -5; then
+                nginx -s reload && echo "nginx reloaded"
+              else
+                echo "NGINX -T FAILED -> restoring"
+                for f in $CONFS; do [ -f "$f.bak-$STAMP-noauth" ] && cp "$f.bak-$STAMP-noauth" "$f"; done
+                exit 1
+              fi
+
+              echo
+              echo "===== 2) APP_PASSWORD ====="
+              PW=$(openssl rand -base64 18 | tr -d '\n' | tr '+/' 'Ab')
+              mkdir -p /etc/systemd/system/plan-api.service.d
+              cat > /etc/systemd/system/plan-api.service.d/10-app-auth.conf <<EOF
+            [Service]
+            Environment="APP_PASSWORD=$PW"
+            Environment="APP_STRICT_PASSWORD=1"
+            EOF
+              systemctl daemon-reload
+              systemctl restart plan-api
+              sleep 4
+              echo "status(should be 401): $(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5000/api/auth/status)"
+              echo "login wrong(should be 401): $(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"password":"definitely-wrong"}' http://127.0.0.1:5000/api/auth/login)"
+              echo "login right(should be 200): $(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"password":"'$PW'"}' http://127.0.0.1:5000/api/auth/login)"
+
+              echo
+              echo "===== 3) site without basic auth ====="
+              echo "https index(should be 200): $(curl -sk -o /dev/null -w '%{http_code}' https://grow-consultant.com/index.html)"
+
+              echo
+              echo "===== GENERATED APP_PASSWORD ====="
+              echo "$PW"
+            } > "$OUT" 2>&1
+            cat "$OUT"
+
+      - name: Pull result back to repo
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+          ECS_HOST: ${{ secrets.ECS_HOST }}
+          ECS_PORT: ${{ secrets.ECS_PORT }}
+          ECS_USER: ${{ secrets.ECS_USER }}
+        run: |
+          echo "$KEY" > key.pem
+          chmod 600 key.pem
+          mkdir -p diagnostics
+          TS=$(date -u +%Y%m%d-%H%M%S)
+          rsync -az -e "ssh -p $ECS_PORT -i key.pem -o StrictHostKeyChecking=no" \
+            "$ECS_USER@$ECS_HOST:/tmp/kid-fix.txt" "diagnostics/fix-$TS.txt"
+
+      - name: Push result to diag-output branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git checkout -B diag-output
+          git add diagnostics/
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "fix: ECS nginx basic auth 关闭 + APP_PASSWORD 注入结果 $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push -f origin diag-output
