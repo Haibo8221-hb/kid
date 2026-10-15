@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Jemma 定制化海外教育方案 · 双孩规划整合与差异化设计</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f7f8fa;--surface:#fff;--surface2:#f0f2f5;--border:#e2e6ea;--text:#1a1d28;--text2:#6b7280;--accent:#7c3aed;--accent2:#10b981;--red:#ef4444;--orange:#f59e0b;--yellow:#eab308;--green:#22c55e;--blue:#4f8cff;--radius:12px}
+body{font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.78;font-size:15px;padding:0 0 80px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+header.hero{background:linear-gradient(135deg,#7c3aed,#0891b2);color:#fff;padding:50px 0 42px;margin-bottom:34px}
+header.hero h1{font-size:31px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px}
+header.hero p{font-size:14px;opacity:.93}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.meta span{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:4px 13px;font-size:12px}
+h2{font-size:22px;font-weight:800;margin:46px 0 14px;padding-bottom:10px;border-bottom:2px solid var(--accent);letter-spacing:-.3px}
+h3{font-size:17px;font-weight:700;margin:28px 0 12px}
+h4{font-size:14.5px;font-weight:700;margin:0 0 8px}
+p{margin-bottom:12px}
+code{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:12.5px;font-family:ui-monospace,Consolas,monospace;color:#7c3aed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 26px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+th{background:var(--surface2);padding:10px 12px;text-align:left;font-weight:700;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:10px;white-space:nowrap}
+.b-h{background:rgba(239,68,68,.13);color:#b91c1c}
+.b-m{background:rgba(245,158,11,.15);color:#b45309}
+.b-l{background:rgba(34,197,94,.14);color:#15803d}
+.b-fix{background:rgba(124,58,237,.13);color:#6d28d9}
+.b-diya{background:rgba(79,140,255,.14);color:#1d4ed8}
+.b-jemma{background:rgba(124,58,237,.14);color:#6d28d9}
+ul,ol{margin:0 0 14px 22px}
+li{margin-bottom:6px}
+.insight{background:var(--surface2);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:13.5px;line-height:1.72}
+.insight.bad{border-left-color:var(--red);background:rgba(239,68,68,.05)}
+.insight.good{border-left-color:var(--accent2);background:rgba(16,185,129,.05)}
+.insight.warn{border-left-color:var(--orange);background:rgba(245,158,11,.06)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+.toc ol{margin-left:20px}
+.toc a{color:var(--accent);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kid{border:1px solid var(--border);border-radius:10px;padding:16px 18px;background:var(--surface)}
+.kid.diya{border-top:3px solid var(--blue)}
+.kid.jemma{border-top:3px solid var(--accent)}
+.kid h4{font-size:15px;margin-bottom:8px}
+.kid .yr{font-size:11px;color:var(--text2);font-weight:400}
+.mist{border-left:3px solid var(--orange);background:rgba(245,158,11,.05);border-radius:0 6px 6px 0;padding:9px 13px;margin-top:10px;font-size:13px;line-height:1.7}
+.mist b{color:#b45309}
+.src{font-size:11.5px;color:var(--text2);margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:12.5px}
+.bar-row .n{width:150px;color:var(--text2);text-align:right;flex-shrink:0}
+.bar-row .b{flex:1;height:9px;background:var(--surface2);border-radius:5px;overflow:hidden}
+.bar-row .b i{display:block;height:100%;border-radius:5px}
+.bar-row .c{width:52px;text-align:right;font-weight:700;flex-shrink:0}
+.stage{border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:16px 20px;margin-bottom:14px;background:var(--surface)}
+.stage .sh{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.stage .sn{font-size:12px;font-weight:800;color:#fff;background:var(--accent);border-radius:6px;padding:2px 10px}
+.stage .st{font-size:15.5px;font-weight:700}
+.stage .sd{font-size:12px;color:var(--text2)}
+footer{margin-top:54px;padding-top:22px;border-top:1px solid var(--border);color:var(--text2);font-size:12.5px}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}.wrap{padding:0 16px}header.hero h1{font-size:24px}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+ <div class="wrap">
+  <h1>Jemma 定制化海外教育方案</h1>
+  <p>双孩规划整合 → 系统路线对比 → 个性化深度分析 → 定制路径与备选方案</p>
+  <div class="meta">
+   <span>出具日期：2026-10-15</span>
+   <span>对象：Jemma · Year 9 · Headington School</span>
+   <span>对照：Diya · Year 11（方案已于同日交付）</span>
+   <span>事实依据：UAT-UK / UKMT / DAAD / 各校官网（2026-10 核实）</span>
+  </div>
+ </div>
+</header>
+
+<div class="wrap">
+
+<div class="toc">
+ <b>本文结构（对应你的四项要求）</b>
+ <ol>
+  <li><a href="#s0">前置：三处必须纠正的过时事实（两孩共用）</a></li>
+  <li><a href="#s1">要求 1 · 双孩完整规划整合：目标、路径、时间节点、里程碑</a></li>
+  <li><a href="#s2">要求 2 · 系统路线对比：课程 / 申请 / 费用 / 时间 / 风险</a></li>
+  <li><a href="#s3">要求 3 · Jemma 个性化深度分析</a></li>
+  <li><a href="#s4">要求 4 · Jemma 定制方案：推荐路径、阶段目标、实施步骤、备选方案</a></li>
+  <li><a href="#s5">差异化说明：为什么不能套用 Diya 的模板</a></li>
+  <li><a href="#s6">优先级清单 + 近期 90 天行动</a></li>
+ </ol>
+</div>
+
+<!-- ============ 0 前置纠正 ============ -->
+<h2 id="s0">0. 前置：三处必须纠正的过时事实</h2>
+
+<div class="insight bad">
+这三条不是优化建议，是<b>止损</b>。现有 <code>Jemma_Plan.md</code>（v2, 2026-06-03）与 <code>jemma.html</code> 路线卡中，有三处事实已经失效或错位——如果按原文执行，Jemma 会把时间投到一个<b>已经不存在的考试</b>上。
+</div>
+
+<div class="card">
+<h3>① MAT 与 ENGAA 已被废止 —— Jemma 的目标笔试是 TMUA，不是 MAT/ESAT</h3>
+<p><code>Jemma_Plan.md</code> 术语表写「<b>MAT</b> = Oxford 数学系和 Imperial 工程系的入学笔试」、「<b>ENGAA</b> = Oxford 工程系的入学笔试」，第 200 行又写「数学/工程：MAT（Year 12 十月）+ STEP（Year 12 六月）」；<code>jemma.html:542</code> 与 <code>:1421</code> 也写着 "MAT / STEP / ESAT exam prep"。</p>
+<p><b>2026 年 1 月的实际情况：</b>牛津一次性废除了 8 个自有笔试（AHCAAT、BMSAT、CAT、<b>MAT</b>、MLAT、<b>PAT</b>、PhilAT、TSA），全部并入 UAT-UK 统一体系。<b>MAT 与 ENGAA 已永久停用，不存在"考 MAT"这条路径。</b>现行只有五个考试：</p>
+<table>
+<tr><th>考试</th><th>适用</th><th>格式</th><th>Jemma 相关性</th></tr>
+<tr><td><b>TMUA</b></td><td>剑桥 CS/经济/数学（含联合学位）；牛津 CS/数学（含联合）；<b>帝国理工 Computing、数学、经济金融与数据科学</b>；LSE 经济；华威 CS/离散数学/数学；杜伦数学</td><td>150 分钟，2 卷各 20 题，基于 <b>Higher GCSE + AS 数学</b>，1.0-9.0 分</td><td><b class="badge b-jemma">若走 CS/数学 → 这是主考</b></td></tr>
+<tr><td><b>ESAT</b></td><td>剑桥工程/化工/自然科学/兽医；牛津工程科学/物理/生物医学；帝国理工全部工程（含设计工程）；UCL 电子电气</td><td>机考，M1 必考 + 2 模块，各 27 题/40 分钟，禁计算器，模块独立 1.0-9.0 分不合总分</td><td>若走工程 → 主考</td></tr>
+<tr><td><b>TARA</b></td><td>牛津 PPE/经济与管理/心理等；<b>UCL 计算机科学、机械工程、Robotics &amp; AI</b></td><td>3×40 分钟（批判思维 22 题 + 问题解决 22 题 + 不计分写作）</td><td><b>注意：UCL 的 CS 用 TARA 不用 TMUA</b></td></tr>
+<tr><td>UCAT / LNAT</td><td>医学 / 法律</td><td>—</td><td>暂不相关</td></tr>
+</table>
+<div class="insight warn"><b>这条对 Jemma 的实际含义：</b>她的 Bebras Distinction（计算思维全国前 10%）+ Maths 95% 组合指向 <b>计算机科学</b>，而 CS 的主考是 <b>TMUA</b>——与 Diya 的 ESAT 完全不同。TMUA 基于 <b>GCSE + AS 数学</b>（不含物理、不含 A-level 微积分深度），这意味着 <b>Jemma 现在（Year 9）还完全不需要开始 TMUA 备考</b>，任何"提前刷 TMUA"的投入都是浪费。同时 STEP 也不适用——STEP 现在只用于剑桥/华威<b>数学</b>，不是工程或 CS 的门槛。</div>
+</div>
+
+<div class="card">
+<h3>② Jemma 已经是 Year 9，不是 Year 8 —— 所有时间线要整体后移一年</h3>
+<p><code>Jemma_Plan.md</code> 第 49 行写「Jemma: <b>Year 8</b>，Headington School」，德语时间线写「<b>Year 8（现在）</b>: German 28/30 · Year 9: Goethe B1」；<code>jemma.html:1437</code> 写 "a Year 8 summer is still childhood"，<code>:1464</code> 同样写 "Year 8 (now)"。而同一份 <code>jemma.html:1400</code> 又写「Jemma now: <b>Year 9</b> · Maths 88%」——<b>文档内部自相矛盾</b>。</p>
+<p><b>按 Year 9（2026-27 学年）重算的真实时间线：</b></p>
+<table>
+<tr><th>阶段</th><th>Diya（Year 11）</th><th>Jemma（Year 9）</th><th>差距</th></tr>
+<tr><td>GCSE 考试</td><td><b>2027 年 5 月</b>（约 7 个月后）</td><td><b>2029 年 5 月</b></td><td>2 年</td></tr>
+<tr><td>A-Level 选科确定</td><td>2026 年 9 月（已定）</td><td>2029 年 6-9 月</td><td>3 年</td></tr>
+<tr><td>A-Level 就读</td><td>2027-2029</td><td>2029-2031</td><td>2 年</td></tr>
+<tr><td>入学笔试</td><td>ESAT <b>2028 年 10 月</b></td><td>TMUA/ESAT <b>2030 年 10 月</b></td><td>2 年</td></tr>
+<tr><td>UCAS 提交</td><td>2028 年 10 月</td><td><b>2030 年 10 月</b></td><td>2 年</td></tr>
+<tr><td>大学入学</td><td>2029 年 9 月</td><td><b>2031 年 9 月</b></td><td>2 年</td></tr>
+</table>
+<div class="insight bad"><b>连带影响：</b>德语里程碑全部顺延一年——现状应为「Year 9（现在）German 28/30 → Year 10 Goethe B1 → Year 11 B2 → Year 12-13 TestDaF 4×4 / Goethe C1」。原表的 Year 8 起点会让家庭误以为 B1 已经"该完成了"。<b>好消息是：5 年窗口依然充裕，德语路线的可行性结论不变，只是节奏要重排。</b></div>
+</div>
+
+<div class="card">
+<h3>③ Bebras 日期错了，而且倒计时指向 2025 年 —— 这是 3 周内的近期节点</h3>
+<p><code>jemma.html:430</code> 写「Competition season starts now — <b>Bebras 1 Nov</b>, IMC 27 Jan」，<code>jemma.html:1012</code> 的倒计时常量写 <code>target:'2025-11-12'</code>（<b>已是过去日期，页面会显示 "Passed"</b>）。</p>
+<p><b>官方实际窗口：UK Bebras Challenge 2026 年 11 月 9 日 – 11 月 20 日</b>（由学校统一报名组织）。IMC 的 27 January 是对的，但年份应为 <b>2027 年 1 月 27 日</b>。</p>
+<div class="insight warn"><b>为什么这条重要：</b>今天是 10 月 15 日，<b>Bebras 窗口在 3-4 周后开启</b>。Jemma 已有 Bebras Distinction（前 10%），这是她档案里<b>唯一一个 Diya 没有的稀缺信号</b>。倒计时指向 2025 年意味着页面在提示"已经过去了"，很可能导致错过本年度报名。<b>建议本周内向 Computing 老师确认学校是否已登记 2026 场次。</b></div>
+<div class="src">另注：UKMT 官方日历显示 <b>JMC（Junior Mathematical Challenge）面向 Year 8 及以下</b>，2027 年场次为 5 月 5 日。Jemma 已 Year 9，<b>应参加 IMC（2027 年 1 月 27 日）而非 JMC</b>——原 <code>Jemma_Plan.md:122</code> 写「UKMT Intermediate Math Challenge（Year 9 参加，目标 Gold）」是正确的，但 <code>:42</code> 术语表把 JMC 注为「Year 8-9 级别」需要更正为 Year 8 及以下。</div>
+</div>
+
+<!-- ============ 1 整合 ============ -->
+<h2 id="s1">1. 双孩完整规划整合</h2>
+
+<div class="card">
+<h3>1.1 两份 Full Plan 的画像并置</h3>
+<div class="grid2">
+<div class="kid diya">
+ <h4>Diya <span class="yr">Year 11 · 2026-27 学年 · GCSE 2027-05</span></h4>
+ <p style="font-size:13px;line-height:1.75">
+ <b>目标国家</b>：英国（主）+ 中国香港（平行双线）<br>
+ <b>目标专业</b>：设计工程 / 工程<br>
+ <b>目标院校</b>：Cambridge Design (MDes) · Imperial × RCA Design Engineering · UCL Engineering &amp; Architectural Design · Loughborough PDE ｜ HK：HKUST Engineering（争全奖）· PolyU Product Design + AI<br>
+ <b>入学考试</b>：<b>ESAT</b>（Maths 1 + Maths 2，帝国理工设计工程<b>不需 Physics 模块</b>；剑桥工程需 M1+M2+Physics）<br>
+ <b>A-Level 组合</b>：Maths + Further Maths + Physics + <b>Art</b>（四科，UK G5 申请人中占比 &lt;0.5%）<br>
+ <b>核心风险</b>：English 4/3（最大短板，且拖累 Art 分析写作）· Chemistry 44% · 四科压力
+ </p>
+</div>
+<div class="kid jemma">
+ <h4>Jemma <span class="yr">Year 9 · 2026-27 学年 · GCSE 2029-05</span></h4>
+ <p style="font-size:13px;line-height:1.75">
+ <b>目标国家</b>：英国（主）+ <b>德国 TU9</b>（备选，现有规划已含 DAAD 论证）<br>
+ <b>目标专业</b>：现有规划写「工程/数学/自然科学」<b>未细分</b> → 本方案建议收敛为 <b>计算机科学 / 数学</b> 主线<br>
+ <b>目标院校</b>：Oxford · Cambridge · Imperial（冲刺）｜ Edinburgh · UCL · Manchester · KCL（主攻）｜ Durham · Warwick · Bristol · Southampton（稳保）<br>
+ <b>入学考试</b>：<b>应为 TMUA</b>（原规划误写 MAT/ENGAA）<br>
+ <b>A-Level 组合</b>：原规划建议 Maths + FMaths + Physics + Chemistry（四科）→ 本方案建议 <b>Maths + FMaths + Computing/CS + 第四门待定</b><br>
+ <b>核心风险</b>：过度排程 · 过早窄化 · 英语（是信心问题非能力问题）
+ </p>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h3>1.2 关键里程碑时间轴（两孩同图对照）</h3>
+<table>
+<tr><th style="width:110px">时间</th><th>Diya（Year 11 → 大学）</th><th>Jemma（Year 9 → 大学）</th></tr>
+<tr><td><b>2026-10</b></td><td>ESAT 摸底启动（本方案 3 周计划第 1 周）· SMC 已于 10/7 考完</td><td><b>Bebras 窗口 11/9-20 报名确认</b> · IMC 备考启动（每周 2 题）</td></tr>
+<tr><td><b>2026-11</b></td><td>SMC 结果到校 → 归档；BMO R1（11/18）如晋级</td><td><b>Bebras 参赛</b>（争取蝉联 Distinction）</td></tr>
+<tr><td>2027-01</td><td>BMO R2（1/20）如晋级</td><td><b>IMC（1/27）— 首次正式数学竞赛，目标 Gold</b></td></tr>
+<tr><td>2027-05/06</td><td><b>GCSE 考试（5/12 起）</b> → 决定 A-level 选科</td><td>UKMT Kangaroo / Cayley·Hamilton·Maclaurin（3/18）· JMO（6/15，如 IMC 晋级）</td></tr>
+<tr><td>2027-09</td><td><b>A-Level 开始</b>；IELTS 首考（目标 6.0）</td><td>Year 10 开始；<b>GCSE 选科确认</b>（含是否选 Computer Science）</td></tr>
+<tr><td>2028-10</td><td><b>UCAS 提交 + ESAT（10 月场，牛剑强制）</b></td><td>Year 11；<b>GCSE 备考年</b></td></tr>
+<tr><td>2028-11</td><td>港校首轮截止（HKUST 11/20 · HKU 11/26）</td><td>—</td></tr>
+<tr><td>2029-01/05</td><td>面试结果 · offer 比较；<b>A-Level 开始（9 月）</b></td><td>—；<b>GCSE 考试（5 月）</b></td></tr>
+<tr><td><b>2029-09</b></td><td><b>大学入学</b></td><td><b>A-Level 开始</b>；德语 TestDaF/C1 备考窗口开启</td></tr>
+<tr><td><b>2030-10</b></td><td>—</td><td><b>UCAS 提交 + TMUA/ESAT（10 月场）</b></td></tr>
+<tr><td>2031-01</td><td>—</td><td>uni-assist 德国申请截止（1/15）· 港校如并行则 2030-11 首轮</td></tr>
+<tr><td><b>2031-09</b></td><td>—</td><td><b>大学入学</b></td></tr>
+</table>
+<div class="insight"><b>整合的关键结论：</b>两个孩子的申请季<b>相隔整整两年</b>（Diya 2028 秋 / Jemma 2030 秋）。这带来一个被现有规划低估的战略资产——<b>Diya 的完整申请过程本身就是 Jemma 最好的教材</b>：2028 年 10 月的 UCAS 填写、ESAT 考场经验、面试被问到什么、offer 条件怎么谈、PS 哪一段起了作用，Jemma 可以<b>全程近距离观察</b>。原规划第十章提到了这一点但只写"借鉴"，没有落成机制。本方案在第 4 节把它变成具体动作（"影子申请"机制）。</div>
+</div>
+
+<!-- ============ 2 路线对比 ============ -->
+<h2 id="s2">2. 系统路线对比（Route Compare）</h2>
+
+<div class="card">
+<h3>2.1 五个维度的异同</h3>
+<table>
+<tr><th style="width:110px">维度</th><th>Diya</th><th>Jemma</th><th style="width:150px">差异性质</th></tr>
+<tr><td><b>课程体系</b></td><td>A-Level 四科（M+FM+Ph+<b>Art</b>），Art 是差异化的核心载体</td><td>A-Level 三到四科（M+FM+<b>CS</b>+ 待定），<b>不需要 Art 作为 A-level</b></td><td><b class="badge b-h">本质不同</b><br>稀缺性来源不同</td></tr>
+<tr><td><b>申请路径</b></td><td>UCAS（英）+ Non-JUPAS（港）<b>双线并行</b>；作品集是核心材料</td><td>UCAS（英）<b>单线</b>；德国 uni-assist 为备选线（1 月截止）；<b>无作品集</b></td><td><b class="badge b-h">本质不同</b><br>材料类型不同</td></tr>
+<tr><td><b>入学考试</b></td><td><b>ESAT</b>（M1+M2，禁计算器，模块独立计分）</td><td><b>TMUA</b>（2 卷各 20 题，GCSE+AS 数学，<b>一考可用于牛剑帝 LSE 华威多校</b>）</td><td><b class="badge b-h">完全不同的考</b></td></tr>
+<tr><td><b>费用预算</b></td><td>UK 8 年总计 £180-220k；HK 若 HKUST 全奖净成本 £36k</td><td>UK 同类量级；<b>德国 RWTH Aachen / TU Berlin 学费 €0</b>，三年生活费约 €34-40k</td><td><b class="badge b-m">Jemma 多一条低成本线</b></td></tr>
+<tr><td><b>时间规划</b></td><td><b>冲刺</b>：7 个月后 GCSE，24 个月后 UCAS</td><td><b>选项构建</b>：31 个月后 GCSE，48 个月后 UCAS</td><td><b class="badge b-h">战略姿态相反</b></td></tr>
+<tr><td><b>风险重心</b></td><td>学科短板（English 4/3、Chemistry 44%）· 四科压力 · 作品集质量</td><td><b>过度排程</b> · 过早窄化 · 英语自信 · 德语能否坚持到 C1</td><td><b class="badge b-h">风险类型不同</b></td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>2.2 费用预算对比（含关键不确定项）</h3>
+<table>
+<tr><th>路径</th><th>学费/年</th><th>三年（或四年）总额</th><th>备注</th></tr>
+<tr><td>英国 G5 · 本土生（home）费率</td><td>£9,250</td><td>£28k（3年）/ £37k（4年）</td><td rowspan="2"><b class="badge b-h">最大变量</b>：本土生 vs 国际生身份取决于居留/定居状态，现有两份文档<b>混用了两种费率</b>（<code>Jemma_Plan.md:447</code> 用 £9,250 本土费率，<code>Diya_Plan.md:155</code> 的 £168k/4年 ≈ £42k/年 是国际费率）。<b>这一项未确认前，任何总预算都是猜测</b>——差额可达 £100k+</td></tr>
+<tr><td>英国 G5 · 国际生费率</td><td>约 £38-45k</td><td>£120-180k（3年）/ £160-200k（4年）</td></tr>
+<tr><td>中国香港 · HKUST</td><td>约 £21.5k</td><td>£86k（4年）+ 住宿生活 £36k = <b>£122k</b></td><td>A\*A\*A 可获全奖 + HKD 60k 津贴 → <b>净成本约 £36k</b></td></tr>
+<tr><td>中国香港 · PolyU</td><td>约 £16k</td><td>£64k + £36k = <b>£100k</b></td><td>无对应全奖机制记录</td></tr>
+<tr><td><b>德国 · RWTH Aachen / TU Berlin</b></td><td><b style="color:var(--accent2)">€0</b>（仅 €300 左右学期费，含公交卡）</td><td><b>生活费 €11-13k/年 × 3 = €34-40k</b></td><td>需保证金账户约 €11,208/年（2024 标准，须按当年核实）；<b>比英国路径省 £100k 量级</b></td></tr>
+<tr><td>德国 · TU Munich</td><td>€2,000-3,000/学期</td><td>€12-18k 学费 + 生活费</td><td>巴伐利亚州 2024/25 起新规</td></tr>
+<tr><td>德国 · 巴符州（KIT / 斯图加特 / 海德堡）</td><td>€1,500/学期</td><td>€9k 学费 + 生活费</td><td>2017 年起全州统一</td></tr>
+</table>
+<div class="insight warn"><b>两项必须核实的成本变量（会改变整体判断）：</b><br>
+① <b>本土生/国际生身份</b>——如上，差额 £100k+，是全部预算里最大的单一变量；<br>
+② <b>英国私立学校学费的 VAT</b>——2025 年起英国对私校学费征收增值税，Headington 的实际费用需按最新账单核实（<b>此项本次未核实，标记为待确认</b>）。若按 20% 量级估算，Y9-Y13 五年的中学阶段成本会显著上升，这会直接影响"德国零学费"路线的相对吸引力。</div>
+<div class="src">来源：DAAD GCE 认证页 · tum.de 学费页 · 巴符州 mwk 学费标准 · auswaertiges-amt.de 保证金标准（2024）· uni-assist.de ｜ 港校数据来自各校 Non-JUPAS 通道公开要求</div>
+</div>
+
+<div class="card">
+<h3>2.3 风险因素对比</h3>
+<div class="grid2">
+<div class="kid diya">
+<h4>Diya 的风险结构 <span class="badge b-diya">能力型风险</span></h4>
+<ul style="font-size:13px">
+<li><b>English 4/3</b> — 高概率高影响，且形成风险链：拖累 PS、笔试读题、IELTS、<b>Art 分析写作 → A-level Art 成绩 → 作品集质量 → 全部设计类申请</b></li>
+<li><b>Chemistry 44%</b> — 但<b>不在任何目标专业 offer 条件内</b>，本方案已建议降级</li>
+<li><b>IELTS 6.0 未达标</b> — 中概率高影响</li>
+<li><b>四科压力</b> — 中概率中影响</li>
+<li>时间紧：GCSE 只剩 7 个月</li>
+</ul>
+</div>
+<div class="kid jemma">
+<h4>Jemma 的风险结构 <span class="badge b-jemma">结构型风险</span></h4>
+<ul style="font-size:13px">
+<li><b>过度排程</b> — 见 3.4 的数据举证，这是<b>当前最实际的风险</b></li>
+<li><b>过早窄化</b> — 直接复制 Diya 的工程路线，会浪费她的 Computing 稀缺信号</li>
+<li><b>英语自信</b>（非能力）— 干预方式与 Diya <b>完全不同</b>，见 3.3</li>
+<li><b>德语中断</b> — 德国路线的全部价值都押在"C1 能否达成"，一旦 Year 10-11 放弃德语，备选线归零</li>
+<li><b>Physics 趋势下滑</b>（Exceptional → Above）— <code>jemma.html:446</code> 已标注"低概率中影响，观察不急干预"，<b>这个判断是对的</b></li>
+<li>时间充裕：这是优势也是风险（容易拖延到 Year 12 才动）</li>
+</ul>
+</div>
+</div>
+<div class="insight"><b>风险性质的根本差异：</b>Diya 的风险是<b>"能力够不够"</b>——解法是补短板、聚焦、限时冲刺。Jemma 的风险是<b>"结构对不对"</b>——她六项资产都在 Above/Exceptional，没有需要抢救的短板；解法是<b>不要排太满、不要过早收窄、把稀缺信号养大</b>。这两种风险需要<b>相反的管理动作</b>，这也是"不能套用同一模板"的根本原因。</div>
+</div>
+
+<!-- ============ 3 个性化分析 ============ -->
+<h2 id="s3">3. Jemma 个性化深度分析</h2>
+
+<div class="card">
+<h3>3.1 六项资产盘点：哪些是真稀缺，哪些只是"不错"</h3>
+<p>按<b>同辈稀缺度</b>（而非绝对分数）重排 Jemma 的档案——这是判断该往哪投时间的基础：</p>
+<table>
+<tr><th>资产</th><th>证据</th><th>稀缺度</th><th>可变现路径</th></tr>
+<tr><td><b>Computing / 计算思维</b></td><td>UK Bebras <b>Distinction（全国前 10%）</b>；Tinkercad / Scratch / Python 项目</td><td><b style="color:var(--red)">★★★★★ 极高</b><br>Diya 没有；同辈中拿到 Distinction 的比例很小</td><td><b>CS 方向的天然证据链</b>；TMUA 的数学推理部分与计算思维高度重合；帝国理工 Computing 13:1 竞争激烈，早期竞赛记录是硬通货</td></tr>
+<tr><td><b>Mathematics</b></td><td>95% "Exceptional"（另一处记 88%，高出中位数 13 分）</td><td><b style="color:var(--red)">★★★★★ 极高</b></td><td>FMaths A-level 的门槛（GCSE Maths 需 8-9）已稳；TMUA / ESAT M1 的地基</td></tr>
+<tr><td><b>Chemistry</b></td><td>97% "Exceptional"</td><td>★★★★☆ 高</td><td><b>注意：与 Diya 恰好相反</b>——Diya 化学 44% 是短板，Jemma 化学 97% 是长板。但化学对 CS/数学路线<b>无用</b>，对医学/化工才有用</td></tr>
+<tr><td><b>德语</b></td><td>28/30 Above Standard</td><td><b style="color:var(--red)">★★★★★ 极高</b><br>英国学生中坚持德语到 A-level 的极少</td><td><b>德国零学费路线的唯一入场券</b>；也是 PS 里"跨文化 + 语言能力"的差异化素材</td></tr>
+<tr><td><b>钢琴 Grade 8</b></td><td>Year 8/9 已达 Grade 8（Prep），每天 20 分钟</td><td>★★★★☆ 高</td><td><b>成本极低的稀缺信号</b>：维持只需 20 分钟/天；PS 里"长期坚持 + 结构性练习"的最佳例证；也是学业压力的天然调节阀</td></tr>
+<tr><td><b>Art</b></td><td>"Exceptional — a talented Artist"</td><td>★★★☆☆ 中高</td><td><b>与 Diya 的用法应该不同</b>：Diya 需要 Art 成为 A-level 科目来构成稀有组合；Jemma 的稀有性已由 Computing+Maths+德语构成，<b>Art 应作为兴趣与 PS 素材保留，不必占一个 A-level 名额</b></td></tr>
+</table>
+<div class="insight good"><b>盘点结论：</b>Jemma 的档案不是"六项都不错"，而是<b>有一个明确的尖峰组合：Computing + Maths + 德语</b>。这三样东西同时出现在一个英国 Year 9 学生身上是罕见的，而且<b>指向的方向与 Diya 完全不同</b>——Diya 的尖峰是 Maths+Physics+<b>Art</b>（指向设计工程），Jemma 的尖峰是 Maths+<b>Computing</b>+德语（指向计算机科学，附带一条德国低成本备选）。<b>这就是"不能套模板"的事实基础。</b></div>
+</div>
+
+<div class="card">
+<h3>3.2 战略姿态：Diya 在冲刺，Jemma 应该在"攒选项"</h3>
+<p>这是两孩方案最根本的分野，所有具体建议都从这里派生：</p>
+<div class="bar-row"><span class="n">Diya 距 UCAS</span><span class="b"><i style="width:40%;background:var(--blue)"></i></span><span class="c">24 个月</span></div>
+<div class="bar-row"><span class="n">Jemma 距 UCAS</span><span class="b"><i style="width:80%;background:var(--accent)"></i></span><span class="c">48 个月</span></div>
+<table style="margin-top:16px">
+<tr><th style="width:130px"></th><th>Diya（Year 11）</th><th>Jemma（Year 9）</th></tr>
+<tr><td><b>核心问题</b></td><td>"如何在 7 个月内把分数拉到位"</td><td>"如何在 3 年内保留最多扇门，同时不烧掉她"</td></tr>
+<tr><td><b>正确动作</b></td><td>聚焦、砍掉非必要（化学降级）、限时训练</td><td><b>广度探索、保留可选项、控制强度</b></td></tr>
+<tr><td><b>错误动作</b></td><td>还在探索新方向（没时间了）</td><td><b>现在就锁定专业方向、开始刷入学笔试</b>（浪费且有害）</td></tr>
+<tr><td><b>关键指标</b></td><td>分数、错题分类、限时节奏</td><td><b>兴趣是否持续、是否还有自由时间、稀缺信号是否在长</b></td></tr>
+</table>
+<div class="insight warn"><b>Jemma 现阶段最大的风险不是"不够努力"，而是"太努力"。</b>对一个 Year 9 学生，把 TMUA 备考、A-level 先修、四科竞赛全部提前，是典型的家长焦虑传导。三年窗口的正确用法是<b>让兴趣自己收敛</b>——如果她在 Year 10-11 仍然主动想做编程项目，那 CS 就是真方向；如果那时她的热情转到了别的方向，提前锁定 CS 就变成了枷锁。</div>
+</div>
+
+<div class="card">
+<h3>3.3 英语：同一个"短板"，两个完全不同的处方</h3>
+<p>两份规划都提到英语问题，但性质不同，<b>混用处方会造成实质伤害</b>：</p>
+<table>
+<tr><th></th><th>Diya</th><th>Jemma</th></tr>
+<tr><td><b>现状</b></td><td>Eng Lang 6（59%）/ Eng Lit 5（57%），曾低至 4/3；已接受学校 LD 支持</td><td>English "Meeting Standard"；<code>Jemma_Plan.md:58</code> 明确写「<b>不是能力问题，是 confidence 问题</b>」</td></tr>
+<tr><td><b>性质</b></td><td><b>结构性能力缺口</b>——分析段落方法（PETZAL）、effect 动词、文本细读都需要重建</td><td><b>表达意愿与输出量不足</b>——能力达标，缺的是"敢在众人面前用英语表达"</td></tr>
+<tr><td><b>正确处方</b></td><td>结构化训练：每日一段 PETZAL、每周 3 词深挖、禁用 "shows"</td><td><b>输出场景，不是 drills</b>：辩论社/戏剧/课堂发言/给真人讲解。<b>把英语变成"用来做事的工具"而不是"被评分的科目"</b></td></tr>
+<tr><td><b>错误处方</b></td><td>只做泛读、指望自然提升（来不及）</td><td><b>套用 Diya 的 PETZAL 每日 drills</b>——对信心不足的孩子，高频被评分的写作练习会<b>加剧回避</b>，效果与目标相反</td></tr>
+</table>
+<div class="insight good"><b>Jemma 的英语处方（低成本、可坚持）：</b><br>
+① <b>借力已有资产</b>——她的 Drama 与 Music 是 "Meeting Standard" 但存在，<b>争取一个有台词/有观众的校内角色</b>（戏剧社、音乐演出、 assembly 主持）。在真人面前用英语表达，对信心的提升远超任何写作练习。<br>
+② <b>"讲给姐姐听"机制</b>——Diya 正在准备 A-level 与面试，Jemma 每周用英语给 Diya 讲一次自己这周做的编程项目（5 分钟）。<b>零成本、有真实听众、且不涉及评分</b>。<br>
+③ <b>不做每日写作 drills</b>。学校 English 作业按质完成即可，额外投入放在口头输出上。</div>
+</div>
+
+<div class="card">
+<h3>3.4 用她自己的数据举证：过度排程已经在发生</h3>
+<p>这不是推测。<code>data/planner_jemma.json</code>（2026 年 5 月的周计划实录）显示：</p>
+<table>
+<tr><th>日期</th><th>排入的时段</th><th>时间跨度</th></tr>
+<tr><td><b>2026-05-19（周二）</b></td><td>1pm Think Academy · 2pm English · 5pm English · 6pm Chemistry · 7pm Biology · 8pm Physics · 9pm Latin · 10pm Reading · 11pm Reading · 12am Think Academy</td><td><b>10 个时段，13:00 → 24:00</b></td></tr>
+<tr><td>2026-05-20（周三）</td><td>10pm Latin · 11pm Reading · 1pm English ×2 · 5-6pm Maths ×2 · 7pm Biology · 8pm Physics · 9pm Chemistry · 12am Reading</td><td><b>10 个时段，含三个深夜块</b></td></tr>
+<tr><td>2026-05-22（周五）</td><td>5pm Maths · 6pm Chemistry · 9pm Latin · 10pm Reading · 11pm Reading · 12am English</td><td>6 个时段，<b>21:00-24:00 三连</b></td></tr>
+</table>
+<div class="insight bad"><b>自相矛盾之处：</b>同一份 <code>jemma.html:1437</code> 明确写着正确原则——「<b>a Year 8 summer is still childhood — 3-4h learning per day + at least 1h outdoor sports + 2 free days per week</b>」。但实际排程数据是<b>每天 10 个时段、排到午夜</b>。<b>原则是对的，执行完全背离。</b>
+<p style="margin-bottom:0;margin-top:10px">对一个 Year 9（13-14 岁）的学生，这个密度带来的不是成绩，而是三样东西：<b>睡眠不足</b>（影响记忆固化，直接抵消所有复习投入）、<b>自主学习动机被外部排程替代</b>（长期看是最贵的损失）、<b>兴趣探索空间归零</b>（而兴趣探索恰恰是 Year 9-10 最该做的事）。</p></div>
+<p><b>公平起见需要说明：</b>这是 2026 年 5 月的计划数据，可能包含学校课程时间，也不代表每一条都实际执行了。但<b>计划表本身就是家庭期望的投射</b>——如果计划表排到午夜，说明"排满"是被默认接受的。这一项需要家长复核。</p>
+<div class="insight good"><b>建议的硬上限（写进工作台作为约束，而不是靠自觉）：</b>Year 9-10 阶段，<b>课外自主学习的排程上限 = 每天 1 个时段（≤90 分钟）+ 每周末最多 1 个 2 小时深度块</b>；每周<b>至少 2 个完整的空白半天</b>；21:00 后不排任何学习内容。这个上限比现在低得多，但<b>可持续的 7 小时/周，胜过不可持续的 40 小时/周</b>。</div>
+</div>
+
+<!-- ============ 4 定制方案 ============ -->
+<h2 id="s4">4. Jemma 定制化方案</h2>
+
+<div class="card">
+<h3>4.1 推荐路径：CS/数学主线 + 德国备选线，Art 与音乐作为素养层</h3>
+<div class="insight">
+<b>主线（UK · 计算机科学 / 数学）</b><br>
+理由：Computing Distinction + Maths 95% 是她档案里<b>唯一 Diya 没有的稀缺组合</b>，而 CS 恰好是英国录取竞争最激烈、也最看重早期证据的方向。<br><br>
+<b>备选线（德国 · TU9 工程/信息学）</b><br>
+理由：现有规划的 DAAD 论证是扎实的（3 门 A-Level 最低 C + List A 科目 + 12 年学龄，Jemma 的组合完全满足），而<b>德语 28/30 是这条线的唯一门票</b>。零学费意味着三年比英国省 £100k 量级——这不是"备胎"，是一条有真实经济价值的平行路径。<br><br>
+<b>素养层（Art + 钢琴 + 德语，不作为升学工具）</b><br>
+理由：这三样<b>不占 A-level 名额、不需要额外投入</b>（钢琴 20 分钟/天、Art 校内课程、德语校内课程），却同时提供 PS 素材、面试谈资与心理调节。<b>把它们从"要不要继续"的焦虑里解放出来，明确定位为"终身保留项"。</b>
+</div>
+
+<h4>目标院校与笔试对照（按 CS 主线，2026-10 核实）</h4>
+<table>
+<tr><th>梯队</th><th>院校 / 专业</th><th>笔试</th><th>成绩门槛</th><th>说明</th></tr>
+<tr><td><b>冲刺</b></td><td>Cambridge Computer Science (BA/MEng)</td><td><b>TMUA</b>（<b>仅 10 月场</b>，剑桥严格要求）</td><td>—</td><td>TMUA 数据：2024-25 申请者均分 <b>4.56</b>，<b>offer 持有者均分 6.457</b>；Peterhouse/Trinity 另加 CS 入学任务</td></tr>
+<tr><td><b>冲刺</b></td><td>Oxford Computer Science / Maths &amp; CS / CS &amp; Philosophy</td><td><b>TMUA</b>（2027 入学起取代 MAT，<b>仅认 10 月场</b>）</td><td>—</td><td>一份 TMUA 成绩可同时用于牛津、剑桥、帝国理工、LSE、华威——<b>一考多用是 TMUA 相对 ESAT 的关键优势</b></td></tr>
+<tr><td><b>冲刺</b></td><td>Imperial Computing (BEng/MEng) · Joint Maths &amp; CS</td><td><b>TMUA</b></td><td><b>A\*A\*A 或 A\*AAA，数学必须 A\*</b>，<b>偏好 Further Maths</b>；不接受 ICT / Business Studies / General Studies / Critical Thinking</td><td><b>13:1</b>（申请:名额，2025）；帝国理工 CS 通常不安排面试，<b>笔试权重极高</b></td></tr>
+<tr><td><b>主攻</b></td><td>UCL Computer Science (BSc/MEng)</td><td><b class="badge b-h">TARA，不是 TMUA</b></td><td>—</td><td><b>易踩坑</b>：UCL 的 CS、机械工程、Robotics &amp; AI 都用 TARA（批判思维 + 问题解决 + 写作）；只有 UCL 经济用 TMUA、电子电气用 ESAT</td></tr>
+<tr><td><b>主攻</b></td><td>Warwick CS · Edinburgh Informatics · Manchester · KCL</td><td>Warwick CS 需 <b>TMUA</b>（不接受 STEP 替代）；爱丁堡/曼大通常无强制笔试</td><td>—</td><td>Warwick 数学可用 STEP 替代 TMUA，<b>但 CS 不行</b></td></tr>
+<tr><td><b>稳保</b></td><td>Durham CS（<b>不要求 TMUA</b>）· Bristol · Southampton</td><td>无 / 杜伦数学仅"可加分"</td><td>—</td><td>Durham CS 是少数不要求 TMUA 的强校，<b>作为保底很有价值</b></td></tr>
+</table>
+<div class="insight warn"><b>选校的一个硬约束（与 Diya 的情况同理）：</b>如果主申包含 UCL CS，就需要<b>额外考 TARA</b>（与 TMUA 是两个不同考试，都要报名、都要备考）。因此建议<b>主申两校选在同一笔试体系内</b>——例如 Cambridge CS + Imperial Computing + Oxford CS（都是 TMUA），把 UCL 放到"愿意为 TARA 额外投入"时才选。<b>这一点必须在 Year 12 选校时锁定，不能到报名截止前才发现。</b></div>
+</div>
+
+<div class="card">
+<h3>4.2 阶段目标（Year 9 → Year 13）</h3>
+
+<div class="stage">
+<div class="sh"><span class="sn">Year 9</span><span class="st">现在 – 2027 年 7 月 · 探索与习惯</span><span class="sd">核心：把排程降下来，把信号养起来</span></div>
+<ul style="margin-bottom:0">
+<li><b>降载</b>：执行 3.4 的排程硬上限（每天 ≤1 时段 + 周末 1 个深度块 + 每周 2 个空白半天）</li>
+<li><b>竞赛</b>：Bebras（2026-11-09~20，争取蝉联 Distinction）→ IMC（2027-01-27，<b>目标 Gold</b>）</li>
+<li><b>CS 兴趣验证</b>：一个<b>自己想做</b>的小项目（不是家长布置的），Python/Scratch/Tinkercad 均可，做完能讲 5 分钟</li>
+<li><b>英语</b>：只加"口头输出"，不加写作 drills（见 3.3）</li>
+<li><b>德语</b>：保持校内成绩，<b>不设考试目标</b>（B1 推到 Year 10）</li>
+<li><b>GCSE 选科准备</b>：确认 Headington 是否开设计算机科学 GCSE，以及 Jemma 是否想选</li>
+</ul>
+</div>
+
+<div class="stage">
+<div class="sh"><span class="sn">Year 10</span><span class="st">2027 年 9 月 – 2028 年 7 月 · 方向收敛</span><span class="sd">核心：第一次真实的方向选择</span></div>
+<ul style="margin-bottom:0">
+<li><b>GCSE 选科确定</b>：Maths + English + 三科科学为底；<b>强烈建议选 Computer Science GCSE</b>（若学校开设）；德语<b>务必保留</b>（这是德国线的门票）</li>
+<li><b>竞赛升级</b>：IMC → 如晋级则 <b>Cayley/Hamilton Olympiad</b>（Year 10 对应 Cayley）；Bebras 再战</li>
+<li><b>关键观察点</b>：<b>姐姐 Diya 的完整申请年（2027-09 起 A-level、2028-10 UCAS+ESAT）</b>——启动"影子申请"机制（见 4.4）</li>
+<li><b>方向决策</b>：Year 10 结束时，根据她<b>是否仍然主动做编程项目</b>，决定主线是 CS 还是转回工程/自然科学。<b>这是本方案唯一的"方向闸门"，不提前</b></li>
+<li><b>德语</b>：Goethe B1（Year 10 目标）</li>
+</ul>
+</div>
+
+<div class="stage">
+<div class="sh"><span class="sn">Year 11</span><span class="st">2028 年 9 月 – 2029 年 7 月 · GCSE 年</span><span class="sd">核心：GCSE 成绩是唯一硬指标，其他全部让路</span></div>
+<ul style="margin-bottom:0">
+<li><b>GCSE 目标</b>：Maths <b>8-9</b>（这是 A-Level FMaths 的门槛，也是帝国理工 CS "数学必须 A\*"的前置信号）；英语 6+；科学 7+；德语 7+</li>
+<li><b>竞赛降频</b>：GCSE 年只保留 1-2 项（Bebras + 一项数学），<b>其余暂停</b></li>
+<li><b>TMUA 诊断（仅此一次）</b>：2029 年春做一次 TMUA 官方样题，<b>只为定位，不为备考</b>（TMUA 基于 Higher GCSE + AS 数学，此时她刚考完 GCSE，正好能测出真实起点）</li>
+<li><b>A-Level 选科准备</b>：确认 <b>Maths + Further Maths + Computer Science + 第四门</b> 的 timetable 可行性；第四门建议 <b>Physics</b>（保留工程转向的可能）或 <b>German</b>（强化德国线 + PS 差异化）</li>
+<li><b>德语</b>：Goethe B2</li>
+</ul>
+</div>
+
+<div class="stage">
+<div class="sh"><span class="sn">Year 12</span><span class="st">2029 年 9 月 – 2030 年 7 月 · 笔试与素材</span><span class="sd">核心：TMUA 正式备考 + PS 素材池 + 德语 C1</span></div>
+<ul style="margin-bottom:0">
+<li><b>TMUA 备考</b>：随 AS/A-Level 数学进度推进（TMUA 考 GCSE+AS 内容，<b>跟着课程学就是最好的备考</b>）；Year 12 下学期开始限时训练（150 分钟 2 卷）</li>
+<li><b>目标分</b>：剑桥 CS offer 持有者均分 <b>6.457</b>（申请者均分仅 4.56）→ <b>目标 6.5-7.0</b></li>
+<li><b>PS 素材池</b>：把 Year 9-12 的编程项目、竞赛、德语、钢琴、Art 归档整理（<b>每年 30 分钟即可，不要等到 Year 13 回忆</b>）</li>
+<li><b>德语</b>：<b>TestDaF 4×4 或 Goethe C1</b>（Year 12 内考完，为德国线锁定资格）</li>
+<li><b>夏校</b>：UNIQ（牛津官方，<b>免费</b>）值得申请；如需付费夏校，优先选与 CS 直接相关的</li>
+</ul>
+</div>
+
+<div class="stage">
+<div class="sh"><span class="sn">Year 13</span><span class="st">2030 年 9 月 – 2031 年 7 月 · 申请季</span><span class="sd">核心：10 月是全部关键节点的交汇处</span></div>
+<ul style="margin-bottom:0">
+<li><b>2030 年 10 月</b>：<b>TMUA（牛剑强制 10 月场，1 月场成绩牛津不认）+ UCAS 提交</b>——这两件事在同一个月，<b>PS 必须在 9 月前定稿</b></li>
+<li><b>2030 年 11 月</b>：港校首轮（若并行）；帝国理工 CS 通常不面试，笔试定生死</li>
+<li><b>2030 年 12 月 – 2031 年 2 月</b>：牛剑面试（如入围）</li>
+<li><b>2031 年 1 月 15 日</b>：<b>uni-assist 德国申请截止</b>（RWTH Aachen / TU Berlin 优先，零学费）</li>
+<li><b>2031 年 5-8 月</b>：A-Level 出分 → offer 确认</li>
+</ul>
+</div>
+</div>
+
+<div class="card">
+<h3>4.3 近期 90 天实施步骤（2026-10-15 → 2027-01-13）</h3>
+<p style="color:var(--text2);font-size:13.5px">与 Diya 的 3 周计划不同，Jemma 的近期计划<b>以"减法"和"报名确认"为主</b>，不新增学习负担。</p>
+<table>
+<tr><th style="width:118px">时间</th><th>动作</th><th style="width:180px">完成判据</th></tr>
+<tr><td><b>10/15-10/21</b><br>本周</td><td>① <b>向 Computing 老师确认 Bebras 2026（11/9-20）学校是否已登记</b>；② 复核 <code>planner_jemma.json</code> 的排程，<b>把 21:00 后的时段全部删除</b>；③ 修正 <code>jemma.html</code> 的倒计时（Bebras 目标日改为 2026-11-09）</td><td>Bebras 报名已确认；周计划无夜间时段</td></tr>
+<tr><td><b>10/22-10/31</b></td><td>Bebras 热身：<b>每周 2-3 道往年题</b>（bebras.uk，免费），不做整套限时；同时开始 IMC 每周 2 题（UKMT 官网免费真题）</td><td>累计 Bebras 6-9 题 + IMC 4 题</td></tr>
+<tr><td><b>11/1-11/8</b></td><td>轻量收尾：Bebras 前一周<b>不加量</b>，只做 2-3 题保持手感；确认考试当天的时间安排</td><td>无新增负担</td></tr>
+<tr><td><b>11/9-11/20</b></td><td><b>Bebras 2026 参赛</b>（具体日期由学校安排）</td><td>已参赛</td></tr>
+<tr><td><b>11/21-12/18</b></td><td>IMC 主线：每周 2-3 题 + <b>错题三分类</b>（粗心/没懂/没时间，方法与 Diya 一致，可共用同一套习惯）；圣诞前完成 2 套完整 IMC 往年卷</td><td>2 套完整卷 + 三分类表</td></tr>
+<tr><td><b>12/19-1/4</b><br>圣诞假</td><td><b>刻意留白</b>：不安排学习任务。可选：一个<b>她自己想做</b>的编程小项目（不设产出要求）</td><td>假期真的休息了</td></tr>
+<tr><td><b>1/5-1/13</b></td><td>IMC 最后冲刺（考试 <b>1/27</b>）：每周 2 套限时卷 + 错题复盘。<b>目标 Gold</b>（Year 9 拿 IMC Gold 是很强的信号）</td><td>2 套限时卷完成</td></tr>
+<tr><td><b>贯穿全程</b></td><td>英语口头输出：<b>每周 1 次 5 分钟</b>用英语给 Diya 讲自己的编程项目（零成本、有真实听众、不涉及评分）；钢琴每天 20 分钟照常</td><td>每周至少 1 次</td></tr>
+</table>
+<div class="insight good"><b>90 天成本核算：</b>新增学习投入 ≈ <b>每周 2-3 小时</b>（Bebras/IMC 题目 + 每周 1 次 5 分钟口头输出）；<b>金钱支出 0</b>（Bebras 由学校组织、UKMT 真题免费、bebras.uk 免费）；<b>同时是净减负</b>——因为要删掉现有排程里 21:00 后的全部时段。<b>这是唯一一个"做了之后总负担下降"的计划。</b></div>
+</div>
+
+<div class="card">
+<h3>4.4 备选方案与切换触发条件</h3>
+<table>
+<tr><th style="width:130px">备选线</th><th>触发条件（什么情况下切换）</th><th>需要付出的代价</th><th>决策时点</th></tr>
+<tr><td><b>B1 · 转工程/自然科学</b><br>（即 Diya 的路线）</td><td>Year 10 结束时，她<b>不再主动做编程项目</b>，但对物理/化学表现出持续兴趣（注意她 Chemistry 97%）</td><td>笔试从 TMUA 换成 <b>ESAT</b>（M1+M2+Physics）；A-Level 第四门必须选 Physics；<b>需重做全部备考计划</b></td><td><b>Year 10 末（2028-07）</b><br>此后切换成本急剧上升</td></tr>
+<tr><td><b>B2 · 德国 TU9 主线</b><br>（从备选升级为主选）</td><td>① 德语顺利到 C1；<b>且</b> ② 英国 A-Level 预估未达 A\*A\*A；<b>或</b> ③ 家庭预算收紧（德国三年省 £100k 量级）</td><td>需 uni-assist 材料认证（流程繁琐）+ 保证金账户 €11,208/年 + <b>本科不能带家属陪读的政策同样适用于德国</b>（需核实德国具体规定）</td><td>Year 12（2030 春）<br>德语 C1 出分后</td></tr>
+<tr><td><b>B3 · 港校并行</b><br>（Diya 的双线模式）</td><td>Year 12 时希望增加一条"成绩导向、无需笔试面试"的保险线（港校逻辑：硬 cutoff，不看竞赛与 PS）</td><td>IELTS 需 6.5-7；<b>港校首轮 2030-09 开放、11 月截止，比 UCAS 更早</b>，需同时准备两套材料</td><td>Year 12 末（2030-06）<br>现在不必规划</td></tr>
+<tr><td><b>B4 · 数学主线</b><br>（而非 CS）</td><td>Year 11-12 时 TMUA 模考稳定 7.0+，且她对纯数学的兴趣超过编程</td><td>剑桥/华威<b>数学</b>可用 <b>STEP</b> 替代 TMUA（CS 不行）；需额外准备 STEP 2/3（难度显著高于 TMUA）</td><td>Year 12（2029-2030）</td></tr>
+</table>
+<div class="insight"><b>为什么现在不建 B3（港校）？</b>对一个 Year 9 学生同时维护三条申请线，是典型的过度规划——每条线都有自己的材料要求、语言要求与截止日，<b>并行维护的成本会在 Year 12-13 集中爆发</b>，而那正是 A-Level 出分的关键期。<b>港校的决策窗口在 Year 12 末，现在只需要知道"它存在且可行"，不需要为它做任何准备。</b>这与 3.4 的排程原则一致：规划本身也要避免过度排程。</div>
+</div>
+
+<div class="card">
+<h3>4.5 "影子申请"机制：把 Diya 的申请过程变成 Jemma 的教材</h3>
+<p>这是两孩相隔两年带来的独特资产，现有规划提到"借鉴"但没有落成机制。具体做法：</p>
+<table>
+<tr><th style="width:130px">Diya 的节点</th><th>Jemma 的对应动作</th><th>产出</th></tr>
+<tr><td>2027-09 A-Level 开始</td><td>问一个问题：<b>"选课表实际怎么排的？四科 timetable 冲突吗？"</b></td><td>Jemma Year 11 选科时的真实参考（而非官网说法）</td></tr>
+<tr><td>2028-10 <b>ESAT 考场</b></td><td>考完当天问三件事：<b>节奏够不够、禁计算器影响多大、哪个模块最难</b></td><td>对 TMUA/ESAT 的第一手体感（TMUA 同样禁计算器）</td></tr>
+<tr><td>2028-10 <b>UCAS 填写</b></td><td><b>全程旁观一次</b>：五个志愿怎么排、PS 4000 字符怎么分配、推荐信怎么要</td><td>2030 年她自己填时，流程已完全熟悉</td></tr>
+<tr><td>2028-11/12 面试</td><td>问：<b>被问了什么？哪道题卡住了？面试官在意什么？</b></td><td>面试准备的真实题库（比任何辅导机构都准）</td></tr>
+<tr><td>2029-01/05 offer</td><td>看 offer 条件的<b>具体措辞</b>：A\*A\*A 怎么写的、有没有科目限定、contextual offer 是否存在</td><td>理解 offer 条件的真实粒度</td></tr>
+<tr><td>2029-06 PS 复盘</td><td><b>让 Diya 指出自己 PS 里"现在觉得写得不好"的段落</b></td><td>避免重复同一批错误——这是最值钱的一条</td></tr>
+</table>
+<div class="insight good"><b>成本：0</b>。这只是"在正确的时间问正确的问题"。<b>但它要求 Jemma 不是被动旁观</b>——建议每个节点后写 5 行笔记存进她的工作台 Notes 模块，两年后这些笔记就是一份无法从任何机构买到的申请手册。</div>
+</div>
+
+<!-- ============ 5 差异化说明 ============ -->
+<h2 id="s5">5. 差异化说明：为什么这份方案不能套用 Diya 的模板</h2>
+
+<div class="card">
+<p>你的要求是"不能套用同一模板"。这不是形式要求——如果照搬 Diya 的方案，会在<b>六个具体位置</b>上产生实质错误：</p>
+<table>
+<tr><th style="width:150px">若照搬 Diya 方案</th><th>会对 Jemma 造成的具体后果</th><th>本方案的处理</th></tr>
+<tr><td><b>备考 ESAT</b></td><td>她的方向（CS）考的是 <b>TMUA</b>。ESAT 的 Physics/Chemistry 模块对 CS 申请<b>零价值</b>，投入完全浪费</td><td>明确 TMUA 为主线，并给出<b>"Year 12 前不需要开始 TMUA 备考"</b>的结论（因为它基于 GCSE+AS 数学）</td></tr>
+<tr><td><b>把 Art 作为 A-Level 科目</b></td><td>Diya 需要 Art 构成 Maths+FM+Physics+<b>Art</b> 的稀有组合（&lt;0.5%）。Jemma 的稀有性已由 <b>Computing + Maths + 德语</b>构成，再加 Art <b>只会稀释数学深度</b>，而帝国理工 CS 要求"数学必须 A\*、偏好 Further Maths"</td><td>Art 定位为<b>素养层</b>：校内保留、PS 素材、不占 A-level 名额</td></tr>
+<tr><td><b>化学降级</b></td><td>Diya 化学 44% 是短板且不在 offer 条件内，所以降级正确。<b>Jemma 化学 97% 是长板</b>——同一条建议在两人身上含义完全相反</td><td>Jemma 化学<b>不设降级也不设主攻</b>：GCSE 拿高分即可，A-Level 是否选取决于 Year 11 的方向决策</td></tr>
+<tr><td><b>每日 PETZAL 写作 drills</b></td><td>Diya 的 English 4/3 是<b>能力缺口</b>，结构化 drills 对症。Jemma 的英语是<b>信心问题</b>（规划原文如此），高频被评分的写作练习会<b>加剧回避</b>，效果与目标相反</td><td>改为<b>口头输出 + 真实听众</b>（讲给 Diya 听、争取有台词的校内角色），不加写作 drills</td></tr>
+<tr><td><b>三周冲刺式密集计划</b></td><td>Diya 距 GCSE 7 个月，冲刺合理。Jemma 距 GCSE <b>31 个月</b>，冲刺模式会提前耗尽她，且挤占 Year 9-10 最该做的<b>兴趣探索</b></td><td>90 天计划以<b>减法和报名确认</b>为主，新增投入每周仅 2-3 小时，<b>总负担净下降</b></td></tr>
+<tr><td><b>砍掉"非必要"科目聚焦主线</b></td><td>Diya 需要聚焦是因为<b>时间不够</b>。Jemma 的时间充裕，此时聚焦等于<b>主动关掉还没探索过的门</b>——而她的方向要到 Year 10 末才能真正确认</td><td>保留<b>方向闸门</b>在 Year 10 末，并预设 B1（转工程）备选线与切换条件</td></tr>
+</table>
+<div class="insight good"><b>一句话概括差异：</b>Diya 的方案是<b>"在有限时间里把确定的事做对"</b>（聚焦、限时、砍掉非必要）；Jemma 的方案是<b>"在充裕时间里不犯过早收窄的错误"</b>（降载、保留选项、把稀缺信号养大、让兴趣自己收敛）。<b>两者的管理动作几乎完全相反，因为它们面对的是不同的约束条件——不是同一个模板的两种配色。</b></div>
+</div>
+
+<!-- ============ 6 优先级 ============ -->
+<h2 id="s6">6. 优先级清单</h2>
+
+<div class="card">
+<h3>P0 · 本周内（时间敏感 / 会导致走错路）</h3>
+<table>
+<tr><th>#</th><th>动作</th><th>位置</th><th>为什么是 P0</th></tr>
+<tr><td>1</td><td><b>确认 Bebras 2026（11/9-20）学校报名</b></td><td>问 Computing 老师</td><td>窗口 3-4 周后开启，错过等一年；这是她<b>唯一 Diya 没有的稀缺信号</b></td></tr>
+<tr><td>2</td><td><b>修正 Bebras 倒计时年份</b>（现指向 2025-11-12）与文案日期（现写"1 Nov"）</td><td><code>jemma.html:1012</code>、<code>:430</code></td><td>页面正在显示"已过期"，直接导致漏报</td></tr>
+<tr><td>3</td><td><b>删除周计划中 21:00 后的全部时段</b></td><td><code>data/planner_jemma.json</code></td><td>现有排程到午夜，与规划自己写的"3-4h/天 + 2 个自由日"原则直接冲突</td></tr>
+<tr><td>4</td><td><b>把 MAT/ENGAA 改为 TMUA</b>，STEP 限定为"仅剑桥/华威数学"</td><td><code>Jemma_Plan.md:15-17,201</code>、<code>jemma.html:542,1421</code></td><td>MAT 已废止，按原文备考会投到一个不存在的考试上</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>P1 · 一个月内（方向与结构）</h3>
+<table>
+<tr><th>#</th><th>动作</th><th>说明</th></tr>
+<tr><td>5</td><td><b>确认 Headington 是否开设 Computer Science GCSE</b>，以及 Jemma 是否想选</td><td>Year 10 选科的前置问题；CS GCSE 是 CS 主线的最自然起点</td></tr>
+<tr><td>6</td><td><b>Year 9 全部年级标注更正</b>（现有文档混用 Year 8/Year 9）</td><td>影响德语里程碑、竞赛级别（JMC vs IMC）、时间线全部推算</td></tr>
+<tr><td>7</td><td><b>IMC 备考启动</b>（每周 2-3 题，UKMT 免费真题，考试 2027-01-27）</td><td>Year 9 拿 IMC Gold 是很强的早期信号</td></tr>
+<tr><td>8</td><td><b>英语改为口头输出机制</b>：每周 1 次 5 分钟讲给 Diya 听；询问戏剧社/音乐演出的参与机会</td><td>对症"信心问题"，且成本为零</td></tr>
+<tr><td>9</td><td><b>核实两项预算变量</b>：本土生/国际生身份、私校学费 VAT 后的实际数字</td><td>差额 £100k 量级，未确认前所有总预算都是猜测</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>P2 · 本学年内（不急但需排期）</h3>
+<table>
+<tr><th>#</th><th>动作</th><th>说明</th></tr>
+<tr><td>10</td><td><b>建立"影子申请"机制</b>：Diya 每个申请节点后，Jemma 写 5 行笔记存入工作台 Notes</td><td>零成本，两年后积累成无法购买的申请手册</td></tr>
+<tr><td>11</td><td><b>德语路线保持但不加压</b>：Year 9 不设考试目标，B1 推到 Year 10</td><td>德国线全部价值押在 C1，节奏要留余量而非提前</td></tr>
+<tr><td>12</td><td><b>把排程硬上限写进工作台</b>（而非靠自觉）：每天 ≤1 时段、每周 2 个空白半天、21:00 后禁排</td><td>与 <code>jemma.html:1437</code> 已写明的原则对齐</td></tr>
+<tr><td>13</td><td><b>Year 10 末设"方向闸门"</b>：以"是否仍主动做编程项目"为唯一判据，决定 CS 主线或切 B1 工程线</td><td>避免过早窄化，也避免无限期拖延</td></tr>
+<tr><td>14</td><td><b>明确主申两校须在同一笔试体系</b>（都 TMUA，或接受为 UCL 额外考 TARA）</td><td>Year 12 选校的硬约束，提前知道可避免报名截止前才发现</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>整体判断</h3>
+<div class="insight good">
+<b>Jemma 的档案比 Diya 的更"顺"，但顺本身带来一类 Diya 没有的风险。</b><br><br>
+六项资产全部在 Above/Exceptional，没有需要抢救的短板，有 31 个月的窗口，还有一个 Diya 没有的稀缺组合（Computing Distinction + Maths 95% + 德语）。<b>这种档案最大的威胁不是失败，而是被过度安排——把本该用来探索兴趣的时间填满，然后在 Year 12 发现她其实不知道自己想去哪。</b><br><br>
+所以这份方案的核心动作是三个<b>减法</b>：删掉夜间排程、删掉对已废止考试的备考、删掉"现在就要锁定方向"的焦虑；以及两个<b>加法</b>：把 Computing 这个稀缺信号养大（Bebras → IMC → 自主项目），把 Diya 的申请过程变成她的教材。<br><br>
+<b>与 Diya 方案的根本区别：</b>Diya 需要的是聚焦与冲刺，Jemma 需要的是空间与保留。<b>这两个动作方向相反，因为约束条件不同——不是同一模板的两种配色。</b>
+</div>
+</div>
+
+<footer>
+本方案基于 <code>download/Jemma_Plan.md</code>（v2, 2026-06-03）、<code>download/Diya_Plan.md</code>（v5, 2026-05-21）、<code>jemma.html</code> 路线卡与学科数据、<code>data/planner_jemma.json</code> 排程实录，以及 2026-10-15 核实的考试与院校要求。<br>
+<b>本次核实的事实来源</b>：UAT-UK（ESAT/TMUA/TARA 规格、考位、废止清单）· UKMT 官方竞赛日历 · Imperial Computing 课程页（13:1、A\*A\*A、TMUA、不接受科目清单）· 各校 CS 笔试要求对照 · DAAD GCE 认证页与 TU Munich 学费页（转引自现有规划）。<br>
+<b>标记为待核实的项</b>：本土生/国际生学费身份（差额 £100k+）· 英国私校学费 VAT 后的实际数字 · 德国保证金账户当年标准 · 德国本科阶段家属陪同政策。<br>
+本方案为规划建议，<b>不承诺任何录取结果</b>。院校要求每个申请周期都会复核，所有门槛数据在 Year 12 选校时必须回到各校官网课程页重新确认。
+</footer>
+
+</div>
+</body>
+</html>
