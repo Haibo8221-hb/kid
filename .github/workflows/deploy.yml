@@ -5,9 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: write      # 测试日志需推送到调试分支
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -24,26 +21,12 @@ jobs:
         run: pip install --quiet flask httpx pyyaml
 
       - name: P0 regression (auth / whitelist / errors)
-        id: p0
-        run: |
-          python -V
-          python tests/verify_p0_fixes.py 2>&1 | tee test-p0.log
-          exit ${PIPESTATUS[0]}
+        run: python tests/verify_p0_fixes.py
 
       - name: Resource link health check
-        run: |
-          python tests/check_links.py 2>&1 | tee test-links.log
-          exit ${PIPESTATUS[0]}
+        run: python tests/check_links.py
 
-      - name: Push test logs to debug branch (always)
-        if: always()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "actions@github.com"
-          git checkout -B "ci-testlog-${{ github.run_number }}"
-          git add -f test-p0.log test-links.log
-          git commit -m "ci: test log run ${{ github.run_number }}" || echo "nothing to commit"
-          git push -f origin "ci-testlog-${{ github.run_number }}"
+      # 注：需要完整测试输出时，手动跑 "Test only (debug harness)" 工作流（会推送日志到 ci-testlog 分支）
 
   deploy:
     needs: test
