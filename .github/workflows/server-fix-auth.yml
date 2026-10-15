@@ -1,11 +1,11 @@
 name: Server fix - disable nginx basic auth & set APP_PASSWORD
 
-# 一次性修复（用完即删）：
-#   1) 注释掉三个 vhost 里的 auth_basic / auth_basic_user_file（消除 Windows Basic 弹窗，
-#      只保留应用层登录）；改前备份，nginx -t 失败自动还原。
+# 一次性修复（用完即删），幂等：已打补丁则跳过，密码优先复用已有 drop-in。
+#   1) 注释掉三个 vhost 里的 auth_basic / auth_basic_user_file（消除 Windows Basic 弹窗），
+#      改前备份，nginx -t 失败自动还原；reload 用多种方式兜底。
 #   2) 为 plan-api 写 systemd drop-in，注入 APP_PASSWORD + APP_STRICT_PASSWORD=1，
-#      重启并自检（未登录 401 / 正确密码 200 / 首页 200）。
-# 结果（含生成的密码）写入 diag-output 分支的 diagnostics/ 供查阅。
+#      重启并自检（未登录 401 / 错密码 401 / 正确密码 200 / 首页 200）。
+# 结果写入 diag-output 分支的 diagnostics/。
 on:
   workflow_dispatch:
   push:
@@ -34,47 +34,64 @@ jobs:
             OUT=/tmp/kid-fix.txt
             STAMP=20261015
             CONFS="/www/server/panel/vhost/nginx/grow-consultant.conf /www/server/panel/vhost/nginx/python_kid.conf /www/server/panel/vhost/nginx/112.74.40.8.conf"
+            DROPIN=/etc/systemd/system/plan-api.service.d/10-app-auth.conf
             {
               echo "===== 1) nginx basic auth ====="
               for f in $CONFS; do
                 if [ -f "$f" ]; then
-                  cp -n "$f" "$f.bak-$STAMP-noauth"
-                  sed -i 's/^\([[:space:]]*\)auth_basic[[:space:]]/\1# auth_basic /; s/^\([[:space:]]*\)auth_basic_user_file/\1# auth_basic_user_file/' "$f"
-                  echo "patched: $f"
-                else
-                  echo "skip (missing): $f"
+                  if grep -q '^[[:space:]]*auth_basic[[:space:]]' "$f"; then
+                    cp -n "$f" "$f.bak-$STAMP-noauth"
+                    sed -i 's/^\([[:space:]]*\)auth_basic[[:space:]]/\1# auth_basic /; s/^\([[:space:]]*\)auth_basic_user_file/\1# auth_basic_user_file/' "$f"
+                    echo "patched: $f"
+                  else
+                    echo "already patched: $f"
+                  fi
                 fi
               done
-              if nginx -t 2>&1 | tail -5; then
-                nginx -s reload && echo "nginx reloaded"
+
+              if nginx -t 2>&1 | tail -3; then
+                echo "-- reload attempts --"
+                systemctl reload nginx 2>&1 | tail -2 && echo "systemctl reload ok" \
+                  || /etc/init.d/nginx reload 2>&1 | tail -2 && echo "init.d reload ok" \
+                  || kill -HUP "$(cat /www/server/nginx/logs/nginx.pid 2>/dev/null || pgrep -f 'nginx: master' | head -1)" && echo "HUP sent"
+                sleep 2
+                echo "master pid: $(pgrep -f 'nginx: master' | head -1)"
               else
                 echo "NGINX -T FAILED -> restoring"
                 for f in $CONFS; do [ -f "$f.bak-$STAMP-noauth" ] && cp "$f.bak-$STAMP-noauth" "$f"; done
-                exit 1
               fi
 
               echo
               echo "===== 2) APP_PASSWORD ====="
-              PW=$(openssl rand -base64 18 | tr -d '\n' | tr '+/' 'Ab')
-              mkdir -p /etc/systemd/system/plan-api.service.d
-              cat > /etc/systemd/system/plan-api.service.d/10-app-auth.conf <<EOF
-            [Service]
-            Environment="APP_PASSWORD=$PW"
-            Environment="APP_STRICT_PASSWORD=1"
-            EOF
+              if [ -f "$DROPIN" ]; then
+                PW=$(grep -o 'APP_PASSWORD=[^"]*' "$DROPIN" | head -1 | cut -d= -f2-)
+                echo "reuse existing password from drop-in"
+              else
+                PW=$(openssl rand -base64 18 | tr -d '\n' | tr '+/' 'Ab')
+                mkdir -p /etc/systemd/system/plan-api.service.d
+                printf '[Service]\nEnvironment="APP_PASSWORD=%s"\nEnvironment="APP_STRICT_PASSWORD=1"\n' "$PW" > "$DROPIN"
+                echo "created drop-in"
+              fi
+              cat "$DROPIN"
               systemctl daemon-reload
               systemctl restart plan-api
-              sleep 4
-              echo "status(should be 401): $(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5000/api/auth/status)"
-              echo "login wrong(should be 401): $(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"password":"definitely-wrong"}' http://127.0.0.1:5000/api/auth/login)"
-              echo "login right(should be 200): $(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"password":"'$PW'"}' http://127.0.0.1:5000/api/auth/login)"
+              sleep 5
+              echo "-- service --"
+              systemctl is-active plan-api
+              echo "-- backend checks --"
+              echo "status(401): $(curl -s -m 8 -o /dev/null -w '%{http_code}' http://127.0.0.1:5000/api/auth/status)"
+              echo "login wrong(401): $(curl -s -m 8 -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"password":"definitely-wrong"}' http://127.0.0.1:5000/api/auth/login)"
+              echo "login right(200): $(curl -s -m 8 -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d "{\"password\":\"$PW\"}" http://127.0.0.1:5000/api/auth/login)"
+              echo "-- last log --"
+              journalctl -u plan-api -n 12 --no-pager 2>/dev/null | tail -12
 
               echo
-              echo "===== 3) site without basic auth ====="
-              echo "https index(should be 200): $(curl -sk -o /dev/null -w '%{http_code}' https://grow-consultant.com/index.html)"
+              echo "===== 3) site ====="
+              echo "https index(200): $(curl -sk -m 10 -o /dev/null -w '%{http_code}' https://grow-consultant.com/index.html)"
+              echo "https app.html(200): $(curl -sk -m 10 -o /dev/null -w '%{http_code}' https://grow-consultant.com/app.html)"
 
               echo
-              echo "===== GENERATED APP_PASSWORD ====="
+              echo "===== APP_PASSWORD ====="
               echo "$PW"
             } > "$OUT" 2>&1
             cat "$OUT"
@@ -100,5 +117,5 @@ jobs:
           git checkout -B diag-output
           git add diagnostics/
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
-          git commit -m "fix: ECS nginx basic auth 关闭 + APP_PASSWORD 注入结果 $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git commit -m "fix: ECS nginx/auth 修复结果 $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git push -f origin diag-output
