@@ -16,6 +16,7 @@ rsync -az --delete \
   --exclude='.git/' --exclude='.github/' --exclude='downloads/' \
   --exclude='resources/' --exclude='backups/' \
   --exclude='research_collector.py' --exclude='deploy.sh' \
+  --exclude='.workbuddy/' --exclude='tests/' --exclude='analysis/.versions/' \
   -e "ssh -p $ECS_PORT -i $KEY -o StrictHostKeyChecking=no" \
   ./ "$ECS_USER@$ECS_HOST:$SITE_ROOT/"
 

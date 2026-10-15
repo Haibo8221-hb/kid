@@ -34,6 +34,11 @@ clawd/
 node_modules/
 *.log
 
+# ── IDE 本地状态与快照基线（不入库、不部署）──
+.workbuddy/
+analysis/.versions/
+*.broken.html
+
 # ── 大体积静态资源（走 OSS / workbench-kit 单独通道，不进 git，避免仓库膨胀）──
 resources/
 downloads/
