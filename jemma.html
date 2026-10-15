@@ -1008,11 +1008,13 @@ function toast(msg,dur=2500){
 
 // Countdown 
 const TIMER_TARGETS = [
+ // UKMT JMC 2027 = 2027-05-05（来源：ukmt.org.uk/competition-calendar-2026-27）
+ // Bebras 2026 窗口：2026-11-09 ~ 11-20（来源：bebras.uk）
  {id:'t-gcse', name:'GCSE Exams', target:'2029-05-01', tag:'Jemma', tagClass:'green'},
- {id:'t-jmc', name:'UKMT JMC', target:'2027-06-01', tag:'Jemma', tagClass:'accent2'},
- {id:'t-bebras', name:'Jemma Bebras', target:'2026-11-09', tag:'Jemma', tagClass:'green'},
- {id:'t-summer', name:'Summer Start', target:'2025-07-01', tag:'Both', tagClass:'yellow'},
- {id:'t-halfterm', name:'Half Term', target:'2025-10-24', tag:'Both', tagClass:'yellow'}
+ {id:'t-jmc', name:'UKMT JMC', target:'2027-05-05', tag:'Jemma', tagClass:'accent2'},
+ {id:'t-bebras', name:'Jemma Bebras (窗口首日)', target:'2026-11-09', tag:'Jemma', tagClass:'green'},
+ {id:'t-summer', name:'Summer Start', target:'2026-07-01', tag:'Both', tagClass:'yellow'},
+ {id:'t-halfterm', name:'Half Term', target:'2026-10-26', tag:'Both', tagClass:'yellow'}
 ];
 
 function getTimeLeft(target){

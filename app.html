@@ -1308,12 +1308,19 @@ function toast(msg,dur=2500){
 }
 
 // Countdown 
+// 2026 考试/活动日历（官方来源已标注；校历项按学校通用值，需与学校校历核对）
+// · GCSE 2026 夏季考试季：5/11 首场(English Literature P1) ~ 6/24 备用日，成绩日 8/20
+//   （来源：AQA/Edexcel/OCR 2026 timetable；此处取首场作为倒计时锚点）
+// · UKMT SMC 2026：2026-10-07（来源：ukmt.org.uk/competition-calendar-2026-27）
+// · UK Bebras 2026：2026-11-09 ~ 11-20 窗口（来源：bebras.uk，取窗口首日）
 const TIMER_TARGETS = [
- {id:'t-gcse', name:'GCSE Art Exam', target:'2026-05-15', tag:'Diya', tagClass:'orange'},
- {id:'t-smc', name:'UKMT SMC', target:'2025-11-05', tag:'Diya', tagClass:'orange'},
- {id:'t-bebras', name:'Jemma Bebras', target:'2025-11-12', tag:'Jemma', tagClass:'green'},
- {id:'t-summer', name:'Summer Break', target:'2025-07-01', tag:'Both', tagClass:'yellow'},
- {id:'t-halfterm', name:'Half Term', target:'2025-10-24', tag:'Both', tagClass:'yellow'}
+ {id:'t-gcse', name:'GCSE 首场 · Eng Lit P1', target:'2026-05-11', tag:'Diya', tagClass:'orange'},
+ {id:'t-gcse-maths', name:'GCSE Maths P1 (non-calc)', target:'2026-05-14', tag:'Diya', tagClass:'orange'},
+ {id:'t-smc', name:'UKMT SMC', target:'2026-10-07', tag:'Diya', tagClass:'orange'},
+ {id:'t-bebras', name:'Jemma Bebras (窗口首日)', target:'2026-11-09', tag:'Jemma', tagClass:'green'},
+ {id:'t-summer', name:'Summer Break', target:'2026-07-01', tag:'Both', tagClass:'yellow'},
+ {id:'t-halfterm', name:'Half Term', target:'2026-10-26', tag:'Both', tagClass:'yellow'}
+ // TODO(#13)：Summer Break / Half Term 属学校校历项（现按通用值），请以学校校历核对后修正
 ];
 
 function getTimeLeft(target){
@@ -2058,11 +2065,15 @@ function toggleSMCForm(){
  }
 }
 
+// SMC 证书分数线（单一配置源）。口径：采用 UKMT **2025** 官方阈值（2026 阈值官方尚未公布，
+// 公布后只需改这里）。来源：https://ukmt.org.uk/senior-challenges/senior-mathematical-challenge-awards
+//   2025 Certificate Thresholds — Gold 72+ / Silver 57+ / Bronze 46+
+//   （旧代码用的 83/66/51 是 2024 年阈值，已废止）
+const SMC_GRADES = {year: 2025, gold: 72, silver: 57, bronze: 46};
 function smcGrade(score){
- // SMC tier estimate (approx boundaries)
- if(score >= 83) return 'Gold';
- if(score >= 66) return 'Silver';
- if(score >= 51) return 'Bronze';
+ if(score >= SMC_GRADES.gold) return 'Gold';
+ if(score >= SMC_GRADES.silver) return 'Silver';
+ if(score >= SMC_GRADES.bronze) return 'Bronze';
  return 'Below Bronze';
 }
 
@@ -2668,13 +2679,16 @@ function updateCountdownStrip(){
  });
 }
 
+// 注(#8)：英文段落框架命名存在两种写法 —— PETAL（Point→Evidence→Technique→Analysis→Link，5 步）
+// 与 PETZAL（多一个 Zoom 步骤，6 步）。家长 2026-10-15 答复「待定」，故**暂不统一**，
+// 页面现有 PETAL 文案与卡片保持原样；待学校教材口径确认后再全局替换（届时只需改本文件 PETAL 相关文案）。
 // Study Tips (V2 Learning Method Cards) — Updated 15 Aug 2026: kept 3 core methods, added 5 (daily drill + Chemistry + 2357 + ESAT + SMC game plan)
 const V2_TIPS_POOL = [
   // === KEPT: Core evidence-based methods ===
   {id:'dm02',title:'Active Recall + Spaced Repetition',icon:'🧠',cat:'general',
-   concept:'The most effective study method is testing yourself — not re-reading. Space your review sessions: 1 day → 3 days → 1 week → 1 month.',
+   concept:'The most effective study method is testing yourself — not re-reading. Space your review sessions with the 2357 schedule: same day, then 2, 3, 5 and 7 days later.',
    why:'The forgetting curve shows you lose 50% of new information in 24 hours without review. Each active recall session resets the curve. Spacing reviews doubles long-term retention compared to cramming (Ebbinghaus, 1885; confirmed by 200+ studies).',
-   steps:['After learning something new, close the book immediately','Write down everything you remember — no peeking','Check what you missed — THAT is what needs review','Schedule reviews: tomorrow, 3 days, 1 week, 1 month'],
+   steps:['After learning something new, close the book immediately','Write down everything you remember — no peeking','Check what you missed — THAT is what needs review','Schedule reviews with 2357: today, then 2, 3, 5 and 7 days later'],
    practice:'Right now: pick one GCSE topic. Close everything. Write a one-page summary from memory. Mark what you forgot in red. This is your review list.',
    apply:['Chemistry: Memorise the reactivity series — test yourself tomorrow','Physics: Recall all equations from the Forces topic — no formula sheet','English: Recall 5 key Macbeth quotes with analysis points']},
 
