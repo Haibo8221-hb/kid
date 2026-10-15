@@ -16,7 +16,13 @@
 | ECS SSH 端口 | `443`（华为代理只放行 CONNECT 到 443，22 被拒） |
 | ECS 用户 | `root` |
 | 站点根目录 SITE_ROOT | `/www/wwwroot/kid` |
-| 后端服务名 SERVICE | 宝塔建站时起的服务名（例：`plan-api`，见 §3） |
+| 后端服务名 SERVICE | **`plan-api`**（systemd，已在线上确认，见 §3.4） |
+
+> **命名消歧（别搞混）**：
+> - `plan-api` = **后端 systemd 服务名**，重启/查日志一律用它（`systemctl restart plan-api`）。
+> - `kid` = **站点目录名 / 宝塔站点名**（`/www/wwwroot/kid`），不是服务名。
+> - `kid-api` = 仓库 `deploy/supervisor-kid-api.conf` 里**备选 supervisor 方案的 program 名，实际未启用**；
+>   照 §3.3 装了 supervisor 会起第二个后端抢 5000 端口，**不要启用**。
 
 ---
 
@@ -88,9 +94,12 @@ which rsync || (apt-get update && apt-get install -y rsync)   # Debian/Ubuntu
 **网站 → 添加站点**：站点名/域名填 `kid` → 根目录自动为 `/www/wwwroot/kid`（与 SITE_ROOT 一致）。
 
 ### 3.2 起后端（宝塔「Python 项目」管理器，推荐）
+> 线上实际结果：后端以 **systemd 服务 `plan-api`** 运行（`/opt/plan-api/bin/python api_server.py`）。
+> 若用下面的宝塔管理器新建项目，**项目名称请填 `plan-api`**，与 CI/CD 里的 SERVICE 保持一致。
+
 1. 软件商店安装 **Python 项目**（Python 项目管理器）；并安装一个 Python 3.x 版本。
 2. **添加项目**：
-   - 项目名称：`kid-api`（这串就是后面 Secrets 的 `SERVICE` 值，建议就叫 `kid-api`）
+   - 项目名称：`plan-api`（这串就是后面 Secrets 的 `SERVICE` 值）
    - 项目路径：`/www/wwwroot/kid`
    - 启动方式：**gunicorn**
    - 启动命令：`gunicorn -w 4 -b 127.0.0.1:5000 api_server:app`
@@ -102,24 +111,38 @@ which rsync || (apt-get update && apt-get install -y rsync)   # Debian/Ubuntu
    ALLOWED_ORIGINS=*            # 生产改成你的真实域名，如 https://kid.你的域名.com
    HERMES_HOME=/www/wwwroot/kid/.hermes
    CHAT_MAX_HISTORY=20
-   APP_PASSWORD=<你的访问密码>    # 应用层登录密码（默认 haibo2026，务必修改！）
+   APP_PASSWORD=<你的访问密码>    # 应用层登录密码，必须显式设置（代码已不再提供默认密码）
+   APP_STRICT_PASSWORD=1         # 配好密码后开启：未配置密码时拒绝所有登录
    # APP_SECRET=<随机串>         # 可选；留空则从密码派生（改密码=吊销全部会话）
    ```
 
-### 3.3 备选：supervisor 直接托管（宝塔管理器不顺手时用）
-把仓库里的 `deploy/supervisor-kid-api.conf` 传到 ECS：
+**用 systemd 时改环境变量（推荐，线上就是这个做法）**——写 drop-in，不要改主 unit：
+```bash
+mkdir -p /etc/systemd/system/plan-api.service.d
+cat > /etc/systemd/system/plan-api.service.d/10-app-auth.conf <<'EOF'
+[Service]
+Environment="APP_PASSWORD=<你的强密码>"
+Environment="APP_STRICT_PASSWORD=1"
+EOF
+systemctl daemon-reload && systemctl restart plan-api
+```
+
+### 3.3 备选：supervisor 直接托管（**不推荐，线上未启用**）
+仅在完全不用 systemd 时才用。把仓库里的 `deploy/supervisor-kid-api.conf` 传到 ECS：
 ```bash
 cp /www/wwwroot/kid/deploy/supervisor-kid-api.conf /etc/supervisor/conf.d/kid-api.conf
 supervisorctl reread && supervisorctl update && supervisorctl restart kid-api
 ```
-此时 `SERVICE=kid-api`。
+此时 `SERVICE=kid-api`（需同步改 GitHub Secret）。**不要与 `plan-api` 同时运行**，会抢 5000 端口。
 
 ### 3.4 确认 SERVICE 名（用于 Secrets）
 ECS 上执行：
 ```bash
-supervisorctl status
+systemctl status plan-api          # 应看到 active (running)
+systemctl show plan-api -p ExecStart -p Environment
 ```
-输出里 `kid-api  RUNNING ...` 的 `kid-api` 就是 `SERVICE` 的确切值（宝塔管理器起的名字可能带前缀，以这里显示为准）。
+线上已确认值：ExecStart=`/opt/plan-api/bin/python api_server.py`。
+若上面查不到，再退而求其次看 supervisor：`supervisorctl status`（此时名字以输出为准）。
 
 ### 3.5 nginx 反代 /api/
 站点 → 设置 → 配置文件，在 `server{}` 内加：
@@ -135,11 +158,31 @@ location /api/ {
 ### 3.6 安全屏蔽
 把仓库里的 `nginx-git-protect.conf` 内容贴进站点 nginx 配置 `server{}` 内（防 `.git`/`.env` 被公网下载），保存并重载。
 
-### 3.7 权限与目录
+### 3.7 nginx 重载（宝塔的 nginx 不在 systemd 里）
+ECS 上跑的是宝塔自带 nginx，`systemctl reload nginx` 会报 not active，且 PATH 里的 `/usr/sbin/nginx -t`
+测的是 `/etc/nginx/nginx.conf`（**错的配置**）。正确做法：
+```bash
+/www/server/nginx/sbin/nginx -t -c /www/server/nginx/conf/nginx.conf \
+  && /www/server/nginx/sbin/nginx -s reload
+# 兜底：kill -HUP $(ps -eo pid,args | awk '/nginx: master process/{print $1;exit}')
+```
+
+> **已处理（2026-10-15）**：三个 vhost（`grow-consultant.conf` / `python_kid.conf` / `112.74.40.8.conf`）
+> 里的 `auth_basic "升学规划"` + `auth_basic_user_file /etc/nginx/.htpasswd` 已注释（备份 `*.bak-20261015-noauth`）。
+> 这两行会导致打开首页先弹一次 **Windows 原生认证框**（宝塔「密码访问」），取消后才进应用层登录 = 两次登录。
+> **新建/重建站点后不要再打开「密码访问」**。
+
+### 3.8 权限与目录
 ```bash
 mkdir -p /www/wwwroot/kid/data /www/wwwroot/kid/logs /www/wwwroot/kid/.hermes
 chown -R www:www /www/wwwroot/kid
 ```
+
+### 3.9 无 SSH 时如何改服务器
+本机沙箱/代理连不上 ECS 时，用一次性 GitHub Actions 工作流代跑（`appleboy/ssh-action`），
+结果 rsync 回传到 `diag-output` 分支，本地 `git fetch origin diag-output` 读文件。
+仓库保留只读版 `.github/workflows/server-diag.yml`（改 `.github/triggers/server-diag.txt` 触发）。
+用完后删除临时工作流与分支。
 
 ---
 
@@ -154,7 +197,7 @@ chown -R www:www /www/wwwroot/kid
 | `ECS_USER` | `root` |
 | `ECS_SSH_KEY` | 本机 `~/.ssh/id_ed25519` **私钥全文**（含 BEGIN/END 共 7 行） |
 | `SITE_ROOT` | `/www/wwwroot/kid` |
-| `SERVICE` | 第 3 步起的后端服务名（如 `plan-api`） |
+| `SERVICE` | 后端服务名，填 **`plan-api`** |
 
 > 取私钥全文：`Get-Content ~/.ssh/id_ed25519 | Set-Clipboard`，再粘贴到 Secret 框。
 > **不再需要** GitHub Deploy Key（方案 B 下 ECS 不主动拉 GitHub）。
@@ -167,7 +210,10 @@ chown -R www:www /www/wwwroot/kid
 - **重跑最近一次**：GitHub → Actions → 对应 run → Re-run jobs。
 - **手动应急**（不走 Actions，本机直推）：`bash deploy.sh`（需本机 SSH 代理已配）。
 
-部署流程：Actions checkout → rsync 推到 `/www/wwwroot/kid` → 修权限 `www:www` → `supervisorctl restart <SERVICE>`。
+部署流程：Actions checkout → rsync `--delete` 推到 `/www/wwwroot/kid` → 修权限 `www:www` → `systemctl restart plan-api`。
+
+> **注意**：Actions 只做「同步 + 重启」，**不会设置环境变量**（如 `APP_PASSWORD`），
+> 那些必须按 §3.2 在服务器上配好。另外 rsync 带 `--delete`，服务器上被删掉的目录（如已下线的 `v2/`）会同步删除。
 
 ---
 
