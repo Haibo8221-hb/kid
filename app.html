@@ -1106,6 +1106,8 @@ Hong Kong parallel: HKUST+PolyU
 <div id="toast"></div>
 <div id="ver-badge" style="position:fixed;left:6px;bottom:6px;z-index:400;font-size:10px;color:var(--text2);opacity:0.5;pointer-events:none;font-family:monospace"></div>
 
+<script>window.KID_CHILD='diya';</script>
+<script src="assets/kid-common.js?v=20261015"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -1211,6 +1213,53 @@ function getNotes(subj){
 }
 function setNotes(subj, arr){
  localStorage.setItem('diya_notes_'+subj, JSON.stringify(arr));
+ notesSyncPush();                      // #11：写本地后立即（防抖）推到服务端
+}
+
+/* ── #11 Notes 服务端持久化 ──────────────────────────────────────────
+ * 策略：localStorage 仍是渲染的即时数据源（保持同步渲染、断网可用），
+ * 服务端作为跨设备/清缓存后的真源。
+ *   pull：进入 Notes 页时拉取；仅当服务端 updatedAt 新于本地同步标记才覆盖，
+ *         避免把"别的设备刚写的"误判旧数据，也避免空服务端覆盖本地存量。
+ *   push：任何写入后 1.2s 防抖，全量提交所有科目（幂等，无需增量协议）。
+ * 失败一律静默降级为纯本地，不影响使用。
+ */
+const NOTES_SYNC_AT_KEY = 'diya_notes_sync_at';
+let _notesPushTimer = null;
+
+async function notesSyncPull(){
+ try{
+  const r = await fetch(`/api/notes/${KID_CHILD}`);
+  if(!r.ok) return false;
+  const d = await r.json();
+  const payload = d && d.payload;
+  if(!payload || !Object.keys(payload).length) return false;   // 服务端空：不动本地
+  const localAt = localStorage.getItem(NOTES_SYNC_AT_KEY) || '';
+  if(localAt && d.updatedAt && d.updatedAt <= localAt) return false;  // 本地不比服务端旧
+  let changed = false;
+  NOTES_SUBJECTS.forEach(s=>{
+   if(Array.isArray(payload[s])){ localStorage.setItem('diya_notes_'+s, JSON.stringify(payload[s])); changed = true; }
+  });
+  if(d.updatedAt) localStorage.setItem(NOTES_SYNC_AT_KEY, d.updatedAt);
+  return changed;
+ }catch(e){ return false; }
+}
+
+function notesSyncPush(){
+ clearTimeout(_notesPushTimer);
+ _notesPushTimer = setTimeout(async ()=>{
+  const payload = {};
+  NOTES_SUBJECTS.forEach(s=>{ payload[s] = getNotes(s); });
+  const at = new Date().toISOString();
+  try{
+   const r = await fetch(`/api/notes/${KID_CHILD}`, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({payload, updatedAt: at})
+   });
+   if(r.ok) localStorage.setItem(NOTES_SYNC_AT_KEY, at);
+  }catch(e){ /* 静默降级：本地已写，下次进页面会再推 */ }
+ }, 1200);
 }
 function timeAgoNote(iso){
  const d=new Date(iso), now=new Date(), diff=now-d;
@@ -1244,7 +1293,14 @@ function switchNotesTab(subj){
  if(btn) btn.classList.add('visible');
  renderNotes();
 }
-function loadNotes(){ migrateNotes(); renderNotes(); }
+function loadNotes(){
+ migrateNotes();
+ renderNotes();                                   // 先用本地数据渲染，避免等待网络
+ notesSyncPull().then(changed=>{
+  if(changed) renderNotes();                      // 服务端有更新 -> 重渲染
+  notesSyncPush();                                // 拉取完成后再推，避免竞态覆盖服务端
+ });
+}
 function renderNotes(){
  const container = document.getElementById('notes-list');
  const btn = document.getElementById('add-note-btn');
@@ -1301,12 +1357,6 @@ function deleteNote(id, subject){
 }
 
 // Toast 
-function toast(msg,dur=2500){
- const t=document.getElementById('toast');
- t.textContent=msg;t.classList.add('show');
- setTimeout(()=>t.classList.remove('show'),dur);
-}
-
 // Countdown 
 // 2026 考试/活动日历（官方来源已标注；校历项按学校通用值，需与学校校历核对）
 // · GCSE 2026 夏季考试季：5/11 首场(English Literature P1) ~ 6/24 备用日，成绩日 8/20
@@ -1323,34 +1373,11 @@ const TIMER_TARGETS = [
  // TODO(#13)：Summer Break / Half Term 属学校校历项（现按通用值），请以学校校历核对后修正
 ];
 
-function getTimeLeft(target){
- const now=Date.now(), end=new Date(target).getTime();
- const diff=end-now;
- if(diff<=0) return 'Passed';
- const d=Math.floor(diff/86400000);
- const h=Math.floor((diff%86400000)/3600000);
- const m=Math.floor((diff%3600000)/60000);
- return d>0?`${d}D ${h}H`:h>0?`${h}H ${m}M`:`${m}M`;
-}
-
 // Radar Chart (Canvas) 
 
 // Dashboard 
 
 // Child Tabs 
-async function loadTasks(child){
- try{
- const r=await fetch('/api/tasks?user='+child);
- const data=await r.json();
- tasksData[child]=data;
- renderTasks(child);
- }catch(e){
- // Fallback to localStorage
- const ls=localStorage.getItem('tasks_'+child);
- tasksData[child]=ls?JSON.parse(ls):{};
- renderTasks(child);
- }
-}
 function renderTasks(child){
  const container=document.getElementById(child+'-tasks');
  if(!container) return;
@@ -1418,22 +1445,6 @@ async function toggleTask(child,key,el){
  await saveTasks(child);
  renderTasks(child);  // full re-render to move between pending/done sections
 }
-async function saveTasks(child){
- try{
- await fetch('/api/tasks',{
- method:'POST',
- headers:{'Content-Type':'application/json'},
- body:JSON.stringify({user:child,tasks:tasksData[child]})
- });
- localStorage.setItem('tasks_'+child,JSON.stringify(tasksData[child]));
- toast('Synced ');
- }catch(e){
- // Save to localStorage as fallback
- localStorage.setItem('tasks_'+child,JSON.stringify(tasksData[child]));
- toast('Saved locally');
- }
-}
-
 // Planner 
 function loadPlannerView(){
  if(plannerWeeks['diya']===undefined) plannerWeeks['diya']=0;
@@ -1457,25 +1468,6 @@ async function loadPlanner(child){
  renderPlannerGrid(child);
  updatePlannerLabel(child);
  }
-}
-function getWeekDates(child){
- const now=new Date();
- const weekStart=plannerWeeks[child]||0;
- const start=new Date(now);
- start.setDate(now.getDate()-now.getDay()+1+weekStart*7);
- const days=[];
- for(let i=0;i<7;i++){
- const d=new Date(start);
- d.setDate(start.getDate()+i);
- days.push(d);
- }
- return days;
-}
-function formatDate(d){
- return `${d.getMonth()+1}/${d.getDate()}`;
-}
-function dateKey(d){
- return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 let plannerDone = {};
 
@@ -1563,18 +1555,6 @@ function downloadWeekPlan(){
  a.href=URL.createObjectURL(blob);
  a.download='weekly-plan-'+dateKey(days[0])+'.csv';
  a.click();
-}
-function updatePlannerLabel(child){
- const days=getWeekDates(child);
- const label=document.getElementById(child+'-week-label');
- if(label) label.textContent=`${formatDate(days[0])} – ${formatDate(days[6])}`;
- const syncLabel=document.getElementById('planner-sync-label');
- if(syncLabel&&child==='diya') syncLabel.textContent=`${formatDate(days[0])} – ${formatDate(days[6])}`;
-}
-function changeWeek(child,delta){
- plannerWeeks[child]=(plannerWeeks[child]||0)+delta;
- renderPlannerGrid(child);
- updatePlannerLabel(child);
 }
 async function addPlannerItem(child,date,hour){
  const item=prompt('Add plan item:');
@@ -1782,11 +1762,6 @@ async function loadRoutes(){
  </div>
  `).join('');
 }
-function toggleRoute(id){
- const card=document.getElementById('route-'+id);
- if(card) card.classList.toggle('open');
-}
-
 // Resources — Categorized Download Library
 async function loadResources(){
  const C=document.getElementById('resource-list');
@@ -2340,20 +2315,6 @@ function switchChatChild(child){
  document.getElementById('chat-hdr-title').textContent=' Chat with '+(child==='diya'?'Diya':'Jemma');
  loadChatHistory();
 }
-async function loadChatHistory(){
- const container=document.getElementById('chat-messages');
- if(!container) return;
- try{
- const r=await fetch('/api/chat/diya?limit=50');
- const data=await r.json();
- const msgs=Array.isArray(data)?data:(data.messages||[]);
- container.innerHTML='';
- msgs.forEach(m=>appendChatMsg(m.role,m.content));
- container.scrollTop=container.scrollHeight;
- }catch(e){
- container.innerHTML='<div style="color:var(--text2);padding:20px;text-align:center">Load failed</div>';
- }
-}
 function markdownToHtml(md){
  // Minimal markdown → HTML converter for chat bubbles
  if(!md) return '';
@@ -2784,43 +2745,8 @@ function renderTipCard(el){
   '</div></div>';
 }
 
-function nextTip(){
- if (currentTipIndex < todayTips.length - 1) {
-  currentTipIndex++;
-  const t = todayTips[currentTipIndex];
-  const STORAGE_KEY = 'study_tips_viewed_diya';
-  let viewed = {};
-  try { viewed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
-  viewed[t.id] = (viewed[t.id] || 0) + 1;
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(viewed)); } catch(e) {}
-  renderTipCard();
- }
-}
-
-function prevTip(){
- if (currentTipIndex > 0) { currentTipIndex--; renderTipCard(); }
-}
-
 // Error Book 
 let errorsData = [], errorFilter = 'all';
-function formatRelativeDate(dateStr){
- if(!dateStr) return '';
- const d = new Date(dateStr);
- if(isNaN(d.getTime())) return dateStr;
- const now = new Date();
- const diffMs = now - d;
- const diffMins = Math.floor(diffMs/60000);
- const diffHrs = Math.floor(diffMs/3600000);
- const diffDays = Math.floor(diffMs/86400000);
- if(diffMins < 1) return 'Just now';
- if(diffMins < 60) return `${diffMins} mins ago`;
- if(diffHrs < 24) return `${diffHrs} hours ago`;
- if(diffDays === 1) return 'Yesterday';
- if(diffDays < 7) return `${diffDays} days ago`;
- if(diffDays < 14) return 'Last week';
- if(diffDays < 30) return `${Math.floor(diffDays/7)} weeks ago`;
- return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-}
 async function loadErrorBook(){
  try{
  const r = await fetch('/api/errors/diya');
@@ -2856,6 +2782,10 @@ function markMastered(id){
  const mastered = JSON.parse(localStorage.getItem('mastered_errors_diya')||'{}');
  if(err.mastered) mastered[id]=err.masteredDate; else delete mastered[id];
  localStorage.setItem('mastered_errors_diya',JSON.stringify(mastered));
+ // #11：mastered 同步到服务端（后端 errors PUT 已支持该字段）；失败静默降级为本地
+ fetch(`/api/errors/${KID_CHILD}/${encodeURIComponent(id)}`,
+  {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({mastered: err.mastered})}
+ ).catch(()=>{});
  renderErrors();
  // Update error count display
  const mCount = errorsData.filter(e=>e.mastered).length;
@@ -2863,7 +2793,6 @@ function markMastered(id){
  const el = document.getElementById('error-count');
  if(el) el.innerHTML = (mCount>0?`<span style="color:var(--accent2);font-weight:700">${mCount} mastered</span> · `:'')+`<span style="color:var(--orange);font-weight:700">${aCount} active</span>`;
 }
-function filterErrors(subj){ errorFilter=subj; document.querySelectorAll('#error-filter-bar .filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.subject===subj)); renderErrors(); }
 function renderErrors(){
  const container = document.getElementById('error-list');
  if(!container) return;
@@ -2911,8 +2840,6 @@ function renderErrors(){
    </div>`;
  }).join('');
 }
-function openErrorModal(id){ document.getElementById('error-edit-id').value=''; document.getElementById('error-modal-title').textContent='Add Error'; document.getElementById('error-modal').classList.add('open'); }
-function closeErrorModal(){ document.getElementById('error-modal').classList.remove('open'); }
 async function saveError(){
  const body = {
  subject: document.getElementById('error-subject-input').value,
@@ -3155,12 +3082,6 @@ function renderTasksEnhanced(child){
  if(!Object.keys(grouped).length){ html=`<div class="empty-state">No tasks yet, add below</div>`; }
  container.innerHTML=html;
 }
-function toggleCollapse(id){
- const body=document.getElementById(id);
- const tog=document.getElementById('tog-'+id);
- body.classList.toggle('collapsed');
- tog.classList.toggle('open');
-}
 async function renameTask(child, oldKey, newName){
  if(!newName||newName===oldKey.split('-').pop()) return;
  const prefix = oldKey.split('-')[0]+'-';
@@ -3183,16 +3104,6 @@ renderTasks = renderTasksEnhanced;
 // ── Upload（作业上传与识别入库）──────────────────────────
 const UPLOAD_CHILD = 'diya';   // app.html 固定 diya；jemma.html 有自己的实现
 let uploadPolling = null;
-
-function uploadStatusBadge(s){
-  const map = {
-    queued:['排队中','var(--text2)'], rendering:['渲染中','var(--accent)'],
-    ocr:['识别中','var(--accent)'], extract:['抽取中','var(--accent)'],
-    done:['完成','var(--accent2)'], failed:['失败','var(--red)'],
-  };
-  const [txt,color] = map[s] || [s||'未知','var(--text2)'];
-  return `<span style="font-size:10px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.5px">${txt}</span>`;
-}
 
 function setupUploadZone(){
   const drop = document.getElementById('upload-drop');
@@ -3393,10 +3304,6 @@ async function openUploadDetail(uid){
   `;
   document.getElementById('upload-detail-title').textContent = e.title || m.original_name || '上传详情';
   modal.classList.add('open');
-}
-
-function closeUploadDetail(){
-  document.getElementById('upload-detail-modal').classList.remove('open');
 }
 
 async function uploadToErrors(uid){

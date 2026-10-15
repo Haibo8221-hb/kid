@@ -1565,6 +1565,56 @@ def error_item(child, err_id):
     return resp
 
 
+# ── Notes (路线图 #11：从 localStorage 提升到服务端持久化) ──────────
+# 设计取舍：两份前端的 Notes 数据结构不同（Diya 是按科目的多条卡片数组，
+# Jemma 是单段文本），因此后端**不规定结构**，只存一个自由形态的 payload
+# 外加 updatedAt 时间戳，由前端自行解释。这样无需改动任何 UI 即可完成持久化，
+# 也避免为两种结构各写一套接口。
+
+def _notes_path(child):
+    return os.path.join(DATA_DIR, f'notes_{child}.json')
+
+@app.route('/api/notes/<child>', methods=['GET', 'PUT', 'OPTIONS'])
+def notes_api(child):
+    """Notes 读写。存储形态：{'updatedAt': ISO8601, 'payload': <任意 JSON>}"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+
+    child = _safe_child(child)
+    path = _notes_path(child)
+
+    if request.method == 'GET':
+        data = _cached_json_read(path, ttl=10) or {}
+        if not isinstance(data, dict):
+            data = {}
+        resp = jsonify({
+            'child': child,
+            'updatedAt': data.get('updatedAt') or '',
+            'payload': data.get('payload') if isinstance(data.get('payload'), dict) else {},
+        })
+        _set_cors(resp)
+        return resp
+
+    # PUT：整体覆盖（前端每次提交全量 payload，天然幂等）
+    body = request.get_json(force=True, silent=True) or {}
+    payload = body.get('payload')
+    if not isinstance(payload, dict):
+        resp = jsonify({'ok': False, 'error': 'payload 必须是对象'})
+        _set_cors(resp)
+        return resp, 400
+    updated_at = str(body.get('updatedAt') or datetime.now().isoformat())
+    atomic_write(path, {'updatedAt': updated_at, 'payload': payload},
+                 ensure_ascii=False, indent=2)
+    _json_cache.pop(path, None)
+    resp = jsonify({'ok': True, 'updatedAt': updated_at})
+    _set_cors(resp)
+    return resp
+
+
 # ── SMC Progress Records (trend tracking) ─────────────────────
 SMC_DATA_FILE = os.path.join(DATA_DIR, 'smc_records.json')
 

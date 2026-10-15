@@ -770,6 +770,8 @@ Benchmark sister's path, but start from her own strengths
 
 <div id="toast"></div>
 
+<script>window.KID_CHILD='jemma';</script>
+<script src="assets/kid-common.js?v=20261015"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -801,24 +803,6 @@ Benchmark sister's path, but start from her own strengths
 })();
 // Error Book
 let errorsData = [], errorFilter = 'all';
-function formatRelativeDate(dateStr){
- if(!dateStr) return '';
- const d = new Date(dateStr);
- if(isNaN(d.getTime())) return dateStr;
- const now = new Date();
- const diffMs = now - d;
- const diffMins = Math.floor(diffMs/60000);
- const diffHrs = Math.floor(diffMs/3600000);
- const diffDays = Math.floor(diffMs/86400000);
- if(diffMins < 1) return 'Just now';
- if(diffMins < 60) return `${diffMins} mins ago`;
- if(diffHrs < 24) return `${diffHrs} hours ago`;
- if(diffDays === 1) return 'Yesterday';
- if(diffDays < 7) return `${diffDays} days ago`;
- if(diffDays < 14) return 'Last week';
- if(diffDays < 30) return `${Math.floor(diffDays/7)} weeks ago`;
- return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-}
 async function loadErrorBook(){
  try{
   const r = await fetch('/api/errors/jemma');
@@ -847,13 +831,16 @@ function markMastered(id){
  const mastered = JSON.parse(localStorage.getItem('mastered_errors_jemma')||'{}');
  if(err.mastered) mastered[id]=err.masteredDate; else delete mastered[id];
  localStorage.setItem('mastered_errors_jemma',JSON.stringify(mastered));
+ // #11：mastered 同步到服务端；失败静默降级为本地
+ fetch(`/api/errors/${KID_CHILD}/${encodeURIComponent(id)}`,
+  {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({mastered: err.mastered})}
+ ).catch(()=>{});
  renderErrors();
  const mCount = errorsData.filter(e=>e.mastered).length;
  const aCount = errorsData.length - mCount;
  const el = document.getElementById('error-count');
  if(el) el.innerHTML = (mCount>0?`<span style="color:var(--accent2);font-weight:700">${mCount} mastered</span> · `:'')+`<span style="color:var(--orange);font-weight:700">${aCount} active</span>`;
 }
-function filterErrors(subj){ errorFilter=subj; document.querySelectorAll('#error-filter-bar .filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.subject===subj)); renderErrors(); }
 function renderErrors(){
  const container = document.getElementById('error-list');
  if(!container) return;
@@ -900,8 +887,6 @@ function renderErrors(){
    </div>`;
  }).join('');
 }
-function openErrorModal(id){ document.getElementById('error-edit-id').value=''; document.getElementById('error-modal-title').textContent='Add Error'; document.getElementById('error-modal').classList.add('open'); }
-function closeErrorModal(){ document.getElementById('error-modal').classList.remove('open'); }
 async function saveError(){
  const body = {
   subject: document.getElementById('error-subject-input').value,
@@ -941,11 +926,56 @@ let notesTimeout = null;
 
 // Tab Navigation 
 
-// Notes 
+// Notes
+/* ── #11 Notes 服务端持久化 ──────────────────────────────────────────
+ * 与 app.html 同一套协议：localStorage 即时渲染，服务端做跨设备真源。
+ * Jemma 的 Notes 是单段文本，故 payload 用 {text: <string>}。
+ */
+const NOTES_SYNC_AT_KEY = 'jemma_notes_sync_at';
+let _notesPushTimer = null;
+
+async function notesSyncPull(){
+ try{
+  const r = await fetch(`/api/notes/${KID_CHILD}`);
+  if(!r.ok) return false;
+  const d = await r.json();
+  const text = d && d.payload && typeof d.payload.text === 'string' ? d.payload.text : null;
+  if(text === null) return false;                 // 服务端空：不动本地
+  const localAt = localStorage.getItem(NOTES_SYNC_AT_KEY) || '';
+  if(localAt && d.updatedAt && d.updatedAt <= localAt) return false;
+  localStorage.setItem('jemma_notes', text);
+  if(d.updatedAt) localStorage.setItem(NOTES_SYNC_AT_KEY, d.updatedAt);
+  const el = document.getElementById('notes-area');
+  if(el) el.value = text;
+  return true;
+ }catch(e){ return false; }
+}
+
+function notesSyncPush(){
+ clearTimeout(_notesPushTimer);
+ _notesPushTimer = setTimeout(async ()=>{
+  const el = document.getElementById('notes-area');
+  const at = new Date().toISOString();
+  try{
+   const r = await fetch(`/api/notes/${KID_CHILD}`, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({payload:{text: el?el.value:''}, updatedAt: at})
+   });
+   if(r.ok){
+    localStorage.setItem(NOTES_SYNC_AT_KEY, at);
+    const s=document.getElementById('notes-status');
+    if(s){ s.textContent=' Synced'; setTimeout(()=>{ if(s.textContent===' Synced') s.textContent=''; },2000); }
+   }
+  }catch(e){ /* 静默降级：本地已写 */ }
+ }, 500);
+}
+
 function loadNotes(){
  const notes = localStorage.getItem('jemma_notes') || '';
  const el = document.getElementById('notes-area');
  if(el) el.value = notes;
+ notesSyncPull().then(()=>notesSyncPush());       // 先拉后推，避免竞态覆盖
 }
 function saveNotes(){
  clearTimeout(notesTimeout);
@@ -955,6 +985,7 @@ function saveNotes(){
  }, 400);
  const s=document.getElementById('notes-status');
  if(s) s.textContent='';
+ notesSyncPush();                                  // #11：防抖推服务端
 }
 function saveNotesNow(){
  clearTimeout(notesTimeout);
@@ -962,6 +993,7 @@ function saveNotesNow(){
  if(el){ localStorage.setItem('jemma_notes', el.value); }
  const s=document.getElementById('notes-status');
  if(s){ s.textContent=' Save'; setTimeout(()=>s.textContent='',2000); }
+ notesSyncPush();                                  // #11
 }
 
 // Execution Plan → Tasks 
@@ -1000,12 +1032,6 @@ function genExecTasks(){
 }
 
 // Toast 
-function toast(msg,dur=2500){
- const t=document.getElementById('toast');
- t.textContent=msg;t.classList.add('show');
- setTimeout(()=>t.classList.remove('show'),dur);
-}
-
 // Countdown 
 const TIMER_TARGETS = [
  // UKMT JMC 2027 = 2027-05-05（来源：ukmt.org.uk/competition-calendar-2026-27）
@@ -1017,34 +1043,11 @@ const TIMER_TARGETS = [
  {id:'t-halfterm', name:'Half Term', target:'2026-10-26', tag:'Both', tagClass:'yellow'}
 ];
 
-function getTimeLeft(target){
- const now=Date.now(), end=new Date(target).getTime();
- const diff=end-now;
- if(diff<=0) return 'Passed';
- const d=Math.floor(diff/86400000);
- const h=Math.floor((diff%86400000)/3600000);
- const m=Math.floor((diff%3600000)/60000);
- return d>0?`${d}D ${h}H`:h>0?`${h}H ${m}M`:`${m}M`;
-}
-
 // Radar Chart (Canvas) 
 
 // Dashboard 
 
 // Child Tabs 
-async function loadTasks(child){
- try{
- const r=await fetch('/api/tasks?user='+child);
- const data=await r.json();
- tasksData[child]=data;
- renderTasks(child);
- }catch(e){
- // Fallback to localStorage
- const ls=localStorage.getItem('tasks_'+child);
- tasksData[child]=ls?JSON.parse(ls):{};
- renderTasks(child);
- }
-}
 const _esc=s=>String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
 function renderTasks(child){
  const container=document.getElementById(child+'-tasks');
@@ -1115,12 +1118,6 @@ function renderTasks(child){
  }
  container.innerHTML=html;
 }
-function toggleCollapse(id){
- const body=document.getElementById(id);
- const tog=document.getElementById('tog-'+id);
- body.classList.toggle('collapsed');
- tog.classList.toggle('open');
-}
 async function addTask(child){
  const input=document.getElementById(child+'-task-input');
  if(!input) return;
@@ -1174,22 +1171,6 @@ function saveEditTask(el){
  saveTasks(child);
 }
 
-async function saveTasks(child){
- try{
- await fetch('/api/tasks',{
- method:'POST',
- headers:{'Content-Type':'application/json'},
- body:JSON.stringify({user:child,tasks:tasksData[child]})
- });
- localStorage.setItem('tasks_'+child,JSON.stringify(tasksData[child]));
- toast('Synced ');
- }catch(e){
- // Save to localStorage as fallback
- localStorage.setItem('tasks_'+child,JSON.stringify(tasksData[child]));
- toast('Saved locally');
- }
-}
-
 // Planner 
 function loadPlannerView(){
  loadPlanner('jemma');
@@ -1214,25 +1195,6 @@ async function loadPlanner(child){
  plannerData[child]=lsData;
  }
  renderPlannerGrid(child);
-}
-function getWeekDates(child){
- const now=new Date();
- const weekStart=plannerWeeks[child]||0;
- const start=new Date(now);
- start.setDate(now.getDate()-now.getDay()+1+weekStart*7);
- const days=[];
- for(let i=0;i<7;i++){
- const d=new Date(start);
- d.setDate(start.getDate()+i);
- days.push(d);
- }
- return days;
-}
-function formatDate(d){
- return `${d.getMonth()+1}/${d.getDate()}`;
-}
-function dateKey(d){
- return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function renderPlannerGrid(child){
  const gridId=child+'-planner';
@@ -1299,18 +1261,6 @@ function savePlannerCell(input){
  body:JSON.stringify({user:child,plan:plannerData[child]||{}})
  }).catch(()=>{});
  },2000);
-}
-function updatePlannerLabel(child){
- const days=getWeekDates(child);
- const label=document.getElementById(child+'-week-label');
- if(label) label.textContent=`${formatDate(days[0])} – ${formatDate(days[6])}`;
- const syncLabel=document.getElementById('planner-sync-label');
- if(syncLabel&&child==='jemma') syncLabel.textContent=`${formatDate(days[0])} – ${formatDate(days[6])}`;
-}
-function changeWeek(child,delta){
- plannerWeeks[child]=(plannerWeeks[child]||0)+delta;
- renderPlannerGrid(child);
- updatePlannerLabel(child);
 }
 function downloadWeekPlan(child){
  const DAYS=[
@@ -1484,11 +1434,6 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
  </div>
  `).join('');
 }
-function toggleRoute(id){
- const card=document.getElementById('route-'+id);
- if(card) card.classList.toggle('open');
-}
-
 // Resources 
 async function loadResources(){
  const container=document.getElementById('resource-list');
@@ -1633,26 +1578,6 @@ function renderTipCard(el){
  </div>`;
 }
 
-function nextTip(){
- if (currentTipIndex < todayTips.length - 1) {
-  currentTipIndex++;
-  const t = todayTips[currentTipIndex];
-  const STORAGE_KEY = 'study_tips_viewed_jemma';
-  let viewed = {};
-  try { viewed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
-  viewed[t.id] = (viewed[t.id] || 0) + 1;
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(viewed)); } catch(e) {}
-  renderTipCard();
- }
-}
-
-function prevTip(){
- if (currentTipIndex > 0) {
-  currentTipIndex--;
-  renderTipCard();
- }
-}
-
 // Dashboard 
 async function loadDashboard(){
  try{
@@ -1793,20 +1718,6 @@ function switchChatChild(child){
  currentChatChild=child;
  document.getElementById('chat-hdr-title').textContent='Chat with Jemma';
  loadChatHistory();
-}
-async function loadChatHistory(){
- const container=document.getElementById('chat-messages');
- if(!container) return;
- try{
- const r=await fetch('/api/chat/jemma?limit=50');
- const data=await r.json();
- const msgs=Array.isArray(data)?data:(data.messages||[]);
- container.innerHTML='';
- msgs.forEach(m=>appendChatMsg(m.role,m.content));
- container.scrollTop=container.scrollHeight;
- }catch(e){
- container.innerHTML='<div style="color:var(--text2);padding:20px;text-align:center">Load failed</div>';
- }
 }
 function markdownToHtml(md){
  if(!md) return '';
@@ -2008,15 +1919,6 @@ function updateStreak(){
 // ── Upload（作业上传与识别入库，child=jemma）──────────────────
 const UPLOAD_CHILD = 'jemma';
 
-function uploadStatusBadge(s){
-  const map = {
-    queued:['排队中','var(--text2)'], rendering:['渲染中','var(--accent)'],
-    ocr:['识别中','var(--accent)'], extract:['抽取中','var(--accent)'],
-    done:['完成','var(--accent2)'], failed:['失败','var(--red)'],
-  };
-  const [txt,color] = map[s] || [s||'未知','var(--text2)'];
-  return `<span style="font-size:10px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.5px">${txt}</span>`;
-}
 function escHtmlJ(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
 
 function setupUploadZone(){
@@ -2205,10 +2107,6 @@ async function openUploadDetail(uid){
   `;
   document.getElementById('upload-detail-title').textContent = e.title || m.original_name || '上传详情';
   document.getElementById('upload-detail-modal').classList.add('open');
-}
-
-function closeUploadDetail(){
-  document.getElementById('upload-detail-modal').classList.remove('open');
 }
 
 async function uploadToErrors(uid){

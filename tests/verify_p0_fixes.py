@@ -29,6 +29,7 @@ class Authed:
     def get(self, u, **kw):    return self.cl.get(u, **kw)
     def post(self, u, **kw):   return self.cl.post(u, **kw)
     def delete(self, u, **kw): return self.cl.delete(u, **kw)
+    def put(self, u, **kw):    return self.cl.put(u, **kw)
 
 c = app.test_client()
 
@@ -102,6 +103,30 @@ if recs:
     r = cc.delete(f"/api/errors/diya/{recs[0]['id']}")
     check(r.status_code == 200, f'存量记录可删除（实际 {r.status_code}）')
 
+
+print('== #11 Notes 服务端持久化 ==')
+_cc = Authed(A._make_token())
+r = _cc.get('/api/notes/diya')
+check(r.status_code == 200, f'GET notes 200（实际 {r.status_code}）')
+check(r.get_json().get('payload') == {}, 'GET notes 初始 payload 为空对象')
+r = _cc.put('/api/notes/diya', json={'payload': {'Maths': [{'id': 'n1', 'content': 'x'}], 'text': 'jemma-style'}, 'updatedAt': '2026-10-15T16:00:00'})
+check(r.status_code == 200 and r.get_json().get('ok'), f'PUT notes 成功（实际 {r.status_code}）')
+r = _cc.get('/api/notes/diya')
+d = r.get_json()
+check(d.get('updatedAt') == '2026-10-15T16:00:00', 'PUT 后 updatedAt 回读一致')
+check(d['payload'].get('Maths') and d['payload']['Maths'][0]['id'] == 'n1', 'PUT 后 payload 回读一致（自由形态，不规定结构）')
+r = _cc.put('/api/notes/diya', json={'payload': 'not-an-object'})
+check(r.status_code == 400, f'payload 非对象应 400（实际 {r.status_code}）')
+r = _cc.get('/api/notes/../../evil')
+check(r.status_code != 200 or 'evil' not in str(r.get_json()), 'notes 接口受 _safe_child 白名单保护')
+_np = os.path.join(tmp, 'notes_diya.json')
+check(os.path.exists(_np), 'notes 落盘到 data/notes_<child>.json')
+# 未登录不得读写（用全新客户端，避免复用前面用例的会话 cookie）
+_fresh = app.test_client()
+r = _fresh.get('/api/notes/diya')
+check(r.status_code == 401, f'未登录 GET notes 应 401（实际 {r.status_code}）')
+r = _fresh.put('/api/notes/diya', json={'payload': {}})
+check(r.status_code == 401, f'未登录 PUT notes 应 401（实际 {r.status_code}）')
 
 print('== 登录限流（新增-D）==')
 _ip = '203.0.113.7'

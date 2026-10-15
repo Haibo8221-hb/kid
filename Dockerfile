@@ -11,6 +11,7 @@ COPY api_server.py chat_prompt.md save_planner.py email_error_poll.py research_c
 
 # Static files
 COPY *.html ./
+COPY assets/ ./assets/   # #10 前端公共层（Docker 路径也要带上，否则页面 404）
 COPY *.md ./
 
 # Data
