@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Flask API for planner data storage + AI chat + wiki logs"""
 import base64, hashlib, hmac, json, logging, os, re, sys, time, uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, Response, stream_with_context
 import httpx
 
@@ -1495,15 +1495,72 @@ def get_errors(child):
         atomic_write(path, errors, ensure_ascii=False, indent=2)
         _json_cache.pop(path, None)
 
+    # #12 排序归一化：与前端 renderErrors 的排序口径一致（日期倒序 → 优先级倒序），
+    # 这样分页切片后的顺序与不分页时完全相同，避免"翻页后顺序变了"的观感问题。
+    _prio = {'high': 3, 'medium': 2, 'low': 1}
+    errors = sorted(
+        errors,
+        key=lambda e: (str(e.get('date') or ''), _prio.get(e.get('priority'), 0)),
+        reverse=True,
+    )
+
     # Aggregate mode for dashboard (avoids shipping the full ~276KB file to the client)
     if request.args.get('stats') == '1':
         by_subject = {}
+        mastered_total = 0
         for e in errors:
-            s = e.get('subject', 'Other') if isinstance(e, dict) else 'Other'
+            if not isinstance(e, dict):
+                continue
+            s = e.get('subject', 'Other')
             by_subject[s] = by_subject.get(s, 0) + 1
-        resp = jsonify({'child': child, 'total': len(errors), 'by_subject': by_subject})
+            if e.get('mastered'):
+                mastered_total += 1
+        week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+        new_this_week = sum(
+            1 for e in errors
+            if isinstance(e, dict) and str(e.get('date') or '') >= week_ago
+        )
+        resp = jsonify({
+            'child': child,
+            'total': len(errors),
+            'by_subject': by_subject,
+            # #12：分页后前端拿不到全量数据，计数改由服务端提供
+            'mastered_total': mastered_total,
+            'active_total': len(errors) - mastered_total,
+            'new_this_week': new_this_week,
+        })
+        _set_cors(resp)
+        return resp
+
+    # #12 可选过滤 + 分页（不传 page/limit 时与旧行为完全一致：返回全部）
+    subject = (request.args.get('subject') or '').strip()
+    if subject and subject != 'all':
+        errors = [e for e in errors if (e.get('subject') or 'Other') == subject]
+    m_arg = request.args.get('mastered')
+    if m_arg in ('0', '1'):
+        want = (m_arg == '1')
+        errors = [e for e in errors if bool(e.get('mastered')) == want]
+
+    page = request.args.get('page', type=int)
+    limit = request.args.get('limit', type=int)
+    payload = {
+        'child': child,
+        'total': len(errors),          # 过滤后的总条数（非总量）
+        'page': 1,
+        'limit': None,
+        'has_more': False,
+    }
+    if page or limit:
+        page = max(1, page or 1)
+        limit = max(1, min(int(limit or 50), 200))   # 上限 200，防止一次拉爆
+        start = (page - 1) * limit
+        payload['page'] = page
+        payload['limit'] = limit
+        payload['has_more'] = start + limit < len(errors)
+        payload['errors'] = errors[start:start + limit]
     else:
-        resp = jsonify({'child': child, 'errors': errors, 'total': len(errors)})
+        payload['errors'] = errors
+    resp = jsonify(payload)
     _set_cors(resp)
     return resp
 

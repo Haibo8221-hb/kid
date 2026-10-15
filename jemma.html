@@ -803,25 +803,53 @@ Benchmark sister's path, but start from her own strengths
 })();
 // Error Book
 let errorsData = [], errorFilter = 'all';
-async function loadErrorBook(){
+// #12 分页状态
+let errorsPage = 1, errorsHasMore = false, errorsLoading = false;
+
+/* ── #12 错题分页 ────────────────────────────────────────────────────
+ * 与 app.html 同一套协议：首屏 50 条 + "Load more"；计数由 ?stats=1 提供。
+ */
+const ERRORS_PAGE_SIZE = 50;
+
+async function fetchErrorsPage(page, append){
  try{
-  const r = await fetch('/api/errors/jemma');
-  errorsData = await r.json();
-  if(!Array.isArray(errorsData)) errorsData = errorsData.errors || errorsData.entries || [];
- }catch(e){ errorsData = []; }
- const mastered = JSON.parse(localStorage.getItem('mastered_errors_jemma')||'{}');
- errorsData.forEach(e=>{if(mastered[e.id]){e.mastered=true;e.masteredDate=mastered[e.id];}});
- renderErrors();
- const mCount = errorsData.filter(e=>e.mastered).length;
- const aCount = errorsData.length - mCount;
- const errCountEl = document.getElementById('error-count');
- if(errCountEl){
-  let parts = [];
-  if(mCount>0) parts.push(`<span style="color:var(--accent2);font-weight:700">${mCount} mastered</span>`);
-  if(aCount>0) parts.push(`<span style="color:var(--orange);font-weight:700">${aCount} active</span>`);
+  const q = new URLSearchParams({page:String(page), limit:String(ERRORS_PAGE_SIZE)});
+  if(errorFilter && errorFilter!=='all') q.set('subject', errorFilter);
+  const r = await fetch(`/api/errors/${KID_CHILD}?${q}`);
+  const d = await r.json();
+  const arr = Array.isArray(d) ? d : (d.errors || d.entries || []);
+  errorsHasMore = !!d.has_more;
+  errorsPage = page;
+  const mastered = JSON.parse(localStorage.getItem('mastered_errors_jemma')||'{}');
+  arr.forEach(e=>{ if(mastered[e.id]){ e.mastered=true; e.masteredDate=mastered[e.id]; } });
+  errorsData = (append && page > 1) ? errorsData.concat(arr) : arr;
+  renderErrors();
+ }catch(e){ if(!append) errorsData = []; renderErrors(); }
+}
+
+async function loadMoreErrors(){
+ if(!errorsHasMore || errorsLoading) return;
+ errorsLoading = true;
+ await fetchErrorsPage(errorsPage + 1, true);
+ errorsLoading = false;
+}
+
+async function refreshErrorStats(){
+ try{
+  const d = await (await fetch(`/api/errors/${KID_CHILD}?stats=1`)).json();
+  const el = document.getElementById('error-count');
+  if(!el) return;
+  const parts = [];
+  if(d.mastered_total>0) parts.push(`<span style="color:var(--accent2);font-weight:700">${d.mastered_total} mastered</span>`);
+  if(d.active_total>0) parts.push(`<span style="color:var(--orange);font-weight:700">${d.active_total} active</span>`);
   if(!parts.length) parts.push('No errors yet — add your first!');
-  errCountEl.innerHTML = parts.join(' · ');
- }
+  el.innerHTML = parts.join(' · ');
+ }catch(e){}
+}
+
+async function loadErrorBook(){
+ await fetchErrorsPage(1, false);
+ refreshErrorStats();
 }
 function markMastered(id){
  const err = errorsData.find(e=>e.id===id);
@@ -836,10 +864,7 @@ function markMastered(id){
   {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({mastered: err.mastered})}
  ).catch(()=>{});
  renderErrors();
- const mCount = errorsData.filter(e=>e.mastered).length;
- const aCount = errorsData.length - mCount;
- const el = document.getElementById('error-count');
- if(el) el.innerHTML = (mCount>0?`<span style="color:var(--accent2);font-weight:700">${mCount} mastered</span> · `:'')+`<span style="color:var(--orange);font-weight:700">${aCount} active</span>`;
+ refreshErrorStats();   // #12：分页后计数以服务端统计为准
 }
 function renderErrors(){
  const container = document.getElementById('error-list');
@@ -886,6 +911,13 @@ function renderErrors(){
    </div>
    </div>`;
  }).join('');
+ // #12 分页：还有更多时追加"加载更多"
+ if(errorsHasMore){
+  const more = document.createElement('div');
+  more.style.cssText='text-align:center;padding:14px';
+  more.innerHTML='<button class="btn-sm" onclick="loadMoreErrors()">Load more</button>';
+  container.appendChild(more);
+ }
 }
 async function saveError(){
  const body = {

@@ -2747,31 +2747,55 @@ function renderTipCard(el){
 
 // Error Book 
 let errorsData = [], errorFilter = 'all';
-async function loadErrorBook(){
+// #12 分页状态
+let errorsPage = 1, errorsHasMore = false, errorsLoading = false;
+/* ── #12 错题分页 ────────────────────────────────────────────────────
+ * 首屏只拉 50 条（原实现一次性拉 276KB / 113 条），"Load more"追加下一页。
+ * 计数（mastered / active / new this week）改由 ?stats=1 提供，
+ * 因为分页后前端不再持有全量数据，本地统计会变成"只统计当前页"。
+ */
+const ERRORS_PAGE_SIZE = 50;
+
+async function fetchErrorsPage(page, append){
  try{
- const r = await fetch('/api/errors/diya');
- errorsData = await r.json();
- if(!Array.isArray(errorsData)) errorsData = errorsData.errors || errorsData.entries || [];
- }catch(e){ errorsData = []; }
- // Merge mastered state from localStorage
- const mastered = JSON.parse(localStorage.getItem('mastered_errors_diya')||'{}');
- errorsData.forEach(e=>{if(mastered[e.id]){e.mastered=true;e.masteredDate=mastered[e.id];}});
- renderErrors();
- // Progress stats: mastered vs active
- const mCount = errorsData.filter(e=>e.mastered).length;
- const aCount = errorsData.length - mCount;
- const now = new Date();
- const weekAgo = new Date(now - 7*86400000);
- const newThisWeek = errorsData.filter(e=>{const d=new Date(e.date||e.created_at||0);return d>=weekAgo;}).length;
- const errCountEl = document.getElementById('error-count');
- if(errCountEl){
-  let parts = [];
-  if(mCount>0) parts.push(`<span style="color:var(--accent2);font-weight:700">${mCount} mastered</span>`);
-  if(aCount>0) parts.push(`<span style="color:var(--orange);font-weight:700">${aCount} active</span>`);
-  if(newThisWeek>0) parts.push(`${newThisWeek} new this week`);
+  const q = new URLSearchParams({page:String(page), limit:String(ERRORS_PAGE_SIZE)});
+  if(errorFilter && errorFilter!=='all') q.set('subject', errorFilter);
+  const r = await fetch(`/api/errors/${KID_CHILD}?${q}`);
+  const d = await r.json();
+  const arr = Array.isArray(d) ? d : (d.errors || d.entries || []);
+  errorsHasMore = !!d.has_more;
+  errorsPage = page;
+  const mastered = JSON.parse(localStorage.getItem('mastered_errors_diya')||'{}');
+  arr.forEach(e=>{ if(mastered[e.id]){ e.mastered=true; e.masteredDate=mastered[e.id]; } });
+  errorsData = (append && page > 1) ? errorsData.concat(arr) : arr;
+  renderErrors();
+ }catch(e){ if(!append) errorsData = []; renderErrors(); }
+}
+
+async function loadMoreErrors(){
+ if(!errorsHasMore || errorsLoading) return;
+ errorsLoading = true;
+ await fetchErrorsPage(errorsPage + 1, true);
+ errorsLoading = false;
+}
+
+async function refreshErrorStats(){
+ try{
+  const d = await (await fetch(`/api/errors/${KID_CHILD}?stats=1`)).json();
+  const el = document.getElementById('error-count');
+  if(!el) return;
+  const parts = [];
+  if(d.mastered_total>0) parts.push(`<span style="color:var(--accent2);font-weight:700">${d.mastered_total} mastered</span>`);
+  if(d.active_total>0) parts.push(`<span style="color:var(--orange);font-weight:700">${d.active_total} active</span>`);
+  if(d.new_this_week>0) parts.push(`${d.new_this_week} new this week`);
   if(!parts.length) parts.push('No errors');
-  errCountEl.innerHTML = parts.join(' · ');
- }
+  el.innerHTML = parts.join(' · ');
+ }catch(e){}
+}
+
+async function loadErrorBook(){
+ await fetchErrorsPage(1, false);
+ refreshErrorStats();
 }
 function markMastered(id){
  const err = errorsData.find(e=>e.id===id);
@@ -2787,11 +2811,7 @@ function markMastered(id){
   {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({mastered: err.mastered})}
  ).catch(()=>{});
  renderErrors();
- // Update error count display
- const mCount = errorsData.filter(e=>e.mastered).length;
- const aCount = errorsData.length - mCount;
- const el = document.getElementById('error-count');
- if(el) el.innerHTML = (mCount>0?`<span style="color:var(--accent2);font-weight:700">${mCount} mastered</span> · `:'')+`<span style="color:var(--orange);font-weight:700">${aCount} active</span>`;
+ refreshErrorStats();   // #12：分页后计数以服务端统计为准
 }
 function renderErrors(){
  const container = document.getElementById('error-list');
@@ -2839,6 +2859,13 @@ function renderErrors(){
    </div>
    </div>`;
  }).join('');
+ // #12 分页：还有更多时追加"加载更多"
+ if(errorsHasMore){
+  const more = document.createElement('div');
+  more.style.cssText='text-align:center;padding:14px';
+  more.innerHTML='<button class="btn-sm" onclick="loadMoreErrors()">Load more</button>';
+  container.appendChild(more);
+ }
 }
 async function saveError(){
  const body = {

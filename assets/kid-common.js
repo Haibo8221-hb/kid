@@ -27,7 +27,14 @@ function dateKey(d){
  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function filterErrors(subj){ errorFilter=subj; document.querySelectorAll('#error-filter-bar .filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.subject===subj)); renderErrors(); }
+/* #12：错题改为服务端分页后，科目筛选不能再只过滤本地已加载的那页，
+ * 必须重新向服务端请求（否则"筛选结果为空"是假的）。
+ * 有 loadErrorBook 就重新拉取（会重置到第 1 页），否则退回本地渲染。 */
+function filterErrors(subj){
+ errorFilter=subj;
+ document.querySelectorAll('#error-filter-bar .filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.subject===subj));
+ if(typeof loadErrorBook==='function'){ loadErrorBook(); } else { renderErrors(); }
+}
 
 function formatDate(d){
  return `${d.getMonth()+1}/${d.getDate()}`;

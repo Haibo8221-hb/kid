@@ -128,6 +128,45 @@ check(r.status_code == 401, f'未登录 GET notes 应 401（实际 {r.status_cod
 r = _fresh.put('/api/notes/diya', json={'payload': {}})
 check(r.status_code == 401, f'未登录 PUT notes 应 401（实际 {r.status_code}）')
 
+print('== #12 错题分页 ==')
+_cc = Authed(A._make_token())
+# 造 120 条样本，覆盖 113 条的真实规模
+import shutil as _sh
+_sh.rmtree(tmp, ignore_errors=True); os.makedirs(tmp, exist_ok=True)
+for i in range(120):
+    _cc.post('/api/errors/diya', json={'question': f'Q{i}', 'subject': ['Maths','Physics'][i % 2],
+                                       'priority': ['high','medium','low'][i % 3],
+                                       'date': f'2026-01-{(i % 28) + 1:02d}'})
+d = _cc.get('/api/errors/diya?page=1&limit=50').get_json()
+check(d['total'] == 120, f'分页 total=120（实际 {d["total"]}）')
+check(len(d['errors']) == 50, f'第1页 50 条（实际 {len(d["errors"])}）')
+check(d['has_more'] is True, '第1页 has_more=True')
+d2 = _cc.get('/api/errors/diya?page=3&limit=50').get_json()
+check(len(d2['errors']) == 20, f'第3页 20 条（实际 {len(d2["errors"])}）')
+check(d2['has_more'] is False, '末页 has_more=False')
+# 分页切片顺序必须与不分页一致（服务端已统一排序）
+allq = [e['question'] for e in _cc.get('/api/errors/diya').get_json()['errors']]
+paged = []
+for pg in (1, 2, 3):
+    paged += [e['question'] for e in _cc.get(f'/api/errors/diya?page={pg}&limit=50').get_json()['errors']]
+check(allq == paged, '分页拼接顺序与全量顺序一致（排序口径未漂移）')
+# 科目筛选
+d3 = _cc.get('/api/errors/diya?page=1&limit=50&subject=Maths').get_json()
+check(d3['total'] == 60, f'subject=Maths 过滤后 60 条（实际 {d3["total"]}）')
+check(all(e['subject'] == 'Maths' for e in d3['errors']), '筛选结果全部命中科目')
+# 不传 page/limit 时保持旧行为（返回全部）
+d4 = _cc.get('/api/errors/diya').get_json()
+check(len(d4['errors']) == 120, f'不分页时返回全部 120 条（实际 {len(d4["errors"])}）')
+# stats 增强字段
+st = _cc.get('/api/errors/diya?stats=1').get_json()
+check(st['total'] == 120 and 'mastered_total' in st and 'new_this_week' in st,
+      'stats=1 提供 mastered_total / new_this_week（供分页前端计数）')
+# 首屏传输量
+import json as _json
+first = len(_json.dumps(_cc.get('/api/errors/diya?page=1&limit=50').get_json(), ensure_ascii=False).encode())
+full = len(_json.dumps(_cc.get('/api/errors/diya').get_json(), ensure_ascii=False).encode())
+check(first < full * 0.6, f'首屏传输量显著下降：{first//1024}KB vs 全量 {full//1024}KB')
+
 print('== 登录限流（新增-D）==')
 _ip = '203.0.113.7'
 for i in range(5):
