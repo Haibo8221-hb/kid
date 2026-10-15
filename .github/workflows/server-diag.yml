@@ -108,16 +108,17 @@ jobs:
           mkdir -p diagnostics
           TS=$(date -u +%Y%m%d-%H%M%S)
           rsync -az -e "ssh -p $ECS_PORT -i key.pem -o StrictHostKeyChecking=no" \
-            "$ECS_USER@$ECS_HOST:/tmp/kid-diag.txt" "diagnostics/server-$TS.txt"
+            "$ECS_USER@$ECS_HOST:/tmp/kid-diag.txt" "diagnostics/server-$TS.txt" || echo "RSYNC FAILED"
+          cp "diagnostics/server-$TS.txt" diagnostics/latest.txt
+          ls -la diagnostics
+          echo "TS=$TS" >> "$GITHUB_ENV"
 
-      - name: Push to diag-output branch
+      - name: Push to timestamped diag branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "actions@github.com"
-          git checkout -B diag-output
-          git add diagnostics/
-          if git diff --cached --quiet; then
-            echo "no change"; exit 0
-          fi
-          git commit -m "diag: ECS nginx/service snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          git push -f origin diag-output
+          git checkout -B "diag-$TS"
+          git add -f diagnostics/
+          git status --short
+          git commit -m "diag: ECS snapshot $TS" || echo "nothing to commit"
+          git push -f origin "diag-$TS"
