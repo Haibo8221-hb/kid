@@ -57,6 +57,23 @@ jobs:
               echo
               echo "===== backend health ====="
               curl -s -o /dev/null -w "api status: %{http_code}\n" http://127.0.0.1:5000/api/auth/status
+              echo
+              echo "===== data dir (运行时数据真源) ====="
+              ls -la --time-style=long-iso "${{ secrets.SITE_ROOT }}/data" | head -45
+              echo "--- 关键文件 ---"
+              for f in auth_state.json llm_config.json errors_diya.json errors_jemma.json planner_diya.json planner_jemma.json tasks_diya.json tasks_jemma.json wiki_diya.json wiki_jemma.json smc_records.json; do
+                if [ -f "${{ secrets.SITE_ROOT }}/data/$f" ]; then echo "present: $f ($(stat -c %s "${{ secrets.SITE_ROOT }}/data/$f")B, $(stat -c %y "${{ secrets.SITE_ROOT }}/data/$f"))"; else echo "ABSENT : $f"; fi
+              done
+              echo "--- 部署探针（验证 rsync 不再删 data/）---"
+              cat "${{ secrets.SITE_ROOT }}/data/.deploy-probe" 2>/dev/null || echo "PROBE ABSENT"
+              echo
+              echo "===== 备份 ====="
+              echo "--- crontab ---"
+              crontab -l 2>/dev/null | grep -i "kid-backup" || echo "NO BACKUP CRON"
+              echo "--- /opt/kid-backup ---"
+              ls -la /opt/kid-backup 2>/dev/null || echo "NO BACKUP DIR"
+              echo "--- backup.log ---"
+              tail -5 /opt/kid-backup/backup.log 2>/dev/null || echo "no log"
             } > "$OUT" 2>&1
             echo "--- collected ---"
             cat "$OUT"
