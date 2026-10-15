@@ -21,10 +21,26 @@ jobs:
         run: pip install --quiet flask httpx pyyaml
 
       - name: P0 regression (auth / whitelist / errors)
-        run: python tests/verify_p0_fixes.py
+        id: p0
+        run: |
+          python -V
+          python tests/verify_p0_fixes.py 2>&1 | tee test-p0.log
+          exit ${PIPESTATUS[0]}
 
       - name: Resource link health check
-        run: python tests/check_links.py
+        run: |
+          python tests/check_links.py 2>&1 | tee test-links.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Push test logs to debug branch (always)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git checkout -B "ci-testlog-${{ github.run_number }}"
+          git add -f test-p0.log test-links.log
+          git commit -m "ci: test log run ${{ github.run_number }}" || echo "nothing to commit"
+          git push -f origin "ci-testlog-${{ github.run_number }}"
 
   deploy:
     needs: test
