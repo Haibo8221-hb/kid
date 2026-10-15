@@ -40,3 +40,9 @@ downloads/
 
 # ── 运行时数据临时文件 ──
 data/*.tmp
+
+# ── 智能体工作区（记忆/临时产物，不入库）──
+.workbuddy/
+
+# ── 编辑前快照基线（tools/safe_update.py 产物）──
+.versions/

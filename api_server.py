@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Flask API for planner data storage + AI chat + wiki logs"""
-import base64, hashlib, hmac, json, os, re, time, uuid
+import base64, hashlib, hmac, json, logging, os, re, sys, time, uuid
 from datetime import datetime
 from flask import Flask, request, jsonify, Response, stream_with_context
 import httpx
+
+log = logging.getLogger('kid-api')
 
 app = Flask(__name__)
 DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(__file__), 'data'))
@@ -20,7 +22,46 @@ CHAT_MAX_HISTORY = int(os.environ.get('CHAT_MAX_HISTORY', '20'))
 AUTH_COOKIE = 'kid_auth'
 AUTH_TTL = 30 * 24 * 3600            # token 有效期 30 天
 AUTH_RENEW = 15 * 24 * 3600          # 剩余不足 15 天时滚动续期
-APP_PASSWORD = os.environ.get('APP_PASSWORD', 'haibo2026')
+
+# ── 密码来源（P0-3）───────────────────────────────────────────────────
+# 优先级：APP_PASSWORD 环境变量 → APP_PASSWORD_FILE 文件 → 内置默认（仅兼容存量）
+# APP_STRICT_PASSWORD=1：未显式配置密码时拒绝所有登录（生产环境必须开启）
+# 未开严格模式时仍回退默认值，但启动即打 CRITICAL 告警，便于灰度切换、避免锁死部署
+_DEFAULT_PASSWORD = 'haibo2026'
+APP_STRICT_PASSWORD = os.environ.get('APP_STRICT_PASSWORD', '0') == '1'
+
+def _resolve_password():
+    p = os.environ.get('APP_PASSWORD', '').strip()
+    if p:
+        return p
+    f = os.environ.get('APP_PASSWORD_FILE', '').strip()
+    if f and os.path.exists(f):
+        try:
+            with open(f) as fh:
+                return fh.read().strip()
+        except Exception as e:
+            log.error('APP_PASSWORD_FILE 读取失败: %s', e)
+    return ''
+
+APP_PASSWORD = _resolve_password() or _DEFAULT_PASSWORD
+PASSWORD_CONFIGURED = bool(_resolve_password())
+if not PASSWORD_CONFIGURED:
+    log.critical('SECURITY: APP_PASSWORD 未配置，当前回退到内置默认密码（必须尽快修改）。'
+                 '严格模式=%s；生产请设置 APP_PASSWORD 并置 APP_STRICT_PASSWORD=1。',
+                 APP_STRICT_PASSWORD)
+
+# ── Cookie 安全属性 ───────────────────────────────────────────────────
+# 默认 Secure（站点经 https 提供）；本地 http 调试时设 COOKIE_SECURE=0
+COOKIE_SECURE = os.environ.get('COOKIE_SECURE', '1') != '0'
+
+def _cookie_kwargs(extra=None):
+    kw = dict(httponly=True, samesite='Lax', path='/', secure=COOKIE_SECURE)
+    if extra:
+        kw.update(extra)
+    return kw
+
+def _set_auth_cookie(resp, tok, max_age=AUTH_TTL):
+    resp.set_cookie(AUTH_COOKIE, tok, max_age=max_age, **_cookie_kwargs())
 
 def _auth_secret():
     """签名密钥：显式 APP_SECRET 优先；否则从密码派生（改密码=吊销全部会话）"""
@@ -29,23 +70,45 @@ def _auth_secret():
         return s.encode()
     return hmac.new(b'kid-main-auth-v1', APP_PASSWORD.encode(), hashlib.sha256).digest()
 
+AUTH_STATE_FILE = os.path.join(DATA_DIR, 'auth_state.json')
+
+def _logout_epoch():
+    """全局登出水位线：登出时刻之前签发的所有 token 一律失效。"""
+    try:
+        with open(AUTH_STATE_FILE) as f:
+            return float(json.load(f).get('logout_at', 0) or 0)
+    except Exception:
+        return 0.0
+
+def _mark_logout(now=None):
+    now = float(now or time.time())
+    try:
+        atomic_write(AUTH_STATE_FILE, {'logout_at': now}, ensure_ascii=False)
+    except Exception as e:
+        log.error('写入登出水位线失败: %s', e)
+    return now
+
 def _make_token(now=None):
-    now = int(now or time.time())
-    exp = now + AUTH_TTL
-    sig = hmac.new(_auth_secret(), str(exp).encode(), hashlib.sha256).hexdigest()[:32]
-    return f'{exp}.{sig}'
+    """token = exp.iat.sig —— iat 为毫秒级浮点签发时间，用于登出后精确吊销。"""
+    now = float(now or time.time())
+    exp = int(now + AUTH_TTL)
+    iat_s = str(int(now * 1000))      # 毫秒整型，避免 token 中出现额外小数点
+    sig = hmac.new(_auth_secret(), f'{exp}.{iat_s}'.encode(), hashlib.sha256).hexdigest()[:32]
+    return f'{exp}.{iat_s}.{sig}'
 
 def _verify_token(tok):
-    """校验 token；有效返回 True。过期/签名不符均拒绝（恒定时间比较）。"""
-    if not tok or '.' not in tok:
+    """校验 token；过期/签名不符/早于登出水位线均拒绝（恒定时间比较）。"""
+    if not tok or tok.count('.') < 2:
         return False
     try:
-        exp_s, sig = tok.split('.', 1)
-        exp = int(exp_s)
+        exp_s, iat_s, sig = tok.split('.', 2)
+        exp, iat = int(exp_s), int(iat_s) / 1000.0
     except ValueError:
         return False
-    good = hmac.new(_auth_secret(), str(exp).encode(), hashlib.sha256).hexdigest()[:32]
+    good = hmac.new(_auth_secret(), f'{exp}.{iat_s}'.encode(), hashlib.sha256).hexdigest()[:32]
     if not hmac.compare_digest(sig, good):
+        return False
+    if iat < _logout_epoch():     # 登出时刻之前签发的 token 全部失效
         return False
     return exp > time.time()
 
@@ -86,6 +149,11 @@ def auth_login():
         return _cors()
     data = request.get_json(force=True, silent=True) or {}
     pwd = str(data.get('password') or '')
+    # 严格模式下未配置密码 → 一律拒绝登录（避免内置默认密码被利用）
+    if APP_STRICT_PASSWORD and not PASSWORD_CONFIGURED:
+        resp = jsonify({'ok': False, 'error': '服务端未配置 APP_PASSWORD，请联系管理员'})
+        _set_cors(resp)
+        return resp, 503
     if not hmac.compare_digest(pwd.encode(), APP_PASSWORD.encode()):
         time.sleep(0.4)  # 恒定延迟，抬高暴力破解成本
         resp = jsonify({'ok': False, 'error': '密码错误'})
@@ -93,18 +161,18 @@ def auth_login():
         return resp, 401
     tok = _make_token()
     resp = jsonify({'ok': True, 'expires_in': AUTH_TTL})
-    resp.set_cookie(AUTH_COOKIE, tok, max_age=AUTH_TTL, httponly=True,
-                    samesite='Lax', path='/')
+    _set_auth_cookie(resp, tok)
     _set_cors(resp)
     return resp
 
 @app.route('/api/auth/logout', methods=['POST', 'OPTIONS'])
 def auth_logout():
-    """清除会话 cookie（无状态 token 无服务端会话可吊销，靠短 TTL 自然过期）"""
+    """清除会话 cookie + 抬高登出水位线，使此前签发的所有 token 立即失效。"""
     if request.method == 'OPTIONS':
         return _cors()
+    _mark_logout()          # 服务端吊销：旧 cookie 即使被复制也立即失效
     resp = jsonify({'ok': True})
-    resp.set_cookie(AUTH_COOKIE, '', max_age=0, httponly=True, samesite='Lax', path='/')
+    resp.set_cookie(AUTH_COOKIE, '', max_age=0, **_cookie_kwargs())
     _set_cors(resp)
     return resp
 
@@ -123,8 +191,7 @@ def auth_status():
     try:
         exp = int(tok.split('.', 1)[0])
         if exp - time.time() < AUTH_RENEW:
-            resp.set_cookie(AUTH_COOKIE, _make_token(), max_age=AUTH_TTL,
-                            httponly=True, samesite='Lax', path='/')
+            _set_auth_cookie(resp, _make_token())
     except (ValueError, AttributeError):
         pass
     _set_cors(resp)
@@ -194,6 +261,16 @@ def _cached_json_read(path, ttl=15, default=None):
     _json_cache[path] = (data, now, mtime)
     return data
 
+# ── child / user 参数白名单（P0-2）────────────────────────────────────
+# 凡是用于拼接 data/ 文件名的用户输入（child、user），必须先过 _safe_child，
+# 否则 `../../xxx` 可路径穿越写出/覆盖 data/ 目录任意文件。
+ALLOWED_CHILDREN = ('diya', 'jemma')
+
+def _safe_child(value, default='diya'):
+    """只放行白名单内的 child/user；非法值一律回退默认值，绝不拼进文件路径。"""
+    v = str(value or '').strip().lower()
+    return v if v in ALLOWED_CHILDREN else default
+
 # ── Planner (cloud sync) ──────────────────────────────────────────
 @app.route('/api/planner', methods=['GET', 'POST', 'OPTIONS'])
 def planner_api():
@@ -203,7 +280,8 @@ def planner_api():
         resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return resp
-    user = request.args.get('user', 'diya') if request.method == 'GET' else (request.get_json(force=True, silent=True) or {}).get('user', 'diya')
+    raw_user = request.args.get('user', 'diya') if request.method == 'GET' else (request.get_json(force=True, silent=True) or {}).get('user', 'diya')
+    user = _safe_child(raw_user)
     fpath = os.path.join(DATA_DIR, f'planner_{user}.json')
     if request.method == 'POST':
         data = request.get_json(force=True, silent=True) or {}
@@ -230,7 +308,7 @@ def tasks_api():
         resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return resp
     data = request.get_json(force=True, silent=True) or {}
-    user = data.get('user', request.args.get('user', 'diya'))
+    user = _safe_child(data.get('user', request.args.get('user', 'diya')))
     fpath = os.path.join(DATA_DIR, f'tasks_{user}.json')
     if request.method == 'POST':
         atomic_write(fpath, data.get('tasks', {}), ensure_ascii=False)
@@ -255,7 +333,7 @@ def chat_api_plain():
 
 def _chat_handler(child):
     """Shared handler for /api/chat and /api/chat/<child>"""
-    child = child or 'diya'
+    child = _safe_child(child or 'diya')
     conv_path = os.path.join(DATA_DIR, f'chat_{child}.json')
     os.makedirs(os.path.dirname(conv_path), exist_ok=True)
 
@@ -535,7 +613,7 @@ def chat_stream():
 
     data = request.get_json(force=True, silent=True) or {}
     user_msg = data.get('message', '')
-    child = data.get('user', 'diya')
+    child = _safe_child(data.get('user', 'diya'))
     if not user_msg:
         return jsonify({'error': 'empty message'}), 400
 
@@ -866,7 +944,7 @@ def review_api():
         resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return resp
 
-    user = request.args.get('user') or (request.get_json(silent=True) or {}).get('user', 'diya')
+    user = _safe_child(request.args.get('user') or (request.get_json(silent=True) or {}).get('user', 'diya'))
     review_path = os.path.join(DATA_DIR, f'reviews_{user}.json')
 
     if request.method == 'GET':
@@ -1283,9 +1361,7 @@ def error_save():
         return resp
 
     data = request.get_json(force=True, silent=True) or {}
-    child = data.get('child', 'diya')
-    if child not in ('diya', 'jemma'):
-        child = 'diya'
+    child = _safe_child(data.get('child', 'diya'))
 
     # Support both flat format (email pipeline) and rich format (exam grading)
     entry = data.get('error', None)
@@ -1295,8 +1371,9 @@ def error_save():
         err.setdefault('source', 'Exam Grading')
         err.setdefault('enriched', True)
     else:
+        # 字段名与前端读取保持一致（P0-6）：question / solution，另补 raw 别名兼容旧调用方
         err = {
-            'raw': data.get('raw', ''),
+            'question': data.get('question', data.get('raw', '')),
             'subject': data.get('subject', ''),
             'type': data.get('type', 'other'),
             'solution': data.get('solution', ''),
@@ -1304,6 +1381,7 @@ def error_save():
             'date': datetime.now().isoformat(),
             'enriched': bool(data.get('subject'))
         }
+    err.setdefault('id', str(uuid.uuid4()))   # P0-6：每条错题必须有稳定 id，否则无法删除
 
     path = os.path.join(DATA_DIR, f'errors_{child}.json')
     errors = []
@@ -1321,21 +1399,55 @@ def error_save():
     return resp
 
 
-@app.route('/api/errors/<child>', methods=['GET', 'OPTIONS'])
+@app.route('/api/errors/<child>', methods=['GET', 'POST', 'OPTIONS'])
 def get_errors(child):
-    """Get error entries for a child."""
+    """Get / append error entries for a child."""
     if request.method == 'OPTIONS':
         resp = jsonify({})
         _set_cors(resp)
-        resp.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return resp
 
-    if child not in ('diya', 'jemma'):
-        child = 'diya'
+    child = _safe_child(child)
 
     path = os.path.join(DATA_DIR, f'errors_{child}.json')
+
+    if request.method == 'POST':
+        data = request.get_json(force=True, silent=True) or {}
+        err = {
+            'id': str(uuid.uuid4()),
+            'subject': (data.get('subject') or '').strip() or 'Other',
+            # 兼容历史字段名：raw → question，correct_solution → solution
+            'question': (data.get('question') or data.get('raw') or '').strip(),
+            'solution': (data.get('solution') or data.get('correct_solution') or '').strip(),
+            'type': (data.get('type') or 'other').strip(),
+            'tags': data.get('tags', '') or '',
+            'date': data.get('date') or datetime.now().strftime('%Y-%m-%d'),
+            'source': data.get('source') or 'Manual',
+            'mastered': bool(data.get('mastered', False)),
+        }
+        if not err['question']:
+            resp = jsonify({'ok': False, 'error': '题目内容（question）不能为空'})
+            _set_cors(resp)
+            return resp, 400
+        errors = list(_cached_json_read(path, ttl=15) or [])
+        errors.insert(0, err)
+        atomic_write(path, errors, ensure_ascii=False, indent=2)
+        _json_cache.pop(path, None)
+        resp = jsonify({'ok': True, 'id': err['id'], 'total': len(errors)})
+        _set_cors(resp)
+        return resp
+
     errors = _cached_json_read(path, ttl=15) or []
+
+    # 存量补齐 id：历史记录（113 条）无 id，导致无法删除——读取时一次性回写
+    need_id = [e for e in errors if isinstance(e, dict) and not e.get('id')]
+    if need_id:
+        for e in need_id:
+            e['id'] = str(uuid.uuid4())
+        atomic_write(path, errors, ensure_ascii=False, indent=2)
+        _json_cache.pop(path, None)
 
     # Aggregate mode for dashboard (avoids shipping the full ~276KB file to the client)
     if request.args.get('stats') == '1':
@@ -1346,6 +1458,63 @@ def get_errors(child):
         resp = jsonify({'child': child, 'total': len(errors), 'by_subject': by_subject})
     else:
         resp = jsonify({'child': child, 'errors': errors, 'total': len(errors)})
+    _set_cors(resp)
+    return resp
+
+
+@app.route('/api/errors/<child>/<err_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+def error_item(child, err_id):
+    """单条错题的读/改/删（P0-1：前端 DELETE 此前因无此路由全部 405）。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, PUT, DELETE, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+
+    child = _safe_child(child)
+    path = os.path.join(DATA_DIR, f'errors_{child}.json')
+    errors = list(_cached_json_read(path, ttl=15) or [])
+
+    if request.method == 'GET':
+        hit = next((e for e in errors if str(e.get('id')) == str(err_id)), None)
+        if not hit:
+            resp = jsonify({'error': 'not found'})
+            _set_cors(resp)
+            return resp, 404
+        resp = jsonify(hit)
+        _set_cors(resp)
+        return resp
+
+    if request.method == 'DELETE':
+        remain = [e for e in errors if str(e.get('id')) != str(err_id)]
+        if len(remain) == len(errors):
+            resp = jsonify({'ok': False, 'error': 'not found'})
+            _set_cors(resp)
+            return resp, 404
+        atomic_write(path, remain, ensure_ascii=False, indent=2)
+        _json_cache.pop(path, None)
+        resp = jsonify({'ok': True, 'total': len(remain)})
+        _set_cors(resp)
+        return resp
+
+    # PUT：局部更新（含 mastered 勾选）
+    data = request.get_json(force=True, silent=True) or {}
+    found = False
+    for e in errors:
+        if str(e.get('id')) == str(err_id):
+            for k in ('subject', 'question', 'solution', 'type', 'tags', 'date', 'mastered'):
+                if k in data:
+                    e[k] = data[k]
+            found = True
+            break
+    if not found:
+        resp = jsonify({'ok': False, 'error': 'not found'})
+        _set_cors(resp)
+        return resp, 404
+    atomic_write(path, errors, ensure_ascii=False, indent=2)
+    _json_cache.pop(path, None)
+    resp = jsonify({'ok': True})
     _set_cors(resp)
     return resp
 

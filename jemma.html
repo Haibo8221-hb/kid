@@ -903,7 +903,8 @@ async function saveError(){
  };
  if(!body.subject||!body.question){ toast('Please fill in subject and question'); return; }
  try{
-  await fetch('/api/errors/jemma',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const r = await fetch('/api/errors/jemma',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){ toast('❌ 保存失败 '+(r.status)); return; }   // 不再无条件报成功
   closeErrorModal();
   await loadErrorBook();
   toast('Saved!');
@@ -913,8 +914,11 @@ async function deleteError(id){
  const error = errorsData.find(e=>e.id===id);
  const label = error?(error.subject||'')+' — '+(error.question||'').slice(0,50):'this error';
  if(!confirm(`Delete "${label}"? This cannot be undone.`)) return;
- try{ await fetch('/api/errors/jemma/'+id,{method:'DELETE'}); await loadErrorBook(); toast('Deleted'); }
- catch(e){ toast('Delete failed'); }
+ try{
+  const r = await fetch('/api/errors/jemma/'+id,{method:'DELETE'});
+  if(!r.ok){ toast('❌ 删除失败 '+(r.status)); return; }
+  await loadErrorBook(); toast('Deleted');
+ }catch(e){ toast('Delete failed'); }
 }
 // State 
 let currentChild = 'jemma';

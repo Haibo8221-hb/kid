@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Diya / Jemma 学习工作台 · 结构化评估报告</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f7f8fa;--surface:#fff;--surface2:#f0f2f5;--border:#e2e6ea;--text:#1a1d28;--text2:#6b7280;--accent:#4f8cff;--accent2:#10b981;--red:#ef4444;--orange:#f59e0b;--yellow:#eab308;--green:#22c55e;--radius:12px}
+body{font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;font-size:15px;padding:0 0 80px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+header.hero{background:linear-gradient(135deg,#4f8cff,#10b981);color:#fff;padding:52px 0 44px;margin-bottom:36px}
+header.hero h1{font-size:32px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px}
+header.hero p{font-size:14px;opacity:.92}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.meta span{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:4px 13px;font-size:12px}
+h2{font-size:22px;font-weight:800;margin:44px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--accent);letter-spacing:-.3px}
+h3{font-size:16px;font-weight:700;margin:26px 0 10px;color:var(--text)}
+h4{font-size:14px;font-weight:700;margin:18px 0 8px;color:var(--accent)}
+p{margin-bottom:12px}
+code{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:12.5px;font-family:ui-monospace,Consolas,monospace;color:#b45309}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+th{background:var(--surface2);padding:10px 12px;text-align:left;font-weight:700;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:10px;white-space:nowrap}
+.b-h{background:rgba(239,68,68,.13);color:#b91c1c}
+.b-m{background:rgba(245,158,11,.15);color:#b45309}
+.b-l{background:rgba(34,197,94,.14);color:#15803d}
+.b-info{background:rgba(79,140,255,.13);color:#1d4ed8}
+ul,ol{margin:0 0 14px 22px}
+li{margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.kpi .v{font-size:26px;font-weight:800;color:var(--accent)}
+.kpi .l{font-size:11.5px;color:var(--text2);margin-top:3px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:12.5px}
+.bar-row .n{width:130px;color:var(--text2);text-align:right;flex-shrink:0}
+.bar-row .b{flex:1;height:9px;background:var(--surface2);border-radius:5px;overflow:hidden}
+.bar-row .b i{display:block;height:100%;border-radius:5px}
+.bar-row .c{width:38px;text-align:right;font-weight:700;flex-shrink:0}
+.insight{background:var(--surface2);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:13.5px;line-height:1.7}
+.insight.bad{border-left-color:var(--red);background:rgba(239,68,68,.05)}
+.insight.good{border-left-color:var(--accent2);background:rgba(16,185,129,.05)}
+.insight.warn{border-left-color:var(--orange);background:rgba(245,158,11,.06)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+.toc ol{margin-left:20px}
+.toc a{color:var(--accent);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+.flow .step{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;padding:8px 13px;font-size:12.5px}
+.flow .arw{color:var(--text2)}
+.pri-h{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:14px 18px;margin-bottom:10px}
+.pri-m{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:14px 18px;margin-bottom:10px}
+.pri-l{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:14px 18px;margin-bottom:10px}
+.pri-h h4,.pri-m h4,.pri-l h4{margin:0 0 6px}
+.pri-h h4{color:#b91c1c}.pri-m h4{color:#b45309}.pri-l h4{color:#15803d}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--border);color:var(--text2);font-size:12.5px}
+@media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}.wrap{padding:0 16px}header.hero h1{font-size:25px}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+ <div class="wrap">
+  <h1>Diya / Jemma 学习工作台 · 结构化评估报告</h1>
+  <p>基于全量源码实读（app.html 3,377 行 / jemma.html / v2/ / api_server.py 2,050 行 / data/ 32 个数据文件）的静态审计</p>
+  <div class="meta">
+   <span>评估日期：2026-10-15</span>
+   <span>评估类型：代码级静态审计 + 数据核对 + 链接可达性验证</span>
+   <span>证据标准：每条结论均标注 文件:行号</span>
+   <span>被评对象：Study Compass（双孩子学习工作台）</span>
+  </div>
+ </div>
+</header>
+
+<div class="wrap">
+
+<div class="toc">
+ <b>目录</b>
+ <ol>
+  <li><a href="#s1">现状梳理：定位、信息架构、模块、交互、数据组织</a></li>
+  <li><a href="#s2">优点分析：内容组织 / 视觉层次 / 交互逻辑</a></li>
+  <li><a href="#s3">不足分析：17 项具体问题（含量化与定位）</a></li>
+  <li><a href="#s4">改进建议：内容优化 / 结构调整 / 学习效率提升</a></li>
+  <li><a href="#s5">总结：可执行优先级清单</a></li>
+ </ol>
+</div>
+
+<!-- ============ 1 现状梳理 ============ -->
+<h2 id="s1">1. 现状梳理</h2>
+
+<div class="card">
+<h3>1.1 功能定位</h3>
+<p>这是一个<b>面向 GCSE / A-Level 阶段学生的个人学习管理控制台（Personal Learning Dashboard）</b>，服务两个具体用户：Diya（Year 11，2027 年 5 月 GCSE）与 Jemma（Year 8）。系统英文名 <code>Study Compass · Academic Planner</code>（app.html:495-496），核心使命是把「成绩数据 + 错题 + 备考计划 + AI 对话」收敛到单一页面，避免家长/学生在多个文档间切换。</p>
+<p>从代码可确认它同时承担三个角色：</p>
+<ul>
+ <li><b>学习数据看板</b>：倒计时、学科成绩卡、雷达图、错题分布、SMC 竞赛进度（app.html:544-750）</li>
+ <li><b>规划执行工具</b>：周计划表（7 天 × 3 时段 + Must-Do 行）、任务清单、周复盘向导（app.html:788-838、2401-2463）</li>
+ <li><b>AI 教练 + 文档门户</b>：SSE 流式对话、学习方法卡片轮播、指向 30+ 独立 HTML/PDF 资料站的导航（app.html:803-820、2602-2655、1750-1876）</li>
+</ul>
+<div class="insight warn">注意：这不是一个「课程平台」或「题库系统」，而是一个<b>元数据聚合层 + 个人执行看板</b>。它自己几乎不生产学习内容，而是把散落在 30+ 个静态页面、几十份 PDF、以及后端 JSON 里的信息组织起来。这个定位决定了后面大部分问题的性质。</div>
+</div>
+
+<div class="card">
+<h3>1.2 技术架构</h3>
+<table>
+<tr><th>层</th><th>技术</th><th>规模</th><th>关键位置</th></tr>
+<tr><td>前端</td><td>原生 HTML/CSS/JS 单文件 SPA，零框架、零构建</td><td>app.html 3,377 行 / 208 KB（CSS 471 行 + JS 2,290 行 + HTML 600 行）</td><td>app.html 全文</td></tr>
+<tr><td>前端（第二份）</td><td>Jemma 版，结构近似复制</td><td>jemma.html 2,217 行 / 126 KB</td><td>jemma.html</td></tr>
+<tr><td>前端（第三/四份）</td><td>v2 重构版，widget 化 + 外部 config</td><td>diya.html / jemma.html 各 253 行 + shared/ 71 KB</td><td>v2/</td></tr>
+<tr><td>后端</td><td>Flask 单文件，30+ REST 端点 + SSE</td><td>api_server.py 2,050 行 / 85 KB</td><td>api_server.py</td></tr>
+<tr><td>数据</td><td>JSON 文件（无数据库），按孩子分文件</td><td>data/ 32 文件，共 ~1.4 MB</td><td>data/*.json</td></tr>
+<tr><td>鉴权</td><td>共享密码 + HMAC-SHA256 自签 token（httpOnly cookie）</td><td>~110 行</td><td>api_server.py:20-133</td></tr>
+<tr><td>部署</td><td>Docker Compose + Nginx 反代</td><td>—</td><td>Dockerfile / docker-compose.yml / deploy/</td></tr>
+</table>
+<div class="insight bad"><b>关键事实：</b>仓库同时存在 <b>4 份前端</b>（app.html / jemma.html / v2/diya.html / v2/jemma.html），累计约 8,100 行前端代码。git 记录显示 <code>v2/</code> 仅有一次「baseline: 初始入库」提交，之后 v1 持续有功能提交——<b>v2 是已停滞的重构尝试</b>，而 <code>index.html:41-59</code> 仍把 v2 与 v1 并列作为两个正式入口对外暴露。</div>
+</div>
+
+<div class="card">
+<h3>1.3 信息架构与模块划分</h3>
+<p>左侧固定侧边栏（220px，<code>position:fixed</code>）承载 10 个一级入口，主内容区用 <code>.tab-panel{display:none}</code> 切换（app.html:36-37）。</p>
+<table>
+<tr><th>#</th><th>模块</th><th>panel id</th><th>核心内容</th><th>数据来源</th></tr>
+<tr><td>1</td><td>Dashboard</td><td>tab-dashboard</td><td>倒计时条 / 学习方法卡 / 10 科成绩卡 / 雷达图 / 错题分布条 / 强弱项 / 风险热力图 / SMC 进度 / 任务环 / 暑期计划 / 长期路线图</td><td class="code-text"><code>/api/dashboard/diya</code>, <code>/api/errors?stats=1</code>, <code>/api/smc-records</code>, <code>/api/tasks</code> + 4 处硬编码</td></tr>
+<tr><td>2</td><td>Route Compare</td><td>tab-route-compare</td><td>Oxbridge / Imperial / 保底路线对比卡（可折叠）</td><td><code>loadRoutes()</code> 纯前端常量</td></tr>
+<tr><td>3</td><td>Learning Resources</td><td>tab-resources</td><td>9 大类资料库，含 40+ PDF 直链、5 个外部网站</td><td><code>loadResources()</code> 纯 innerHTML 字符串</td></tr>
+<tr><td>4</td><td>Weekly Plan</td><td>tab-planner</td><td>周历网格表：7 天 × (AM/PM/Eve) + Daily Must-Do 行，学科色标</td><td><code>/api/planner</code> + localStorage 兜底</td></tr>
+<tr><td>5</td><td>Notes</td><td>tab-notes</td><td>8 学科 Tab 的便签卡片，可就地编辑</td><td><b>纯 localStorage</b>（<code>diya_notes_*</code>）</td></tr>
+<tr><td>6</td><td>Error Book</td><td>tab-errors</td><td>错题卡（学生答案 vs 正确答案 / 弱点 / 改进方法），学科筛选、掌握标记</td><td><code>/api/errors/diya</code>（全量 276 KB）</td></tr>
+<tr><td>7</td><td>Upload</td><td>tab-upload</td><td>拖拽上传作业 → PDF 渲染 → 多模型 OCR → 字段抽取 → 错题一键入库</td><td><code>/api/upload/*</code> 5 个端点</td></tr>
+<tr><td>8</td><td>Weekly Review</td><td>tab-weekly-review</td><td>7 问向导（完成度/评分/3 优点/3 困难/1 改进/1 优先/1 自豪）</td><td><code>/api/review</code> + localStorage 兜底</td></tr>
+<tr><td>9</td><td>AI Chat</td><td>tab-chat</td><td>SSE 流式对话，注入学习计划上下文，苏格拉底式提示条</td><td><code>/api/chat/stream</code></td></tr>
+<tr><td>—</td><td><b>Subject Analysis</b></td><td><b>tab-subject-analysis</b></td><td colspan="2"><b class="badge b-h">孤儿模块</b>　panel 已定义（app.html:936-939）且 <code>loadSubjectAnalysis()</code> 已实现（2857-2884），但<b>侧边栏无入口、switchTab 无触发</b>（1881-1898）——用户永远无法打开</td></tr>
+</table>
+<div class="insight">侧边栏底部另有 3 类外链：Physics Olympiad 专题页、5 份规划文档、LLM 设置、Logout（app.html:508、522-531）。</div>
+</div>
+
+<div class="card">
+<h3>1.4 核心交互流程</h3>
+<h4>流程 A · 每日主循环（设计意图最清晰的一条）</h4>
+<div class="flow">
+ <span class="step">打开 Dashboard</span><span class="arw">→</span>
+ <span class="step">倒计时 + 风险热力图确认今日重点</span><span class="arw">→</span>
+ <span class="step">学习方法卡「Try It Now」</span><span class="arw">→</span>
+ <span class="step">看错题分布找薄弱学科</span><span class="arw">→</span>
+ <span class="step">进 Weekly Plan 排入时段</span><span class="arw">→</span>
+ <span class="step">勾选任务环涨 %</span><span class="arw">→</span>
+ <span class="step">周日填 Weekly Review</span>
+</div>
+<p>「任务完成率 → 圆环 SVG」这条激励回路实现得最扎实：<code>loadDashboard()</code> 拉 <code>/api/dashboard</code>，算出百分比写入 <code>stroke-dashoffset</code>（1904-1917），并按 0/50/100 三档给出不同鼓励文案。</p>
+
+<h4>流程 B · 错题闭环（设计上完整，实现有断裂）</h4>
+<div class="flow">
+ <span class="step">上传作业 PDF/图片</span><span class="arw">→</span>
+ <span class="step">后端渲染页面 PNG（pypdfium2 200dpi）</span><span class="arw">→</span>
+ <span class="step">5 模型投票 OCR</span><span class="arw">→</span>
+ <span class="step">LLM 抽取学科/知识点/错题</span><span class="arw">→</span>
+ <span class="step">前端预览 + 逐页对照</span><span class="arw">→</span>
+ <span class="step">一键写入 Error Book</span><span class="arw">→</span>
+ <span class="step">标记 Mastered</span>
+</div>
+<p>这是全系统<b>技术含量最高、最有产品价值</b>的链路（api_server.py:1522-2004）。前端侧 <code>pollUploadStatus()</code> 每 2.5s 轮询、15 分钟超时（app.html:3190-3212），失败可重试 OCR / 重试抽取（3215-3231）。</p>
+
+<h4>流程 C · AI 教练（含上下文注入）</h4>
+<p><code>sendChatMsg()</code> → <code>/api/chat/stream</code> → 后端 <code>_build_system_prompt()</code> 会读取 <code>chat_prompt.md</code> + <code>Diya_Plan.md</code> 拼入 system prompt（api_server.py:488-514），实现「AI 知道孩子的备考计划」。前端以自定义 markdown 渲染器 <code>markdownToHtml()</code>（2276-2310）处理回复。</p>
+</div>
+
+<div class="card>
+<h3>1.5 数据组织方式</h3>
+<table>
+<tr><th>类别</th><th>位置</th><th>结构</th><th>问题</th></tr>
+<tr><td>结构化数据</td><td><code>data/{tasks,planner,wiki,errors,chat}_{diya,jemma}.json</code></td><td>Diya 侧：errors 276 KB / 113 条、chat 100 KB / 74 条、tasks 4.3 KB、planner 1.7 KB</td><td><b>两孩子数据量严重失衡</b>：Jemma 侧 errors 仅 35 KB / 16 条、chat 17 KB / 18 条、<code>wiki_jemma.json</code> 为空数组 <code>[]</code></td></tr>
+<tr><td>运行态数据</td><td><code>data/smc_records.json</code>、<code>uploads/</code>、<code>uploads_index.json</code></td><td>上传文件按 <code>{child}/{uid}/</code> 分目录</td><td>路径遍历已被白名单正确阻断（api_server.py:1934）</td></tr>
+<tr><td>浏览器本地</td><td>localStorage 约 10 个 key</td><td><code>diya_notes_*</code>、<code>tasks_*</code>、<code>planner_*</code>、<code>mastered_errors_*</code>、<code>study_tips_viewed_*</code>、<code>diya_streak</code>、<code>diya_theme</code></td><td><b>Notes 与 mastered 状态只存本地</b>，换设备/清缓存即丢失，且与后端无同步</td></tr>
+<tr><td>学习内容</td><td><code>V2_TIPS_POOL</code>（8 条）+ <code>STUDY_TIPS_DIYA</code>（8 条）</td><td>两个方法库并存，内容大量重叠</td><td>见 3.4 内容重复</td></tr>
+<tr><td>学业内容</td><td>硬编码在 HTML/JS 中</td><td>10 科成绩、风险项、SMC 阈值、暑期计划、长期路线</td><td>无法被家长/老师更新，改一次成绩要改代码</td></tr>
+</table>
+</div>
+
+<!-- ============ 2 优点 ============ -->
+<h2 id="s2">2. 优点分析</h2>
+
+<div class="card">
+<h3>2.1 内容组织：三个做法明显高于同类个人项目</h3>
+<h4>① 错题卡采用「四段式对照结构」而非简单记录</h4>
+<p>每条错题固定呈现 5 个层次：原题 → 学生答案（橙）→ 正确答案（绿）→ 弱点诊断（红）→ 如何改进（绿）+ 得分 + 考试来源 + 标签（app.html:2802-2826）。这是符合认知心理学的「对比—诊断—纠正」结构，比多数错题 App 的「截图 + 备注」强得多。<b>Diya 的答案与正确答案左右并排（<code>.ec-answer-section</code> 双栏 Grid，97 行）</b>，视觉上直接形成反差。</p>
+<h4>② 学习方法卡遵循「概念 → 原理 → 步骤 → 立刻练 → 分科应用」五段式</h4>
+<p>8 张方法卡每张都强制包含 <code>concept</code> / <code>why</code> / <code>steps</code> / <code>practice</code> / <code>apply</code> 五个字段（2604-2655）。其中 <code>apply</code> 字段做到了真正的个性化——不是「多做题」这种空话，而是「Chemistry: Memorise the reactivity series — test yourself tomorrow」这种可直接执行的动作。<b>「Try It Now」段落用「Right now: ...」直接下命令</b>（2608、2615、2622、2629、2635、2641、2647、2653），把阅读转化为行动，这是很成熟的产品设计。</p>
+<h4>③ 方法卡内容有真实的学术依据与考试情报</h4>
+<p>主动引用艾宾浩斯遗忘曲线（2606）、明确指出 AQA Paper 1 Q2 中「effect on reader」是三级中权重最高项（3349）、给出 ESAT 与 MAT 的区别（2644）、SMC 2026=2×1013 的年份质因数技巧（3352）、UKMT 官方分数线 Gold 72+/Silver 57+/Bronze 46+（625）。<b>这些是外部知识核对过的信息，不是编造</b>，说明作者（或 AI）做实事的时间投入是真实的。</p>
+</div>
+
+<div class="card">
+<h3>2.2 视觉层次：设计成熟度明显高于「学生自制页面」水平</h3>
+<ul>
+ <li><b>CSS 变量主题化彻底</b>：<code>:root</code> 定义 12 个变量（app.html:11），<code>setTheme()</code> 支持 5 套配色（blue/purple/pink/green/orange），用户偏好存 localStorage（2915-2921）。这是正规产品做法。</li>
+ <li><b>语义化色彩体系一致</b>：<code>--accent</code>（蓝=进行中）、<code>--accent2</code>（绿=已掌握/安全）、<code>--red</code>（风险）、<code>--orange</code>（警告）四个语义色贯穿全站，学科配色在周计划中还有第二套映射（397-403），两套互相不冲突。</li>
+ <li><b>倒计时的紧迫度分层做得很好</b>：按剩余天数自动分 4 档（urgent ≤60 天 / warm ≤180 / cool ≤400 / far），对应不同字号与边框色（2594-2597）。60 天内变红加粗到 28px——这是把「信息」升级为「行动信号」的典型手法。</li>
+ <li><b>零依赖手绘 SVG 图表</b>：雷达图（2170-2237）、任务完成环（653-658）、SMC 分数趋势折线（2031-2052）全部原生 SVG，配 <code>font-variant-numeric:tabular-nums</code> 防数字跳动。没有引入图表库，208 KB 的文件里没有一个外部依赖。</li>
+ <li><b>细节点缀到位</b>：勾选后 <code>opacity:.45</code> + 删除线（273）、已掌握错题整体降透明度（112）、SMC 分数卡 34px 超大字号（2016）、滚动条收窄到 6px（13）、<code>-webkit-text-fill-color:transparent</code> 渐变标题（34）。这些细节体现的是「有人真的天天在用这个页面」。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>2.3 交互逻辑：三处设计值得肯定</h3>
+<ul>
+ <li><b>全量异步 + localStorage 双写兜底</b>：<code>saveTasks</code>（1380-1394）、<code>loadPlanner</code>（1401-1419）、<code>reviewSubmit</code>（2440-2462）全部是「先试后端，失败落本地并 toast 告知」。后端挂了页面仍可用，这是很好的降级设计。</li>
+ <li><b>周回顾做成了向导而非长表单</b>：7 个问题拆成 7 步，进度条 + 上一步/下一步/提交三态切换（2406-2427），符合「单次认知负荷」原则；且校验门槛宽松——只要求「三问中至少填一题」（2452），不强迫写满。</li>
+ <li><b>错误可诊断性极强</b>：全局 <code>error</code> 监听把任何 JS 异常弹成红色 toast 并显示行号（1107-1112）；左下角常驻 <code>build 20261014-1745-domfix</code> 版本徽标（1073、1137）；LLM 按钮点击失败时明确提示「很可能是浏览器缓存了旧版，请 Ctrl+Shift+R」（529、1128）。<b>这是被线上问题教育过的产物</b>，很多商业项目都做不到这种自诊断。</li>
+</ul>
+</div>
+
+<!-- ============ 3 不足 ============ -->
+<h2 id="s3">3. 不足分析</h2>
+
+<div class="card">
+<h3>3.1 【严重 · 功能失效】写操作全部返回 405，且前端不检查</h3>
+<p>这是本次审计发现的<b>最高优先级缺陷</b>：错题本的「新增」和「删除」功能在生产环境<b>完全不可用</b>。</p>
+<table>
+<tr><th>前端调用</th><th>后端实际</th><th>结果</th></tr>
+<tr><td><code>POST /api/errors/diya</code>（app.html:2842）</td><td><code>@app.route('/api/errors/&lt;child&gt;', methods=['GET','OPTIONS'])</code>（api_server.py:1324）</td><td><b>405</b>，数据未写入</td></tr>
+<tr><td><code>DELETE /api/errors/diya/&lt;id&gt;</code>（app.html:2852）</td><td>无该路由</td><td><b>404</b>，数据未删除</td></tr>
+<tr><td><code>POST /api/wiki/diya</code>（app.html:2547）</td><td><code>/api/wiki/&lt;child&gt;</code> 仅 GET/DELETE（api_server.py:724）</td><td><b>405</b>，Wiki 无法新增</td></tr>
+</table>
+<div class="insight bad"><b>为何没被发现：</b><code>saveError()</code> / <code>deleteError()</code> 用 <code>await fetch(...)</code> 但<b>不检查 <code>response.ok</code></b>，405/404 都不是网络异常，try/catch 捕获不到，于是代码照常执行 <code>toast('Saved')</code>（2845、2852-2853）。<b>这是典型的静默失败（silent failure）——界面在笑，数据在丢。</b>Jemma 侧同一 bug 存在于 jemma.html:916。</div>
+<p><b>连带影响：</b>错题本唯一的写入口是邮件管线 <code>/api/error-save</code>（api_server.py:1275），而该端点写的是<b>另一套字段名</b>（<code>raw/type/solution</code>，1298-1306），前端却读 <code>question/diya_answer/correct_solution/error_type</code>（app.html:2790-2799）——<b>邮件进来的错题在页面上大面积渲染为空</b>。更严重的是平铺分支不生成 <code>id</code>（1298），导致 <code>markMastered('undefined')</code>。</p>
+</div>
+
+<div class="card">
+<h3>3.2 【严重 · 安全】child 参数未白名单，存在路径穿越</h3>
+<p><code>/api/planner</code>(207)、<code>/api/tasks</code>(234)、<code>/api/chat/&lt;child&gt;</code>(249)、<code>chat_stream</code>(538-542)、<code>/api/review</code>(870) 的 <code>child</code> 直接参与文件路径拼接，<b>没有白名单校验</b>。而 <code>error_save</code>(1287)、<code>get_errors</code>(1334)、<code>upload_api</code>(1776) 却都做了校验——<b>同一个代码库里两种标准</b>。传入 <code>?user=../../xxx</code> 即可把 JSON 写出 <code>data/</code> 目录。</p>
+<h4>配套的认证弱点</h4>
+<ul>
+ <li><b>默认密码硬编码入库</b>：<code>APP_PASSWORD = os.environ.get('APP_PASSWORD', 'haibo2026')</code>（api_server.py:23）。忘配环境变量即用弱口令上线。</li>
+ <li><b>Cookie 无 <code>secure</code> 标志</b>（96-97、107、126-127），HTTP 链路可明文嗅探。而前端 self-check 里明文出现过公网 IP <code>https://112.74.40.8/app.html</code>（3372），说明确实存在 HTTP 直连场景。</li>
+ <li><b>无失败次数限制</b>：登录失败仅靠 <code>time.sleep(0.4)</code> 拖时间（api_server.py:90），无计数锁定、无 IP 封禁——既是爆破面也是自身 DoS 面（每次失败占一个 worker 0.4s）。</li>
+ <li><b>CORS 兜底为 <code>*</code> 且带 credentials</b>（139-140），当 <code>ALLOWED_ORIGINS</code> 为空时命中；默认域名硬编码 <code>grow-consultant.com</code>（135）。</li>
+ <li><b>Token 实质永不过期</b>：TTL 30 天 + 剩余 15 天即滚动续期（21-22、125），只要用户每月访问一次就永远有效，且无服务端吊销能力。</li>
+ <li><b>API Key 明文落盘</b> <code>data/llm_config.json</code>（api_server.py:414-419、680）。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>3.3 【中 · 性能】错题本无分页，一次拉取 276 KB</h3>
+<div class="bar-row"><span class="n">errors_diya.json</span><span class="b"><i style="width:100%;background:var(--red)"></i></span><span class="c">276K</span></div>
+<div class="bar-row"><span class="n">research_*.json ×4</span><span class="b"><i style="width:52%;background:var(--orange)"></i></span><span class="c">533K</span></div>
+<div class="bar-row"><span class="n">chat_diya.json</span><span class="b"><i style="width:19%;background:var(--accent)"></i></span><span class="c">100K</span></div>
+<div class="bar-row"><span class="n">errors_jemma.json</span><span class="b"><i style="width:6.3%;background:var(--accent2)"></i></span><span class="c">35K</span></div>
+<p><code>get_errors</code> 只支持 <code>?stats=1</code> 聚合模式（api_server.py:1341），<b>没有 limit / 分页</b>。而 Dashboard 已经正确使用了 <code>?stats=1</code> 来避免全量传输（app.html:1939，注释明确写「avoids shipping the full ~276KB file」）——<b>说明作者意识到这个问题，但只在 dashboard 修了</b>。<code>loadErrorBook()</code>（2741）与 <code>loadSubjectAnalysis()</code>（2861）仍然是两次全量拉取 + <code>innerHTML</code> 全量重绘 113 张卡片，每次切 Tab 都重来一遍。</p>
+<p>另一个隐患：<code>_cached_json_read</code> 的缓存写入后<b>不主动失效</b>（api_server.py:183-195），所以 <code>/api/errors</code> 最多返回脏读 15 秒——这解释了为什么「保存后立刻刷新可能看不到」。</p>
+</div>
+
+<div class="card">
+<h3>3.4 【中 · 内容】学习内容存在大面积重复与自相矛盾</h3>
+<h4>① 两个方法库并存且高度重叠</h4>
+<p><code>V2_TIPS_POOL</code>（app.html:2602-2655，8 条，结构化字段）实际<b>只有 <code>loadStudyTips()</code> 一个消费方</b>；<code>STUDY_TIPS_DIYA</code>（3342-3354，8 条，扁平字段）<b>在全文件中没有任何调用点，是完整的死代码</b>。而两者主题高度重合：</p>
+<table>
+<tr><th>主题</th><th>V2_TIPS_POOL</th><th>STUDY_TIPS_DIYA</th></tr>
+<tr><td>主动回忆</td><td>dm02 Active Recall + Spaced Repetition</td><td>tip_02 Active Recall: Close book & explain</td></tr>
+<tr><td>分析段落</td><td>dm09 PETAL + Word-Level Zoom</td><td>d_new01 PETZAL 6 步</td></tr>
+<tr><td>每日一段</td><td>dm14 One Perfect Paragraph a Day</td><td>d_s01 Analysis beats technique-spotting</td></tr>
+<tr><td>间隔复习</td><td>dm16 2357 Spaced Revision</td><td>d_s02 2-3-5-7 review schedule</td></tr>
+<tr><td>SMC 策略</td><td>—</td><td>d_s04 SMC bank questions 1-15</td></tr>
+</table>
+<h4>② 方法论自身前后不一致（会削弱可信度）</h4>
+<div class="insight bad">
+<b>间距重复（spaced repetition）的两套说法：</b><br>
+· dm02（2607）：「明天、3 天、1 周、1 个月」<br>
+· dm16（2640）：「今天、然后 2、3、5、7 天后」（自称 2357 法）<br>
+· d_s02（3350）：「课后、第二天、第三天、一周后」（自称 2-3-5-7 法）<br>
+<b>三套不同的时间表同时出现在同一个页面</b>，学生无从判断哪个为准。<br><br>
+<b>段落法的命名也不一致：</b>dm09/dm14 叫 <b>PETAL</b>（5 步），d_new01 叫 <b>PETZAL</b>（6 步，多一个 Analysis）。同一页面两套缩写。
+</div>
+<h4>③ 陈旧数据未清理，与页面自身陈述冲突</h4>
+<p>废弃常量 <code>TIMER_TARGETS</code>（1277-1283）里 5 个目标日期<b>全部是 2025 年</b>（<code>'2025-11-05'</code> UKMT SMC、<code>'2025-07-01'</code> 暑假），而实际在用的是 <code>COUNTDOWN_ITEMS</code>（2567-2570，2027 年）。<code>TIMER_TARGETS</code> 与 <code>getTimeLeft()</code>（1285-1293）已无调用方——但它就在文件里，任何二次开发者都可能误用这批过期日期。</p>
+</div>
+
+<div class="card">
+<h3>3.5 【中 · 结构】四份前端并存，且 v2 存在未鉴权的数据暴露</h3>
+<ul>
+ <li><b>重复规模</b>：规范化比对 app.html 与 jemma.html 得共同行 <b>1,283 行</b>，重复率约 40%；函数名交集 69 个（jemma 侧 86 个函数中 80% 同名）；CSS 变量体系与深色主题几乎照抄（app.html:9-480 / jemma.html:7-324）。v2 内部 diya.html 与 jemma.html 各 253 行、diff 仅 155 行——骨架 100% 复制。</li>
+ <li><b>v2 完全没有认证</b>：v2 两个 HTML 中 <code>auth/token/401</code> 零匹配，而 v1 有 fetch 拦截 + 探活（app.html:1088-1105）。<b>v2 页面可直连读写全部数据</b>。</li>
+ <li><b>v2 的 logout 只清本地</b>：<code>v2/diya.html:236</code> 仅 <code>localStorage.clear()</code>，不调 <code>/api/auth/logout</code>，cookie 会话仍有效——点了「退出」其实没退出。</li>
+ <li><b>v2 配置与实现脱节</b>：<code>config.js:22</code> 声明 <code>tipsPool:'STUDY_TIPS_DIYA'</code> 指向不存在的 <code>tips-data.js</code>，实际靠 HTML 内联兜底；<code>setTheme()</code> 依赖 <code>data-theme</code> 属性高亮，但 HTML 只给了 <code>style</code>+<code>onclick</code>（v2/diya.html:47），<b>主题选中态必然失效</b>。</li>
+ <li><b>孤儿模块</b>：<code>tab-subject-analysis</code>（936-939）+ <code>loadSubjectAnalysis()</code>（2857-2884）已完整实现，但侧边栏无入口、<code>switchTab</code> 无触发，<b>是用户永远打不开的死代码</b>。</li>
+ <li><b>后端死代码</b>：<code>/api/intel</code>(1083)、<code>/api/resources</code>(1136)、<code>/api/parse-error</code>(1190)、<code>/api/ocr</code>(1499)、<code>/api/activity</code>(1002)、<code>/api/sync</code>(1059)、<code>/api/chat</code>(252) 前端零引用——<b>其中 <code>/api/resources</code> 尤其讽刺：Resources 模块实际用 <code>loadResources()</code> 写死 innerHTML，后端接口完全用不上</b>。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>3.6 【中 · 无障碍】几乎为零</h3>
+<p>实测计数：<code>aria-*</code> 属性 <b>0 处</b>、<code>role=</code> <b>0 处</b>、<code>alt=</code> <b>1 处</b>、<code>&lt;label&gt;</code> 18 处。</p>
+<ul>
+ <li><b>Tab 导航无语义</b>：<code>&lt;div class="tab-panel"&gt;</code>（36-37）切换可见性，但无 <code>role="tablist"/"tab"/"tabpanel"</code>、无 <code>aria-selected</code>、无键盘方向键支持、无 URL hash 同步——<b>刷新页面回到 Dashboard，无法分享/收藏某个 Tab</b>。</li>
+ <li><b>弹窗无焦点管理</b>：<code>.modal-overlay</code>（325-326）只是 display 切换，无 <code>role="dialog"</code>、无 <code>aria-modal</code>、无焦点陷阱、无 ESC 关闭、无打开时聚焦首个输入框。</li>
+ <li><b>表单标签未关联</b>：SMC 表单的 <code>&lt;label&gt;</code>（632-640）<b>没有 <code>for</code> 属性</b>，与 input 无关联；点击标签不聚焦，读屏软件也读不到。</li>
+ <li><b>交互元素无语义</b>：任务复选框是 <code>&lt;div class="cb"&gt;</code>（274-275，<b>且勾选时内部是空字符串，无对勾字符</b>），theme-dot 是 <code>&lt;span&gt;</code>（515-519），profile-avatar 是 <code>&lt;div&gt;</code>（511）——<b>全部无法用键盘操作</b>，读屏软件只会念出相邻文本。</li>
+ <li><b>仅有的 alt 还是误导性的</b>：唯一的 <code>alt="Question image"</code>（2810）对错题图片毫无描述价值。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>3.7 【中 · 响应式】仅 2 个断点，移动端基本不可用</h3>
+<p>全文件仅 <code>@media</code> 出现 <b>2 次</b>（66、67 行），且<b>只作用于 <code>.subject-grid</code> 一个类</b>。侧边栏是 <code>position:fixed;width:220px</code>（17），主内容 <code>margin-left:220px;padding:28px 36px</code>（32）——<b>在 375px 宽的手机上，可用宽度只剩 155px</b>，周历表格（<code>80px + 7×1fr</code>，288）会严重挤压。<code>.task-list</code> 是写死的两列 Grid（269），<code>.dash-grid</code> 两列（241），均无降级。<b>没有侧边栏汉堡按钮、没有底部导航</b>。</p>
+<p>唯一有适配意识的是 <code>.sa-grid</code> 与 <code>.rcat-grid</code> 用了 <code>auto-fill/minmax()</code>（118、412）。</p>
+</div>
+
+<div class="card">
+<h3>3.8 【中 · 内容准确性】6 条资源链接已失效，另有 4 处内容与自身陈述冲突</h3>
+<h4>失效链接（已逐条验证文件系统）</h4>
+<table>
+<tr><th>链接</th><th>位置</th><th>状态</th></tr>
+<tr><td><code>/papers/ukmt/</code></td><td>app.html:1757</td><td><b>404</b> 目录不存在</td></tr>
+<tr><td><code>/papers/step/</code></td><td>app.html:1765</td><td><b>404</b></td></tr>
+<tr><td><code>/papers/tmua/</code></td><td>app.html:1766</td><td><b>404</b></td></tr>
+<tr><td><code>/english_p1_essays.html</code></td><td>app.html:1790</td><td><b>404</b>（但存在 <code>english_p1_answers.html</code>，疑似改名未同步）</td></tr>
+<tr><td><code>/books/Corbettmaths_Algebra.pdf</code></td><td>app.html:1781</td><td><b>404</b>（其他书籍在 <code>/resources/books/</code>，此处路径前缀不一致）</td></tr>
+<tr><td><code>/books/CodeBook_Singh.pdf</code></td><td>app.html:1782</td><td><b>404</b>（同上）</td></tr>
+</table>
+<div class="insight bad"><b>影响评估：</b>失效的 <code>/papers/ukmt/</code> 恰好是方法卡 dm11「这周做 Maths Paper 1H 2023（Resources tab）」所指向的入口（2622）。<b>学习动作与资源供给之间断链——这是比样式问题严重得多的一致性缺陷。</b></div>
+<h4>内容冲突</h4>
+<ul>
+ <li><b>筛选按钮全是摆设</b>：<code>function filterResources(cat){}</code>（1878）是<b>空函数体</b>，而 Resources 页有 6 个筛选按钮（772-779）。点击无任何反应，<code>.active</code> 状态永不切换。</li>
+ <li><b>周计划周切换按钮无标签</b>：<code>onclick="changeWeek('diya',-1)"></button></code>（791、793）——<b>按钮文本为空</b>，用户不知道是上一周还是下一周。</li>
+ <li><b>SMC 分档阈值自相矛盾</b>：UI 文案写「Gold 72+ / Silver 57+ / Bronze 46+」（625，来自 UKMT 官方），但代码 <code>smcGrade()</code> 实现的是 <code>≥83/≥66/≥51</code>（1991-1997）。<b>同一页面上两个标准并存</b>，且 smcGrade 用于所有历史记录渲染（2063）。</li>
+ <li><b>提交了不存在的字段</b>：<code>submitSMCRecord()</code> 读取 <code>val('smc-notes')</code>（2086），但表单里<b>没有 <code>#smc-notes</code> 这个 input</b>，notes 永远是空字符串。</li>
+ <li><b>任务复选框无对勾</b>：<code>${item.done?'':''}</code>（1348）——两个分支都是空字符串，勾选后框内无任何视觉反馈（仅靠背景色变化）。</li>
+ <li><b>Streak 逻辑自毁</b>：<code>loadStreak()</code> 在 lastDate 既非今天也非昨天时执行 <code>data.count = 0</code>（2118-2120），但<b>从不调用 <code>startStreak()</code></b>（2131-2139 无调用点）——连续天数永远停在 0，这个激励功能实际是死的。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>3.9 【低 · 并发与健壮性】</h3>
+<ul>
+ <li><b>JSON 写入无锁</b>：<code>atomic_write</code>（150-157）用固定名 <code>path+'.tmp'</code> + <code>os.replace</code>，无 fsync、同名 tmp 在并发下互相覆盖；只有 uploads 索引有锁（1536），<b>tasks/planner/errors/reviews/wiki 的读-改-写全程无锁，会丢更新</b>。</li>
+ <li><b>损坏文件被静默清空</b>：<code>safe_load</code> 遇解析失败把文件重命名为 <code>.corrupt</code> 并返回 <code>[]</code>（171-179），<b>随后任意一次 POST 就把历史覆写成空</b>——丢数据且无告警。</li>
+ <li><b>smc_records 有 NameError</b>：api_server.py:1371 引用未定义变量 <code>path</code>（应为 <code>SMC_DATA_FILE</code>），该 JSON 一旦损坏即 500。</li>
+ <li><b>日期格式不统一</b>：<code>error_save</code> 用 <code>isoformat()</code> 带时分秒（1294），其余是 <code>YYYY-MM-DD</code>；前端按 <code>new Date()</code> 排序（2786），导致邮件条目与手工条目排序错位、<code>formatRelativeDate</code> 显示异常。</li>
+ <li><b>文件句柄泄漏</b>：<code>open(open())</code> 模式未关闭句柄（383、416、670）。</li>
+ <li><b>上传限流在反代后失效</b>：30 次/小时的计数是进程内字典（1780-1787），未启用 ProxyFix，<b>Nginx 后所有用户共用一个桶</b>。</li>
+<li><b>OCR 线程池仅 2 workers</b>（1474），单页最坏 5 模型 × 90s 超时（1484），20 页 PDF 排队时间可能极长；200dpi 渲染无内存上限（1623）。</li>
+ <li><b>上传限流检查顺序颠倒</b>：<code>f.read()</code> 在大小检查之前执行（1792）。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>3.10 【低 · 体验】双孩子切换是「换整页」而非「换上下文」</h3>
+<p>切换 Jemma 是 <code>&lt;a href="/jemma.html"&gt;</code>（538）——<b>整页跳转、丢失当前 Tab 与滚动位置</b>。且全局状态写死 Diya：<code>let currentChild = 'diya'</code>（1135）、<code>loadDashboard()</code> 硬编码 <code>/api/dashboard/diya</code>（1903）、<code>loadErrorBook()</code> 硬编码 <code>/api/errors/diya</code>（2741）、<code>loadReviewHistory()</code> 硬编码 <code>/api/review?user=diya</code>（2491）、localStorage 前缀全部 <code>diya_</code>（<code>diya_notes_</code>、<code>diya_streak</code>、<code>diya_theme</code>、<code>mastered_errors_diya</code>、<code>study_tips_viewed_diya</code>）。<b>这份 3,377 行的「通用」工作台在代码层面其实是 Diya 专用</b>——这正是两份前端重复 1,283 行的根本原因。</p>
+</div>
+
+<div class="card">
+<h3>3.11 问题分布概览</h3>
+<table>
+<tr><th>维度</th><th>严重</th><th>中</th><th>低</th><th>小计</th><th>代表问题</th></tr>
+<tr><td>功能可用性</td><td>1</td><td>—</td><td>—</td><td><b>1</b></td><td>写接口 405，静默失败</td></tr>
+<tr><td>安全</td><td>1</td><td>—</td><td>—</td><td><b>1</b></td><td>路径穿越 + 默认弱口令</td></tr>
+<tr><td>内容质量</td><td>—</td><td>1</td><td>—</td><td><b>1</b></td><td>方法论自相矛盾、6 条死链</td></tr>
+<tr><td>结构调整</td><td>—</td><td>1</td><td>—</td><td><b>1</b></td><td>四份前端 + v2 未鉴权</td></tr>
+<tr><td>性能</td><td>—</td><td>1</td><td>—</td><td><b>1</b></td><td>错题本无分页</td></tr>
+<tr><td>易用性</td><td>—</td><td>—</td><td>1</td><td><b>1</b></td><td>空筛选器、空按钮、Streak 自毁</td></tr>
+<tr><td>无障碍</td><td>—</td><td>1</td><td>—</td><td><b>1</b></td><td>aria/role 均为 0</td></tr>
+<tr><td>响应式</td><td>—</td><td>1</td><td>—</td><td><b>1</b></td><td>仅 2 个断点</td></tr>
+<tr><td>并发健壮性</td><td>—</td><td>—</td><td>1</td><td><b>1</b></td><td>无锁写入、损坏静默清空</td></tr>
+</table>
+</div>
+
+<!-- ============ 4 改进建议 ============ -->
+<h2 id="s4">4. 改进建议</h2>
+
+<h3>4.1 内容优化</h3>
+
+<div class="pri-h">
+<h4>① 统一学习方法的唯一口径，删除死代码 <span class="badge b-h">高</span></h4>
+<p><b>预期效果</b>：消除自相矛盾，建立可信度；减少 40 KB 无效体积。</p>
+<p><b>实现要点</b>：</p>
+<ul>
+ <li>删除 <code>STUDY_TIPS_DIYA</code>（app.html:3342-3354，无调用方）与 <code>TIMER_TARGETS</code>（1277-1283，日期全为 2025 年）。</li>
+ <li>在 <code>V2_TIPS_POOL</code> 中<b>保留唯一一套间隔复习时间表</b>，建议采用 1-3-7-30（有明确的艾宾浩斯依据且 dm02 已引用），统一改写 dm16 与 d_s02 的表述并注明其为同一方法。</li>
+ <li>段落法<b>统一为 PETAL（5 步）或 PETZAL（6 步）之一</b>，二选一后全站替换；建议保留 PETZAL（6 步）因为 d_s01 关于「effect on reader 是权重最高项」的论证更准确。</li>
+ <li>把方法内容外置为 <code>data/tips_diya.json</code>，让家长/老师可编辑而无需改代码。</li>
+</ul>
+</div>
+
+<div class="pri-h">
+<h4>② 修复 6 条失效资源链接，并给方法卡建立「资源可达性校验」 <span class="badge b-h">高</span></h4>
+<p><b>预期效果</b>：消除学习动作与资源供给的断链——这是当前最伤使用信心的问题。</p>
+<p><b>实现要点</b>：</p>
+<ul>
+ <li>逐条修复上表 6 个链接：<code>/books/*</code> 两项应指向 <code>/resources/books/</code>（与 They Say/I Say 一致）；<code>english_p1_essays.html</code> 改为实际存在的 <code>english_p1_answers.html</code> 或补建该页；<code>/papers/{ukmt,step,tmua}/</code> 需确认是目录缺失还是链接写错。</li>
+ <li>把 <code>loadResources()</code> 中写死的 innerHTML（1752-1875）<b>改为从 <code>/api/resources</code> 读取</b>——该后端接口（api_server.py:1136）已存在却零调用，改完即可在服务端加链接探活（返回 200/404），前端自动把失效项置灰并标注「文件缺失」。</li>
+ <li>启动时或构建时跑一次全量链接检查，失效项在页面底部以开发者模式显示（复用已有的 <code>#ver-badge</code>，1073）。</li>
+</ul>
+</div>
+
+<div class="pri-m">
+<h4>③ 修正 SMC 阈值矛盾与陈旧内容 <span class="badge b-m">中</span></h4>
+<p><b>预期效果</b>：消除同一页面两个标准；让家长可信地把 SMC 分数用于决策。</p>
+<p><b>实现要点</b>：<b>以 UI 文案为准</b>——把 <code>smcGrade()</code>（1991-1997）从 <code>83/66/51</code> 改为 <code>72/57/46</code>，与 625 行的官方 UKMT 阈值一致；阈值提到一个 <code>SMC_THRESHOLDS</code> 常量并同时供 UI 文案与判定函数使用，杜绝再次分叉；删除或补上 <code>smc-notes</code> 输入框（2086 引用了不存在的元素）。</p>
+</div>
+
+<div class="pri-m">
+<h4>④ 学业数据从硬编码迁移到可编辑配置 <span class="badge b-m">中</span></h4>
+<p><b>预期效果</b>：家长可自己更新成绩与风险判断，无需开发者介入——这是私有教育工具可持续性的关键。</p>
+<p><b>实现要点</b>：把 <code>initDiyaGrades()</code> 的 10 科数组（2143-2154）、Dashboard 的 Strengths/Risk/Risk Heatmap/Summer Plan/Long-term Roadmap 四段文案（570-750）迁到 <code>data/profile_diya.json</code>；沿用 <b>v2 已经做对的 <code>config.js</code> 模式</b>（v2/shared/config.js:25-35 已有 subjects/strengths/weaknesses/countdowns 结构），等于把 v2 的唯一优势移植回 v1。</p>
+</div>
+
+<div class="card">
+<h3>4.2 结构调整</h3>
+
+<div class="pri-h">
+<h4>⑤ 修复三处写接口的 405，并给所有 fetch 加响应检查 <span class="badge b-h">高</span></h4>
+<p><b>预期效果</b>：恢复错题本与 Wiki 的核心功能；杜绝「界面在笑、数据在丢」的静默失败。这是全清单里<b>投入最小、收益最大</b>的一项。</p>
+<p><b>实现要点</b>：</p>
+<ul>
+ <li>后端补 <code>POST /api/errors/&lt;child&gt;</code>、<code>DELETE /api/errors/&lt;child&gt;/&lt;id&gt;</code>（可参照已有的 <code>/api/error-save</code> 写入逻辑，1275）；<code>/api/wiki/&lt;child&gt;</code> 的 methods 加上 POST（724）。</li>
+ <li>统一字段名为前端读取的那一套（<code>question / diya_answer / correct_solution / error_type / priority</code>），并<b>保证每条记录有 <code>id</code></b> 与 <code>YYYY-MM-DD</code> 日期。</li>
+ <li><b>前端全面加 <code>if(!r.ok) throw</code></b>：<code>saveError</code>(2841)、<code>deleteError</code>(2852)、<code>saveWikiEntry</code>(2546)、<code>deleteWikiEntry</code>(2557)、<code>reviewSubmit</code>(2453)、<code>submitSMCRecord</code>(2088 已有 <code>r.ok</code> 判断，做法可作为模板)。</li>
+ <li>顺手把 <code>loadActivityFeed()</code>（2887-2900）里两个空的 <code>&lt;b&gt;&lt;/b&gt;</code> 标签和「只取最近 5-8 条却按插入顺序取」的逻辑修掉（2895-2896 用 <code>slice(-10)</code> 但数组是最新在前，应为 <code>slice(0,10)</code>）。</li>
+</ul>
+</div>
+
+<div class="pri-h">
+<h4>⑥ 给所有 child/user 参数加白名单，堵住路径穿越 <span class="badge b-h">高</span></h4>
+<p><b>预期效果</b>：把数据越权写入/读取的风险降到零；代码风格与已有的 <code>error_save</code>/<code>get_errors</code>/<code>upload_api</code> 统一。</p>
+<p><b>实现要点</b>：定义模块级 <code>ALLOWED_CHILDREN = ('diya','jemma')</code>（api_server.py:1524 已有 <code>UPLOAD_CHILDREN</code> 可复用），在 <code>planner_api</code>(199)、<code>tasks_api</code>(225)、<code>chat_api</code>(249)、<code>chat_stream</code>(528)、<code>review_api</code>(861) 入口统一校验，不在白名单直接 400；顺手在 <code>_make_token</code> 的 payload 里加入 child 字段，实现按孩子分权（当前 token 不绑定任何身份，无法区分 Diya 与 Jemma）。</p>
+</div>
+
+<div class="pri-h">
+<h4>⑦ 收敛为单一前端，v2 下线或补齐鉴权 <span class="badge b-h">高</span></h4>
+<p><b>预期效果</b>：消除未鉴权页面的数据暴露；减少 40% 重复维护成本；让「双孩子」真正参数化。</p>
+<p><b>实现要点</b>（建议顺序）：</p>
+<ul>
+ <li><b>立即</b>：把 <code>index.html:41-59</code> 的 V2 入口下线或加「实验性」标注，直到 v2 补齐鉴权——<b>这是唯一「不做就持续暴露数据」的一项</b>。</li>
+ <li><b>短期</b>：把 v1 的 fetch 401 拦截 + 探活守卫（app.html:1077-1105）原样移植进 v2；v2 的 logout 改为调用 <code>/api/auth/logout</code>（v2/diya.html:236）。</li>
+ <li><b>中期（收益最大）</b>：合并 <code>app.html</code> 与 <code>jemma.html</code> 为<b>一份带 <code>?child=diya|jemma</code> 参数</b>的应用。需替换的硬编码点已定位清楚：<code>currentChild</code>(1135)、<code>loadDashboard</code>(1903)、<code>loadErrorBook</code>(2741)、<code>loadReviewHistory</code>(2491)、以及全部 <code>diya_</code> 前缀的 localStorage key。可<b>直接复用 v2/shared/config.js 的 children 配置结构</b>，省掉从零设计。</li>
+ <li>合并后统一到 v2 的 widget 架构（<code>W.Tasks/W.ErrorBook/W.Planner/W.Wiki/W.Chat</code>，widgets.js:270-994）——它已经跑通了 13 个组件，比 v1 的 2,290 行手写 innerHTML 更可维护。</li>
+ <li>顺手清理后端死代码：<code>/api/intel</code>、<code>/api/parse-error</code>、<code>/api/ocr</code>、<code>/api/activity</code>、<code>/api/sync</code>、<code>/api/chat</code>(252)、<code>/api/homework*</code> 共 7 个端点前端零引用；以及 <code>tab-subject-analysis</code> 孤儿面板——<b>要么挂上侧边栏入口（它的 <code>loadSubjectAnalysis()</code> 已经写好了，2857-2884），要么删掉</b>。</li>
+</ul>
+</div>
+
+<div class="pri-m">
+<h4>⑧ 拆分 3,377 行单文件 <span class="badge b-m">中</span></h4>
+<p><b>预期效果</b>：可维护性、可测试性；解决「缓存了旧版」这类反复出现的问题（1128、3372 的自诊断提示就是这个问题催生的）。</p>
+<p><b>实现要点</b>：CSS（471 行）→ <code>app.css</code>；JS 按模块拆为 <code>store.js</code>（状态+localStorage）/ <code>api.js</code>（fetch 封装+401 拦截）/ <code>views/*.js</code>（每 Tab 一个）/ <code>tips.js</code>（方法库数据）；构建时注入 <code>APP_VERSION</code> hash 替代手工维护的版本号（1137）。前端体积从 208 KB 单文件降到可缓存的多文件。</p>
+</div>
+
+<div class="card">
+<h3>4.3 学习效率提升</h3>
+
+<div class="pri-h">
+<h4>⑨ 错题本接上「主动回忆 + 间隔复习」闭环 <span class="badge b-h">高</span></h4>
+<p><b>预期效果</b>：把工作台从「记录工具」升级为「记忆训练工具」——<b>这是最能直接提分的一项</b>，因为它让方法卡 dm02（主动回忆）与错题本真正连起来，而当前两者是孤立的两块。</p>
+<p><b>实现要点</b>：</p>
+<ul>
+ <li><b>给错题卡加「复习状态」</b>：<code>review_stage ∈ {new, due, reviewed}</code> + <code>last_reviewed</code> + <code>next_review_due</code>，字段落 <code>data/errors_diya.json</code>（注意 mastered 状态目前只存 localStorage，应一并后端化）。</li>
+ <li>用现有 <code>getWeekDates()</code> 的 7 天格子做「今日待复习」队列：进入 Dashboard 时高亮「今天 N 道错题到期」。</li>
+ <li><b>每张卡加一步「遮住答案自测」</b>：<code>.ec-correct</code> 默认折叠，点「Show answer」才展开（当前是左右并排全展示，<b>没有机会做主动回忆</b>——这是与 dm02 方法直接冲突的设计）。</li>
+ <li>掌握判定不要只有手动 <code>markMastered()</code>（2765）：连续 2 次自测答对才自动标记掌握。</li>
+</ul>
+</div>
+
+<div class="pri-h">
+<h4>⑩ 把 Dashboard 的「今日该做什么」收敛成一个行动区 <span class="badge b-h">高</span></h4>
+<p><b>预期效果</b>：解决当前最大易用性问题——Dashboard 有 10 个区块（544-750），但<b>没有一个回答「我今天该做什么」</b>。</p>
+<p><b>实现要点</b>：</p>
+<ul>
+ <li>在倒计时条（548）下方加一个 <b>Today Focus</b> 区块，用已有数据自动生成 3 条待办：今日 Must-Do（planner 数据，1491）、到期错题（新增字段，见 ⑨）、SMC/大考倒计时最近的节点（COUNTDOWN_ITEMS，2567）。</li>
+ <li>把 <b>Strengths/Risk 两段文案（570-594）从静态 HTML 改为随数据自动生成</b>——目前这两段是手写的固定文字，成绩变了不会更新，属于「看起来是数据其实是文案」的误导性设计。</li>
+ <li>删掉 Dashboard 上重复度高的 <b>Risk Heatmap（597-619）</b>——它与 Risk 列表、错题分布条、学科卡四处表达同一件事，占了整屏 30% 的高度却信息增量最小。把空间还给 Today Focus。</li>
+</ul>
+</div>
+
+<div class="pri-m">
+<h4>⑪ 修复几个「一戳就碎」的小交互 <span class="badge b-m">中</span></h4>
+<p><b>预期效果</b>：消除用户会立刻察觉的「这是个没做完的东西」印象。</p>
+<p><b>实现要点</b>：</p>
+<ul>
+ <li><b>实现 <code>filterResources(cat)</code></b>（当前空函数，1878）——按已有 <code>data-filter</code> 值过滤 <code>.rcat-section</code> 并同步 <code>.active</code> 态；这 6 个按钮现在完全是摆设。</li>
+ <li><b>给周切换按钮加标签</b>（791、793 空按钮）：改为 <code>‹ 上周</code> / <code>下周 ›</code>，并把周范围写进 <code>#planner-sync-label</code>。</li>
+ <li><b>修 Streak</b>：在任务完成时调用 <code>startStreak()</code>，或改为「今日有勾选任务则 streak+1」；当前永远显示 0 天。</li>
+ <li><b>补任务复选框对勾</b>（1348 的 <code>${item.done?'':''}</code>）：改为 ✓ / 空。</li>
+ <li><b>修 countdown 的 className 覆写</b>（2593）：<code>el.className.replace(...)</code> 会连 <code>countdown-item</code> 一起改写，仅靠正则兜底，极脆弱；改用 <code>classList.remove('urgent','warm','cool','far')</code>。</li>
+</ul>
+</div>
+
+<div class="pri-m">
+<h4>⑫ 错题本分页 + 虚拟滚动 <span class="badge b-m">中</span></h4>
+<p><b>预期效果</b>：276 KB 全量传输与 113 张卡全量重绘的问题消失；错题量翻倍后仍可用。</p>
+<p><b>实现要点</b>：后端 <code>get_errors</code>（1324）加 <code>?limit=&amp;offset=&amp;subject=</code>；前端改为分页或「加载更多」；保留已有的 <code>?stats=1</code> 聚合路径给 Dashboard 用（1939 的做法是对的）。同时给 <code>loadSubjectAnalysis()</code>（2861）改用 stats 接口，避免与 <code>loadErrorBook()</code> 重复拉同一份数据。</p>
+</div>
+
+<div class="pri-l">
+<h4>⑬ 响应式与无障碍补齐 <span class="badge b-l">低（但影响面广）</span></h4>
+<p><b>预期效果</b>：手机上可用（家长在通勤路上看错题是真实场景）；键盘与读屏可用。</p>
+<p><b>实现要点</b>：</p>
+<ul>
+ <li><b>响应式</b>：<code>≤820px</code> 时侧边栏收为抽屉 + 顶部汉堡按钮（或底部 Tab 栏），主内容 <code>margin-left</code> 归零；<code>.task-list</code>(269)、<code>.dash-grid</code>(241)、<code>.weekly-plan-table</code>(385) 加单列降级。</li>
+ <li><b>无障碍</b>：Tab 容器加 <code>role="tablist"</code>、面板加 <code>role="tabpanel"</code> 与 <code>aria-labelledby</code>，支持方向键与 <code>hashchange</code>（顺带解决「刷新回 Dashboard、无法分享链接」）；<code>.modal-overlay</code> 加 <code>role="dialog" aria-modal="true"</code> + 焦点陷阱 + ESC 关闭；SMC 表单的 7 个 <code>&lt;label&gt;</code>（632-640）补 <code>for</code>；把 <code>.cb</code> 复选框（274）、<code>.theme-dot</code>（515）、<code>.profile-avatar</code>（511）改为真实 <code>&lt;button&gt;</code>/<code>&lt;input type=checkbox&gt;</code>。</li>
+</ul>
+</div>
+
+<div class="pri-l">
+<h4>⑭ 数据层加固 <span class="badge b-l">低</span></h4>
+<p><b>预期效果</b>：消除并发丢更新与「文件损坏后被静默清空」这两类不可逆数据损失。</p>
+<p><b>实现要点</b>：所有 JSON 写入加线程锁（复用 uploads 已有的 <code>_upload_lock</code> 模式，1536）；<code>atomic_write</code> 的 tmp 文件名加 PID/线程 ID；<code>safe_load</code> 遇到损坏时<b>抛错并告警</b>而非返回 <code>[]</code>（171-179）；修 <code>api_server.py:1371</code> 的 <code>path</code> NameError；写后主动清 <code>_json_cache</code>（解决 15 秒脏读）；API Key 改存环境变量或至少 <code>chmod 600</code>；Cookie 加 <code>secure=True</code>（配合 Nginx HTTPS）；登录加失败计数锁定；<code>_load_hw</code> 的硬编码路径（2006）改用 <code>DATA_DIR</code>。</p>
+</div>
+
+<!-- ============ 5 总结 ============ -->
+<h2 id="s5">5. 总结：可执行优先级清单</h2>
+
+<div class="card">
+<h3>P0 · 立即修（约 1-2 天，阻断性 / 安全 / 信任危机）</h3>
+<table>
+<tr><th>#</th><th>动作</th><th>位置</th><th>为什么是 P0</th></tr>
+<tr><td>1</td><td><b>下线 index.html 的 V2 入口</b>，或给 v2 补上鉴权</td><td>index.html:41-59；v2/*.html</td><td>v2 <b>完全未鉴权</b>，任何人可直连读写全部数据；且 logout 只清本地（v2/diya.html:236）</td></tr>
+<tr><td>2</td><td><b>child 参数白名单</b>，堵路径穿越</td><td>api_server.py:199/225/249/528/861</td><td>可写出 <code>data/</code> 目录；同库内其他端点已做校验，属不一致缺陷</td></tr>
+<tr><td>3</td><td><b>补 POST/DELETE 错题与 Wiki 接口</b> + 前端加 <code>if(!r.ok) throw</code></td><td>api_server.py:724/1324；app.html:2546/2557/2841/2852</td><td>错题本新增/删除<strong>当前 100% 失效</strong>，且界面提示「Saved」掩盖失败</td></tr>
+<tr><td>4</td><td><b>统一 error-save 与前端字段名</b>，确保每条记录有 id 与规范日期</td><td>api_server.py:1294-1306 ↔ app.html:2790-2799</td><td>邮件错题在页面渲染为空；<code>markMastered('undefined')</code></td></tr>
+<tr><td>5</td><td><b>修 6 条失效资源链接</b></td><td>app.html:1757/1765/1766/1781/1782/1790</td><td>方法卡指定的练习入口 404，直接断掉「方法 → 行动」链</td></tr>
+<tr><td>6</td><td><b>移除硬编码默认密码</b>、Cookie 加 <code>secure</code>、登录加失败锁定</td><td>api_server.py:23/96/90</td><td><code>APP_PASSWORD='haibo2026'</code> 随代码入库；前端曾明文出现过公网 HTTP IP</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>P1 · 尽快排期（约 1 周，核心体验与内容可信度）</h3>
+<table>
+<tr><th>#</th><th>动作</th><th>位置</th><th>收益</th></tr>
+<tr><td>7</td><td><b>实现 <code>filterResources()</code> + 周切换按钮标签 + 任务对勾 + Streak 复活</b></td><td>app.html:1878/791/793/1348/2118</td><td>四类「一戳就碎」的交互，改动量极小</td></tr>
+<tr><td>8</td><td><b>统一方法论口径</b>，删除 <code>STUDY_TIPS_DIYA</code> 与 <code>TIMER_TARGETS</code></td><td>app.html:3342-3354 / 1277-1283</td><td>消除三套间隔复习时间表、PETAL/PETZAL 双命名</td></tr>
+<tr><td>9</td><td><b>修 <code>smcGrade()</code> 阈值</b> 为 72/57/46，统一为单一常量</td><td>app.html:1991-1997 ↔ 625</td><td>同一页面两个评分标准</td></tr>
+<tr><td>10</td><td><b>错题本分页</b> + 复用 <code>?stats=1</code></td><td>api_server.py:1324/1341；app.html:2741/2861</td><td>去掉 276 KB 全量拉取与 113 卡全量重绘</td></tr>
+<tr><td>11</td><td><b>Dashboard 加 Today Focus 行动区</b>，删除冗余 Risk Heatmap，强弱项改为数据驱动</td><td>app.html:548/570-594/597-619</td><td>回答「今天做什么」；腾出 30% 首屏空间</td></tr>
+<tr><td>12</td><td><b>错题卡默认折叠答案 + 加复习状态字段</b></td><td>app.html:2813-2816；data/errors_diya.json</td><td>让错题本真正服务 dm02 主动回忆方法，而不只是存档</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>P2 · 结构治理（约 2-4 周，消除长期成本）</h3>
+<table>
+<tr><th>#</th><th>动作</th><th>位置</th><th>收益</th></tr>
+<tr><td>13</td><td><b>合并 app.html 与 jemma.html 为单一 <code>?child=</code> 应用</b>，复用 v2 的 config.js children 结构</td><td>app.html + jemma.html（重复 1,283 行）</td><td>消灭 40% 重复；让「双孩子」真正参数化</td></tr>
+<tr><td>14</td><td><b>拆分单文件</b>：CSS / store / api / views / tips + 构建注入版本号</td><td>app.html 3,377 行</td><td>可维护可缓存；根治「缓存旧版」问题</td></tr>
+<tr><td>15</td><td><b>学业数据外置</b>到 <code>data/profile_*.json</code>（沿用 v2 config 模式）</td><td>app.html:2143-2154 / 570-750</td><td>家长可自助更新成绩，不用改代码</td></tr>
+<tr><td>16</td><td><b>清理死代码</b>：7 个零引用后端端点 + <code>tab-subject-analysis</code> 孤儿面板（挂入口或删）</td><td>api_server.py:252/1002/1059/1083/1136/1190/1499；app.html:936</td><td>减少约 400 行无维护成本代码</td></tr>
+<tr><td>17</td><td><b>响应式 + 无障碍</b>：抽屉式侧边栏、Tab 语义与键盘导航、弹窗焦点管理、label 关联、可聚焦交互元素</td><td>app.html:17/32/36-37/269/325/515/632-640</td><td>手机可用（家长通勤看错题）、键盘与读屏可用</td></tr>
+<tr><td>18</td><td><b>数据层加固</b>：写锁、tmp 唯一名、损坏不静默清空、1371 NameError、写后清缓存、Key 加密</td><td>api_server.py:150-179/1371/414</td><td>消除并发丢更新与不可逆数据丢失</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>整体判断</h3>
+<div class="insight good">
+<b>这是一份「思考深度远超工程完成度」的资产。</b><br><br>
+内容侧（学习方法的学术依据、考试情报、错题四段式结构、5 模型投票 OCR + 字段抽取管线）达到了认真打磨的水平，Dashboard 的风险热力图、倒计时紧迫度分层、SMC 趋势图都体现了真实的教��思考。<br><br>
+但工程侧存在三类必须修的问题：<b>① 功能性静默失败</b>（错题本写操作 405 却提示成功）、<b>② 安全边界不一致</b>（同一代码库 5 个端点缺 child 白名单、默认弱口令入库）、<b>③ 结构债累积</b>（4 份前端、40% 重复、一个已写好却没有入口的孤儿模块）。<br><br>
+<b>建议节奏：先用 1-2 天做 P0 的 6 项</b>——尤其是第 1 项（v2 未鉴权暴露）和第 3 项（错题本失效且界面掩盖失败），这两项每天都在持续损害信任；然后把 P1 的 6 项作为一个「内容可信度 + 每日可用性」迭代；P2 的结构治理不急，但应在 P0/P1 完成后立即排期，否则四份前端的维护成本会继续滚雪球。
+</div>
+</div>
+
+<footer>
+本报告基于 2026-10-15 的全量源码静态审计生成，所有结论均可回溯到具体文件与行号。<br>
+审计范围：app.html（3,377 行）、jemma.html、v2/（4 文件 1,142 行）、api_server.py（2,050 行）、data/（32 文件）、index.html、login.html；含 6 条资源链接的文件系统可达性实测。<br>
+说明：本报告为工程与内容质量评估，不涉及学习效果承诺。
+</footer>
+
+</div>
+</body>
+</html>

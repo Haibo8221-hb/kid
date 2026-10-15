@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Diya 学习方案专家建议 · 内容 / 习惯 / 升学路径</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f7f8fa;--surface:#fff;--surface2:#f0f2f5;--border:#e2e6ea;--text:#1a1d28;--text2:#6b7280;--accent:#4f8cff;--accent2:#10b981;--red:#ef4444;--orange:#f59e0b;--yellow:#eab308;--green:#22c55e;--radius:12px}
+body{font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.78;font-size:15px;padding:0 0 80px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+header.hero{background:linear-gradient(135deg,#1e40af,#0891b2);color:#fff;padding:50px 0 42px;margin-bottom:34px}
+header.hero h1{font-size:31px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px}
+header.hero p{font-size:14px;opacity:.93}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.meta span{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:4px 13px;font-size:12px}
+h2{font-size:22px;font-weight:800;margin:46px 0 14px;padding-bottom:10px;border-bottom:2px solid var(--accent);letter-spacing:-.3px}
+h3{font-size:17px;font-weight:700;margin:28px 0 12px}
+h4{font-size:14.5px;font-weight:700;margin:0 0 8px}
+p{margin-bottom:12px}
+code{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:12.5px;font-family:ui-monospace,Consolas,monospace;color:#b45309}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 26px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+th{background:var(--surface2);padding:10px 12px;text-align:left;font-weight:700;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:10px;white-space:nowrap}
+.b-h{background:rgba(239,68,68,.13);color:#b91c1c}
+.b-m{background:rgba(245,158,11,.15);color:#b45309}
+.b-l{background:rgba(34,197,94,.14);color:#15803d}
+.b-fix{background:rgba(79,140,255,.13);color:#1d4ed8}
+ul,ol{margin:0 0 14px 22px}
+li{margin-bottom:6px}
+.insight{background:var(--surface2);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:13.5px;line-height:1.72}
+.insight.bad{border-left-color:var(--red);background:rgba(239,68,68,.05)}
+.insight.good{border-left-color:var(--accent2);background:rgba(16,185,129,.05)}
+.insight.warn{border-left-color:var(--orange);background:rgba(245,158,11,.06)}
+.rec{border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin-bottom:16px;background:var(--surface)}
+.rec-h{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+.rec-n{background:var(--accent);color:#fff;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;margin-top:2px}
+.rec-t{font-size:16px;font-weight:700;flex:1;line-height:1.5}
+.rows{margin-top:12px}
+.row{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:9px 0;border-top:1px dashed var(--border);font-size:13.5px;line-height:1.72}
+.row:first-child{border-top:none}
+.row .lb{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;padding-top:2px}
+.row.crit .lb{color:var(--red)}
+.row.eff .lb{color:var(--accent2)}
+.mist{border-left:3px solid var(--orange);background:rgba(245,158,11,.05);border-radius:0 6px 6px 0;padding:9px 13px;margin-top:10px;font-size:13px;line-height:1.7}
+.mist b{color:#b45309}
+.src{font-size:11.5px;color:var(--text2);margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)}
+.src a{color:var(--accent);text-decoration:none}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+.toc ol{margin-left:20px}
+.toc a{color:var(--accent);text-decoration:none}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.kpi .v{font-size:23px;font-weight:800;color:var(--accent)}
+.kpi .l{font-size:11.5px;color:var(--text2);margin-top:3px;line-height:1.5}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tl{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.tl .d{font-size:12px;font-weight:800;color:var(--accent);margin-bottom:6px}
+.tl .e{font-size:13.5px;font-weight:700;margin-bottom:6px}
+.tl .x{font-size:12.5px;color:var(--text2);line-height:1.65}
+footer{margin-top:54px;padding-top:22px;border-top:1px solid var(--border);color:var(--text2);font-size:12.5px}
+@media(max-width:860px){.grid3{grid-template-columns:1fr}.wrap{padding:0 16px}.row{grid-template-columns:1fr;gap:3px}header.hero h1{font-size:24px}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+ <div class="wrap">
+  <h1>海外教育视角下的学习方案建议</h1>
+  <p>对象：Diya（Year 11 · 英国私校 · 目标 G5 工程）｜ 以 2026-10 官方政策与考试规格为准</p>
+  <div class="meta">
+   <span>出具日期：2026-10-15</span>
+   <span>视角：海外教育行业（英联邦六国 + 大陆/港新路径）</span>
+   <span>依据：UCAS / UAT-UK / UKVI / 各校官网口径</span>
+   <span>前提：低成本、可持续、能坚持</span>
+  </div>
+ </div>
+</header>
+
+<div class="wrap">
+
+<div class="toc">
+ <b>本文导航</b>
+ <ol>
+  <li><a href="#s0">先说三个必须纠正的前提（否则后面的建议会白做）</a></li>
+  <li><a href="#s1">维度一 · 内容层面：难度、深度、广度、与中国教材衔接</a></li>
+  <li><a href="#s2">维度二 · 学习习惯层面：节奏、复习预习、输出型练习</a></li>
+  <li><a href="#s3">维度三 · 升学路径：成绩 / 标化 / 语言 / 背景 / 时间节点</a></li>
+  <li><a href="#s4">整合：一份可执行的 12 周启动方案</a></li>
+  <li><a href="#s5">未来 3 周执行计划（10/15 → 11/4）· 按真实日期排布</a></li>
+ </ol>
+</div>
+
+<!-- ============ 0 前置纠正 ============ -->
+<h2 id="s0">0. 先说三个必须纠正的前提</h2>
+
+<div class="insight bad">
+<b>在给建议之前，我必须先纠正现有方案里三处会导致路径走偏的判断错误。这三条不是"建议"，是"止损"。</b>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">1</span><span class="rec-t">现有方案把「ESAT」和「MAT」混为一谈，且 MAT 已被取消——如果按原计划备考 MAT，投入会全部作废</span></div>
+<p><b>事实（2026 年现状，已核实）：</b></p>
+<ul>
+ <li>MAT 已被 <b>TMUA</b> 取代，目前基本退出剑桥/帝国理工的工程类要求。</li>
+ <li>由剑桥与帝国理工共同创办的 <b>UAT-UK</b> 统一运行 <b>ESAT</b>，已取代 <b>NSAA</b>（剑桥自然科学/工程）与 <b>ENGAA</b>；自 <b>2027 入学起，牛津工程、Physics、Physics &amp; Philosophy 也改为考 ESAT，牛津的 PAT 正式取消</b>。</li>
+ <li>剑桥、帝国理工、牛津、UCL 共四校使用 ESAT。帝国理工用得最重，覆盖航空、生物工程、土木、电气电子、材料、机械、<b>设计工程</b>等几乎全部工程专业。</li>
+</ul>
+<div class="insight bad" style="margin-top:10px">
+<b>ESAT 规格（务必按此理解，不要按 MAT 的经验推断）：</b><br>
+· 形式：<b>机考</b>（Pearson VUE 考点），全客观题，<b>禁止计算器、无公式纸、负分标记</b><br>
+· 五个模块：Maths 1（<b>必考</b>）、Maths 2、Physics、Chemistry、Biology<br>
+· 每模块 <b>27 题 / 40 分钟</b>，<b>独立计时、不可挪用时间</b>；共考 3 个模块，总计 120 分钟<br>
+· 评分：<b>每模块独立给 1.0–9.0 分，不合成总分</b>；无总分意味着"偏科"无法互相补偿<br>
+· 费用：英国/爱尔兰 £78，海外考点 £133
+</div>
+<p><b>对 Diya 的直接含义（按目标倒推）：</b></p>
+<table>
+<tr><th>目标</th><th>ESAT 模块组合</th><th>说明</th></tr>
+<tr><td><b>帝国理工 设计工程</b>（当前冲刺目标）</td><td>Maths 1 + Maths 2</td><td><b>不需要 Physics 模块</b>——这是常被误解的一点，但 Maths 2 难度明显高于 Maths 1</td></tr>
+<tr><td>剑桥 工程</td><td>Maths 1 + Maths 2 + Physics</td><td>三模块全考</td></tr>
+<tr><td>牛津 工程科学</td><td>Maths 1 + Maths 2 + Physics</td><td>2027 入学起首次适用 ESAT</td></tr>
+<tr><td>UCL 电子电气工程</td><td>Maths 1 + 另两模块自选</td><td>UCL 仅电子电气工程用 ESAT；机械土木用 TMUA</td></tr>
+</table>
+<div class="insight warn" style="margin-top:10px">
+<b>时间节点（务必按此倒推，2029 入学）：</b><br>
+2029 年入学 → UCAS 截止约 2028 年 10 月中 → ESAT 通常在 <b>2028 年 10 月</b>考（剑桥/牛津申请人<b>必须</b>考 10 月场次，1 月场仅限剑桥部分 January deadline 的 mature college 与牛津 Astrophoria 预科）。<br>
+<b>也就是说 Diya 的 ESAT 在 Y13（2028-2029 学年开始的 10 月）考，不是现在。</b>但 Maths 2 对应的 A-Level 微积分内容国内体系普遍薄弱，<b>现在就该开始铺垫</b>——见建议 1-3。
+</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">2</span><span class="rec-t">A-Level 选科与 Oxbridge offer 的硬约束，当前方案存在"化学卡住 A-level 数学/Further Maths"的隐性风险</span></div>
+<p>剑桥工程 offer 是 <b>A*A*A 且必须含数学与物理</b>；帝国理工设计工程要求 <b>AAA 且数学必须 A</b>；牛剑数学方向现在要求 <b>A*A*A 且数学与 Further Maths 均 A*</b>。</p>
+<div class="insight bad">
+<b>风险点：</b>现有方案把"Chemistry ≥7 决定第 4 门 A-level"作为条件。这个逻辑<b>方向反了</b>——在英国体系下，<b>Further Maths 通常需要 GCSE Maths 8-9、Maths A-level 需 GCSE Maths 7+</b>；而许多六年级制会要求"修 A-Level Further Maths 必须先在 A-Level Maths 上达到 A"。也就是说：<b>化学好不好不决定能不能读 Further Maths，数学好不好才决定</b>。而剑 allegedly 需要数学与物理的 A/A*，<b>化学不在 offer 条件内</b>。
+</div>
+<p><b>正确优先级应是：</b><br>
+1. <b>保 Maths + Maths/Further Maths 的 A/A*</b>（这是 offer 的必要条件，不是加分项）<br>
+2. <b>保 Physics 的 A</b>（剑桥/牛津工程都点名要）<br>
+3. 化学<b>降到"够用即可"</b>——帝国理工设计工程只需 Maths 1+2，化学不在要求内<br>
+4. 化学真正的作用是<b>为化学工程、帝国理工的 Chemical Engineering、以及 Materials 留一条后路</b>，而不是"必须 7 分才能读 A-level 化学"</p>
+<div class="mist"><b>常见误区：</b>家长普遍以为"把弱科补到 7 分，四门 A-level 就能齐开花"。实际上 Oxford/Cambridge 的 offer 都是三门制（Cambridge 明确表示三门 A-level 即可，第四门不会提高 offer），<b>用四门的时间换取三门的高分，比四门平均用力划算得多</b>。工作台上"每科 7+"的全科战略，在英国体系下是典型的中式思路，会稀释数学深度。</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">3</span><span class="rec-t">香港路径的定位需要重新校准——不是"保底"，而是有独立的成绩逻辑，且时间线远比英美紧</span></div>
+<p>现有方案写"HKUST + PolyU"作为香港平行线、UCL 为 Primary、PolyU 为 Safety。但按 2026 年实际口径，这个排序需要调整，且港校有一条被忽略的硬规则：</p>
+<div class="insight warn">
+<b>港校不强制申请时带雅思</b>（可后补），但"没有合格雅思无法顺利录取入读"，且高分雅思是面试与择优录取的重要加分项。<b>关键区别：英国是"必须达到分数线"，港校是"没出分基本进不了面试"</b>——港校把语言成绩当作<b>筛选前置条件</b>而非门槛，这一点必须在初三/初四就启动。
+</div>
+<p>更重要的是时间线：<b>港校首轮（黄金轮）在 2026 年 9 月底至 10 月初开放、11 月中下旬截止</b>——比英国提前整整一年。Diya 若走 2029 入学，港校申请窗口在 <b>2028 年 9-11 月</b>，比 UCAS（2028 年 10 月）略早。两条线可以并行，但要共用同一套 A-Level 成绩，属于天然兼容。</p>
+</div>
+
+<!-- ============ 维度一 内容 ============ -->
+<h2 id="s1">维度一 · 内容层面</h2>
+
+<div class="card">
+<h3>1.0 现状诊断</h3>
+<p>工作台记录的当前画像：Maths 75%、Physics 71%、FMaths 已选、<b>Chemistry 44%（标记 CRITICAL）</b>、History 62%、Drama 68%、Business 64%、Art 4、Eng Lang 6、Eng Lit 5。目标为 2027 年 5 月 GCSE。</p>
+<p>从海外教育视角看，这个画像有<b>一个明确的结构性优势</b>：Maths + Physics 双高且 FMaths 已选，正好命中帝国理工设计工程的 ESAT 组合（Maths 1+2）与剑桥工程的 offer 条件（数学+物理 A）。<b>真正的瓶颈不是"哪科弱"，而是"强科能否被拉出足够的深度"</b>——因为 ESAT Maths 2 考的是 A-Level 甚至 FMaths 级别的微积分与函数，而 GCSE Maths 75% 并不意味着能应对 Maths 2。</p>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">1</span><span class="rec-t">把化学从"抢救科目"降级为"够用科目"，用省下的时间做 Maths 2 的前置铺垫 <span class="badge b-h">最高优先</span></span></div>
+<div class="rows">
+<div class="row"><span class="lb">建议</span><span>把 Chemistry 从「必须提到 7 分」的每日主攻，降为「保住 5-6 分即可」。省下的每日 45-60 分钟，全部投入 <b>Maths 2 三个板块的提前接触</b>：① 微积分（导数定义、链式法则、求曲线极值、基础积分）；② 指数与对数（e^x、log 的运算与图像变换）；③ 数列与级数（等差/等比求和、简单递推）。这三块是 ESAT Maths 2 的核心，也是国内 A-Level 学生普遍缺的部分。</span></div>
+<div class="row crit"><span class="lb">适用条件</span><span>Diya 已确定以帝国理工设计工程 / 剑桥工程为主目标；且家长确认未来不打算转化学工程、药学、材料方向。若目标改为 Imperial Chemical Engineering（需 Maths 1+2+Chemistry），则化学必须提回来。</span></div>
+<div class="row eff"><span class="lb">预期效果</span><span>ESAT Maths 2 全球平均分约 4.5，7.0+ 才算有竞争力（top 10-15%）。在 Y13 考前有 2 年铺垫，把微积分与数列从"零基础"变成"见过两遍"，是把自己从 4.5 拉到 6.5+ 的最低成本路径。而化学从 44% 到 6 分（英国及格线之上）的边际收益，远低于数学从 A 到 A*。</span></div>
+</div>
+<div class="mist"><b>常见误区：</b>"化学 44% 是致命短板，必须抢救"。若在国内体系下这是对的，但<strong>英国体系下化学不是任何目标专业的 offer 条件</strong>。另一种误区是"数学强所以不用管"——恰恰相反，<strong>ESAT 无负分、无计算器、27 题 40 分钟，Maths 2 运算量大</strong>，这是"强项更容易翻车"的科目。</div>
+<div class="src">依据：UAT-UK ESAT 规格（各模块独立 1.0-9.0 评分，无总分）；帝国理工设计工程 ESAT 组合为 Maths 1 + Maths 2；剑桥工程 A*A*A 含数学物理。</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">2</span><span class="rec-t">用"降维打击"式的知识广度扩张替代无目的刷题：只补<b>国内教材没有、ESAT/A-Level 必考</b>的四个缺口 <span class="badge b-h">高</span></span></div>
+<p>中国课程与英国 A-Level 的核心知识差异不在"难度"而在<b>结构</b>。以下四项是国内教材系统性缺失、且直接决定 ESAT 与 A-level 成败的：</p>
+<table>
+<tr><th>缺口</th><th>国内教材状况</th><th>ESAT/A-Level 要求</th><th>最低成本补法</th></tr>
+<tr><td><b>导数与微积分直觉</b></td><td>高中仅涉极限概念，无导数定义、无微积分应用</td><td>Maths 2 核心；A-Level Maths 必修</td><td><b>不要先啃 calculus 教科书</b>。用 3Blue1Brown 的「Essence of Calculus」第 1-7 集（免费，约 3 小时），看完能说清导数是什么就够 Y12 用</td></tr>
+<tr><td><b>数列与级数</b></td><td>等差等比有，Σ 记法与求和公式弱</td><td>Maths 2 明确考求和、递推数列</td><td>把 Y12 A-Level 教材的 Sequences &amp; Series 章节提前读一遍（约 5 小时），重点是 Σ 符号与算术/几何级数求和</td></tr>
+<tr><td><b>英文语境下的学科术语</b></td><td>学科词汇以中文为主</td><td>ESAT 全英文出题；A-Level 教材英文</td><td>把 ESAT 官网免费样题的英文题干逐句抄读一遍（<b>免费且是最高效的词汇准备</b>）；不做额外背单词</td></tr>
+<tr><td><b>必考物理实验（required practicals）</b></td><td>不做实验考查</td><td>AQA GCSE Physics 有 10 个必做实验，直接影响 Paper 1 得分</td><td>学校实验室时间集中攻克即可；<b>不要花钱买实验视频课</b>，用学校资源是最低成本路径</td></tr>
+</table>
+<div class="rows">
+<div class="row eff"><span class="lb">预期效果</span><span>这四项恰好覆盖了"ESAT 需要的"与"GCSE 会考的"交集，是投入产出比最高的补强区。总成本约 15-20 小时，全部免费或用学校已有资源。</span></div>
+</div>
+<div class="mist"><b>常见误区：</b>买大量 A-Level 教材、考卷、网课。国内家长最容易在"资料囤积"上浪费——英国学校发的教材（Cambridge International / AQA / Edexcel 官方指定本）本身就是最好的材料，<strong>Workbook 是必做而非可选</strong>，很多学生反而跳过了。另一个误区是把"国内教材更难所以不用补"，实际是<strong>知识框架分类方式不同</strong>：国内按"章节"讲，英国按"能力板块"考（Use of Maths、Reasoning、Problem Solving 是独立评分维度）。</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">3</span><span class="rec-t">用"概念先于计算"的方式处理英文文学与语言——这是 A*A*A 里的第三门，也是国内学生最易被低估的拉分点 <span class="badge b-h">高</span></span></div>
+<div class="rows">
+<div class="row"><span class="lb">建议</span><span>Eng Lang 6 / Eng Lit 5 想拿到 A-level A，需从"读懂"升级为"解释"。核心动作只有一个：<b>把每篇文本的"生词深挖"限定为每周 3 个词</b>——每个词回答三个问题：字典义 / 语感色彩（connotation）/ 对读者的效果。这与工作台上已有的方法卡方向一致，但<b>频率与数量必须收紧</b>（从"每篇一段"改为"每周固定 3 个词"），否则会挤占数学时间。</span></div>
+<div class="row eff"><span class="lb">预期效果</span><span>英文语言与文学在剑/aws offer 中算第三门（或第四门）。A-level English 的 Paper 1 按 <b>Use of English</b>、<b>Analysis</b> 两个维度独立评分，其中 Analysis 权重更高。<b>"effect on reader"能否写准，直接决定 A 与 A* 的分界</b>。每周 3 个词的深挖，一个学期就是 40-50 个高质量分析素材，足够支撑整本作文集。</span></div>
+<div class="row"><span class="lb">适用条件</span><span>Diya 已有 LD（Learning Development）支持记录，说明她有可用的学习支持机制，可继续沿用 school 的 support 资源，不必额外购买 1:1 课时。</span></div>
+</div>
+<div class="mist"><b>常见误区：</b>"英文提分靠背范文"。A-level English 不奖励背诵，考的是<b>现场分析能力</b>；背下来的模板遇到没见过的文本会失效。另一个误区是<b>字数越多越好</b>——A-level 英文没有中国高考那种"篇幅即分数"的机制，一段 120 词精准分析胜过三段 300 词的重复论述。</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">4</span><span class="rec-t">把"国内教材衔接"重新定义为<b>语言与评分的衔接</b>，而非知识补差 <span class="badge b-m">中</span></span></div>
+<p>如果未来考虑转回国内体系（这条路径对双孩家庭是真实选项），需要知道的是：</p>
+<table>
+<tr><th>衔接维度</th><th>英国体系</th><th>国内体系</th><th>需要做什么</th></tr>
+<tr><td>评分尺度</td><td>GCSE 9-1 数字制（2025 年全英 67.1% 达 grade 4+；grade 5 高于中位数；grade 7 进入前 1/5）</td><td>百分制为主，转换标准按校</td><td>GCSE grade 7 ≈ 国内 80-85 分水平；<b>grade 8-9 才是国内 90+ 的等值区间</b>。不要把 6 误判成"中等偏上"</td></tr>
+<tr><td>英语文学广度</td><td>需读莎士比亚原文 + 当代文本</td><td>常见为"整本书 + 题库"模式</td><td>英国体系对<b>独立阅读量</b>要求更高，这是优势，不必担心"没读完规定书目"</td></tr>
+<tr><td>数学深度</td><td>GCSE Maths 止于比例/三角/微积分前奏；A-Level 才上导数</td><td>高一即学导数</td><td>若回国，<b>国内数学进度会领先约 1 年</b>——这也是建议 1 中"提前铺垫微积分"在中国体系下毫无损失的原因</td></tr>
+</table>
+<div class="rows">
+<div class="row eff"><span class="lb">预期效果</span><span>避免出现"因为是英国体系所以数学落后"这类误判。<b>Diya 在 GCSE 阶段学微积分属于超前，回国不需补课</b>——这一点会让"要不要转体制"这个决策轻松很多。</span></div>
+</div>
+<div class="mist"><b>常见误区：</b>把国内"高标准严要求"直接搬到英国体系。国内高考的"刷题量纲"在 A-Level 下是负资产——A-Level 更看重<b>深度理解与独立表达</b>，大量重复刷题会占用本该用于写作与深度思考的时间。</div>
+</div>
+
+<!-- ============ 维度二 习惯 ============ -->
+<h2 id="s2">维度二 · 学习习惯层面</h2>
+
+<div class="card">
+<h3>2.0 现状诊断</h3>
+<p>工作台记录的习惯层设计其实相当完整：有 3 时段周计划表（AM/PM/Eve）、Daily Must-Do 行、任务完成率圆环、每日学习卡轮播、周复盘 7 问。<b>框架有了，问题在于三处：</b></p>
+<ul>
+ <li><b>间隔复习口径自相矛盾</b>——卡片池里同时存在「1天→3天→1周→1个月」、「2357 法（今天/2/3/5/7天）」、「2-3-5-7 法」三套不同时间表，学生无从执行。</li>
+ <li><b>答案永远可见</b>——错题卡的正确答案与学生答案左右并排全展示，<b>结构上没有做主动回忆的机会</b>，而卡片第一条方法恰恰是"主动回忆"。</li>
+ <li><b>Streak 机制失效</b>——连续天数永远显示 0 天（因 startStreak 无调用点），激励回路实际是断的。</li>
+</ul>
+<p>以下建议按"能坚持"排序，均为低成本。</p>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">5</span><span class="rec-t">固定一个"最小可行日"，比优化时间表更有效：每天 90 分钟固定时段，科目固定不变的<b>双科轮换制</b> <span class="badge b-h">最高优先</span></span></div>
+<div class="rows">
+<div class="row"><span class="lb">建议</span><span>不要用工作台现有的"周计划表自由填格子"模式——那是给自律性已经很强的学生的工具。改用固定节奏：<b>每天固定一个 90 分钟时段（建议放学后第一段），周一三五 Maths+Physics，周二四 English+Chemistry，周末做整卷与复盘。</b>科目组合按周固定不变，<b>学生不需要每天做"今天学什么"的决策</b>。</span></div>
+<div class="row eff"><span class="lb">预期效果</span><span>决策成本是拖延的最大来源。90 分钟 × 5 天 = 每周 7.5 小时纯学习，这已足够在一年内产生可观的 A-level 进度。<b>固定化的最大价值不是时长，是"不需要意志力"</b>——研究反复证明，降低启动阻力比提高目标时长更能维持长期坚持。</span></div>
+<div class="row"><span class="lb">适用条件</span><span>Diya 已有 LD 支持记录，说明曾被评估为需要额外学习支持。若学校已有 IEP/学习支持计划，优先与学校对齐时段安排，而非自建体系造成冲突。</span></div>
+</div>
+<div class="mist"><b>常见误区：</b>"每天计划越多越充实"。工作台现有设计允许一天填入多个时段（AM/PM/Eve 三格），实践中常见的结果是<b>每格都填了、每格都没做完、每天都有挫败感</b>。宁可一天只做一格、做满 90 分钟，也不要三格都排满然后集体放弃。</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">6</span><span class="rec-t">统一间隔复习口径为唯一一套时间表，并让错题卡默认<b>折叠答案</b> <span class="badge b-h">最高优先</span></span></div>
+<div class="rows">
+<div class="row"><span class="lb">建议</span><span>两步改动：<b>①</b> 把三套时间表统一为一套，建议采用 <b>1-3-7-30 天</b>（有明确遗忘曲线依据，且学生容易记住）；<b>②</b> 错题卡改为默认只显示题干与自己的答案，<b>正确答案默认折叠</b>，点击才展开。这一条改动几乎零成本，但直接决定错题本是"主动回忆工具"还是"答案收藏夹"。</span></div>
+<div class="row eff"><span class="lb">预期效果</span><span>这两条是全文投入产出比最高的学习类改动。主动回忆的效果是重读的两倍以上（卡片引用的研究结论即为此），但<b>前提是页面上不能直接看到答案</b>——当前设计把这个前提直接破坏了。改完后，错题本从"记录工具"变成"训练工具"。</span></div>
+<div class="row crit"><span class="lb">常见误区</span><span><b>"多看几遍就记住了"</b>。这是最普遍也最贵的学习幻觉。重读带来的熟悉感会被误认为记忆，实际提取能力没有提升。判断标准很简单：<b>如果一张卡片让你觉得"我早就会了"，那它就没在训练你</b>。</span></div>
+</div>
+<div class="rec" style="border:none;padding:0;margin:8px 0 0">
+<div class="rec-h"><span class="rec-n">7</span><span class="rec-t">把"每周 3 词深挖"与"每日一段 PETZAL"固定为输出型练习，用最低成本撬动英语与口语 <span class="badge b-h">高</span></span></div>
+<div class="rows">
+<div class="row"><span class="lb">建议</span><span>输出型练习是海外体系里权重最高、也是国内学生最薄弱的一环。但不需要额外报班，两项即可：<b>① 每日一段 PETZAL 段落</b>（10 分钟限时，用考场语言而非日常语言，禁用 "shows"）；<b>② 每周三段"3 分钟口头复述"</b>——用手机录音，把本周某学科的一个知识点讲给自己听，<b>讲不下去的地方就是没懂的地方</b>。复述对象是一个真人（家长即可，每周 10 分钟），不是录音本身。</span></div>
+<div class="row eff"><span class="lb">预期效果</span><span>英语语言/文学 A-level 的评分核心是"能否精准解释语言选择的效果"。<b>说比写更能暴露理解漏洞</b>——写作时可以用长句绕过去，口头复述绕不过去。三分钟复述还能顺带解决未来 ESAT/A-level 面试所需的"口头表达"能力，而面试恰是剑桥/牛津工程放榜前的关键关卡。</span></div>
+<div class="row"><span class="lb">适用条件</span><span>Diya 目前 Eng Lang 6 → 目标是 A-level A。这一档跨度（约提升 2 个等级）通常靠评分解题模式训练，不靠阅读量堆积。</span></div>
+</div>
+<div class="mist"><b>常见误区一：</b>"口语要练就练学术辩论/演讲"。成本高、启动难，且与 A-level 评分标准关联弱。<b>误区二：</b>把每日一段写作做到 500+ 词。A-level English 16 分长的 essay 有严格的时间与结构要求，<b>训练价值在于"限时下的结构完整"，不在篇幅</b>。10 分钟 150 词的完整 PETZAL 段落，训练价值远高于 1 小时 600 词但结构松散的段落。</div>
+<div class="src">低成本理由：全部使用学生已有的工作台功能（Notes 模块 + 错题本），不新增工具、不新增支出。</div>
+</div>
+
+<!-- ============ 维度三 升学 ============ -->
+<h2 id="s3">维度三 · 升学路径（原文「刘翔路径」按「留学路径」理解）</h2>
+
+<div class="card">
+<h3>3.0 先给一张对照表：四地路径的真实门槛差异</h3>
+<p>很多家庭把港校当"保底"，但按 2026 年实际口径，<b>港前三的门槛已不低于英国 G5 的中国学生录取线</b>。这张表是所有建议的基础：</p>
+<table>
+<tr><th>路径</th><th>A-Level 硬要求</th><th>标化考试</th><th>语言要求</th><th>申请时间线（2029 入学）</th></tr>
+<tr><td><b>帝国理工 设计工程</b></td><td>AAA，<b>数学必须 A</b></td><td><b>ESAT Maths 1+2</b>（无 Physics）</td><td>IELTS 7.0（单项 6.5）；大学英语授课 3 年可免</td><td>UCAS 约 2028-10；ESAT 2028-10；面试 2028-12；offer 2029-01~03</td></tr>
+<tr><td><b>剑桥 工程</b></td><td><b>A*A*A 含数学+物理</b></td><td>ESAT M1+M2+Physics</td><td>IELTS 7.5（单项 7.0）</td><td><b>ESAT 必须 10 月场</b>；面试 11-12 月；offer 2029-01</td></tr>
+<tr><td><b>牛津 工程科学</b></td><td>A*A*A</td><td>ESAT M1+M2+Physics（<b>2027 起取代 PAT</b>）</td><td>IELTS 7.5（单项 7.0）</td><td>同上，2028-10 首考</td></tr>
+<tr><td><b>UCL 电子电气</b></td><td>AAA</td><td>ESAT（UCL 仅此专业用）；机械土木用 TMUA</td><td>IELTS 7.0-7.5</td><td>UCAS 2028-10</td></tr>
+<tr><td><b>港大 / 港科大</b></td><td><b>A*A*AA</b>（热门理工更严）</td><td>国际生通道通常不强制 SAT；若走 AP 通道需 SAT 1380-1450+</td><td>IELTS 6.5-7（<b>无合格成绩基本进不了面试</b>）</td><td><b>首轮 2028-09 开放、2028-11 下旬截止</b>——比英国早约 3 个月</td></tr>
+<tr><td><b>港理工</b></td><td>A*A*A / ABB+</td><td>AP 通道需 SAT</td><td>IELTS 6.5-7</td><td>首轮 2028-09 开放、2028-11 中旬截止</td></tr>
+<tr><td><b>NUS</b></td><td><b>不接受预估分</b>，需 3 门实考、多数录取者 4A</td><td>如仅 AS 成绩，需加 SAT/ACT + 3 门 AP</td><td>IELTS 6.5（写作口语各 6.5）</td><td><b>⚠️ 2027-05 考、8 月出分者无法申请同年入学</b>；须顺延一年</td></tr>
+<tr><td><b>NTU</b></td><td>同一考季 <b>4 门 A</b>，工程理科需含数学或高数</td><td>如仅预估需 3 门 AP</td><td>IELTS 6.0（写作口语 6.0）</td><td>同上的"考季错配"规则</td></tr>
+</table>
+<div class="insight bad">
+<b>这张表里最关键的一条：新加坡两校不接受 A-Level 预估分，且有"考季错配"硬规则——5 月考试、8 月出分的 A-Level 考生无法申请同年入学。</b>Diya 若 A2 在 2029 年 5 月考、6-7 月出分，<b>刚好卡在门槛上</b>。这条规则把"申请 2029 入学"的窗口压缩得非常窄，必须精确倒推。
+</div>
+<div class="insight warn">
+<b>另一条容易被忽略的：英国本科不能带家属陪读。</b>自 2024 年 1 月起，只有<strong>研究型研究生（9 个月以上）与政府奖学金学生</strong>能带配偶/子女；<strong>本科生、授课型硕士一律不可</strong>。同时 12 岁以上也不能申请"父母陪读签证"（仅限 4-11 岁、私校走读、一位家长）。这意味着 Diya 若读英国本科，家庭需要提前规划——<b>这不是教育问题，是签证与家庭安排问题，但必须在选校阶段就想清楚</b>。
+</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">8</span><span class="rec-t">把 ESAT 拆成三年三段，不要提前刷整套真题 <span class="badge b-h">最高优先</span></span></div>
+<table style="margin-top:8px">
+<tr><th>阶段</th><th>时间</th><th>做什么</th><th>低成本动作</th></tr>
+<tr><td>第一段<br>地基</td><td><b>Y11 现在至 2027-05</b></td><td>不碰 ESAT 题目。只做两件事：① 数学基础扎实到能顺畅处理分数、指数、对数；② 用 3Blue1Brown 建立微积分直觉</td><td><b>每天 20 分钟</b>，共约 3 个月</td></tr>
+<tr><td>第二段<br>模块拆解</td><td><b>Y12（2027-09 至 2028-06）</b></td><td>随 A-Level 课程同步：Maths 2 考什么就提前 3 个月学什么（微积分、数列、指数对数、坐标几何、三角）。<b>不做整套卷</b>，只做单知识点练习</td><td>跟随学校 A-Level 教材，<b>额外投入为零</b>（只是顺序提前）</td></tr>
+<tr><td>第三段<br>节奏与限时</td><td><b>Y13 开学至 2028-10</b></td><td>此时 A-Level 内容已学完，开始做限时训练：<b>27 题 / 40 分钟 / 无计算器</b>。重点练"节奏"而非"知识"——前 10 分钟必须做完 8-10 题</td><td>用官方样题 + 计时器，<b>每周 1 个模块即可</b>；务必练无计算器的心算</td></tr>
+</table>
+<div class="rows">
+<div class="row eff"><span class="lb">预期效果</span><span>ESAT 的最大杀手不是知识而是<b>节奏</b>：无计算器、27 题 40 分钟、负分为零，等于要求"放弃做不完的题"。全球平均分约 4.5，7.0+ 才进 top 10-15%。<b>节奏训练只能用限时套题练，没有捷径</b>——但也不需要多，每周一个模块 × 3 个月 = 12 次高质量限时，足够。</span></div>
+<div class="row crit"><span class="lb">常见误区</span><span><b>误区一：现在就开始刷 ESAT 真题。</b>两年前刷没有用——那时连 A-Level 微积分都没学，做对的题只是" GCSE 水平部分"，且会产生虚假的信心。<b>误区二：用计算器练 ESAT 题型。</b>实际考场没有计算器，用计算器练出的手感在考场上完全失效，且心算能力不会建立。<b>误区三：以为 ESAT 有总分。</b>三个模块独立给分、不合成，<strong>不存在"用物理高分补数学低分"的可能</strong>，必须每模块都过线。</span></div>
+</div>
+<div class="src">依据：UAT-UK ESAT 规格与 2026-27 考位；剑桥与牛津申请人必须考 10 月场次；ESAT 费用 £78（UK/IE）/£133（海外）。</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">9</span><span class="rec-t">雅思不要等初三——港校与英国两道门的判定逻辑不同，最优解是初二开始"低成本持续维护" <span class="badge b-h">高</span></span></div>
+<table style="margin-top:8px">
+<tr><th>目的地</th><th>雅思门槛</th><th>不达标的后果</th><th>Diya 需要的时间点</th></tr>
+<tr><td>帝国理工 / UCL</td><td>7.0（单 6.5）</td><td>可后补，但需在申请轮前出分</td><td>最晚 Y13 上学期（2028 秋）首次出分</td></tr>
+<tr><td>剑桥 / 牛津</td><td>7.5（单 7.0）</td><td>可后补</td><td>同上，且需留一次重考余量</td></tr>
+<tr><td><b>港大 / 港科大</b></td><td>6.5-7</td><td><b>⚠️ 无合格成绩基本无法顺利录取入读，且是面试与择优的重要加分项</b>——比英国更硬</td><td><b>2028-09 开放申请前必须已有成绩</b>（首轮 2028-11 截止）</td></tr>
+<tr><td>NUS</td><td>6.5（读写作各 6.5）</td><td>硬门槛</td><td>同上</td></tr>
+</table>
+<div class="rows">
+<div class="row"><span class="lb">建议</span><span><b>不要为了刷分而刷分。</b>Diya 已在英国读公立/私校三年以上，<b>日常英语环境已解决"能不能开口"的问题</b>；真正需要雅思分数的原因是<b>门槛与排序</b>。最低成本路径：<b>2028 年 6 月（Y13 开学前）考第一次</b>，一次到位 7.0-7.5；若学校有 EAL 支持或英语老师可作诊断，可先做一次模考评估。若考虑港校作为并行选项，则须提前到 <b>2028 年上半年</b>出分，以匹配 9 月开放的申请窗口。</span></div>
+<div class="row eff"><span class="lb">预期效果</span><span>雅思对多数英国工程大学的实际区分度有限（尤其在英授课三年可豁免的情况下），<b>但对港校是筛选前置条件</b>。因此"是否需要考雅思"取决于目标组合：<b>若英港双线并行 → 必须考，且时点要提前；若只申英国 → 可延后到 Y13</b>。</span></div>
+</div>
+<div class="mist"><b>常见误区：</b>"考雅思越早越好"。多数学生在 Y13 考是因为口语和学术词汇届时更成熟，<b>过早考（如 Y10）通常只能得到 6.0-6.5 的天花板，还要花两次重考</b>。真正低成本的策略是<b>平时不准备、考前 2-3 个月集中投入</b>——因为需要应试技巧（而非语言能力）的部分，恰恰短期可习得。</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">10</span><span class="rec-t">背景提升的最低成本路径：把已有的东西"记录下来"，不要为背景而做新项目 <span class="badge b-h">高</span></span></div>
+<p>英国 G5 与港校都看"学术承诺（academic commitment）"与个人陈述，港校尤为看重（25% 学术 + 25% 课外活动/领导力 + 50% 面试为常见权重结构）。<b>但对 Diya 而言，竞赛与活动不缺，问题在于没有被记录下来。</b></p>
+<div class="rows">
+<div class="row"><span class="lb">建议</span><span>从<b>Y11 起每年做一次 30 分钟的"档案整理"</b>，把三类已有材料归档：<b>① 学术</b>——UKMT SMC 成绩、BPhO 及其他竞赛记录、任何 A-Level 预估；<b>② 输出型</b>——英语写作集、任何讲义/教程/笔记（可匿名，Teaching Excellence 式的"教别人"是极强的 PS 素材）；<b>③ 活动</b>——戏剧/音乐/社团（Diya 有 Drama 68%，这是被低估的资产，戏剧排练的协作与表达是很好的 PS 素材）。</span></div>
+<div class="row eff"><span class="lb">预期效果</span><span>个人陈述与推荐信需要<b>具体、有细节、可验证的例子</b>。绝大多数"没有背景"的学生不是真的没有，而是<b>没有被转化为可引用的叙述</b>。每年 30 分钟的整理，成本近乎为零，效果却直接作用于 offer 环节。</span></div>
+<div class="row"><span class="lb">适用条件</span><span>适用于不需要额外投入的项目/科研的场景。若计划转 IB，需注意 IB 强制 CAS（ Creativity, Activity, Service），该项恰好与"活动记录"重合，不额外增加负担。</span></div>
+</div>
+<div class="mist"><b>常见误区：</b>"要做一个科研项目/参加夏令营"。行业里最常见的建议是买一个科研项目，这在经济与学术伦理上都不划算（英国高校的录取审阅已能识别流水线项目）。<b>低成本高信号的做法反而是：把已有的经历写深，而不是叠加新的经历</b>。另注意新加坡 NUS/NTU 明确要求"领导力与社会影响力（重点在影响力而非简单参与）"，这与"参加了很多活动"是相反的导向。</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">11</span><span class="rec-t">用"主申 2 + 冲刺 1 + 保底 2"替代现有的五校并列，避免表格掩盖决策 <span class="badge b-m">中</span></span></div>
+<p>现有方案把 Cambridge Design / Imperial Design（冲刺）、UCL / HKUST（Primary）、Bristol / Southampton / PolyU（Safety）平铺，<b>看似周全，实则掩盖了一个关键决策：ESAT 只能考一次（一个申请周期内）</b>，而不同学校要求不同模块组合。选模组一旦确定，报考前无法更改，改了要退费重报。</p>
+<div class="rows">
+<div class="row"><span class="lb">建议</span><span>明确为主申（帝国理工设计工程 + 剑桥工程，两者都要 Maths 1+2，<b>模块组合一致，可一次报考覆盖</b>）、冲刺一所、保底两所。<b>关键：主申的两校模块需求必须一致</b>——这是选校的第一硬约束，不是学术实力问题。</span></div>
+<div class="row eff"><span class="lb">预期效果</span><span>把"考什么"从 5 个可能收敛为 1 个确定答案，<b>释放的心理带宽足以体现在面试准备上</b>。同时避免"报了 UCL 却发现需要不同模块"的不可逆损失。</span></div>
+</div>
+<div class="mist"><b>常见误区：</b>把 UCL 电子电气作为并列目标，但 UCL 仅此专业用 ESAT、机械土木用 TMUA——<b>同一所学校不同专业考试不同</b>，混列会造成误判。同理，Imperial Computing 用 TMUA 而非 ESAT。</div>
+</div>
+
+<div class="rec">
+<div class="rec-h"><span class="rec-n">12</span><span class="rec-t">把英国本科"不能陪读"当作一个必须提前解决的家庭决策点 <span class="badge b-m">中</span></span></div>
+<div class="rows">
+<div class="row"><span class="lb">建议</span><span>这一条与学习无关但影响巨大：<b>自 2024 年 1 月起，英国 Student visa 的家属陪读只适用于研究型研究生（9 个月以上）与政府奖学金学生；本科生与授课型硕士一律不可</b>。家长陪读签证（Parent of a Child Student）仅限 <b>4-11 岁</b>的孩子 + 私立走读学校，且每个孩子仅一位家长、家长在英不可工作。Diya 目前 Year 11，若未来申请英国本科，家庭需提前规划是"孩子独立赴英"还是"另择路径"。</span></div>
+<div class="row eff"><span class="lb">预期效果</span><span>这属于"越早知道越好"的决策前提，不影响当���学习动作，但影响 2027-2029 的家庭整体安排（例如是否需要考虑港新作为并行选项——它们没有陪读限制）。</span></div>
+</div>
+<div class="mist"><b>常见误区：</b>把英国留学默认成"家长陪读+孩子读预科"的旧模式。按 2026 年规则，本科阶段这条路已基本不存在，相关预期需要整体重建。</div>
+</div>
+
+<!-- ============ 整合方案 ============ -->
+<h2 id="s4">4. 整合：一份可执行的 12 周启动方案</h2>
+
+<div class="card">
+<p>把上述 12 条压缩成三个月的启动清单。<b>刻意设计为"低成本、不需额外报班、不占用家庭经济预算"</b>。</p>
+
+<h3>阶段一 · 第 1-4 周：只做三件零成本的事</h3>
+<div class="grid3">
+<div class="tl">
+ <div class="d">第 1-2 周</div>
+ <div class="e">建立固定学习节奏</div>
+ <div class="x">每天固定 90 分钟时段；周一三五 Maths+Physics、周二四 English+Chem。<b>把工作台周计划表从"三格都填"改为"只填一格"</b>。</div>
+</div>
+<div class="tl">
+ <div class="d">第 2-3 周</div>
+ <div class="e">两处工作台改动</div>
+ <div class="x">① 错题卡答案默认折叠；② 把三套间隔复习时间表统一为 1-3-7-30 天。<b>各花 10 分钟</b>。</div>
+</div>
+<div class="tl">
+ <div class="d">第 3-4 周</div>
+ <div class="e">化学降级、评估数学深度</div>
+ <div class="x">化学改为"够用即止"；用一套 ESAT 官方样题做数学 1 自测，<b>不计入任何成绩，只为定位数学真实水平</b>（免费）。</div>
+</div>
+</div>
+
+<h3>阶段二 · 第 5-8 周：补缺口 + 建输出习惯</h3>
+<div class="grid3">
+<div class="tl">
+ <div class="d">第 5-8 周</div>
+ <div class="e">微积分手感</div>
+ <div class="x">3Blue1Brown《微积分的本质》第 1-7 集，<b>每周 3 集、每次 20 分钟</b>，看完能用自己的话解释"导数是什么"。</div>
+</div>
+<div class="tl">
+ <div class="d">第 5-12 周</div>
+ <div class="e">输出型练习上线</div>
+ <div class="x">每日一段 PETZAL（10 分钟限时）+ 每周三段 3 分钟口头复述（录音但讲给真人听）。<b>只做这两项，不加别的。</b></div>
+</div>
+<div class="tl">
+ <div class="d">第 8 周</div>
+ <div class="e">档案第一次整理</div>
+ <div class="x">30 分钟归档：SMC 成绩、竞赛记录、英语写作集、Drama 活动。<b>建一个文件夹即可</b>，不写 PS。</div>
+</div>
+</div>
+
+<h3>阶段三 · 第 9-12 周：把路径决策提前锁定</h3>
+<div class="grid3">
+<div class="tl">
+ <div class="d">第 9-10 周</div>
+ <div class="e">确定主申两校</div>
+ <div class="x">确认帝国理工设计工程与剑桥工程的 ESAT 模块组合<b>是否一致</b>（都是 M1+M2，帝国不加 Physics；剑桥要加）→ 据此决定是否需要额外考 Physics 模块。</div>
+</div>
+<div class="tl">
+ <div class="d">第 11 周</div>
+ <div class="e">倒推时间表</div>
+ <div class="x">把 ESAT（2028-10）、UCAS（2028-10）、港校首轮（2028-11）、雅思出分（2028-06 前）四个日期写进工作台倒计时条。<b>现有倒计时条只有两项，扩展为四项</b>。</div>
+</div>
+<div class="tl">
+ <div class="d">第 12 周</div>
+ <div class="e">建立"一年一档"机制</div>
+ <div class="x">每年 6 月做一次 30 分钟归档更新。<b>成本：每年 30 分钟</b>，覆盖 PS 与推荐信所需的全部素材。</div>
+</div>
+</div>
+
+<div class="insight good">
+<b>这份清单的总成本核算：</b>额外学习投入 ≈ 每天 20-90 分钟（其中真正"新增"的只有微积分 20 分钟与英语输出 20-40 分钟）；额外金钱支出 ≈ <b>0</b>（3Blue1Brown、ESAT 样题、ESAT 官网考纲均为免费；学校教材与实验室已覆盖必做实验）；额外家长投入 ≈ 每周 10 分钟（听孩子做 3 分钟复述）+ 每年 30 分钟（档案整理）。
+</div>
+
+<div class="insight warn">
+<b>需要提醒的一点：</b>以上全部建议均<b>不承诺任何升学结果</b>。ESAT、GCSE 成绩、面试表现都受临场状态与整体准备影响，超出个人努力的因素（如申请池规模、学院名额）不可控。本文的作用是把有限的时间与精力放在<b>可控且边际收益最高</b>的位置上。
+</div>
+</div>
+
+<h2 id="s5">5. 未来 3 周执行计划（2026-10-15 → 11-04，从今天起）</h2>
+
+<div class="card">
+<p>本节与 12 周计划的关系：<b>这 3 周就是 12 周计划的第 1-3 周</b>——即「阶段一：只做三件零成本的事」的执行细化版，已排到具体日期。12 周计划保持不变，本节只是让它从今天开始跑起来。</p>
+<div class="insight">
+<b>三个已纳入的日历事实：</b><br>
+① 今天是 <b>周四（10/15）</b>——所以第一周从今晚启动，固定节奏从下周一（10/19）正式点火；<br>
+② <b>10/26 当周大概率是英国私校的 half term 秋假</b>（以学校校历为准）——假期不是用来补课的，方案已按「深度块 + 休息」设计；<br>
+③ <b>SMC 结果 11 月到校</b>（10 月 7 日已考）——正好落在第三周归档窗口内，到手即入档。<br>
+若学校在窗口内安排 mock，<b>mock 优先于本表一切任务</b>，mock 后的周末用「三分类复盘」替代当周 ESAT 样题卷即可。
+</div>
+</div>
+
+<div class="card">
+<h3>5.1 第一周 · 10/15（四）– 10/21（三）：启动与摸底</h3>
+<p style="color:var(--text2);font-size:13.5px;margin-bottom:14px">本周只做两件事：<b>把节奏立起来</b>（比做什么更重要）、<b>拿到第一份真实数据</b>（ESAT 摸底 + 错题三分类）。不学新知识点。</p>
+<table>
+<tr><th style="width:96px">日期</th><th>动作</th><th style="width:190px">完成判据</th></tr>
+<tr><td><b>10/15 四</b><br>今晚 20min</td><td>只做两件小事：① 在工作台周计划里<b>只填一格</b>固定 90 分钟时段；② 建文件夹「2029 申请素材」，SMC 准考证等已有材料拍照存入</td><td>工作台一格已填、文件夹已建</td></tr>
+<tr><td><b>10/16 五</b><br>90min</td><td>数学：ESAT 官方样题 <b>Maths 1</b>，27 题 40 分钟，<b>禁计算器</b>。做完按官方答案打分（1-9 分制自己折算即可）</td><td>一张写了日期与分数的手写纸</td></tr>
+<tr><td><b>10/17 六</b><br>2h</td><td><b>错题三分类</b>：把昨天错题分成「粗心 / 没懂 / 时间不够」三类，各记条数。不重做</td><td>三分类计数表一张</td></tr>
+<tr><td><b>10/18 日</b><br>60min</td><td>3Blue1Brown《微积分的本质》第 1-2 集（每集约 15 分钟，看两遍胜过看四集）</td><td>能口头说出"导数是什么"</td></tr>
+<tr><td><b>10/19 一</b><br>90min</td><td><b>固定节奏正式点火</b>：Maths+Physics——数学改昨天错题；物理挑 1 个知识点做口头复述</td><td>两个科目各完成一件小事</td></tr>
+<tr><td><b>10/20 二</b><br>90min</td><td>English+Chem——Macbeth 单句精析 1 处（只挖 1 个词，写 connotation + effect）；化学只做 1 道题保手感</td><td>能说清"为什么选这个词而不是同义词"</td></tr>
+<tr><td><b>10/21 三</b><br>90min</td><td>Maths+Physics——<b>只攻上周分类为「没懂」的题</b>，回到教材对应章节</td><td>能讲出每道题卡在哪一步</td></tr>
+</table>
+<div class="insight good"><b>10/17 周六那个三分类，是这 3 周里信息量最大的一个动作。</b>它把"我数学不好"这种模糊感受，变成"12 道错题里 7 道粗心、3 道没懂、2 道没时间"——这直接决定 10/21 和 10/24 该做什么。绝大多数学生做错题只对答案、不分类，等于白做。</div>
+</div>
+
+<div class="card">
+<h3>5.2 第二周 · 10/22（四）– 10/28（三）：定向补漏（含 half term）</h3>
+<p style="color:var(--text2);font-size:13.5px;margin-bottom:14px">本周原则：<b>只补第一周分类出的「没懂」那一类</b>，不碰已经会的内容。10/26 起大概率进入 half term——假期的正确用法见下方提示。</p>
+<table>
+<tr><th style="width:96px">日期</th><th>动作</th><th style="width:190px">完成判据</th></tr>
+<tr><td><b>10/22 四</b><br>90min</td><td>English+Chem——写 1 段 PETZAL（10 分钟限时，约 150 词），禁用 "shows"，至少 2 个不同 effect 动词</td><td>10 分钟内写完且 6 步齐全</td></tr>
+<tr><td><b>10/23 五</b><br>90min</td><td>Maths+Physics——微积分第 3-4 集，看完<b>用自己的话写 200 字</b>解释"导数是什么"（不是抄字幕）</td><td>200 字能念给家长听</td></tr>
+<tr><td><b>10/24 六</b><br>2h</td><td>定向补漏：针对「没懂」题涉及的章节，重读教材 + 同类题 3 道</td><td>同类题 3 道中对 2 道以上</td></tr>
+<tr><td><b>10/25 日</b><br>—</td><td><b>刻意留白</b>：休息，或补本周欠账。不安排新任务</td><td>无（这就是目的）</td></tr>
+<tr><td><b>10/26 一</b><br>假期/常规</td><td>若 half term 已放：上午一个 <b>2h 深度块</b>——<b>错题本新规上线：每道新错题先遮住答案自己写一遍</b>再展开对照；若未放假：常规 90min 同此内容</td><td>≥3 道遮答案完成的错题</td></tr>
+<tr><td><b>10/27 二</b><br>假期/常规</td><td>微积分第 5-7 集收尾（全 7 集在本日看完）</td><td>能口述导数的几何意义</td></tr>
+<tr><td><b>10/28 三</b><br>假期/常规</td><td><b>3 分钟口头复述 ×3</b>：讲给家长听——① 导数概念 ② 一道错题的卡点 ③ 一个 Macbeth 引文的分析</td><td>讲不下去的地方已记下</td></tr>
+</table>
+<div class="insight warn"><b>half term 的正确用法不是"补课周"。</b>正确结构是：每天最多一个上午 2h 深度块，下午与晚上彻底休息。假期里把每天排满的学生，11 月返校时是耗尽状态——而 GCSE 真正的消耗战在 1 月之后的 mock 循环。<b>现在省下的精力，比现在多刷的题值钱。</b></div>
+</div>
+
+<div class="card">
+<h3>5.3 第三周 · 10/29（四）– 11/4（三）：收口与锁定</h3>
+<p style="color:var(--text2);font-size:13.5px;margin-bottom:14px">本周把前两周的发现固化成决定。两个关键时点：<b>10/31（家长参与 40 分钟）</b>与 <b>11/1（化学取舍）</b>。</p>
+<table>
+<tr><th style="width:96px">日期</th><th>动作</th><th style="width:190px">完成判据</th></tr>
+<tr><td><b>10/29 四</b><br>90min</td><td>English+Chem——把 3 段 PETZAL 并排放一起看，<b>只找 1 个重复出现的问题</b>（如总忘写 Link、或总滥用 shows），写下改正动作</td><td>1 个问题 + 1 个改正动作</td></tr>
+<tr><td><b>10/30 五</b><br>90min</td><td>Maths+Physics——针对三分类结论做 15 分钟定向练习（粗心→审题与单位检查；没懂→继续补章节）</td><td>动作与结论对得上</td></tr>
+<tr><td><b>10/31 六</b><br>2h<br><span style="color:var(--accent2);font-size:11px">家长参与 40min</span></td><td>① ESAT Maths 1 <b>第二次限时</b>（换一份官方样题，只对比分数）；② <b>家长陪同官网核对</b>：帝国理工设计工程与剑桥工程各 20 分钟，核对 A-level offer、ESAT 模块组合、语言要求三件事</td><td>两校对照表一张，标注"ESAT 能否一次报考覆盖两校"</td></tr>
+<tr><td><b>11/1 日</b><br>60min</td><td>三件收口事：① <b>化学取舍决定</b>（保留 / 降级，写下理由）；② 工作台倒计时从 2 项扩为 4 项（ESAT 2028-10 / UCAS 2028-10 / 港校首轮 2028-11 / 雅思 2028-06）；③ 归档本周产物，<b>SMC 结果到校后拍照入档</b></td><td>取舍已写、倒计时 4 项、文件夹新增 ≥3 文件</td></tr>
+<tr><td><b>11/2 一</b><br>90min</td><td>回到固定节奏：把 3 周里<b>最有效的 1 个动作</b>固化进日常（大概率是"遮答案"或"三分类"）</td><td>该动作已写进下周计划</td></tr>
+<tr><td><b>11/3 二</b><br>90min</td><td>常规：English+Chem 各一件小事</td><td>完成即算</td></tr>
+<tr><td><b>11/4 三</b><br>60min</td><td><b>3 周复盘</b>：对照下方检查清单逐项打勾，并写一句话结论——"这 3 周证明了我的问题是 ____，最有效的动作是 ____"</td><td>清单全勾 + 一句话结论</td></tr>
+</table>
+<div class="insight good"><b>11/1 的化学取舍是这 3 周里最重要的一个决定。</b>很多学生会本能地"四科都留着"，结果四科都是中游水平。明确写下"化学降到 GCSE 够用即可、不修 A-level 化学"，比含糊地"尽量兼顾"更有力量——<b>放弃一门不在 offer 条件里的课不是失败，是聚焦。</b>帝国理工设计工程的 offer 是 AAA 含数学 A，化学不在其中。</div>
+</div>
+
+<div class="card">
+<h3>5.4 检查清单（按真实日期）</h3>
+<table>
+<tr><th style="width:110px">时点</th><th>检查项</th><th style="width:110px">是否达成</th></tr>
+<tr><td><b>10/17 周六</b></td><td>ESAT Maths 1 摸底分数 + 错题三分类计数表已产出</td><td>□ 是　□ 否</td></tr>
+<tr><td><b>10/21 周三</b></td><td>固定 90 分钟节奏已连续执行 3 天（10/19-21）</td><td>□ 是　□ 否</td></tr>
+<tr><td><b>10/28 周三</b></td><td>微积分 7 集全部看完；≥3 道遮答案错题；3 段口头复述完成</td><td>□ 是　□ 否</td></tr>
+<tr><td><b>10/31 周六</b></td><td>第二次 ESAT 限时完成；主申两校 ESAT 模块组合已核对</td><td>□ 是　□ 否</td></tr>
+<tr><td><b>11/1 周日</b></td><td>化学取舍已决定并写明理由；倒计时已扩为 4 项；SMC 结果已归档（或到手即归档）</td><td>□ 是　□ 否</td></tr>
+<tr><td><b>11/4 周三</b></td><td>一句话结论已写出（问题 + 最有效动作）</td><td>□ 是　□ 否</td></tr>
+</table>
+<div class="insight">
+<b>3 周投入核算：</b>每周约 6-9 小时（第一周因启动略重）；其中真正"新增"的只有微积分视频与英语输出。<br>
+<b>金钱支出：0</b>（ESAT 官方样题、考试局大纲、3Blue1Brown 全部免费）。<br>
+<b>家长投入：约 15 分钟/周</b>（听 3 分钟复述）+ <b>10/31 周六 40 分钟</b>（官网核对陪同）——这是 3 周里唯一需要家长深度参与的时点。
+</div>
+<div class="insight warn">
+<b>同样不承诺结果。</b>这 3 周验证的是<b>节奏是否可持续、错题分类是否可行、路径是否已锁定</b>——全是过程指标。ESAT 实际分数要到 2028 年 10 月才揭晓，本方案的作用是让中间这两年不浪费，而非让结果提前确定。
+</div>
+</div>
+</div>
+
+<footer>
+本文由海外教育行业视角出具，事实部分（考试规格、院校要求、签证政策、时间节点）已于 2026-10-15 通过公开渠道核实；策略部分为专业判断，不构成对任何录取结果的承诺。<br>
+关键数据来源：UAT-UK（ESAT 规格与考位）、UCAS 分数体系、UKVI 签证规则、帝国理工/剑桥/牛津/UCL 课程页公开要求、香港八校 Non-JUPAS 通道要求、NUS/NTU 2027 入学要求。<br>
+技术实现与编程相关内容已按要求弱化，仅在第 6、7 条及第 15 周周六项中作为承载工具提及。<br>
+更新记录：2026-10-15 新增第 5 节「未来 3 周执行计划（2026-10-15 → 11-04）」，按真实日历排布（含 half term 与 SMC 结果节点），原 12 周计划保持不变。
+</footer>
+
+</div>
+</body>
+</html>

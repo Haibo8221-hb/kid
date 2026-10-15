@@ -21,10 +21,8 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:
 .card-info{font-size:11px;color:var(--text2);margin-bottom:16px}
 .card-links{display:flex;flex-direction:column;gap:8px}
 .card-link{display:block;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:all 0.15s}
-.card-link.v2{background:var(--accent);color:#fff}
-.card-link.v2:hover{background:#7aa5ff}
-.card-link.v1{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
-.card-link.v1:hover{border-color:var(--text2);color:var(--text)}
+.card-link.primary{background:var(--accent);color:#fff}
+.card-link.primary:hover{background:#7aa5ff}
 .footer{margin-top:28px;text-align:center;font-size:11px;color:var(--text2)}
 .footer span{opacity:0.5}
 </style>
@@ -43,8 +41,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:
       <div class="card-name">Diya</div>
       <div class="card-info">Year 10 · STEM · GCSE Prep</div>
       <div class="card-links">
-        <a href="v2/diya.html" class="card-link v2">V2 Dashboard →</a>
-        <a href="app.html" class="card-link v1">V1 Classic</a>
+        <a href="app.html" class="card-link primary">打开工作台 →</a>
       </div>
     </div>
 
@@ -53,14 +50,13 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:
       <div class="card-name">Jemma</div>
       <div class="card-info">Year 8 · Science · Building Foundations</div>
       <div class="card-links">
-        <a href="v2/jemma.html" class="card-link v2">V2 Dashboard →</a>
-        <a href="jemma.html" class="card-link v1">V1 Classic</a>
+        <a href="jemma.html" class="card-link primary">打开工作台 →</a>
       </div>
     </div>
   </div>
 
   <div class="footer">
-    <span>V2 = new widget-based dashboard · V1 = classic planner</span>
+    <span>Study Compass · 家庭学习工作台</span>
   </div>
 </div>
 </body>

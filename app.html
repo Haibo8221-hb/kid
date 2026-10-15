@@ -1754,7 +1754,7 @@ async function loadResources(){
   <div class="rcat-section">
    <div class="rcat-title">UKMT / SMC Past Papers</div>
    <div class="rcat-links">
-    <a href="/papers/ukmt/" target="_blank" class="rcat-link">UKMT Past Papers <span class="rcat-badge">Papers</span></a>
+    <a href="https://ukmt.org.uk/free-past-papers" target="_blank" rel="noopener" class="rcat-link">UKMT Past Papers <span class="rcat-badge">Papers</span></a>
     <a href="/resources/SMC/index.html" target="_blank" class="rcat-link">SMC Past Papers <span class="rcat-badge">Papers</span></a>
    </div>
   </div>
@@ -1762,8 +1762,8 @@ async function loadResources(){
    <div class="rcat-title">MAT / STEP / TMUA</div>
    <div class="rcat-links">
     <a href="/resources/MAT/index.html" target="_blank" class="rcat-link">MAT Past Papers <span class="rcat-badge">9 PDFs</span></a>
-    <a href="/papers/step/" target="_blank" class="rcat-link">STEP Past Papers <span class="rcat-badge">Papers</span></a>
-    <a href="/papers/tmua/" target="_blank" class="rcat-link">TMUA Past Papers <span class="rcat-badge">Papers</span></a>
+    <a href="https://www.ocr.org.uk/students/step-mathematics/preparing-for-step/" target="_blank" rel="noopener" class="rcat-link">STEP Past Papers <span class="rcat-badge">Papers</span></a>
+    <a href="https://www.admissionstesting.org/for-test-takers/test-of-mathematics-for-university-admission/preparation/" target="_blank" rel="noopener" class="rcat-link">TMUA Past Papers <span class="rcat-badge">Papers</span></a>
    </div>
   </div>
   <div class="rcat-section">
@@ -1778,8 +1778,9 @@ async function loadResources(){
    <div class="rcat-links">
     <a href="/resources/books/They_Say_I_Say_4th_Edition.pdf" class="rcat-link">They Say / I Say — Graff (academic writing) <span class="rcat-badge">927 KB</span></a>
     <a href="/resources/books/Shakespeare_World_as_a_Stage.pdf" class="rcat-link">Shakespeare — Bryson (English Reading) <span class="rcat-badge">1.8 MB</span></a>
-    <a href="/books/Corbettmaths_Algebra.pdf" class="rcat-link">Corbettmaths Algebra (Grade 9) <span class="rcat-badge">PDF</span></a>
-    <a href="/books/CodeBook_Singh.pdf" class="rcat-link">The Code Book — Simon Singh (Cryptography) <span class="rcat-badge">PDF</span></a>
+    <!-- TODO(#5)：本地 PDF 缺失（原 /books/*.pdf 无此文件），暂指向官方站点；拿到 PDF 后放回 /resources/books/ -->
+    <a href="https://corbettmaths.com/" target="_blank" rel="noopener" class="rcat-link">Corbettmaths Algebra (Grade 9) <span class="rcat-badge">外部站点</span></a>
+    <a href="https://simonsingh.net/" target="_blank" rel="noopener" class="rcat-link">The Code Book — Simon Singh (Cryptography) <span class="rcat-badge">外部站点</span></a>
    </div>
   </div>
   <div class="rcat-section">
@@ -1787,7 +1788,7 @@ async function loadResources(){
    <div class="rcat-links">
     <a href="/macbeth_flashcards.html" target="_blank" class="rcat-link">Macbeth Key Quotations · Flashcards</a>
     <a href="/inspector_calls.html" target="_blank" class="rcat-link">An Inspector Calls · Flashcards</a>
-    <a href="/english_p1_essays.html" target="_blank" class="rcat-link">English Language P1 · Model Essays <span class="rcat-badge">Essays</span></a>
+    <a href="english_p1_answers.html" target="_blank" class="rcat-link">English Language P1 · Model Essays <span class="rcat-badge">Essays</span></a>
     <a href="/diya_english_q4_graded.html" target="_blank" class="rcat-link">📝 English Q4 · Graded Response <span class="rcat-badge">13/20</span></a>
     <a href="/diya_history_graded.html" target="_blank" class="rcat-link">📜 History · Source Utility Graded <span class="rcat-badge">10/12</span></a>
    </div>
@@ -2839,18 +2840,22 @@ async function saveError(){
  };
  if(!body.subject||!body.question){ toast('Please fill in subject and question'); return; }
  try{
- await fetch('/api/errors/diya',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
- closeErrorModal();
- await loadErrorBook();
- toast('Saved ');
+  const r = await fetch('/api/errors/diya',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){ toast('❌ 保存失败 '+(r.status)); return; }   // 不再无条件报成功
+  closeErrorModal();
+  await loadErrorBook();
+  toast('Saved ');
  }catch(e){ toast('Save failed'); }
 }
 async function deleteError(id){
  const error = errorsData.find(e=>e.id===id);
  const label = error?(error.subject||'')+' — '+(error.question||'').slice(0,50):'this error';
  if(!confirm(`Delete "${label}"?\nThis cannot be undone.`)) return;
- try{ await fetch('/api/errors/diya/'+id,{method:'DELETE'}); await loadErrorBook(); toast('Deleted'); }
- catch(e){ toast('Delete failed'); }
+ try{
+  const r = await fetch('/api/errors/diya/'+id,{method:'DELETE'});
+  if(!r.ok){ toast('❌ 删除失败 '+(r.status)); return; }
+  await loadErrorBook(); toast('Deleted');
+ }catch(e){ toast('Delete failed'); }
 }
 
 // Subject Analysis 
