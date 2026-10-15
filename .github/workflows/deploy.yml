@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write      # 测试日志需推送到调试分支
+
 jobs:
   test:
     runs-on: ubuntu-latest
