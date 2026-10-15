@@ -1,0 +1,48 @@
+name: Test only (debug harness)
+
+# 仅跑测试并把完整输出推送到 ci-testlog 分支，用于定位 "P0 regression" 在 CI 上失败的原因。
+# 与 deploy.yml 的 test job 步骤保持一致（同样的 Python 版本与依赖安装方式）。
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/triggers/test-only.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install backend deps (minimal)
+        run: pip install --quiet flask httpx pyyaml
+      - name: Env info
+        run: |
+          python -V
+          pip list 2>/dev/null | grep -iE "flask|httpx|yaml|werkzeug|jinja|click|itsdangerous" || true
+          ls -la data | head -5
+      - name: Run P0 regression (capture output)
+        run: |
+          python tests/verify_p0_fixes.py 2>&1 | tee test-p0.log
+          echo "EXIT=${PIPESTATUS[0]}" >> test-p0.log
+      - name: Run link check (capture output)
+        run: |
+          python tests/check_links.py 2>&1 | tee test-links.log
+          echo "EXIT=${PIPESTATUS[0]}" >> test-links.log
+      - name: Push logs
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          TS=$(date -u +%Y%m%d-%H%M%S)
+          git checkout -B ci-testlog
+          mkdir -p ci-logs
+          cp test-p0.log test-links.log ci-logs/ 2>/dev/null || true
+          git add -f ci-logs/
+          git commit -m "ci: test logs $TS" || echo "nothing to commit"
+          git push -f origin ci-testlog
