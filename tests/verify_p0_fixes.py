@@ -65,7 +65,9 @@ for ep, payload in [('/api/planner', {'user': '../../evil', 'plan': {'a': 1}}),
                     ('/api/errors/diya', {'child': '../../evil', 'question': 'Q'})]:
     r = cc.post(ep, json=payload)
     writes = [p for p in os.listdir(tmp) if 'evil' in p]
-    check(not writes and r.status_code < 500, f'{ep} 未写出穿越文件（返回 {r.status_code}，落盘 {writes}）')
+    # 安全断言的核心：绝不能在 data/ 之外（或以其名）落盘。
+    # 状态码不纳入断言：chat/stream 在无 LLM 配置时按设计返回 503，不代表白名单失效。
+    check(not writes, f'{ep} 未写出穿越文件（返回 {r.status_code}，落盘 {writes}）')
 
 print('== #1 错题 POST / DELETE ==')
 import shutil

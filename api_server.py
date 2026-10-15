@@ -677,7 +677,9 @@ def chat_stream():
 
     cfg = _load_config()
     if not cfg['api_key']:
-        return jsonify({'error': '未配置 LLM API Key，请在侧边栏「⚙️ LLM 设置」中填写。'}), 500
+        # 503 = 服务未配置（区别于 5xx 内部错误），前端可据此提示去「⚙️ LLM 设置」填写
+        return jsonify({'error': '未配置 LLM API Key，请在侧边栏「⚙️ LLM 设置」中填写。',
+                        'code': 'llm_not_configured'}), 503
 
     def generate():
         full_reply = ''
