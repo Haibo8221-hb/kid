@@ -1,0 +1,57 @@
+name: Server setup — data backup (one-time)
+
+# 一次性任务（P1-A）：在 ECS 上部署 data/ 每日备份脚本 + cron，并落一个探针文件用于验证
+# 部署脚本排除 data/ 后服务器数据不再被覆盖。备份落 /opt/kid-backup（非站点目录，不会被 rsync --delete 波及）。
+#
+# 触发：修改 .github/triggers/server-setup-backup.txt 后 push（或手动 Run workflow）
+# 用完即删：本文件 + triggers 文件。
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/triggers/server-setup-backup.txt'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install backup script + cron on ECS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            set -e
+            SITE="${{ secrets.SITE_ROOT }}"
+            BK=/opt/kid-backup
+            mkdir -p "$BK"
+            cat > "$BK/backup.sh" <<'EOS'
+            #!/bin/bash
+            # kid-main 运行时数据每日备份（保留 30 天）
+            set -e
+            SITE=/www/wwwroot/kid
+            BK=/opt/kid-backup
+            TS=$(date +%Y%m%d-%H%M%S)
+            tar czf "$BK/data-$TS.tar.gz" -C "$SITE" data 2>/dev/null
+            find "$BK" -name 'data-*.tar.gz' -mtime +30 -delete
+            echo "$(date -Is) backup done: $BK/data-$TS.tar.gz" >> "$BK/backup.log"
+            EOS
+            chmod +x "$BK/backup.sh"
+            # 安装 cron（去重，避免重复添加）
+            ( crontab -l 2>/dev/null | grep -v 'kid-backup/backup.sh' ; echo "0 3 * * * /opt/kid-backup/backup.sh >> /opt/kid-backup/cron.log 2>&1" ) | crontab -
+            echo "===== crontab ====="
+            crontab -l
+            echo "===== 首次备份 ====="
+            "$BK/backup.sh"
+            ls -la "$BK"
+            echo "===== 探针（验证部署不会删 data/ 内容）====="
+            echo "probe-$(date +%s)-do-not-delete" > "$SITE/data/.deploy-probe"
+            ls -la "$SITE/data" | head -40
+            echo "===== 关键文件存在性 ====="
+            for f in auth_state.json llm_config.json errors_diya.json errors_jemma.json planner_diya.json planner_jemma.json tasks_diya.json tasks_jemma.json; do
+              if [ -f "$SITE/data/$f" ]; then echo "present: $f ($(stat -c %s "$SITE/data/$f") bytes, mtime $(stat -c %y "$SITE/data/$f"))"; else echo "ABSENT : $f"; fi
+            done
+            echo "===== 服务状态 ====="
+            systemctl is-active plan-api || true
