@@ -51,3 +51,9 @@ data/*.tmp
 
 # ── 编辑前快照基线（tools/safe_update.py 产物）──
 .versions/
+
+# ── 运行时数据：含密钥/登出水位/上传物，永不入仓（服务器为唯一真源）──
+data/llm_config.json
+data/auth_state.json
+data/uploads/
+data/*.log
