@@ -26,6 +26,9 @@ jobs:
             --exclude='backups/' \
             --exclude='research_collector.py' \
             --exclude='deploy.sh' \
+            --exclude='.workbuddy/' \
+            --exclude='tests/' \
+            --exclude='analysis/.versions/' \
             -e "ssh -p ${{ secrets.ECS_PORT }} -i key.pem -o StrictHostKeyChecking=no" \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:${{ secrets.SITE_ROOT }}/
 
