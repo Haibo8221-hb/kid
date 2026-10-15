@@ -477,6 +477,18 @@ canvas.radar{width:240px!important;height:240px!important}
 .llmset-status{font-size:12px;margin-top:6px;min-height:16px}
 .llmset-status.ok{color:var(--green,#34d399)}
 .llmset-status.err{color:var(--red)}
+/* ── 三周执行计划卡（Dashboard / Route Compare 共用） ── */
+.twp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:900px){.twp-grid{grid-template-columns:1fr}}
+.twp-week{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;border-left:3px solid var(--border)}
+.twp-week.current{border-left-color:var(--accent2);background:rgba(16,185,129,0.06)}
+.twp-week.past{opacity:0.55}
+.twp-week .tw-label{font-size:12px;font-weight:700;color:var(--text)}
+.twp-week .tw-range{font-size:10px;color:var(--text2);margin-left:6px}
+.twp-week .tw-badge{float:right;font-size:9px;font-weight:700;padding:1px 8px;border-radius:8px;background:var(--accent2);color:#fff}
+.twp-week .tw-goal{font-size:11.5px;color:var(--text);margin-top:6px;line-height:1.5}
+.twp-week .tw-focus{font-size:11px;color:var(--text2);margin-top:6px;line-height:1.6}
+.twp-week .tw-focus b{color:var(--orange)}
 </style>
 </head>
 <body>
@@ -521,6 +533,7 @@ canvas.radar{width:240px!important;height:240px!important}
 </div>
 <div class="sidebar-bottom">
 <div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Planning Docs</div>
+<a href="analysis/海外教育视角学习方案建议_20261015.html" target="_blank" style="color:var(--accent2);font-weight:600">★ 海外教育方案建议 (10/15)</a>
 <a href="/macbeth_flashcards.html" target="_blank">Macbeth Flashcards</a>
 <a href="/inspector_calls_flashcards.html" target="_blank">Inspector Calls Flashcards</a>
 <a href="/Diya_Plan.html" target="_blank">Diya Plan</a>
@@ -546,6 +559,15 @@ canvas.radar{width:240px!important;height:240px!important}
 
 <!-- Countdown Strip -->
 <div id="countdown-strip" class="countdown-strip"></div>
+
+<!-- Next 3 Weeks Plan（靠前展示 · 与 Route Compare 同源渲染） -->
+<div class="section" style="border-left:4px solid var(--accent2)">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+ <div class="section-title" style="margin:0"> 📌 Next 3 Weeks · 15 Oct → 4 Nov</div>
+ <a href="analysis/海外教育视角学习方案建议_20261015.html" target="_blank" style="font-size:11px;margin-left:auto">完整方案 →</a>
+</div>
+<div id="twp-diya" class="twp-grid"></div>
+</div>
 
 <!-- Study Tips -->
 <div id="study-tips" style="margin-bottom:16px"></div>
@@ -752,13 +774,25 @@ Hong Kong parallel: HKUST+PolyU
 <!-- 
  RESOURCES
  -->
-</div>
 
 <!-- 
  ROUTES
  -->
 <div id="tab-route-compare" class="tab-panel">
 <div class="panel-title"> Academic Routes</div>
+
+<!-- 规划整合区：当前主计划 + 规划文档导航 -->
+<div class="section" style="border-left:4px solid var(--accent2)">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+ <div class="section-title" style="margin:0"> 📌 当前主计划 · Next 3 Weeks（15 Oct → 4 Nov）</div>
+ <a href="analysis/海外教育视角学习方案建议_20261015.html" target="_blank" style="font-size:11px;margin-left:auto">方案全文（含 ESAT/升学路径分析）→</a>
+</div>
+<div id="twp-diya-route" class="twp-grid"></div>
+<div style="margin-top:10px;font-size:11px;color:var(--text2)">
+ 其他规划文档（Diya Plan v7 · Route Overview · Summer Guide · A-Level Analysis）见 <a href="#" onclick="switchTab('resources');return false" style="color:var(--accent)">Learning Resources → Planning Docs</a>
+</div>
+</div>
+
 <div id="routes-list">
 <div class="section"><div class="empty-state">Loading...</div></div>
 </div>
@@ -1062,7 +1096,6 @@ Hong Kong parallel: HKUST+PolyU
   <button class="btn btn-sm" onclick="llmTestSettings()">测试连接</button>
   <button class="btn" onclick="closeLLMSettings()">取消</button>
   <button class="btn" onclick="llmSaveSettings()">保存</button>
-</div>
 </div>
 </div>
 </div>
@@ -3358,6 +3391,35 @@ const STUDY_TIPS_DIYA = [
  {id:'d_s05',cat:'general',p:'p0', head:'🌉 Year 10→11 bridge: consolidate, don\'t front-load new content', detail:'The summer and early Year 11 are when grades move — but the winning plan is boring, not heroic. Research and experienced tutors agree: do NOT try to teach yourself new Year 11 content over the summer. Instead, consolidate. The proven formula: 3-5 short sessions a week, 30-60 minutes each, mixing (1) weak-topic review from Year 10, (2) short practice questions, (3) light past papers, and (4) reading/vocabulary for English. The goal is to keep skills warm and close gaps, not to sprint ahead — this stops you arriving at Year 11 already burnt out while actually fixing the gaps that lose marks. English, your weakest subject, is where the biggest summer win hides: one PEEL paragraph a day compounds fast.', action:'This week: build a simple weekly plan with 4 sessions × 30-45 min. Two sessions = English (one PEEL paragraph + one effect-verb bank entry). One = a red Maths topic. One = a red Physics topic. Put them in your calendar at fixed times. Do NOT add a "teach yourself Year 11" session.'},
 ];
 
+// ── 三周执行计划（Dashboard 与 Route Compare 共用渲染；数据源自 analysis/海外教育视角学习方案建议_20261015.html 第 5 节） ──
+const THREE_WEEK_PLAN = {
+  weeks:[
+    {label:'Week 1 · 启动与摸底', start:'2026-10-15', end:'2026-10-21',
+     goal:'节奏立起来 + 拿到第一份真实数据（本周不学新知识点）',
+     focus:'<b>10/16</b> ESAT Maths1 限时摸底（27题/40min/禁计算器） · <b>10/17</b> 错题三分类：粗心/没懂/没时间'},
+    {label:'Week 2 · 定向补漏', start:'2026-10-22', end:'2026-10-28',
+     goal:'只补「没懂」那一类，不碰已经会的（10/25 留白休息）',
+     focus:'<b>10/26</b> 错题「先遮答案自己写」新规上线 · <b>10/27</b> 微积分 7 集收尾（half term 每天最多一个 2h 深度块）'},
+    {label:'Week 3 · 收口与锁定', start:'2026-10-29', end:'2026-11-04',
+     goal:'把前两周的发现固化成决定',
+     focus:'<b>10/31</b> 第二次 ESAT 限时 + 家长陪同核对主申两校 · <b>11/01</b> 化学保留/降级取舍 + 倒计时扩为 4 项'}
+  ]
+};
+function renderThreeWeekPlan(elId){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const today = new Date().toISOString().slice(0,10);
+  el.innerHTML = THREE_WEEK_PLAN.weeks.map(w=>{
+    const state = today > w.end ? 'past' : (today >= w.start ? 'current' : '');
+    const badge = state==='current' ? '<span class="tw-badge">本周</span>' : '';
+    return `<div class="twp-week ${state}">
+     <div class="tw-label">${w.label}<span class="tw-range">${w.range||(w.start.slice(5).replace('-','/')+' – '+w.end.slice(5).replace('-','/'))}</span>${badge}</div>
+     <div class="tw-goal">${w.goal}</div>
+     <div class="tw-focus">${w.focus}</div>
+    </div>`;
+  }).join('');
+}
+
 // Init 
 document.addEventListener('DOMContentLoaded',()=>{
  // Load planner done state
@@ -3366,6 +3428,8 @@ document.addEventListener('DOMContentLoaded',()=>{
  const theme = localStorage.getItem('diya_theme')||'blue';
  setTheme(theme);
  loadDashboard();
+ renderThreeWeekPlan('twp-diya');
+ renderThreeWeekPlan('twp-diya-route');
 loadStreak();
 // Upload 页初始化（拖拽区 + 历史列表）
 try{ setupUploadZone(); refreshUploadList(); }catch(_){}
