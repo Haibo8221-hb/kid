@@ -74,6 +74,24 @@ jobs:
               ls -la /opt/kid-backup 2>/dev/null || echo "NO BACKUP DIR"
               echo "--- backup.log ---"
               tail -5 /opt/kid-backup/backup.log 2>/dev/null || echo "no log"
+              echo "--- 恢复演练（解包最新备份并校验 JSON 可解析）---"
+              LATEST=$(ls -1t /opt/kid-backup/data-*.tar.gz 2>/dev/null | head -1)
+              echo "latest backup: $LATEST"
+              if [ -n "$LATEST" ]; then
+                rm -rf /tmp/restore-test && mkdir -p /tmp/restore-test
+                tar xzf "$LATEST" -C /tmp/restore-test
+                for f in errors_diya.json errors_jemma.json planner_diya.json tasks_diya.json; do
+                  python3 -c "import json,sys; d=json.load(open('/tmp/restore-test/data/$f')); print('$f ok, type=%s, len=%s' % (type(d).__name__, len(d) if hasattr(d,'__len__') else 'n/a'))" 2>&1 | head -2
+                done
+              fi
+              echo
+              echo "===== LLM 配置来源检查 ====="
+              echo "--- data/llm_config.json ---"
+              ls -la "${{ secrets.SITE_ROOT }}/data/llm_config.json" 2>/dev/null || echo "ABSENT (UI 配置可能已被部署删除)"
+              echo "--- .hermes/config.yaml ---"
+              ls -la "${{ secrets.SITE_ROOT }}/.hermes/config.yaml" 2>/dev/null || echo "ABSENT"
+              echo "--- 服务环境变量中的 LLM 相关 key（仅显示是否有值）---"
+              systemctl show plan-api -p Environment 2>/dev/null | tr ' ' '\n' | grep -i "llm\|openai\|deepseek\|api_key" | sed 's/=.*/=<set>/' || echo "none"
             } > "$OUT" 2>&1
             echo "--- collected ---"
             cat "$OUT"
