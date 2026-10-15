@@ -42,7 +42,8 @@ jobs:
             --exclude='deploy.sh' \
             --exclude='.workbuddy/' \
             --exclude='tests/' \
-            --exclude='analysis/.versions/' \
+            --exclude='.versions/' \
+            --exclude='*/.versions/' \
             --exclude='data/' \
             --exclude='logs/' \
             -e "ssh -p ${{ secrets.ECS_PORT }} -i key.pem -o StrictHostKeyChecking=no" \
