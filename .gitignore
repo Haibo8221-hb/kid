@@ -57,3 +57,7 @@ data/llm_config.json
 data/auth_state.json
 data/uploads/
 data/*.log
+
+# ── 含家庭财务/隐私数据的工作文档，永不入仓（仓库是公开的）──
+analysis/*财务*
+analysis/*隐私*

@@ -272,7 +272,7 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--border);color
 · dm16（2640）：「今天、然后 2、3、5、7 天后」（自称 2357 法）<br>
 · d_s02（3350）：「课后、第二天、第三天、一周后」（自称 2-3-5-7 法）<br>
 <b>三套不同的时间表同时出现在同一个页面</b>，学生无从判断哪个为准。<br><br>
-<b>段落法的命名也不一致：</b>dm09/dm14 叫 <b>PETAL</b>（5 步），d_new01 叫 <b>PETZAL</b>（6 步，多一个 Analysis）。同一页面两套缩写。
+<b>段落法的命名也不一致：</b>dm09/dm14 叫 <b>PETAL</b>（5 步），d_new01 叫 <b>PETZAL</b>（6 步，多一个 Analysis）。同一页面两套缩写。<b style="color:#1a7f37">【2026-10-15 已裁决】统一为 PETAL（5 步），Zoom 归入 Analysis 内部技巧；全站 PETZAL 已清零。</b>
 </div>
 <h4>③ 陈旧数据未清理，与页面自身陈述冲突</h4>
 <p>废弃常量 <code>TIMER_TARGETS</code>（1277-1283）里 5 个目标日期<b>全部是 2025 年</b>（<code>'2025-11-05'</code> UKMT SMC、<code>'2025-07-01'</code> 暑假），而实际在用的是 <code>COUNTDOWN_ITEMS</code>（2567-2570，2027 年）。<code>TIMER_TARGETS</code> 与 <code>getTimeLeft()</code>（1285-1293）已无调用方——但它就在文件里，任何二次开发者都可能误用这批过期日期。</p>
@@ -379,7 +379,7 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--border);color
 <ul>
  <li>删除 <code>STUDY_TIPS_DIYA</code>（app.html:3342-3354，无调用方）与 <code>TIMER_TARGETS</code>（1277-1283，日期全为 2025 年）。</li>
  <li>在 <code>V2_TIPS_POOL</code> 中<b>保留唯一一套间隔复习时间表</b>，建议采用 1-3-7-30（有明确的艾宾浩斯依据且 dm02 已引用），统一改写 dm16 与 d_s02 的表述并注明其为同一方法。</li>
- <li>段落法<b>统一为 PETAL（5 步）或 PETZAL（6 步）之一</b>，二选一后全站替换；建议保留 PETZAL（6 步）因为 d_s01 关于「effect on reader 是权重最高项」的论证更准确。</li>
+ <li>段落法<b>统一为 PETAL（5 步）</b>（2026-10-15 家长确认："PETAL 不是 PETZAL"），Zoom 作为 Analysis 内部的关键技巧而非独立步骤；全站 PETZAL 已清零。</li>
  <li>把方法内容外置为 <code>data/tips_diya.json</code>，让家长/老师可编辑而无需改代码。</li>
 </ul>
 </div>
