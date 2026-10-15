@@ -12,12 +12,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Guard — 部署前确认服务器运行时数据目录存在
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            set -e
+            test -d "${{ secrets.SITE_ROOT }}/data" || { echo "::error::服务器 data/ 缺失，中止部署（防止空数据上线）"; exit 1; }
+            echo "data 文件数: $(ls -1 "${{ secrets.SITE_ROOT }}/data" | wc -l)"
+            echo "auth_state: $(test -f "${{ secrets.SITE_ROOT }}/data/auth_state.json" && echo present || echo absent)"
+
       - name: Rsync code to ECS (push mode — ECS does NOT pull GitHub)
         env:
           KEY: ${{ secrets.ECS_SSH_KEY }}
         run: |
           echo "$KEY" > key.pem
           chmod 600 key.pem
+          # ⚠️ data/ 与 logs/ 是运行时数据，服务器为唯一真源，绝不能被本地旧副本覆盖或被 --delete 删除
           rsync -az --delete \
             --exclude='.git/' \
             --exclude='.github/' \
@@ -29,6 +43,8 @@ jobs:
             --exclude='.workbuddy/' \
             --exclude='tests/' \
             --exclude='analysis/.versions/' \
+            --exclude='data/' \
+            --exclude='logs/' \
             -e "ssh -p ${{ secrets.ECS_PORT }} -i key.pem -o StrictHostKeyChecking=no" \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:${{ secrets.SITE_ROOT }}/
 
