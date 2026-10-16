@@ -58,12 +58,23 @@ data/auth_state.json
 data/uploads/
 data/*.log
 
+# ── CI 手动触发器：仅供一次性诊断用，不要入库 ──
+# 原因：这三个 .txt 被 GitHub Actions 用 paths 过滤监听，改内容即触发一次工作流；
+# 入库会导致每次提交都附带触发文件变更，进而引发多余的工作流运行。
+# 工作流本身都支持 workflow_dispatch，手动触发无需依赖这些文件。
+.github/triggers/test-only.txt
+.github/triggers/server-diag.txt
+
 # ── 内部文档区：专家团讨论/决策记录/财务模型/家长报告，永不入仓（仓库是公开的）──
 # 双重防护：既在 .gitignore 拦截，也在 deploy.yml 的 rsync exclude 拦截
 internal/finance/
 internal/team-review/
 internal/parent-reports/
+# engineering/ 与 planning/ 是纯技术与学习文档，可入库（便于团队协作与回溯），
+# 但区根的散落 md 仍不入库
 internal/*.md
+# 例外：README 说明区用途与纪律，需要入库
+!internal/README.md
 
 # ── 含家庭财务/隐私数据的工作文档，永不入仓（仓库是公开的）──
 analysis/*财务*
