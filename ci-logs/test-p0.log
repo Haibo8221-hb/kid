@@ -1,0 +1,63 @@
+== #3 密码 / Cookie ==
+  PASS  错误密码 401（实际 401）
+  PASS  正确密码 200（实际 200）
+  Set-Cookie: kid_auth=1794740026.1792148026181.fa8651fe927bbb9a90acb6b7dc5d702a; Expires=Sun, 15 Nov 2026 10:53:46 GMT; Max-Age=2592000; Secure; HttpOnly; Path=/; SameSite=Lax
+  PASS  Cookie 带 Secure
+  PASS  Cookie 带 HttpOnly
+  PASS  Cookie 带 SameSite=Lax
+  PASS  APP_PASSWORD 已配置（非内置默认）
+== #4 登出吊销 ==
+  PASS  登出前会话有效（实际 200）
+  PASS  登出接口 200（实际 200）
+  PASS  登出后旧 token 401（实际 401）
+  PASS  登出后新登录 token 有效（实际 200）
+== #2 child/user 白名单（路径穿越）==
+  PASS  /api/planner 未写出穿越文件（返回 200，落盘 []）
+  PASS  /api/tasks 未写出穿越文件（返回 200，落盘 []）
+  PASS  /api/review 未写出穿越文件（返回 200，落盘 []）
+  PASS  /api/chat/stream 未写出穿越文件（返回 503，落盘 []）
+  PASS  /api/errors/diya 未写出穿越文件（返回 200，落盘 []）
+== #1 错题 POST / DELETE ==
+  POST -> 200 {'id': '14861f4c-c8d0-4003-bdeb-65ae143f2103', 'ok': True, 'total': 1}
+  PASS  POST /api/errors/<child> 200（原 405）
+  PASS  返回记录 id
+  PASS  GET 可见新记录（实际 1）
+  DELETE -> 200 {'ok': True, 'total': 0}
+  PASS  DELETE /api/errors/<child>/<id> 200（原 405）
+  PASS  DELETE 后记录数归零
+  PASS  删除不存在记录 404（实际 404）
+  PASS  空题目 400（实际 400）
+== 存量无 id 自动补齐 ==
+  PASS  存量记录已自动补 id
+  PASS  存量记录可删除（实际 200）
+== #11 Notes 服务端持久化 ==
+  PASS  GET notes 200（实际 200）
+  PASS  GET notes 初始 payload 为空对象
+  PASS  PUT notes 成功（实际 200）
+  PASS  PUT 后 updatedAt 回读一致
+  PASS  PUT 后 payload 回读一致（自由形态，不规定结构）
+  PASS  payload 非对象应 400（实际 400）
+  PASS  notes 接口受 _safe_child 白名单保护
+  PASS  notes 落盘到 data/notes_<child>.json
+  PASS  未登录 GET notes 应 401（实际 401）
+  PASS  未登录 PUT notes 应 401（实际 401）
+== #12 错题分页 ==
+  PASS  分页 total=120（实际 120）
+  PASS  第1页 50 条（实际 50）
+  PASS  第1页 has_more=True
+  PASS  第3页 20 条（实际 20）
+  PASS  末页 has_more=False
+  PASS  分页拼接顺序与全量顺序一致（排序口径未漂移）
+  PASS  subject=Maths 过滤后 60 条（实际 60）
+  PASS  筛选结果全部命中科目
+  PASS  不分页时返回全部 120 条（实际 120）
+  PASS  stats=1 提供 mastered_total / new_this_week（供分页前端计数）
+  PASS  首屏传输量显著下降：9KB vs 全量 22KB
+== 登录限流（新增-D）==
+  PASS  连续失败达阈值后锁定（实际 429）
+  PASS  锁定期内正确密码也被拒（实际 429）
+  PASS  未失败来源不受影响（实际 200）
+  PASS  清除计数后可正常登录（实际 200）
+
+结果: ALL PASS
+EXIT=0
