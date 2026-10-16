@@ -65,6 +65,7 @@ jobs:
             --exclude='deploy.sh' \
             --exclude='.workbuddy/' \
             --exclude='tests/' \
+            --exclude='internal/' \
             --exclude='.versions/' \
             --exclude='*/.versions/' \
             --exclude='data/' \

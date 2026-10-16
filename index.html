@@ -1,63 +1,320 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Study Compass · Diya & Jemma</title>
+<title>Diya &amp; Jemma · 学习台</title>
+<link rel="stylesheet" href="/assets/kid.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f1117;--surface:#1a1d28;--surface2:#232736;--border:#2a2f42;--text:#e2e6f0;--text2:#8892b0;--accent:#4f8cff;--accent2:#38d9a9;--red:#ff6b6b}
-body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.container{max-width:520px;width:100%}
-.header{text-align:center;margin-bottom:32px}
-.header-icon{font-size:44px;display:block;margin-bottom:12px}
-.header h1{font-size:24px;font-weight:700;margin-bottom:4px}
-.header p{font-size:13px;color:var(--text2)}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;transition:all 0.2s;cursor:pointer}
-.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3)}
-.card-icon{font-size:32px;display:block;margin-bottom:10px}
-.card-name{font-size:18px;font-weight:700;margin-bottom:4px}
-.card-info{font-size:11px;color:var(--text2);margin-bottom:16px}
-.card-links{display:flex;flex-direction:column;gap:8px}
-.card-link{display:block;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:all 0.15s}
-.card-link.primary{background:var(--accent);color:#fff}
-.card-link.primary:hover{background:#7aa5ff}
-.footer{margin-top:28px;text-align:center;font-size:11px;color:var(--text2)}
-.footer span{opacity:0.5}
+:root{
+  --bg:#0f1117;
+  --surface:#1a1d28;
+  --surface2:#232736;
+  --border:#2a2f42;
+  --text:#e6e9f2;
+  --text2:#9aa3b8;
+  --diya:#7aa2ff;
+  --jemma:#5fd3c0;
+}
+body{
+  font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-size:17px;
+  line-height:1.8;
+  min-height:100vh;
+  padding:48px 20px 64px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1000px;margin:0 auto}
+
+/* ---------------- 页面头部 ---------------- */
+.page-head{text-align:center;margin-bottom:44px}
+.page-head h1{
+  font-size:38px;
+  line-height:1.35;
+  font-weight:800;
+  letter-spacing:.5px;
+  margin-bottom:14px;
+}
+.page-head .lead{
+  font-size:18px;
+  line-height:1.85;
+  color:var(--text2);
+  max-width:640px;
+  margin:0 auto;
+}
+
+/* ---------------- 两个独立入口 ---------------- */
+.homes{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+  margin-bottom:52px;
+}
+.home{
+  display:flex;
+  flex-direction:column;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:32px 30px 28px;
+  border-top:5px solid var(--tone);
+}
+.home-diya{--tone:var(--diya)}
+.home-jemma{--tone:var(--jemma)}
+.home-avatar{
+  width:58px;height:58px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:23px;font-weight:800;
+  margin-bottom:16px;
+  color:#0f1117;
+  background:var(--tone);
+}
+.home-name{
+  font-size:27px;
+  font-weight:800;
+  line-height:1.35;
+  margin-bottom:6px;
+  color:var(--text);
+}
+.home-meta{
+  font-size:15px;
+  line-height:1.75;
+  color:var(--text2);
+  margin-bottom:18px;
+}
+.home-what{
+  font-size:17px;
+  line-height:1.85;
+  color:var(--text);
+  padding:16px 18px;
+  border-radius:12px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  margin-bottom:22px;
+  flex-grow:1;
+}
+.home-btn{
+  display:block;
+  text-align:center;
+  padding:15px 22px;
+  border-radius:12px;
+  font-size:18px;
+  font-weight:700;
+  text-decoration:none;
+  color:#0f1117;
+  background:var(--tone);
+  transition:filter .15s,transform .15s;
+}
+.home-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.home-btn:focus-visible{outline:3px solid var(--text);outline-offset:3px}
+
+/* ---------------- 今日区块 ---------------- */
+.block{margin-bottom:48px}
+.block-head{margin-bottom:20px}
+.block-head h2{
+  font-size:27px;
+  font-weight:800;
+  line-height:1.4;
+  margin-bottom:8px;
+}
+.block-head p{font-size:16px;line-height:1.8;color:var(--text2)}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.grid-2 .kid-focus-card,.grid-2 .kid-ask-card{margin-bottom:0}
+
+.tasks-head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:14px;
+  margin-bottom:16px;
+}
+.tasks-head h3{font-size:20px;font-weight:700;line-height:1.5}
+#kid-progress{flex-grow:1;min-width:240px;margin-bottom:0}
+
+.footer{
+  text-align:center;
+  font-size:15px;
+  line-height:1.8;
+  color:var(--text2);
+  padding-top:8px;
+}
+
+/* ---------------- 移动端：两栏改上下堆叠（断点与 kid.css 的 768px 对齐） ---------------- */
+@media (max-width:768px){
+  body{padding:34px 16px 48px;font-size:17px}
+  .page-head h1{font-size:32px}
+  .page-head .lead{font-size:17px}
+  .homes,.grid-2{grid-template-columns:1fr;gap:16px}
+  .home{padding:26px 22px 24px}
+  .home-name{font-size:24px}
+  .block-head h2{font-size:23px}
+}
 </style>
 </head>
-<body>
-<div class="container">
-  <div class="header">
-    <span class="header-icon">📋</span>
-    <h1>Study Compass</h1>
-    <p>Diya (Y10) · Jemma (Y8) · Headington School</p>
-  </div>
+<body data-kid-page="home">
+<div class="wrap">
 
-  <div class="cards">
-    <div class="card">
-      <span class="card-icon">🎨</span>
-      <div class="card-name">Diya</div>
-      <div class="card-info">Year 10 · STEM · GCSE Prep</div>
-      <div class="card-links">
-        <a href="app.html" class="card-link primary">打开工作台 →</a>
+  <header class="page-head">
+    <h1>你们的学习台</h1>
+    <p class="lead">Diya 和 Jemma 各有一个只属于她的学习台。成绩、计划、错题，都放在自己的那一个里，互不相混。</p>
+  </header>
+
+  <!-- ============ 两个完全独立的入口 ============ -->
+  <section class="homes">
+
+    <article class="home home-diya">
+      <div class="home-avatar" aria-hidden="true">D</div>
+      <h2 class="home-name">Diya</h2>
+      <p class="home-meta">Year 11 · GCSE 2027 年 5 月 · Headington</p>
+      <p class="home-what">方向是工程 / 设计工程。Maths 和 Physics 是她的强项，这两门她上手最快。</p>
+      <a class="home-btn" href="/app.html">进入 Diya 的学习台 →</a>
+    </article>
+
+    <article class="home home-jemma">
+      <div class="home-avatar" aria-hidden="true">J</div>
+      <h2 class="home-name">Jemma</h2>
+      <p class="home-meta">Year 9 · GCSE 2029 年 5 月 · Headington</p>
+      <p class="home-what">还在探索期。数学、计算机、科学、美术她都感兴趣，不急着定方向，先都试试看。</p>
+      <a class="home-btn" href="/jemma.html">进入 Jemma 的学习台 →</a>
+    </article>
+
+  </section>
+
+  <!-- ============ 今天想做点什么 ============ -->
+  <section class="block">
+    <div class="block-head">
+      <h2>今天想做点什么？</h2>
+      <p>下面这些是给你（或者你们）自己用的。做完了就打勾，拿不准的先自己定。</p>
+    </div>
+  </section>
+
+  <!-- (a) 需要重点关注 -->
+  <section class="block">
+    <div class="block-head">
+      <h2>需要你留意的事</h2>
+      <p>这几条跟具体科目无关，是方法上的事。做到了就会有效果。</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="kid-focus-card">
+        <h3 class="kid-h">每天固定一个 90 分钟，比周末突击更有效</h3>
+        <p class="kid-sub">每天同一时间、同一张桌子，坐下来的那一刻最难，之后就顺了。</p>
+      </div>
+      <div class="kid-focus-card">
+        <h3 class="kid-h">错题本每周清 1 条就够</h3>
+        <p class="kid-sub">不用一次清完。一周一条，能真正搞懂，比堆满一整本有用。</p>
+      </div>
+      <div class="kid-focus-card">
+        <h3 class="kid-h">21:00 之后不排学习</h3>
+        <p class="kid-sub">晚上的时间留给睡觉和放松。硬撑出来的效率，第二天早上会还回去。</p>
+      </div>
+      <div class="kid-focus-card">
+        <h3 class="kid-h">睡够比多做一小时更重要</h3>
+        <p class="kid-sub">脑子睡够了，第二遍看书的速度比多熬一小时快得多。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- (b) 需要你自己决定 -->
+  <section class="block">
+    <div class="block-head">
+      <h2>需要你自己决定的事</h2>
+      <p>这几件事没有标准答案，你来拍板。点一个就是你今天的选择。</p>
+    </div>
+
+    <div class="kid-decide-card">
+      <h3 class="kid-h">今天先做哪一门？</h3>
+      <p class="kid-sub">选一个就开始，不用三门一起上。</p>
+      <div class="kid-choices">
+        <button type="button" class="kid-choice" data-choice="先数学">先数学</button>
+        <button type="button" class="kid-choice" data-choice="先英语">先英语</button>
+        <button type="button" class="kid-choice" data-choice="先错题">先错题</button>
+        <button type="button" class="kid-choice" data-choice="先竞赛">先竞赛</button>
       </div>
     </div>
 
-    <div class="card">
-      <span class="card-icon">🧪</span>
-      <div class="card-name">Jemma</div>
-      <div class="card-info">Year 8 · Science · Building Foundations</div>
-      <div class="card-links">
-        <a href="jemma.html" class="card-link primary">打开工作台 →</a>
+    <div class="kid-decide-card">
+      <h3 class="kid-h">遇到不会的题，你打算怎么处理？</h3>
+      <p class="kid-sub">先想清楚再问，和直接问，得到的答案质量不一样。</p>
+      <div class="kid-choices">
+        <button type="button" class="kid-choice" data-choice="先自己再想 10 分钟">先自己再想 10 分钟</button>
+        <button type="button" class="kid-choice" data-choice="问老师">问老师</button>
+        <button type="button" class="kid-choice" data-choice="先跳过，最后回头做">先跳过，最后回头做</button>
       </div>
     </div>
-  </div>
 
-  <div class="footer">
-    <span>Study Compass · 家庭学习工作台</span>
-  </div>
+    <div class="kid-decide-card">
+      <h3 class="kid-h">这周末的计划要不要调整？</h3>
+      <p class="kid-sub">计划是给你用的，不是用来考验你的。</p>
+      <div class="kid-choices">
+        <button type="button" class="kid-choice" data-choice="照原计划">照原计划</button>
+        <button type="button" class="kid-choice" data-choice="减掉一项">减掉一项</button>
+        <button type="button" class="kid-choice" data-choice="换一项">换一项</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- (c) 今天的小任务（可勾选） -->
+  <section class="block">
+    <div class="tasks-head">
+      <h3>今天的小任务</h3>
+      <div id="kid-progress" data-kid-label="今天的进度"></div>
+    </div>
+
+    <div class="kid-task-card" data-task-id="t1">
+      <span class="kid-toggle" aria-hidden="true"></span>
+      <span class="kid-task-label">先坐 25 分钟，做完休息 5 分钟</span>
+      <p class="kid-sub">番茄钟就够，不用一次做满 90 分钟。</p>
+    </div>
+    <div class="kid-task-card" data-task-id="t2">
+      <span class="kid-toggle" aria-hidden="true"></span>
+      <span class="kid-task-label">清一条错题，写清楚当时错在哪</span>
+      <p class="kid-sub">写一句话就行，比如「看漏了单位」。</p>
+    </div>
+    <div class="kid-task-card" data-task-id="t3">
+      <span class="kid-toggle" aria-hidden="true"></span>
+      <span class="kid-task-label">把明天要做的三件事写下来</span>
+      <p class="kid-sub">睡前 5 分钟写完，早上就不用想。</p>
+    </div>
+    <div class="kid-task-card" data-task-id="t4">
+      <span class="kid-toggle" aria-hidden="true"></span>
+      <span class="kid-task-label">21:00 之后不再看书</span>
+      <p class="kid-sub">合上书，让脑子歇着。</p>
+    </div>
+  </section>
+
+  <!-- (d) 问问自己 -->
+  <section class="block">
+    <div class="block-head">
+      <h2>问问自己</h2>
+      <p>点一下问题就能写。写给以后的自己看，只有你能看到。</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="kid-ask-card" data-placeholder="比如：把数学作业最后一道题弄懂了">
+        <div class="kid-ask-q">今天有没有一件事，是你做完之后觉得「还不错」的？</div>
+      </div>
+      <div class="kid-ask-card" data-placeholder="比如：想试学一下编程">
+        <div class="kid-ask-q">最近有什么事，你觉得有点难，但还想试试看？</div>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer">Diya &amp; Jemma · 各自的学习台</p>
+
 </div>
+
+<script src="/assets/kid.js"></script>
+<script>
+  KidCheck.init('body');
+  KidAsk.init('body');
+  KidProgress.render('#kid-progress');
+  KidStamp.init('body');
+</script>
 </body>
 </html>

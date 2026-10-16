@@ -58,6 +58,13 @@ data/auth_state.json
 data/uploads/
 data/*.log
 
+# ── 内部文档区：专家团讨论/决策记录/财务模型/家长报告，永不入仓（仓库是公开的）──
+# 双重防护：既在 .gitignore 拦截，也在 deploy.yml 的 rsync exclude 拦截
+internal/finance/
+internal/team-review/
+internal/parent-reports/
+internal/*.md
+
 # ── 含家庭财务/隐私数据的工作文档，永不入仓（仓库是公开的）──
 analysis/*财务*
 analysis/*隐私*

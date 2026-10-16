@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title> Jemma · Growth Explorer</title>
+<title>Jemma's Study Space · Year 9</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0f1117;--surface:#1a1d28;--surface2:#232736;--border:#2a2f42;--text:#e2e6f0;--text2:#8892b0;--accent:#4f8cff;--accent2:#38d9a9;--red:#ff6b6b;--orange:#ffa94d;--yellow:#ffd43b;--green:#69db7c;--radius:12px}
@@ -213,9 +213,9 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 .ec-image{max-width:100%;max-height:400px;border-radius:8px;margin-bottom:12px;border:1px solid var(--border)}
 .ec-question{font-size:14px;color:var(--text);line-height:1.6;margin-bottom:12px;padding:10px 14px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)}
 .ec-answer-section{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.ec-diya-answer{font-size:13px;color:var(--text);line-height:1.5;padding:10px 14px;background:rgba(255,169,77,0.06);border-radius:8px;border-left:3px solid var(--orange)}
-.ec-diya-answer .label,.ec-correct .label,.ec-weaknesses .label,.ec-solution .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
-.ec-diya-answer .label{color:var(--orange)}.ec-correct .label{color:var(--accent2)}.ec-weaknesses .label{color:var(--red)}.ec-solution .label{color:var(--accent2)}
+.ec-jemma-answer{font-size:13px;color:var(--text);line-height:1.5;padding:10px 14px;background:rgba(255,169,77,0.06);border-radius:8px;border-left:3px solid var(--orange)}
+.ec-jemma-answer .label,.ec-correct .label,.ec-weaknesses .label,.ec-solution .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.ec-jemma-answer .label{color:var(--orange)}.ec-correct .label{color:var(--accent2)}.ec-weaknesses .label{color:var(--red)}.ec-solution .label{color:var(--accent2)}
 .ec-correct{font-size:13px;color:var(--text);line-height:1.5;padding:10px 14px;background:rgba(16,185,129,0.06);border-radius:8px;border-left:3px solid var(--accent2)}
 .ec-score{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;padding:6px 10px;background:var(--surface2);border-radius:6px;display:inline-block}
 .ec-weaknesses{font-size:12px;color:var(--red);line-height:1.6;margin-bottom:10px;padding:8px 12px;background:rgba(255,107,107,0.05);border-radius:8px}
@@ -322,8 +322,21 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 #toast.show{display:block}
 .empty-state{font-size:14px;color:var(--text2);padding:20px;text-align:center}
 </style>
+<!-- 移动端适配：本页原有布局无媒体查询，窄屏下压缩间距与字号 -->
+<style>
+@media (max-width:768px){
+  .twp-grid{grid-template-columns:1fr !important}
+  .countdown-strip{gap:8px}
+  .section{padding:12px !important}
+  .header-bar{flex-direction:column;align-items:flex-start;gap:6px}
+  .compare-table{font-size:12px}
+  .compare-table th,.compare-table td{padding:6px 7px}
+}
+</style>
+<!-- 儿童友好高亮与互动组件层（共享样式表，两个孩子的页面各自独立渲染） -->
+<link rel="stylesheet" href="/assets/kid.css">
 </head>
-<body>
+<body data-kid-page="jemma">
 
 <!-- Sidebar -->
 <aside class="sidebar">
@@ -353,12 +366,9 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <li><a href="#" data-tab="upload" onclick="switchTab('upload');return false">📤 Upload</a></li>
 </ul>
 <div class="sidebar-bottom">
-<div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Planning Docs</div>
-<a href="analysis/Jemma定制化海外教育方案_20261015.html" target="_blank" style="color:var(--accent2);font-weight:600">★ Jemma 定制化方案 (10/15)</a>
-<a href="analysis/海外教育视角学习方案建议_20261015.html" target="_blank">Diya 方案建议（对照参考）</a>
-<a href="/Jemma_Plan.html" target="_blank">Jemma Full Plan</a>
-<a href="/Jemma_Plan.html" target="_blank">Growth Route Overview</a>
-<a href="/Jemma_2026_Summer_Guide.html" target="_blank">Jemma Summer Guide</a>
+<div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">My Stuff</div>
+<a href="/Jemma_Plan.html" target="_blank">My Full Plan</a>
+<a href="/Jemma_2026_Summer_Guide.html" target="_blank">My Summer Guide</a>
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
@@ -366,15 +376,29 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <!-- Main -->
 <main class="main">
 <div class="header-bar">
-<h2>Jemma Growth Dashboard</h2>
-<div class="admin-info"><a href="/app.html" style="color:var(--accent);font-weight:600;margin-right:12px">Switch to Diya →</a> · <a href="#" onclick="logout();return false" style="color:var(--red)">Logout</a></div>
+<h2>Jemma's Study Space</h2>
+<div class="admin-info"><a href="#" onclick="logout();return false" style="color:var(--red)">Logout</a></div>
 </div>
 
 <!-- 
  DASHBOARD
  -->
 <div id="tab-dashboard" class="tab-panel active">
-<div class="panel-title"> Jemma · Growth Explorer</div>
+<div class="panel-title"> Jemma · My Year 9</div>
+
+<!-- 我的身份卡：这个页面是什么、只属于谁 -->
+<div class="kid-who-card">
+  <div class="kid-who-name">Jemma</div>
+  <div class="kid-who-meta">Year 9 · GCSE 2029 年 5 月 · Headington</div>
+  <p class="kid-who-msg">这是<b>只属于你一个人</b>的学习台。你的成绩、错题、计划、笔记都只存在这里——姐姐看不到，爸爸妈妈也可以陪你一起看，但内容都是你的。</p>
+  <p class="kid-who-msg" style="margin-top:8px">离 GCSE 还有 <b>4 年</b>，离大学还有 <b>6 年</b>——所以现在<b>不用急着定方向</b>。这三年（Y9–Y11）要做的事只有两个：<b>保持好奇</b>，把<b>你喜欢的学科学扎实</b>。</p>
+  <div class="kid-who-todo">
+    <div class="kid-ask-card" data-placeholder="写下来，比如：今天我想先练 Bebras">
+      <strong>今天先做哪一件？</strong>
+      <span class="kid-hint">先练 Bebras 的题，还是先做点别的？挑<b>一件</b>做完就够了，不用全做完。</span>
+    </div>
+  </div>
+</div>
 
 <!-- Countdown Strip -->
 <div id="countdown-strip" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap"></div>
@@ -385,6 +409,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
  <div class="section-title" style="margin:0"> 📌 Next 3 Weeks · 15 Oct → 4 Nov</div>
 </div>
 <div id="twp-jemma" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"></div>
+<div id="kid-progress" data-kid-label="这三周完成了几件" style="margin:12px 0 0"></div>
 </div>
 
 <!-- Study Tips Rotator -->
@@ -412,24 +437,24 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <!-- SWOT + School Assessment -->
 <div class="dash-grid">
 <div class="section">
-<div class="section-title"> Strengths</div>
+<div class="section-title"> 我擅长的 · My Strengths</div>
 <div style="font-size:14px;line-height:1.8;color:var(--accent2)">
- Maths 88% — 13pts above median, top set<br>
- Chemistry 74% (+2) — climbing steadily<br>
- Computing — UK Bebras Distinction, national top 10%<br>
- Art — Exceptional, "a talented Artist"<br>
- Strong self-motivation — sets own goals, self-reviews and summarises<br>
- Has sister Diya as role model + shares resources
+ Maths 88% — 高出学校中位数 13 分，在最高的那个班<br>
+ Chemistry 74%（+2）— 一直在稳步往上走<br>
+ Computing — UK Bebras Distinction（全校前 25%）。Gold 是全国前 10%，有没有拿到还没告诉我<br>
+ Art — Exceptional，老师原话「a talented Artist」<br>
+ 自己会给自己定目标 — 会主动复盘、会把学的东西讲给别人听
 </div>
 </div>
-<div class="section">
-<div class="section-title">Risk & Weaknesses</div>
-<div style="font-size:14px;line-height:1.8;color:var(--text2)">
- English confidence low — "confidence falters when analysing"<br>
- Low class participation — History/Drama reluctant to share<br>
- Physics: last term Exceptional → this term Above<br>
- Competition season starts now — Bebras 9-20 Nov, IMC 27 Jan: first real tests<br>
- Calm runway — 2.5 years to GCSE, no panic needed
+<div class="section kid-focus-card">
+<div class="section-title"> 需要重点关注 · My Watch List</div>
+<div style="font-size:15px;line-height:2;color:var(--text2)">
+ <div class="kid-focus-item"><b>英语信心不够</b> — 老师说「分析的时候会卡住」。其实不是不会，是不敢</div>
+ <div class="kid-focus-item"><b>上课不太举手</b> — 历史、Drama 都不太愿意开口说</div>
+ <div class="kid-focus-item"><b>Biology 在往下掉</b> — 77% → 72%，两次都降了。cartilage / ligament / tendon 这几个容易混</div>
+ <div class="kid-focus-item"><b>Latin 最弱</b> — 现在只有 57.5%，要不要继续学 Y10 我自己得想清楚（见下面的决定卡）</div>
+ <div class="kid-focus-item"><b>第一个比赛季来了</b> — Bebras 11 月 9–20 日，IMC 1 月 27 日。这两个是你第一次真正的比赛</div>
+ <div class="kid-focus-item"><b>时间很宽裕</b> — 离 GCSE 还有 4 年多，完全不用慌</div>
 </div>
 </div>
 </div>
@@ -438,26 +463,26 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <div class="section-title">Risk Heatmap</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;font-size:14px">
 <div style="padding:8px 12px;background:rgba(255,169,77,0.1);border-radius:8px;border-left:3px solid var(--orange)">
- <b>English confidence low</b> — Low Probability·Med Impact — "confidence falters when analysing" — long-term cultivation
+ <b>英语信心</b> — Low Probability·Med Impact — 老师原话「分析的时候会卡住」— 慢慢养，不急
 </div>
 <div style="padding:8px 12px;background:rgba(255,212,59,0.1);border-radius:8px;border-left:3px solid var(--yellow)">
- <b>Class participation</b> — Low Probability·Low Impact — History/Drama reluctant to share — gradual encouragement
+ <b>上课不举手</b> — Low Probability·Low Impact — 历史/Drama 不太愿意开口 — 多鼓励就好
 </div>
 <div style="padding:8px 12px;background:rgba(255,212,59,0.08);border-radius:8px;border-left:3px solid var(--yellow)">
- <b>Physics trend declining</b> — Low Probability·Med Impact — Exceptional→Above — observe, don't rush to intervene
+ <b>Biology 在往下掉</b> — Low Probability·Med Impact — 77% → 72% — 先看着，别急着补课
 </div>
 <div style="padding:8px 12px;background:rgba(56,217,169,0.1);border-radius:8px;border-left:3px solid var(--accent2)">
- <b>First competition season (Bebras + IMC)</b> — Low Probability·Med Impact — gentle start; results are feedback, not verdicts
+ <b>第一个比赛季（Bebras + IMC）</b> — Low Probability·Med Impact — 第一次去试试；结果是反馈，不是判决
 </div>
 <div style="padding:8px 12px;background:rgba(56,217,169,0.08);border-radius:8px;border-left:3px solid var(--accent2)">
- <b>Sister Diya ahead</b> — Confirmed·Positive — clear path, shared resources, fewer detours
+ <b>还有 6 年到大学</b> — Confirmed·Positive — 时间够，不着急定方向，喜欢什么就先学什么
 </div>
 </div>
-<div style="margin-top:12px;font-size:14px;color:var(--text2);line-height:1.8">
-<div style="color:var(--accent2);font-weight:600;margin-bottom:4px">Jemma Core Judgment</div>
-<b>Year 9 = final exploration year — build phase starts in Y10</b> — Maths + coding + strong science core + art talent all fit together<br>
-English confidence needs nurturing — a confidence issue, not ability; 4-year window to develop calmly<br>
-<b style="color:var(--accent2)">Strategy:</b> low pressure · high interest · build foundations — start with what she enjoys, gently push what needs improvement
+<div style="margin-top:12px;font-size:15px;color:var(--text2);line-height:2">
+<div style="color:var(--accent2);font-weight:600;margin-bottom:4px">我的判断 · My Take</div>
+<b>Year 9 是最后一个「什么都试」的年</b> — 数学 + 编程 + 科学 + 画画，放在一起是很有意思的一条路<br>
+英语的信心要慢慢养 — 这是「敢不敢开口」的问题，不是「会不会」的问题。还有 4 年多，慢慢来就好<br>
+<b style="color:var(--accent2)">我的做法：</b> 压力小一点、兴趣大一点 — 先做喜欢的，需要补的轻轻推一下
 </div>
 </div>
 <!-- Task List -->
@@ -468,6 +493,30 @@ English confidence needs nurturing — a confidence issue, not ability; 4-year w
 <input type="text" id="jemma-task-input" placeholder="Add new task..." style="flex:1">
 <button class="btn" onclick="addTask('jemma')">+</button>
 </div>
+</div>
+
+<!-- 需要 Jemma 自己决定的：家长不替她选 -->
+<div class="kid-decide-card">
+  <div class="kid-h">这件事该你决定 · Your Call</div>
+  <p style="font-size:15px;line-height:1.9;margin-top:6px">
+    <b>Latin 要不要继续学？</b><br>
+    Latin 现在是你最弱的一科（57.5%）。但它也有一个别人都没有的好处：它同时算「古典语言」和「人文」两边的敲门砖，学过的大学一眼就认。
+    <b>选哪个都行，重要的是这是你自己选的。</b>
+  </p>
+  <div class="kid-choices">
+    <button class="kid-choice" type="button" data-choice="继续学 Latin"
+            data-choice-label="我决定继续学 Latin">继续学 Latin（保留这条路）</button>
+    <button class="kid-choice" type="button" data-choice="换成别的"
+            data-choice-label="我决定换成 Biology / Chemistry">换成 Biology 或 Chemistry（分数更高）</button>
+    <button class="kid-choice" type="button" data-choice="还没想好"
+            data-choice-label="我还没想好，先不定">还没想好，先不定</button>
+  </div>
+</div>
+
+<!-- 一个只属于她的反思问题 -->
+<div class="kid-ask-card" data-placeholder="比如：第 18 题——我当时读到 'displaced' 就以为是说人受伤，其实是说物体被排开。我没敢往下想，怕选错。">
+  <strong>上次考试，哪道题你觉得本来能对？</strong>
+  <span class="kid-hint">点开写两句就行：当时卡在哪一步？下次看到这种题，第一反应是什么？</span>
 </div>
 <!-- 5-8Monthly Plan Overview -->
 <div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%)">
@@ -487,7 +536,7 @@ IMC past papers — 1 section per week, untimed<br>
 10 min puzzle habit daily (NRICH / UKMT)<br>
 1 reading journal entry per week, 100-200 words<br>
 Type, don't handwrite — builds good habits<br>
-Do UKMT puzzles together with sister Diya
+Do UKMT puzzles — NRICH / UKMT 每天 10 分钟就够
 </div>
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--yellow)">
 <b>All year · Core skills</b><br>
@@ -502,7 +551,7 @@ Do UKMT puzzles together with sister Diya
  Final exploration year — build phase starts in Y10<br>
  Start with what she enjoys: Maths / Coding / Science / Art<br>
  Gently push what needs improvement: English analysis + confident expression<br>
- Some joint sessions with sister — UKMT prep together<br>
+ 每天 10 分钟一道 UKMT / NRICH 的题——短而稳，比周末补三小时有用<br>
  School nights: homework first, then 30-45 min own projects
 </div>
 </div>
@@ -522,37 +571,36 @@ Do UKMT puzzles together with sister Diya
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;font-size:14px">
 <!-- Phase 1 -->
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
-<b>Phase A · Y8-9 Exploration Phase</b><br>
- Discover 1-2 genuine subject passions<br>
- Academic English writing — start now, cultivate long-term<br>
- UKMT JMC → IMC maths competition intro<br>
- Instrument / sport — get 1-2 to a proficient level<br>
- School club participation+Volunteer community service
+<b>Phase A · Y9 Exploration Phase（就是现在）</b><br>
+ 发现 1-2 门真正喜欢的科目<br>
+ 开始练学术英语写作 — 现在开始，慢慢养<br>
+ UKMT IMC 数学比赛入门<br>
+ 乐器 / 运动 — 挑 1-2 项练到熟练<br>
+ 参加学校社团 + 做志愿服务
 </div>
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
 <b>Phase B · Y10-11 Build Phase</b><br>
  GCSE target: 8-9 (A*-A equivalent)<br>
- UKMT SMC → BMO Round 1<br>
+ UKMT SMC — 成绩作 ESAT/TMUA 基线信号，不追 BMO<br>
  BPhO/UKChO Olympiad<br>
  Summer school: UNIQ / Imperial<br>
 PS portfolio + academic reading notes
 </div>
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--orange)">
 <b>Phase C · Y12-13 Sprint Phase</b><br>
- A-level: Maths+FMaths+Physics+Chem<br>
+ A-level: Maths+Physics+Latin（默认 3 门；FMaths 追加决策点后移至 2029-09，不早于 Y12）<br>
  TMUA / ESAT exam prep（MAT 与 ENGAA 已废止）<br>
  UCAS application — 2030 season<br>
  Interview prep + competition credentials<br>
-Benchmark sister's path, but start from her own strengths
+ 从自己的强项出发 — 前面 3 年（Y9–Y11）积累的东西这时候才兑现
 </div>
 <!-- Phase 4 -->
-<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--red)">
-<b>How she differs from Diya</b><br>
- Diya Y10-11 = sprint phase, 2-yr window<br>
- Jemma Y8-9 = exploration phase, 4-yr window<br>
- Low pressure, high interest vs High-pressure Sprint<br>
- Long-term English cultivation vs crash-course fixes<br>
- Older sister's experience + shared resources
+<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent2)">
+<b>我的节奏 · My Timeline</b><br>
+ 现在 Y9，离 GCSE 还有 4 年多，到大学 6 年<br>
+ 6 年窗口（Y9→Y13）— 时间是我最大的优势<br>
+ 低压力 · 高兴趣：先做喜欢的，需要补的轻轻推<br>
+ 英语慢慢养 — 不是考前突击能解决的事
 </div>
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
@@ -643,7 +691,7 @@ Benchmark sister's path, but start from her own strengths
     <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
       <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Electromagnetism Test Results</div>
       <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
-        Access Tuition · KS3 Science · 19/27 marks (70%)<br>
+        KS3 Science Electromagnetism · 19/27 marks (70%)<br>
         Question-by-question grading, feedback, strengths &amp; 3 recommendations
       </div>
       <a href="/downloads/jemma_physics_electromagnetism_results.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">View Results</a>
@@ -897,7 +945,7 @@ function renderErrors(){
      ${oq?`<div class="ec-question">${oq}</div>`:(q?`<div class="ec-question">${q}</div>`:'')}
      ${score?`<div class="ec-score">Score: ${score}</div>`:''}
      <div class="ec-answer-section">
-       ${ans?`<div class="ec-diya-answer"><div class="label">Your Answer</div>${ans}</div>`:''}
+       ${ans?`<div class="ec-jemma-answer"><div class="label">Your Answer</div>${ans}</div>`:''}
        ${correct?`<div class="ec-correct"><div class="label">Correct Answer</div>${correct}</div>`:''}
      </div>
      ${weaknesses?`<div class="ec-weaknesses"><div class="label">Weaknesses</div>${weaknesses}</div>`:''}
@@ -1046,7 +1094,7 @@ function genExecTasks(){
  {cat:'general', name:'Complete 1 functional Tinkercad project (save screenshots)'},
  {cat:'general', name:'IMC past papers — 2-3 sets before 27 Jan'},
  {cat:'general', name:'Read ch.2 of a book + write an analytical paragraph'},
- {cat:'general', name:'Do UKMT puzzles together with sister Diya'},
+ {cat:'general', name:'UKMT / NRICH puzzles — 10 min daily'},
  ];
  let added=0;
  newTasks.forEach(t=>{
@@ -1066,14 +1114,18 @@ function genExecTasks(){
 // Toast 
 // Countdown 
 const TIMER_TARGETS = [
- // UKMT JMC 2027 = 2027-05-05（来源：ukmt.org.uk/competition-calendar-2026-27）
- // Bebras 2026 窗口：2026-11-09 ~ 11-20（来源：bebras.uk）
+// UKMT IMC 2027 = 2027-01-27（来源：ukmt.org.uk/competition-calendar-2026-27）
+// 注：JMC 2027-05-05 仅限 Y8 及以下，Jemma 现Y9 已无资格，故本表不列 JMC
+// Bebras 2026 窗口：2026-11-09 ~ 11-20（来源：bebras.uk）
+// 已移除（2026-10-15，已过期）：Summer Start（2026-07-01）
  {id:'t-gcse', name:'GCSE Exams', target:'2029-05-01', tag:'Jemma', tagClass:'green'},
- {id:'t-jmc', name:'UKMT JMC', target:'2027-05-05', tag:'Jemma', tagClass:'accent2'},
+ {id:'t-imc', name:'UKMT IMC', target:'2027-01-27', tag:'Jemma', tagClass:'accent2'},
  {id:'t-bebras', name:'Jemma Bebras (窗口首日)', target:'2026-11-09', tag:'Jemma', tagClass:'green'},
- {id:'t-summer', name:'Summer Start', target:'2026-07-01', tag:'Both', tagClass:'yellow'},
  {id:'t-halfterm', name:'Half Term', target:'2026-10-26', tag:'Both', tagClass:'yellow'}
+ // TODO：Half Term 属学校校历项（现按通用值），请以学校校历核对后修正
 ];
+
+// Radar Chart (Canvas)
 
 // Radar Chart (Canvas) 
 
@@ -1382,9 +1434,9 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
  {
  id:'jemma-g5', icon:'', title:' G5 Sprint Route · Engineering/Maths/CS',
  content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
-<p><b>Jemma now:</b> Year 9 · Maths 88% (13pts above median) · Computing Distinction · Bebras top 10%</p>
+<p><b>Jemma now:</b> Year 9 · Maths 88% (13pts above median) · Computing Distinction · UK Bebras Distinction（校内前 25%；Gold 为全国前 10%，是否达 Gold 未提供）</p>
 <p><b>Target:</b> Oxford / Cambridge / Imperial — Engineering / Maths / CS</p>
-<p><b>Time window:</b> 6 yrs (Y8→Y13) vs Diya's 2 yrs</p>
+<p><b>Time window:</b> 6 yrs (Y9→Y13) · 2031 年 9 月入学</p>
 <br>
 <table class="compare-table">
 <tr><th>Tier</th><th>University</th><th>Direction</th><th>Notes</th></tr>
@@ -1392,40 +1444,47 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
 <tr><td><b>Primary Tier</b></td><td>Edinburgh · UCL · Manchester · KCL</td><td>Engineering/CS</td><td>Expansion options, higher acceptance rate</td></tr>
 <tr><td><b>Safety Tier</b></td><td>Durham · Warwick · Bristol · Southampton</td><td>Engineering</td><td>Strong engineering school reputations</td></tr>
 </table>
-<p style="margin-top:8px"><b>Recommended A-level combo:</b> Maths + Further Maths + Physics + Chemistry (4)</p>
-<p style="color:var(--accent2)"><b>Strengths:</b> Diya's experience + shared resources + clear path + 6-yr runway</p>
+<p style="margin-top:8px"><b>Recommended A-level combo:</b> Maths + Physics + Latin (3) · FMaths 追加决策点 2029-09（Y12 开学时），不早于 Y12 以免与 GCSE 冲刺叠加</p>
+<div style="margin-top:10px;padding:10px 12px;background:rgba(255,212,59,0.08);border:1px solid var(--yellow);border-radius:8px;border-left:4px solid var(--yellow)">
+<b style="color:#b45309">⚠️ 选科要记住的一件事 · 德国线</b><br>
+<span style="font-size:13px;line-height:1.7">如果你以后想留着「德国工程大学」这条路，第四门 A-level 必须是 <b>DAAD List A 科目</b>：Latin / Biology / Chemistry / 第二门语言（French / German / Spanish / Greek）。<br>
+<b>选错组合不会只是「扣分」，是这条路直接作废——而且要到申请那年才会发现。</b><br>
+⚠️ Headington 2026/27 的招生文件和课程表<b>都没有列 A-level CS</b>（两份官方文件对不上，还要去问学校）。所以校内真正能选的安全备份是 <b>Latin / Biology / Chemistry / 第二门语言</b>，每一科都要拿到 <b>GCSE ≥7</b>。<br>
+<b>这不是现在就定的事</b>——你现在 Y9，还有时间慢慢试。等 Y10 选课前再认真想也来得及。</span>
+</div>
+<p style="color:var(--accent2)"><b>My strengths:</b> Maths 88% · Bebras Distinction · clear 6-yr runway</p>
 </div>`
  },
  {
- id:'jemma-timeline', icon:'', title:' 6-Year Planning Timeline (Y8→Y13)',
+ id:'jemma-timeline', icon:'', title:' My 6-Year Timeline (Y9→Y13)',
  content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
 <table class="compare-table">
 <tr><th>Phase</th><th>Years</th><th>Core Target</th><th>Key Actions</th></tr>
-<tr><td><b>Exploration Phase</b></td><td>Y8-9</td><td>Discover subject passion + start English</td><td>UKMT JMC/IMC · Academic Reading · Club leadership</td></tr>
-<tr><td><b>Build Phase</b></td><td>Y10-11</td><td>High GCSEs + competition system</td><td>UKMT SMC→BMO · BPhO/UKChO · Summer School</td></tr>
-<tr><td><b>Sprint Phase</b></td><td>Y12-13</td><td>A-levels + admissions tests + UCAS</td><td>TMUA（CS/数学主线）· ESAT（如转工程）· PS · Interview · 2030 season</td></tr>
+<tr><td><b>Exploration Phase</b></td><td>Y9<span style="font-size:11px;color:var(--text2)">（至 2027-08）</span></td><td>Discover subject passion + start English</td><td>UKMT IMC · Academic Reading · Club leadership</td></tr>
+<tr><td><b>Build Phase</b></td><td>Y10-11<span style="font-size:11px;color:var(--text2)">（2027-09~2029-07）</span></td><td>High GCSEs + competition system</td><td>UKMT SMC（ESAT/TMUA 基线）· BPhO/UKChO · Summer School</td></tr>
+<tr><td><b>Sprint Phase</b></td><td>Y12-13<span style="font-size:11px;color:var(--text2)">（2029-09~2031-07）</span></td><td>A-levels + admissions tests + UCAS</td><td>TMUA（CS/数学主线）· ESAT（如转工程）· PS · Interview · 2030 season</td></tr>
 </table>
-<p style="margin-top:8px;color:var(--accent2)"><b>Key:</b> every step mapped against Diya's timeline — fewer detours</p>
+<p style="margin-top:8px;color:var(--accent2)"><b>Key:</b> 现在是 Y9，2031 年 9 月入学 — 6 年很长，每一步都来得及</p>
 </div>`
  },
  {
  id:'jemma-summer', icon:'', title:' Summer Strategy · Low pressure, high interest',
  content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
 <table class="compare-table">
-<tr><th>Dimension</th><th>Jemma (Y9)</th><th>Diya (Y11)</th></tr>
-<tr><td>Current Phase</td><td style="color:var(--accent2)">Exploration, 4-yr window</td><td style="color:var(--red)">Sprint, 2-yr window</td></tr>
-<tr><td>Pressure Level</td><td style="color:var(--accent2)">Low pressure, free exploration</td><td style="color:var(--red)">High intensity, time tight</td></tr>
-<tr><td>English need</td><td>Slow burn — long-term cultivation</td><td>Urgent — 4/3, needs work</td></tr>
-<tr><td>Focus</td><td>Interest Discovery+Basic Skills</td><td>Competition+Extra Exams+English</td></tr>
+<tr><th>Dimension</th><th>Where I am now</th></tr>
+<tr><td>Current Phase</td><td style="color:var(--accent2)">Exploration — 4 yrs to GCSE, no rush</td></tr>
+<tr><td>Pressure Level</td><td style="color:var(--accent2)">Low pressure, free exploration</td></tr>
+<tr><td>English need</td><td>Slow burn — long-term cultivation</td></tr>
+<tr><td>Focus</td><td>Interest Discovery + Basic Skills</td></tr>
 </table>
 <p style="margin-top:8px"><b>Summer strategy:</b> start with what she enjoys (Maths / Coding / Science / Art), gently push English analysis + confident expression</p>
-<p style="color:var(--accent2)"><b>Core principles:</b> a Year 8-9 summer is still childhood — 3-4h learning per day + at least 1h outdoor sports + 2 free days per week（注：实际排程已远超此原则，见方案 3.4 节）</p>
+<p style="color:var(--accent2)"><b>Core principles:</b> 暑假还是小时候 — 每天学 3-4 小时 + 至少 1 小时户外运动 + 每周 2 天完全自由</p>
 </div>`
  },
  {
  id:'jemma-resources', icon:'', title:' Recommended Resources',
  content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
-<p><b>Maths competitions:</b> UKMT official JMC/IMC past papers | AoPS | Sparx Maths (school-assigned)</p>
+<p><b>Maths competitions:</b> UKMT official IMC past papers（你现在 Y9，JMC 只给 Y8 及以下，所以该考 IMC）| AoPS | Sparx Maths (school-assigned)</p>
 <p><b>Coding/CS:</b> Tinkercad 3D modelling | Scratch | UK Bebras Challenge</p>
 <p><b>Science:</b> BBC Bitesize | Isaac Physics (Cambridge, free) | MEL Science</p>
 <p><b>English:</b> Free reading of English novels | Reading journal writing | Khan Academy English</p>
@@ -1439,18 +1498,20 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
 <p><b>Why Germany works for Jemma:</b> Already learning German (28/30 Above Standard) — 4yr head start!</p>
 <br>
 <table class="compare-table">
-<tr><th>University</th><th>City</th><th>Tuition/sem</th><th>QS Eng</th></tr>
-<tr><td><b>RWTH Aachen</b></td><td>Aachen</td><td style="color:var(--accent2);font-weight:600">€0</td><td>Top 50</td></tr>
-<tr><td><b>TU Berlin</b></td><td>Berlin</td><td style="color:var(--accent2);font-weight:600">€0</td><td>Top 60</td></tr>
-<tr><td><b>TU Darmstadt</b></td><td>Darmstadt</td><td style="color:var(--accent2);font-weight:600">€0</td><td>Top 150</td></tr>
-<tr><td>TU Munich</td><td>Munich</td><td>€2,000-3,000</td><td>Top 30</td></tr>
+<tr><th>University</th><th>City</th><th>Course Length</th><th>QS Eng</th></tr>
+<tr><td><b>RWTH Aachen</b></td><td>Aachen</td><td>6 yrs</td><td>Top 50</td></tr>
+<tr><td><b>TU Berlin</b></td><td>Berlin</td><td>6 yrs</td><td>Top 60</td></tr>
+<tr><td><b>TU Darmstadt</b></td><td>Darmstadt</td><td>6 yrs</td><td>Top 150</td></tr>
+<tr><td>TU Munich</td><td>Munich</td><td>6 yrs</td><td>Top 30</td></tr>
 </table>
 <p style="margin-top:8px"><b>Language Timeline (5yr window):</b></p>
 <p>Year 9 (now): German 28/30 · Year 10: Goethe B1 · Year 11: Goethe B2 · Year 12: TestDaF 4×4 (C1)</p>
-<p><b>Entry Requirements (DAAD):</b> 3 A-Levels min C (Maths + Physics + Chemistry ✅) · 12yr schooling ✅</p>
-<p style="margin-top:8px"><b>Cost Per Year:</b> Tuition €0 (RWTH/TU Berlin) + Living €11,000-13,000 = <b>€11-13k/yr</b></p>
-<p style="color:var(--accent2)"><b>Recommendation:</b> UK main + Germany backup — apply simultaneously (UCAS Oct + uni-assist Jan). If Jemma keeps German going, this becomes a real, low-cost alternative.</p>
-<p style="margin-top:8px;font-size:11px;color:var(--text2)">Source: DAAD GCE page · tum.de tuition fees · uni-assist.de</p>
+<p style="margin-top:6px"><b>⏰ 语言考试时点约束</b>：德国线 WS 本科申请集中在<b>入学年当年 5-7 月</b>（RWTH NC 5/1–7/15、TU Berlin NC 6/1–7/15、TUM 5/15–7/15），故语言考试必须<b>早于入学年</b>完成，不能等到最后一年才开始。<b>备考终点：2029-08（Y13 开学前）出 TestDaF 4×4 或 Goethe C1</b>；若APS 审核要求存在，流程需数周至 2 个月，须再前移至 2029 春季完成 APS。<br>
+<b>解耦原则（重要）</b>：2028-07 方向闸门若通过，德语学习计划<b>自动启动</b>，与最终是否走德国线解耦——理由：学德语对 UK 主线没有任何负面影响，而语言考试有硬时点、不能后置。这是"提前启动但不提前承诺"。<br>
+<b>本窗口（2026-10→2027-01）内不设德语考试目标</b>：Jemma 仍处 Y9→Y10，诊断建议"德语保持校内不设考试目标、B1 推到 Year 10"维持不变；上方 2029-08 终点仅为长期方向锚点，<b>不构成当期加压依据</b>，不得据此在 Y9 增加德语负荷。</p>
+<p><b>Entry Requirements (DAAD):</b> 3 A-Levels min C · List A 中 Mathematics/Further Maths/Pure Maths 同属「数学」学科组、组内不独立（语言除外）· 需 <b>3 门独立 + List A ≥2</b>：用 List B 科目（Psychology / Religious Studies / History of Art / Art / Music）会使List A 计数掉到 1 → <b>德国线静默失效（不是降权）</b> · <b>第四门须为 DAAD List A 科目</b>：Latin / Biology / Chemistry / 第二门语言（French / German / Spanish / Greek）—— <b>⚠️ Headington 2026/27 招生 PDF 与 Sixth Form 课程表均未列 A-level CS（两版官方文件冲突，待直询）；政策层面 DAAD 接受 CS，但校内供给未确认 → 校内真实可用备份 = Latin / Biology / Chemistry / 第二门语言，四类均在 List A 且在课程表内，每科须达 GCSE ≥7</b> · 12yr schooling ✅</p>
+<p style="color:var(--accent2)"><b>Recommendation:</b> UK 主线 + 德国备选 — 两条一起准备。<b>但注意两个截止日不在同一年</b>：UCAS 是 10 月（我这一轮是 2030 season），而德国本科申请在<b>入学年当年 5 月开放、NC 类科目最晚 7 月 15 日截止</b>（RWTH / TU Berlin / TUM）—— 所以德国的 uni-assist 截止日<b>不是</b>入学年 1 月。German 继续学下去，这条备选就真的可用。</p>
+<p style="margin-top:8px;font-size:11px;color:var(--text2)">Source: DAAD GCE page · uni-assist.de</p>
 </div>`
  }
  ];
@@ -1469,9 +1530,9 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
 // Resources 
 async function loadResources(){
  const container=document.getElementById('resource-list');
- // Curated list only — no /api/resources merge (that serves Diya's GCSE library; GCSE content stays off Jemma's page)
+ // Curated list only — no /api/resources merge (that library is GCSE-level; GCSE content stays off this page)
  const resources=[
- {name:'UKMT JMC Past Papers', desc:'Junior Maths Challenge past papers — free downloads', category:'maths', file:'https://ukmt.org.uk/junior-mathematical-challenge', size:'Web'},
+ {name:'UKMT IMC Past Papers', desc:'Intermediate Maths Challenge past papers — free downloads（Y11 及以下可参赛）', category:'maths', file:'https://ukmt.org.uk/intermediate-mathematical-challenge', size:'Web'},
  {name:'UK Bebras', desc:'Bebras challenge — past puzzles and practice', category:'computing', file:'https://bebras.uk', size:'Web'},
  {name:'GCSE Art Guide', desc:'GCSE Art portfolio & exam prep guide', category:'jemma', file:'/resources/books/', size:'--'},
  {name:'BPhO Resources', desc:'UK BPhO Junior Resources', category:'science', file:'/resources/', size:'--'},
@@ -1545,14 +1606,14 @@ const STUDY_TIPS_JEMMA = [
  // === KEPT: Core foundation (3) ===
  {id:'tip_02',cat:'general',p:'p0', head:'🧠 Active Recall: Close the book & explain — the stumble IS the learning', detail:'Reading the same page 5 times feels like studying but it\'s the weakest way to learn. Your brain tricks you: "yeah I know this." Instead: read ONCE, close the book, explain it out loud. If you stumble, THAT\'S what you need to study — the stumble is not failure, it\'s a map. Research shows students using active recall remember 50% more after one week than re-readers. Works for EVERYTHING — coding concepts, science facts, maths methods.', action:'Today: pick ONE concept from Python you learned this week. Close your laptop. Explain it out loud. Where did you stumble? Re-read ONLY that part. Try again. Then do the same with a science fact. 10 minutes total.'},
  {id:'j_new50',cat:'computing',p:'p0', head:'🐍 Escape “tutorial hell”: build first, then look up only what you’re stuck on', detail:'The biggest trap for new coders is watching tutorial after tutorial and still not being able to build anything on your own (Chinese learners call it “会写但不会用” — can write it, but can’t use it). The fix is project-first learning: pick a small real project, try to build it with ONLY what you already know, and look up just the one thing you’re stuck on. Perfect first projects: (1) Rock Paper Scissors (use the random module so the computer chooses), (2) Mad Libs (ask for words, then fill them into a funny story), (3) a number-guessing game, (4) a password generator. Each is 10–25 lines and teaches input, output, if/else, loops and random. When you finish, CHANGE something (add a score, add lives) — that “change it” step is where the real learning happens.', action:'Today: open replit.com and build Rock Paper Scissors from memory (import random → computer picks 1–3 → you pick → compare). If stuck, look up ONLY the random part, then keep going. When it works, add a score counter and show your family. Next: Mad Libs.'},
- {id:'j_new30',cat:'maths',p:'p1', head:'🏅 UKMT JMC Past Paper Sprint: 60 minutes, 25 questions — start training for your first maths competition medal', detail:'The UKMT Junior Maths Challenge (JMC) is for Years 7-8, and with your Bebras Distinction, you\'re already at medal level. The JMC format: 25 multiple-choice questions, 60 minutes. First 15 are easier (standard KS3 maths), last 10 are HARD puzzles. Scoring: +4 correct, -1 wrong, 0 blank. The training plan: (1) Download ONE past JMC paper from ukmt.org.uk (free → Past Papers → Junior). (2) Set a 60-minute timer. (3) Do questions 1-15 FIRST — these are your "banker" marks. Aim for 13+/15. (4) Questions 16-20: try them all, but if stuck for >3 minutes, SKIP. (5) Questions 21-25: these are genius-level. Try them for fun, but BLANK any you\'re unsure of (better 0 than -1). (6) Mark yourself. Bronze ≈ 30-40 marks. Silver ≈ 40-50. Gold ≈ 50+. (7) For every wrong answer, read the SOLUTION (included in the PDF) — this is where the real learning happens. UKMT solutions teach you problem-solving tricks you can\'t learn in class. Do one paper every 2 weeks. Track your score. Watch it climb.', action:'This week: download the most recent JMC paper from ukmt.org.uk → Past Papers → Junior. Print it. Set 60 min timer. Do questions 1-15 first. Mark yourself. Read EVERY solution — even for the ones you got right, because UKMT solutions often show shortcuts you didn\'t think of. Write down 3 new problem-solving tricks you learned. Do another paper in 2 weeks.'},
+ {id:'j_new30',cat:'maths',p:'p1', head:'🏅 UKMT IMC Past Paper Sprint: 60 minutes, 25 questions — train for your maths competition', detail:'The UKMT Intermediate Maths Challenge (IMC) is for Years 11 and below, so it is the right competition for you now (JMC is for Years 7-8 only — you have graduated past it). The IMC format: 25 multiple-choice questions, 60 minutes. The first 15 are more approachable, the last 10 are HARD puzzles. Scoring: +4 correct, -1 wrong, 0 blank — the same mark scheme as JMC, one difficulty notch higher. The training plan: (1) Download ONE past IMC paper from ukmt.org.uk (free → Past Papers → Intermediate). (2) Set a 60-minute timer. (3) Do questions 1-15 FIRST — these are your "banker" marks. Aim for 11+/15. (4) Questions 16-20: try them all, but if stuck for >3 minutes, SKIP. (5) Questions 21-25: these are genius-level. Try them for fun, but BLANK any you\'re unsure of (better 0 than -1). (6) Mark yourself. Bronze ≈ 30-40 marks. Silver ≈ 40-50. Gold ≈ 50+. (7) For every wrong answer, read the SOLUTION (included in the PDF) — this is where the real learning happens. UKMT solutions teach you problem-solving tricks you can\'t learn in class. Do one paper every 2 weeks. Track your score. Watch it climb.', action:'This week: download the most recent IMC paper from ukmt.org.uk → Past Papers → Intermediate. Print it. Set 60 min timer. Do questions 1-15 first. Mark yourself. Read EVERY solution — even for the ones you got right, because UKMT solutions often show shortcuts you didn\'t think of. Write down 3 new problem-solving tricks you learned. Do another paper in 2 weeks.'},
 
  // === NEW: structured path + debugging + self-directed learning + windows + STEM identity (5) ===
  {id:'j_s01',cat:'computing',p:'p0', head:'🧭 Follow ONE free structured path — stop hopping between random tutorials', detail:'You learn fastest when you follow a single, well-designed course instead of bouncing between YouTube videos. Two excellent free options: (1) Raspberry Pi Foundation\'s "Introduction to Python" project path (projects.raspberrypi.org) — written for ages 10-13, each project builds on the last; (2) PyCrafters from the Python Institute — a free course with two levels: "Explorer" (guided, step-by-step, ages 11-12, perfect for you) and "Adventurer" (independent challenges, ages 13-14). PyCrafters even teaches you to plan projects with a Kanban board and document your work — real engineer habits. Pick one, and finish it before starting another.', action:'Today: open projects.raspberrypi.org and start the first "Introduction to Python" project (or sign up for PyCrafters Explorer). Complete ONE full project this week. When it works, change one thing (colour, speed, message) and show someone.'},
  {id:'j_s02',cat:'computing',p:'p1', head:'🐞 Become a debugger: read the error message first, then the line number — before asking for help', detail:'Real programmers spend more time reading error messages than writing code — and so should you. The error message is not scary, it is a map: it tells you the exact LINE where Python got stuck and usually WHAT went wrong ("NameError: name x is not defined" = you used a variable before creating it; "SyntaxError" = a typo like a missing colon; "IndentationError" = your spacing is off). The habit that makes you independent: (1) read the last line of the error, (2) go to the line number it names, (3) look at that line and the line above, (4) try ONE fix yourself, (5) only then ask for help. Students who do this before asking learn much faster.', action:'This week: the next time your code throws an error (it will!), write the error type and line number in your learning log, guess the fix, try it, and note what worked — all BEFORE asking anyone. Keep a mini list of "errors I now understand".'},
  {id:'j_s03',cat:'general',p:'p1', head:'🧭 Run your own learning: the 6-step self-directed loop (goal → "done?" → steps → timeline → resources → reflect)', detail:'Independent learners (the ones who thrive later) plan their own learning instead of waiting to be told. Researchers describe a 6-step loop you can use for any new skill — coding, maths, a science topic: (1) set a specific GOAL ("build a quiz game", not "get better at Python"); (2) decide what "done" looks like ("it runs and keeps score"); (3) list the steps in order; (4) put a timeline on them; (5) gather your resources (tutorials, docs, books); (6) after you finish, reflect on what worked. This is metacognition — thinking about your own thinking — and it is the single strongest predictor of long-term success.', action:'This week: write one 6-step plan for a small project you actually want to build (a quiz, a game, a calculator). Use your learning log. Tick off the steps as you go, and on Sunday write two lines: what worked + what you would change next time.'},
  {id:'j_s04',cat:'general',p:'p0', head:'⏱️ Tiny focused windows: 15-30 minutes, ONE skill, at a fixed time', detail:'You do not need hours — you need consistency. Study-skill research for your age says short, focused sessions beat long ones, and a regular time beats willpower. The formula: (1) pick a fixed daily time (e.g. right after school, after a snack); (2) set a 15-30 minute timer; (3) work on ONE thing only (one Python project, one puzzle, one science topic) — no phone, no extra tabs; (4) stop when the timer ends. Repeat most days. This builds a habit that carries you through GCSE and A-level without ever feeling like a grind. Aim for "most days", not "perfect".', action:'This week: choose your daily window (15-25 min) and a fixed time. Do it 5 out of 7 days — one coding session, one NRICH puzzle, one science recap. Set a phone timer each time. At the end of the week, count the days you hit it and celebrate.'},
- {id:'j_s05',cat:'general',p:'p1', head:'🌟 You are 12 — STEM interest in girls peaks at 11 and drops at 13. Protect your spark.', detail:'Here is a number worth knowing: girls show equal interest in STEM as boys at primary school, but confidence starts dropping in middle school — and only about 21% of engineering students are women. You are exactly at the age where the spark is easiest to lose, so protect it on purpose. The two things research says keep girls in STEM: (1) role models you can see yourself in — watch "day in the life" videos of women engineers and coders, and ask Diya about her "Girls into Electronics" day; (2) make your work visible — show your projects, enter competitions, so it feels real and public, not just a private hobby. You already have a Bebras Distinction (top 10% nationally) — that is proof you belong.', action:'This week: watch ONE "women in tech / engineering, day in the life" video and write in your learning log "which part of her job looks fun to me?". Then show your latest Python project to one family member and explain how it works.'},
+ {id:'j_s05',cat:'general',p:'p1', head:'🌟 You are 13 — STEM interest in girls peaks at 11 and drops at 13. Protect your spark.', detail:'Here is a number worth knowing: girls show equal interest in STEM as boys at primary school, but confidence starts dropping in middle school — and only about 21% of engineering students are women. You are exactly at the age where the spark is easiest to lose, so protect it on purpose. The two things research says keep girls in STEM: (1) role models you can see yourself in — watch "day in the life" videos of women engineers and coders, and ask your teachers if you can sit in on a school "Girls into Electronics" session; (2) make your work visible — show your projects, enter competitions, so it feels real and public, not just a private hobby. You already have a Bebras Distinction (top 25% in school) — that is proof you belong.', action:'This week: watch ONE "women in tech / engineering, day in the life" video and write in your learning log "which part of her job looks fun to me?". Then show your latest Python project to one family member and explain how it works.'},
 ];
 
 let todayTips = [];
@@ -2192,15 +2253,15 @@ function renderCountdown(){
  }).join('');
 }
 
-// ── 三周执行计划（Jemma · Year 8 定制；方法论源自 analysis/海外教育视角学习方案建议_20261015.html） ──
+// ── 三周执行计划（Jemma · Year 9 定制） ──
 const TWP_JEMMA = [
- {label:'Week 1 · 起步与习惯', start:'2026-10-15', end:'2026-10-21',
+ {id:'w1-errors', taskLabel:'Week 1 · 错题本习惯', label:'Week 1 · 起步与习惯', start:'2026-10-15', end:'2026-10-21',
   goal:'错题本习惯建立：每天 1 道错题进 Error Book（含错在哪、正确思路两行）',
   focus:'<b>本周</b> Maths / Science / German 各挑 1 个薄弱点写进周计划 · Bebras 往年题试做 1 套（找手感）'},
- {label:'Week 2 · 主动回忆', start:'2026-10-22', end:'2026-10-28',
+ {id:'w2-flashcards', taskLabel:'Week 2 · 三科闪卡 5 张', label:'Week 2 · 主动回忆', start:'2026-10-22', end:'2026-10-28',
   goal:'三科各建 5 张闪卡（遮住答案自己说一遍再翻面），每天 20 分钟',
   focus:'<b>10/25</b> 留白休息 · <b>half term</b> 每天最多一个 2h 深度块，下午晚上彻底休息 · Bebras 第 2 套限时'},
- {label:'Week 3 · 复盘与冲刺', start:'2026-10-29', end:'2026-11-04',
+ {id:'w3-bebras-review', taskLabel:'Week 3 · Bebras 错题三分类', label:'Week 3 · 复盘与冲刺', start:'2026-10-29', end:'2026-11-04',
   goal:'Bebras 赛前复盘：错题三分类（粗心/没懂/没时间）， biggest 桶就是冲刺重点',
   focus:'<b>11 月 Bebras</b>（日期以学校通知为准）· 赛后把每道错题按三分类记回 Error Book'}
 ];
@@ -2208,13 +2269,13 @@ function renderTwpJemma(){
   const el=document.getElementById('twp-jemma');
   if(!el) return;
   const today=new Date().toISOString().slice(0,10);
-  const base='background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;';
+  const base='background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px 14px 48px;';
   el.innerHTML=TWP_JEMMA.map(w=>{
     let extra='';
     if(today>w.end) extra='opacity:0.55;';
     else if(today>=w.start) extra='border-left:3px solid var(--accent2);background:rgba(56,217,169,0.08);';
     const badge=today>=w.start&&today<=w.end?'<span style="float:right;font-size:9px;font-weight:700;padding:1px 8px;border-radius:8px;background:var(--accent2);color:#fff">本周</span>':'';
-    return `<div style="${base}${extra}" class="twp-jw">
+    return `<div style="${base}${extra}" class="kid-task-card" data-task-id="${w.id}" data-task-label="${w.taskLabel}" title="点一下就能勾掉">
      <div style="font-size:12px;font-weight:700">${w.label}${badge}</div>
      <div style="font-size:10px;color:var(--text2);margin-top:2px">${w.start.slice(5).replace('-','/')} – ${w.end.slice(5).replace('-','/')}</div>
      <div style="font-size:11.5px;margin-top:6px;line-height:1.5">${w.goal}</div>
@@ -2229,6 +2290,13 @@ document.addEventListener('DOMContentLoaded',()=>{
  loadDashboard();
  renderTwpJemma();
  try{ setupUploadZone(); refreshUploadList(); }catch(_){}
+ // 儿童互动组件：可勾选任务 / 提问卡 / 决策选择 / 完成进度
+ try{
+   KidCheck.init('body');
+   KidAsk.init('body');
+   KidStamp.init('body');
+   KidProgress.render('#kid-progress');
+ }catch(_){}
 });
 </script>
 
@@ -2307,5 +2375,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 </div>
 </div>
 
+<script src="/assets/kid.js"></script>
 </body>
 </html>

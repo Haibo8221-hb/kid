@@ -490,8 +490,10 @@ canvas.radar{width:240px!important;height:240px!important}
 .twp-week .tw-focus{font-size:11px;color:var(--text2);margin-top:6px;line-height:1.6}
 .twp-week .tw-focus b{color:var(--orange)}
 </style>
+<!-- 儿童友好高亮与互动组件层（与 Jemma 页面共用同一套，保证高亮逻辑一致） -->
+<link rel="stylesheet" href="/assets/kid.css">
 </head>
-<body>
+<body data-kid-page="diya">
 
 <!-- Sidebar -->
 <aside class="sidebar">
@@ -504,8 +506,8 @@ canvas.radar{width:240px!important;height:240px!important}
   <circle cx="22" cy="21" r="7" fill="none" stroke="var(--accent2)" stroke-width="1.5"/>
   <polyline points="18.5,21 21,23.5 25.5,19" fill="none" stroke="var(--accent2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
  </svg>
- <h1>Study Compass</h1>
- <p>Academic Planner</p>
+ <h1>Diya's Study Space</h1>
+ <p>Year 11 · 只属于我的学习台</p>
 </div>
 <ul class="sidebar-nav">
 <li><a href="#" data-tab="dashboard" class="active" onclick="switchTab('dashboard');return false">🏠 Dashboard</a></li>
@@ -532,14 +534,11 @@ canvas.radar{width:240px!important;height:240px!important}
  </div>
 </div>
 <div class="sidebar-bottom">
-<div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Planning Docs</div>
-<a href="analysis/海外教育视角学习方案建议_20261015.html" target="_blank" style="color:var(--accent2);font-weight:600">★ Diya 方案建议 (10/15)</a>
-<a href="analysis/Jemma定制化海外教育方案_20261015.html" target="_blank">Jemma 定制化方案（对照）</a>
+<div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">My Stuff</div>
 <a href="/macbeth_flashcards.html" target="_blank">Macbeth Flashcards</a>
 <a href="/inspector_calls_flashcards.html" target="_blank">Inspector Calls Flashcards</a>
-<a href="/Diya_Plan.html" target="_blank">Diya Plan</a>
-<a href="/Diya_Jemma_Oxbridge_Plan.html" target="_blank">Route Overview</a>
-<a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">Summer Guide</a>
+<a href="/Diya_Plan.html" target="_blank">My Full Plan</a>
+<a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">My Summer Guide</a>
 <a href="#" id="llm-settings-btn" title="配置 LLM 端点 / API Key / 模型" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM模块未加载(版本 20261014-1745-domfix)。很可能是浏览器或代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或改用带版本号的地址：app.html?v=20261014-1745-domfix');}}catch(e){alert('LLM设置打开失败: '+((e&&e.message)||e));} return false;">⚙️ LLM 设置</a>
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
@@ -549,14 +548,26 @@ canvas.radar{width:240px!important;height:240px!important}
 <main class="main">
 <div class="header-bar">
 <h2>Focus and try your best</h2>
-<div class="admin-info"><a href="/jemma.html" style="color:var(--accent);font-weight:600;margin-right:12px">Switch to Jemma →</a> · <a href="#" onclick="logout();return false" style="color:var(--red)">Logout</a></div>
+<div class="admin-info"><a href="#" onclick="logout();return false" style="color:var(--red)">Logout</a></div>
 </div>
 
 <!-- 
  DASHBOARD
  -->
 <div id="tab-dashboard" class="tab-panel active">
-<div class="panel-title"> Key Countdowns</div>
+
+<!-- 我的身份卡：这个页面是什么、只属于谁 -->
+<div class="kid-who-card">
+  <div class="kid-who-name">Diya</div>
+  <div class="kid-who-meta">Year 11 · GCSE 2027 年 5 月 · Headington</div>
+  <p class="kid-who-msg">这是<b>只属于你一个人</b>的学习台。你的成绩、错题、计划、笔记都只存在这里——妹妹看不到，爸爸妈妈也可以陪你一起看，但内容都是你的。</p>
+  <div class="kid-who-todo">
+    <span class="kid-ask-card">
+      <strong>今天先做哪一件？</strong>
+      <span class="kid-hint">在下面「本周三件事」里挑一件，勾掉它就够了。不用一次做完所有事。</span>
+    </span>
+  </div>
+</div>
 
 <!-- Countdown Strip -->
 <div id="countdown-strip" class="countdown-strip"></div>
@@ -565,10 +576,29 @@ canvas.radar{width:240px!important;height:240px!important}
 <div class="section" style="border-left:4px solid var(--accent2)">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
  <div class="section-title" style="margin:0"> 📌 Next 3 Weeks · 15 Oct → 4 Nov</div>
- <a href="analysis/海外教育视角学习方案建议_20261015.html" target="_blank" style="font-size:11px;margin-left:auto">完整方案 →</a>
 </div>
 <div id="twp-diya" class="twp-grid"></div>
 </div>
+
+<!-- 需要你自己决定：家长不替你选 -->
+<div class="section kid-decide-card kid-has-stamp">
+ <div class="section-title"> 需要你自己决定 · Your Call</div>
+ <p class="kid-lead">下面这几件事，最后拍板的是你。选完记下来就行——之后如果想改，随时能改。</p>
+ <div class="kid-h">今天先做哪一门？</div>
+ <div class="kid-choices">
+  <button class="kid-choice" data-choice="maths">先数学</button>
+  <button class="kid-choice" data-choice="english">先英语</button>
+  <button class="kid-choice" data-choice="errors">先清错题</button>
+  <button class="kid-choice" data-choice="competition">先竞赛题</button>
+ </div>
+ <div class="kid-h" style="margin-top:14px">遇到不会的题，打算怎么处理？</div>
+ <div class="kid-choices">
+  <button class="kid-choice" data-choice="think10">先自己想 10 分钟</button>
+  <button class="kid-choice" data-choice="askteacher">去问老师</button>
+  <button class="kid-choice" data-choice="skip">先跳过，最后回头做</button>
+ </div>
+</div>
+<div id="kid-progress" style="margin:14px 0"></div>
 
 <!-- Study Tips -->
 <div id="study-tips" style="margin-bottom:16px"></div>
@@ -603,15 +633,15 @@ canvas.radar{width:240px!important;height:240px!important}
  Accepted Learning Development support — mindset shift
 </div>
 </div>
-<div class="section">
-<div class="section-title"> Risk & Weaknesses</div>
-<div style="font-size:14px;line-height:1.8;color:var(--text2)">
- Chemistry 44% ⚠️ — Exam exposes real gaps (electrolysis, ionic structures)<br>
- English analysis depth still needs work (vocabulary focus)<br>
- Physics required practicals — must review method descriptions<br>
- A-level Chemistry viability in question — GCSE outcome will decide<br>
- History longer answers — dropped marks on 16-marker (SPAG)<br>
- SMC mock 70/125 — number theory + algebraic reasoning gap (Q9-13 collapse)
+<div class="section kid-focus-card">
+<div class="section-title"> 需要重点关注 · My Watch List</div>
+<div style="font-size:15px;line-height:2;color:var(--text2)">
+ <div class="kid-focus-item"><b>化学 44%</b> — 考试会暴露真实漏洞（电解、离子结构）</div>
+ <div class="kid-focus-item"><b>英语分析深度</b> — 词汇量还要往上加</div>
+ <div class="kid-focus-item"><b>物理必做实验</b> — 方法描述要背下来</div>
+ <div class="kid-focus-item"><b>化学 A-level 还在考虑中</b> — 看 GCSE 结果再定（不进我的主线，只当备用）</div>
+ <div class="kid-focus-item"><b>历史长答题</b> — 16 分题的答题步骤丢分</div>
+ <div class="kid-focus-item"><b>SMC 模考 70/125</b> — 数论和代数推理有断档（Q9-13 全塌）</div>
 </div>
 </div>
 </div>
@@ -635,9 +665,9 @@ Maths 75% · Physics 71% · English improving ⬆️ · Drama 68% surprise
 </div>
 <div style="margin-top:12px;font-size:14px;color:var(--text2);line-height:1.8">
 <div style="color:var(--accent2);font-weight:600;margin-bottom:4px">Diya Core Assessment:</div>
-<b>Year 11 = GCSE Year.</b> Exams start 12 May 2027 — about 7 months out. English must hold 5/6 and Chemistry needs a 7 to keep A-level Chem alive.<br>
+<b>Year 11 = GCSE Year.</b> Exams start 12 May 2027 — about 7 months out. English must hold 5/6；<b>Chemistry 不进 Plan A</b>，仅若需补第三门（FMaths 失效时）才评估，需 ≥7。<br>
 Maths+Physics are strong but not a free pass — A-level is 3-4× harder than GCSE.<br>
-<b style="color:var(--accent2)">Strategy:</b> English + Chemistry priority · past-paper cycle every subject · maintain Maths/Physics advantage · all subjects 7+.
+<b style="color:var(--accent2)">Strategy:</b> <b>English priority</b>（Chemistry 转条件待定，不进 Plan A）· past-paper cycle every subject · maintain Maths/Physics advantage · all subjects 7+.
 </div>
 </div>
 
@@ -733,15 +763,15 @@ After GCSE: A-level bridging start
 GCSE target 887776+<br>
 SMC sat Oct — review when result lands<br>
 BPhO IPC entry (Feb-Mar 2027)<br>
-Chemistry ≥7 decides 4th A-level<br>
+Chemistry ≥7 decides 4th A-level（该第四门须为 DAAD List A 科目，若走German 线）<br>
 English hold 5/6
 </div>
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent2)">
 <b>Phase B · Y12 Sprint</b><br>
 A-level Maths+FMaths+Physics+4th<br>
-MAT/ESAT prep<br>
+ESAT prep (M1+M2)<br>
 PS + reference prep<br>
-UKMT BMO + BPhO Round 2<br>
+BPhO Round 2<br>
 Imperial/Cambridge interview prep
 </div>
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--orange)">
@@ -786,7 +816,6 @@ Hong Kong parallel: HKUST+PolyU
 <div class="section" style="border-left:4px solid var(--accent2)">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
  <div class="section-title" style="margin:0"> 📌 当前主计划 · Next 3 Weeks（15 Oct → 4 Nov）</div>
- <a href="analysis/海外教育视角学习方案建议_20261015.html" target="_blank" style="font-size:11px;margin-left:auto">方案全文（含 ESAT/升学路径分析）→</a>
 </div>
 <div id="twp-diya-route" class="twp-grid"></div>
 <div style="margin-top:10px;font-size:11px;color:var(--text2)">
@@ -1359,18 +1388,19 @@ function deleteNote(id, subject){
 // Toast 
 // Countdown 
 // 2026 考试/活动日历（官方来源已标注；校历项按学校通用值，需与学校校历核对）
-// · GCSE 2026 夏季考试季：5/11 首场(English Literature P1) ~ 6/24 备用日，成绩日 8/20
-//   （来源：AQA/Edexcel/OCR 2026 timetable；此处取首场作为倒计时锚点）
-// · UKMT SMC 2026：2026-10-07（来源：ukmt.org.uk/competition-calendar-2026-27）
 // · UK Bebras 2026：2026-11-09 ~ 11-20 窗口（来源：bebras.uk，取窗口首日）
+// · UKMT SMC 2026：2026-10-07 已考完（结果 11 月到校，处理见学习方案 W4/W5）
+// 倒计时仅保留「尚未到来」的项目。
+// 已移除（2026-10-15，均已过期，保留会误导家长执行）：
+//   · GCSE 首场· Eng Lit P1（2026-05-11，已考完）
+//   · GCSE Maths P1 non-calc（2026-05-14，已考完）
+//   · UKMT SMC（2026-10-07，已考完；结果 11 月到校，见学习方案 W4/W5）
+//   · Summer Break（2026-07-01，已过）
+// 保留项：仅保留 Diya 自己未来的锚点
 const TIMER_TARGETS = [
- {id:'t-gcse', name:'GCSE 首场 · Eng Lit P1', target:'2026-05-11', tag:'Diya', tagClass:'orange'},
- {id:'t-gcse-maths', name:'GCSE Maths P1 (non-calc)', target:'2026-05-14', tag:'Diya', tagClass:'orange'},
- {id:'t-smc', name:'UKMT SMC', target:'2026-10-07', tag:'Diya', tagClass:'orange'},
- {id:'t-bebras', name:'Jemma Bebras (窗口首日)', target:'2026-11-09', tag:'Jemma', tagClass:'green'},
- {id:'t-summer', name:'Summer Break', target:'2026-07-01', tag:'Both', tagClass:'yellow'},
- {id:'t-halfterm', name:'Half Term', target:'2026-10-26', tag:'Both', tagClass:'yellow'}
- // TODO(#13)：Summer Break / Half Term 属学校校历项（现按通用值），请以学校校历核对后修正
+ {id:'t-gcse', name:'我的 GCSE 开考', target:'2027-05-12', tag:'Diya', tagClass:'green'},
+ {id:'t-halfterm', name:'Half Term', target:'2026-10-26', tag:'Mine', tagClass:'yellow'}
+ // TODO(#13)：Half Term 属学校校历项（现按通用值），请以学校校历核对后修正
 ];
 
 // Radar Chart (Canvas) 
@@ -1612,85 +1642,64 @@ async function loadRoutes(){
    </table>
    <p style="margin-top:8px;font-size:11px;color:var(--accent2)">Key Message: School has strong engineering resources (Y12 has dedicated Oxbridge/Engineering prep program). Key now is to build solid GCSE foundation + explore interests over summer.</p>
   `},
-  {id:'uk-design',title:'UK Design Engineering · Recommended Track',body:`
-   <p style="font-size:11px;color:var(--accent2);margin-bottom:6px">Why this path suits Diya? Maths + FMaths + Physics = Strong STEM combo. Diya Top Choice = Imperial Engineering (explicitly requires Maths + FMaths + Physics). Physics + Maths is Design Engineering hard currency — Not needed Art A-level.</p>
+  {id:'uk-design',title:'Design Engineering · My Route',body:`
+   <p style="font-size:12px;color:var(--accent2);margin-bottom:8px">Why this suits me: Maths + FMaths + Physics is a strong STEM combination, and Imperial Engineering explicitly asks for exactly these three.</p>
    <table class="compare-table">
-    <tr><th>University</th><th>Course</th><th>Duration</th><th>Exam</th><th>Portfolio</th></tr>
+    <tr><th>University</th><th>Course</th><th>Duration</th><th>Extra Test</th><th>Portfolio</th></tr>
     <tr><td>Imperial</td><td>Engineering (Top Choice)</td><td>4yr</td><td>ESAT</td><td></td></tr>
     <tr><td>Cambridge</td><td>Design (MDes)</td><td>4yr</td><td>30min Test</td><td>Core</td></tr>
-    <tr><td>Imperial x RCA</td><td>Design Engineering</td><td>4yr</td><td>MAT/ESAT</td><td></td></tr>
-    <tr><td>UCL</td><td>E&A Design</td><td>5yr</td><td></td><td>Core</td></tr>
+    <tr><td>Imperial x RCA</td><td>Design Engineering</td><td>4yr</td><td>ESAT</td><td></td></tr>
+    <tr><td>UCL</td><td>E&amp;A Design</td><td>5yr</td><td></td><td>Core</td></tr>
     <tr><td>Loughborough</td><td>Product Design Eng</td><td>3-4yr</td><td>None</td><td></td></tr>
    </table>
-   <p style="margin-top:4px;font-size:10px;color:var(--text2)">Starting Salary: £28-35k | 5yr Median Salary: £49k</p>
+   <p style="margin-top:8px;font-size:11px;line-height:1.6"><strong>What this means for me:</strong> Design Engineering does <em>not</em> need an Art A-level. Maths and Physics are the hard currency here — those are the two subjects I must not let slip.</p>
   `},
-  {id:'g5-6d',title:'UK G5 Full Route 6D Comparison',body:`
+  {id:'g5-6d',title:'Two Routes Side by Side',body:`
    <table class="compare-table">
     <tr><th>Dimension</th><th>Design Eng</th><th>Traditional Engineering</th></tr>
-    <tr><td>Fit</td><td></td><td></td></tr>
-    <tr><td>Salary</td><td></td><td></td></tr>
-    <tr><td>ROI</td><td></td><td></td></tr>
-    <tr><td>Entry Difficulty</td><td></td><td></td></tr>
+    <tr><td>Fit</td><td>Design + Engineering</td><td>Engineering only</td></tr>
+    <tr><td>Portfolio needed</td><td>Yes — Art work helps</td><td>No</td></tr>
+    <tr><td>Entry Difficulty</td><td>Higher</td><td>Lower</td></tr>
     <tr><td>Study Duration</td><td>4-5yr</td><td>4yr</td></tr>
-    <tr><td>Total Cost</td><td>£160-200k</td><td>£120-160k</td></tr>
    </table>
-   <p style="margin-top:8px;font-size:11px;line-height:1.6"><strong>Conclusion:</strong> Design Engineering is Diya's optimal solution — Not needed Art, Salary High, Physics+Maths Perfect Match. Imperial Engineering = Top Choice.<br>Traditional Engineering: STEM Core, competition + English is the breakthrough.<br><del>Architecture + pure Art: Excluded (requires Art, Art Dropped).</del></p>
-  `},
-  {id:'hk-top5',title:'HK TOP 5 · Budget and Scholarship',body:`
-   <table class="compare-table">
-    <tr><th>University</th><th>QS</th><th>IELTS</th><th>Grades Required</th><th>Tuition (4yr)</th><th>Scholarship</th></tr>
-    <tr><td>HKUST</td><td>~34</td><td>6.0</td><td>A*AA-AAA</td><td>£86k</td><td>£36k</td></tr>
-    <tr><td>PolyU</td><td>~57</td><td>6.0</td><td>BBB-AAB</td><td>£64k</td><td>£100k</td></tr>
-    <tr><td>HKU</td><td>~17</td><td>6.5</td><td>3A</td><td>£86k+</td><td>&mdash;</td></tr>
-    <tr><td>CUHK</td><td>~36</td><td>6.0</td><td>AAA</td><td>£80k</td><td>&mdash;</td></tr>
-    <tr><td>CityU</td><td>~54</td><td>6.0</td><td>BBB</td><td>£64k</td><td>&mdash;</td></tr>
-   </table>
-   <p style="margin-top:6px;font-size:10px;line-height:1.5">
-    <strong>HKUST Full Scholarship Conditions:</strong> A*A*A = Full Scholarship + HKD 60k Stipend | AAA = Half Scholarship<br>
-    <strong>PolyU Recommended Path:</strong> Product Design + AI Minor — Art Optional, STEM portfolio can also apply<br>
-    <strong>Difficulty Comparison:</strong> HK than UK easier 2-5x — No competitions needed / No interview / No complex PS / IELTS only 6.0
-   </p>
+   <p style="margin-top:8px;font-size:11px;line-height:1.6"><strong>My read:</strong> Design Engineering is the stronger fit for me — I don't need Art A-level, and Physics + Maths match it directly. Imperial Engineering is my top choice.<br>Traditional Engineering keeps the same STEM core; the breakthrough there is competition + English.<br><del>Architecture + pure Art: excluded — would require Art, which I dropped.</del></p>
   `},
   {id:'uk-vs-hk',title:'UK vs HK Application Logic Comparison',body:`
    <table class="compare-table">
     <tr><th>Dimension</th><th>UK</th><th>HK</th></tr>
     <tr><td>Personal Statement</td><td>Core — decides admission</td><td>Not Core — grades priority</td></tr>
-    <tr><td>competition/extracurriculars</td><td>Required (MAT/ESAT/STEP/UKMT)</td><td>Not Required</td></tr>
+    <tr><td>competition/extracurriculars</td><td>Required (ESAT/STEP)</td><td>Not Required</td></tr>
     <tr><td>interview</td><td>Decisive</td><td>Rare</td></tr>
     <tr><td>A-level Grades</td><td>combo and subject matching matters</td><td>Grades Priority</td></tr>
     <tr><td>English</td><td>Throughout PS/interview/academic writing</td><td>IELTS Only</td></tr>
     <tr><td>Offer</td><td>Issued conditional, must meet conditions</td><td>Mostly unconditional</td></tr>
-    <tr><td>Tuition</td><td>£120-200k</td><td>£64-86k</td></tr>
     <tr><td>IELTS</td><td>6.5-7.0</td><td>6.0</td></tr>
-    <tr><td>extra Exam</td><td>MAT/ESAT/STEP</td><td>None</td></tr>
+    <tr><td>extra Exam</td><td>ESAT（剑桥数学线另需 TMUA+STEP）</td><td>None</td></tr>
    </table>
-   <p style="margin-top:6px;font-size:10px;color:var(--accent)">Core Principle: Dual Track — HK and UK Fully Independent Applications, no conflict. No need to decide now.</p>
+   <p style="margin-top:6px;font-size:10px;color:var(--accent)">Core Principle: Dual Track — UK and HK are fully independent applications, no conflict. I don't need to decide now.</p>
   `},
-  {id:'combo',title:'3-Subject Combo Decision',body:`
-   <p style="font-size:11px;color:var(--text2);margin-bottom:6px">Diya is deciding between three A-level combinations. Using university paths + reverse from career data:</p>
+  {id:'combo',title:'Which Three A-levels?',body:`
+   <p style="font-size:11px;color:var(--text2);margin-bottom:6px">I'm weighing up two A-level combinations. Working backwards from what universities ask for:</p>
    <table class="compare-table">
     <tr><th></th><th>A: Maths+FMaths+Physics</th><th>B: Maths+FMaths+Chem</th></tr>
     <tr><td>Imperial Engineering</td><td style="color:var(--accent2);font-weight:600">Perfect</td><td>Missing Physics</td></tr>
     <tr><td>Cambridge Design/Eng</td><td style="color:var(--accent2)"></td><td></td></tr>
     <tr><td>Chemistry UG</td><td></td><td></td></tr>
-    <tr><td>Diya Strength</td><td>Math + Physics</td><td>Math</td></tr>
-    <tr><td>Diya Weakness</td><td>&mdash;</td><td>Chem Weak</td></tr>
+    <tr><td>My Strength</td><td>Math + Physics</td><td>Math</td></tr>
+    <tr><td>My Weakness</td><td>&mdash;</td><td>Chem Weak</td></tr>
    </table>
-   <p style="margin-top:8px;font-size:11px;font-weight:600">Career Comparison (UK Data):</p>
+   <p style="margin-top:8px;font-size:11px;font-weight:600">How the two routes differ afterwards:</p>
    <table class="compare-table">
-    <tr><th></th><th>Engineering Path (A group)</th><th>Chemistry Path (B/C group)</th></tr>
-    <tr><td>Starting Salary</td><td>£27,000–35,000</td><td>£22,000–28,000</td></tr>
-    <tr><td>5yr Median Salary</td><td>£43,000–49,000</td><td>£30,000–38,000</td></tr>
-    <tr><td>10yr Potential</td><td>£55k–80k+</td><td>£40k–55k</td></tr>
+    <tr><th></th><th>Engineering Path (A)</th><th>Chemistry Path (B/C)</th></tr>
     <tr><td>High-skill Employment</td><td>~75%</td><td>~60%</td></tr>
-    <tr><td>UK Skills Shortage</td><td>Severe Missing</td><td>Moderate</td></tr>
-    <tr><td>Visa Advantage</td><td>tight Missing List</td><td>Not on shortage list</td></tr>
+    <tr><td>UK Skills Shortage</td><td>Severe — on the shortage list</td><td>Moderate</td></tr>
+    <tr><td>Visa Advantage</td><td>On the shortage list</td><td>Not on the list</td></tr>
    </table>
    <p style="margin-top:6px;font-size:10px;color:var(--text2)">Data: HESA 2023 · High Fliers 2025 · UK Shortage List</p>
    <p style="margin-top:6px;font-size:12px;color:var(--accent2);font-weight:600">Conclusion: Target Imperial Engineering → Maths+FMaths+Physics is Hard Requirement.</p>
   `},
   {id:'framework',title:'Decision Framework · Timeline',body:`
-   <p style="font-size:11px;color:var(--accent2);margin-bottom:6px"><strong>Decision Confirmed (2026-05-22 v2):</strong> Art/Architecture dropped · Imperial Engineering Top Choice · FMaths GCSE 7+ required</p>
+   <p style="font-size:11px;color:var(--accent2);margin-bottom:6px"><strong>Decision Confirmed (2026-05-22 v2):</strong> Art/Architecture dropped（<b>待 2027-08 复核，因 FMaths 准入风险可能回滚</b>）· Imperial Engineering Top Choice · FMaths 入学门槛待确认（文件写 GCSE 7+，存档基准 8-9，当前预测 6/5）</p>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
     <div>
      <div style="font-weight:600;font-size:12px;margin-bottom:4px">A-Level Combo</div>
@@ -1702,7 +1711,7 @@ async function loadRoutes(){
     <div>
      <div style="font-weight:600;font-size:12px;margin-bottom:4px">University Targets</div>
      <div style="font-size:10px;line-height:1.5"><span style="color:var(--accent)">UK</span> Imperial Engineering (ESAT: Maths1+Maths2+Physics3)<br>+ Imperial Design Eng / Cambridge MDes / UCL E&A</div>
-     <div style="font-size:10px;line-height:1.5;margin-top:4px"><span style="color:var(--accent2)">HK</span> HKUST Engineering — A*A*A = Full Scholarship + HKD60k stipend</div>
+     <div style="font-size:10px;line-height:1.5;margin-top:4px"><span style="color:var(--accent2)">HK</span> HKUST Engineering — 需要 A*A*A</div>
     </div>
    </div>
    <div style="margin-top:12px;font-weight:600;font-size:12px">Key Dates</div>
@@ -1718,28 +1727,20 @@ async function loadRoutes(){
     <tr><td>May-Jun 2026</td><td>Art/Architecture dropped · ESAT register · English + competition start · Chemistry assessment</td></tr>
     <tr><td>Sep 2026</td><td>A-Level subject confirmation (4th subject: Chem or DT?)</td></tr>
     <tr><td>Sep 2027</td><td>UCAS + HK application strategy finalized (new PS format: 3 Q&A)</td></tr>
-    <tr><td>May 2028</td><td>Offer selection — compare scholarships & ROI</td></tr>
+    <tr><td>May 2028</td><td>Offer selection — compare which route fits me best</td></tr>
    </table>
-  `},
-  {id:'cost',title:'Cost Comparison',body:`
-   <table class="compare-table">
-    <tr><th></th><th>UK Cambridge Design</th><th>HK HKUST (Full Scholarship)</th></tr>
-    <tr><td>Total Cost</td><td>£168k</td><td>£36k</td></tr>
-    <tr><td style="color:var(--red);font-weight:700" colspan="3">Gap: 4.7x</td></tr>
-   </table>
-   <p style="margin-top:6px;font-size:10px;color:var(--text2)">Chemistry can be 4th Subject — if strong enough, keep it; if not, DT. Core 3 unchanged, 4th subject flexible.</p>
   `},
   {id:'germany',title:'🇩🇪 Germany · TU9 Engineering Route',body:`
-   <p style="font-size:11px;color:var(--accent2);margin-bottom:6px">Germany = lowest-cost route with world-class engineering education. A-level entry fully recognized (DAAD). UK students = non-EU post-Brexit.</p>
+   <p style="font-size:11px;color:var(--accent2);margin-bottom:6px">Another route worth knowing about: Germany's engineering universities are world-class and A-level entry is fully recognised (via DAAD). UK students apply as non-EU.</p>
    <table class="compare-table">
-    <tr><th>University</th><th>City</th><th>Tuition/sem</th><th>QS Eng</th><th>Note</th></tr>
-    <tr><td>RWTH Aachen</td><td>Aachen</td><td style="color:var(--accent2);font-weight:600">€0</td><td>Top 50</td><td>Engineering holy land</td></tr>
-    <tr><td>TU Berlin</td><td>Berlin</td><td style="color:var(--accent2);font-weight:600">€0</td><td>Top 60</td><td>Most international</td></tr>
-    <tr><td>TU Darmstadt</td><td>Darmstadt</td><td style="color:var(--accent2);font-weight:600">€0</td><td>Top 150</td><td>EE/IT strong</td></tr>
-    <tr><td>TU Munich</td><td>Munich</td><td>€2,000-3,000</td><td>Top 30</td><td>Best overall</td></tr>
-    <tr><td>KIT</td><td>Karlsruhe</td><td>€1,500</td><td>Top 100</td><td>CS/Mech strong</td></tr>
+    <tr><th>University</th><th>City</th><th>Engineering Ranking</th><th>Note</th></tr>
+    <tr><td>RWTH Aachen</td><td>Aachen</td><td>Top 50</td><td>Engineering holy land</td></tr>
+    <tr><td>TU Berlin</td><td>Berlin</td><td>Top 60</td><td>Most international</td></tr>
+    <tr><td>TU Darmstadt</td><td>Darmstadt</td><td>Top 150</td><td>EE/IT strong</td></tr>
+    <tr><td>TU Munich</td><td>Munich</td><td>Top 30</td><td>Best overall</td></tr>
+    <tr><td>KIT</td><td>Karlsruhe</td><td>Top 100</td><td>CS/Mech strong</td></tr>
    </table>
-   <p style="margin-top:6px;font-size:10px;color:var(--text2)">Living costs: ~€900-1,200/mo | Blocked account: €11,208/yr | Health insurance: ~€120/mo</p>
+   <p style="margin-top:6px;font-size:10px;color:var(--text2)">Application timing: German universities recruit for the autumn term, with most deadlines in <strong>May–July of the year you plan to start</strong> — so this is earlier than UCAS. Language: German-taught courses need C1; English-taught options are limited.</p>
    <div style="margin-top:8px">
     <div style="font-weight:600;font-size:11px;margin-bottom:2px">Requirements (DAAD Official)</div>
     <div style="font-size:10px;line-height:1.6">• 3 A-Levels min C (2 from List A: Maths + Sciences) ✅ Diya combo meets this<br>• German-taught: TestDaF 4×4 or Goethe C1 ⚠️ Diya no German exposure — language barrier high<br>• 12 years continuous schooling ✅</div>
@@ -1748,7 +1749,7 @@ async function loadRoutes(){
     <div style="font-weight:600;font-size:11px;margin-bottom:2px">Diya Viability</div>
     <div style="font-size:10px;line-height:1.6;color:var(--red)">⚠️ Major obstacle: Diya has no German language background. C1 in 2 years (Y10→Y12) = near impossible alongside GCSE + A-level prep. Germany more viable as a <b>Master's option</b> (many English-taught MSc Engineering programs).</div>
    </div>
-   <p style="margin-top:6px;font-size:10px;color:var(--accent2)">Source: DAAD GCE recognition page · tum.de tuition fees · uni-assist.de</p>
+   <p style="margin-top:6px;font-size:10px;color:var(--accent2)">Source: DAAD GCE recognition page · uni-assist.de</p>
   `}
  ];
 
@@ -1775,9 +1776,9 @@ async function loadResources(){
    </div>
   </div>
   <div class="rcat-section">
-   <div class="rcat-title">MAT / STEP / TMUA</div>
+   <div class="rcat-title">ESAT / TMUA / STEP / TARA</div>
    <div class="rcat-links">
-    <a href="/resources/MAT/index.html" target="_blank" class="rcat-link">MAT Past Papers <span class="rcat-badge">9 PDFs</span></a>
+    <a href="https://www.admissionstesting.org/for-test-takers/esat/" target="_blank" rel="noopener" class="rcat-link">ESAT Past Papers <span class="rcat-badge">Official</span></a>
     <a href="https://www.ocr.org.uk/students/step-mathematics/preparing-for-step/" target="_blank" rel="noopener" class="rcat-link">STEP Past Papers <span class="rcat-badge">Papers</span></a>
     <a href="https://www.admissionstesting.org/for-test-takers/test-of-mathematics-for-university-admission/preparation/" target="_blank" rel="noopener" class="rcat-link">TMUA Past Papers <span class="rcat-badge">Papers</span></a>
    </div>
@@ -2198,7 +2199,7 @@ function startStreak(){
 function initDiyaGrades(){
 const subjects=[
 {name:'Maths', grade:'Above · 75%', status:'above', trend:'Near-perfect calculator paper', bar:75, tag:'Best Subject', tagClass:'green'},
-{name:'FMaths', grade:'Enrolled', status:'above', trend:'Short course from Y11', bar:80, tag:'A-Level Prep', tagClass:'green'},
+{name:'FMaths', grade:'Enrolled ⚠️', status:'risk', trend:'Short course from Y11 · ⚠️ 入学门槛待确认（文件写 GCSE 7+，存档基准 8-9，当前预测 6/5、追踪 75%）→ 2026-11 数学出分后须确认入学资格。若不达标，Plan A 三科→两门，剑桥/帝国均需三门 → 第三门（Art/Chemistry）升为承重项', bar:80, tag:'门槛待确认', tagClass:'yellow'},
 {name:'Physics', grade:'Above · 71%', status:'above', trend:'Confidence + skills both growing', bar:71, tag:'Building', tagClass:'green'},
 {name:'Chemistry', grade:'Meeting · 44% ⚠️', status:'risk', trend:'Exam score exposes knowledge gaps', bar:44, tag:'CRITICAL', tagClass:'red'},
 {name:'History', grade:'Meeting · 62%', status:'meeting', trend:'Nervous but delivered well', bar:62, tag:'Solid', tagClass:'green'},
@@ -3361,7 +3362,7 @@ function logout(){
  }catch(e){ window.location.replace('index.html'); }
 }
 
-// ── 三周执行计划（Dashboard 与 Route Compare 共用渲染；数据源自 analysis/海外教育视角学习方案建议_20261015.html 第 5 节） ──
+// ── 三周执行计划（Dashboard 与 Route Compare 共用渲染） ──
 const THREE_WEEK_PLAN = {
   weeks:[
     {label:'Week 1 · 启动与摸底', start:'2026-10-15', end:'2026-10-21',
@@ -3386,6 +3387,10 @@ function renderThreeWeekPlan(elId){
      <div class="tw-label">${w.label}<span class="tw-range">${w.range||(w.start.slice(5).replace('-','/')+' – '+w.end.slice(5).replace('-','/'))}</span>${badge}</div>
      <div class="tw-goal">${w.goal}</div>
      <div class="tw-focus">${w.focus}</div>
+     <div class="kid-task-card" data-task-id="diya-${w.start}" data-task-label="${w.label}">
+       <span class="kid-toggle"></span>
+       <span class="kid-task-label">这周的「${w.goal}」做完了就勾一下</span>
+     </div>
     </div>`;
   }).join('');
 }
@@ -3411,7 +3416,15 @@ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
      if(_t){ _t.textContent='⚠️ LLM 模块未加载(版本 '+APP_VERSION+')：很可能是浏览器/代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或访问 https://112.74.40.8/app.html?v='+APP_VERSION; _t.style.background='#f59e0b'; _t.classList.add('show'); setTimeout(function(){_t.classList.remove('show');_t.style.background='';},15000); }
    }
  }catch(_){}
+ // 儿童互动组件：可勾选任务 / 提问卡 / 决策选择 / 完成进度
+ try{
+   KidCheck.init('body');
+   KidAsk.init('body');
+   KidStamp.init('body');
+   KidProgress.render('#kid-progress');
+ }catch(_){}
 });
 </script>
+<script src="/assets/kid.js"></script>
 </body>
 </html>

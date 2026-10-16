@@ -1,1 +1,74 @@
-{"English-Practice \"exploring different suggestions of words\"": {"done": false, "name": "Practice \"exploring different suggestions of words\""}, "English-Read 1 English novel + write reading journal (100-200 words)": {"done": false, "name": "Read 1 English novel + write reading journal (100-200 words)"}, "Maths-Continue Sparx Maths 15-20min/day": {"done": false, "name": "Continue Sparx Maths 15-20min/day"}, "Maths-Download UKMT JMC past papers (try 2-3 questions)": {"done": true, "name": "Download UKMT JMC past papers (try 2-3 questions)"}, "Science-Simple chemistry experiment at home (baking soda + vinegar)": {"done": false, "name": "Simple chemistry experiment at home (baking soda + vinegar)"}, "Science-Watch BBC Bitesize Chemistry/Physics videos": {"done": false, "name": "Watch BBC Bitesize Chemistry/Physics videos"}, "general-1779477132194": {"done": false, "name": "Do practice questions on everything"}, "general-At least 1hr outdoor activity daily": {"done": false, "name": "At least 1hr outdoor activity daily"}, "general-Do UKMT questions with sister Diya": {"done": false, "name": "Do UKMT questions with sister Diya"}, "general-JMC past papers 2-3 sets (untimed)": {"done": false, "name": "JMC past papers 2-3 sets (untimed)"}, "general-Read 2nd book + write analytical paragraph": {"done": false, "name": "Read 2nd book + write analytical paragraph"}, "general-1780332151784": {"done": true, "name": "Creative writing"}, "general-1780332164964": {"done": true, "name": "Analysis writing"}}
+{
+"English-Practice \"exploring different suggestions of words\"": {
+"done": false,
+"name": "Practice \"exploring different suggestions of words\""
+},
+"English-Read 1 English novel + write reading journal (100-200 words)": {
+"done": false,
+"name": "Read 1 English novel + write reading journal (100-200 words)"
+},
+"Maths-Continue Sparx Maths 15-20min/day": {
+"done": false,
+"name": "Continue Sparx Maths 15-20min/day"
+},
+"Maths-Download UKMT JMC past papers (try 2-3 questions)": {
+"done": true,
+"name": "Download UKMT JMC past papers (try 2-3 questions) [已关闭]",
+"detail": "[已关闭 2026-10-15] JMC 仅限 Y8 及以下，Jemma 已 Y9 无资格（ukmt 官方日历核实）"
+},
+"Science-Simple chemistry experiment at home (baking soda + vinegar)": {
+"done": false,
+"name": "Simple chemistry experiment at home (baking soda + vinegar)"
+},
+"Science-Watch BBC Bitesize Chemistry/Physics videos": {
+"done": false,
+"name": "Watch BBC Bitesize Chemistry/Physics videos"
+},
+"general-1779477132194": {
+"done": false,
+"name": "Do practice questions on everything"
+},
+"general-At least 1hr outdoor activity daily": {
+"done": false,
+"name": "At least 1hr outdoor activity daily"
+},
+"general-Do UKMT questions with sister Diya": {
+"done": false,
+"name": "Do UKMT questions with sister Diya"
+},
+"general-JMC past papers 2-3 sets (untimed)": {
+"done": true,
+"name": "JMC past papers 2-3 sets (untimed) [已关闭]",
+"detail": "[已关闭 2026-10-15] 同上，改为 IMC 口径"
+},
+"general-Read 2nd book + write analytical paragraph": {
+"done": false,
+"name": "Read 2nd book + write analytical paragraph"
+},
+"general-1780332151784": {
+"done": true,
+"name": "Creative writing"
+},
+"general-1780332164964": {
+"done": true,
+"name": "Analysis writing"
+},
+"Maths-IMC past papers: warm-up 2-3 questions/week (W2-W4, pre-Bebras)": {
+"detail": "IMC = Intermediate Maths Challenge，Y11 及以下可参赛，25 题 60 分钟，评分 +4/-1/0（与 JMC 同制、难度高一档）。每周 2-3 题，Bebras 备赛期手感训练。来源 ukmt.org.uk 免费。量以学习方案 v3 为准，不加量。",
+"done": false,
+"name": "IMC 往年题热身（每周 2-3 题，Bebras 备赛期）",
+"priority": "p2"
+},
+"Maths-IMC full timed paper x2 (before Christmas, W7-W9)": {
+"detail": "圣诞前完成 2 套完整 IMC 往年卷（限时 60 分钟）+ 三分类复盘。对应 v3 W7/W8 周末深度块，属高压日后必须接轻/空白日。",
+"done": false,
+"name": "IMC 完整限时卷 x2（圣诞前）",
+"priority": "p1"
+},
+"Maths-IMC full timed paper x2 (Jan sprint, W12-W13)": {
+"detail": "1/5 起冲刺：2 套完整限时卷 + 错题复盘。1/27 IMC 考试在三个月窗口之外，本窗口只验证准备度。考前（1/14-15）不刷新题。",
+"done": false,
+"name": "IMC 限时冲刺卷 x2（1月）",
+"priority": "p1"
+}
+}
