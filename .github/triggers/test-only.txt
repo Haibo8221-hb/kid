@@ -1,1 +1,1 @@
-trigger test-only 2026-10-15T12:41:43Z
+rerun deploy CI diagnosis 1792130727
