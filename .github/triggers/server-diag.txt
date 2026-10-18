@@ -1,1 +1,1 @@
-diag round3 2026-10-18T21:29:04Z — v3/assets/nginx-root/git-state
+diag round4 2026-10-18T21:32:21Z — /var/www/plan + IP vhost full

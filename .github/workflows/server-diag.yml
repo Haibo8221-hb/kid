@@ -54,6 +54,21 @@ jobs:
               echo "===== nginx root directives (all vhosts) ====="
               grep -rn "root\s\|server_name\|listen" /www/server/panel/vhost/nginx/*.conf 2>/dev/null | grep -v "\.bak\|\.orig" | head -40
               echo
+              echo "===== /var/www/plan (IP vhost root) 全貌 ====="
+              ls -la /var/www/ 2>/dev/null
+              echo "--- /var/www/plan ---"
+              ls -la /var/www/plan 2>/dev/null | head -40 || echo "/var/www/plan NOT present"
+              echo "--- /var/www/plan/data ---"
+              ls -la /var/www/plan/data 2>/dev/null | head -10 || echo "no data dir under /var/www/plan"
+              echo "--- /var/www/plan/assets ---"
+              ls -la /var/www/plan/assets 2>/dev/null | head -8 || echo "no assets dir under /var/www/plan"
+              echo
+              echo "===== 112.74.40.8.conf 全文 ====="
+              cat /www/server/panel/vhost/nginx/112.74.40.8.conf 2>/dev/null
+              echo
+              echo "===== plan-api WorkingDirectory ====="
+              systemctl show plan-api -p WorkingDirectory -p ExecStart 2>/dev/null
+              echo
               echo "===== git state in webroot (排查疑似 revert) ====="
               git -C "${{ secrets.SITE_ROOT }}" log --oneline -3 2>/dev/null || echo "no git or not a repo"
               git -C "${{ secrets.SITE_ROOT }}" status --short 2>/dev/null | head -10
