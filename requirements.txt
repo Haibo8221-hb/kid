@@ -4,3 +4,4 @@ httpx>=0.24
 gunicorn>=21.0
 pyyaml>=6.0
 pypdfium2>=4.0     # 作业上传：PDF 逐页渲染为 PNG（纯 pip，免系统 poppler）
+pillow>=10.0       # 作业上传：渲染页图像保存/处理（pypdfium2 渲染输出依赖 PIL）
