@@ -574,18 +574,18 @@ canvas.radar{width:240px!important;height:240px!important}
 </div>
 
 <!-- 需要你自己决定：家长不替你选 -->
-<div class="section kid-decide-card kid-has-stamp">
+<div class="section kid-decide-card kid-has-stamp" data-decide-id="diya-call">
  <div class="section-title"> 需要你自己决定 · Your Call</div>
  <p class="kid-lead">下面这几件事，最后拍板的是你。选完记下来就行——之后如果想改，随时能改。</p>
  <div class="kid-h">今天先做哪一门？</div>
- <div class="kid-choices">
+ <div class="kid-choices" data-group-id="subject">
   <button class="kid-choice" data-choice="maths">先数学</button>
   <button class="kid-choice" data-choice="english">先英语</button>
   <button class="kid-choice" data-choice="errors">先清错题</button>
   <button class="kid-choice" data-choice="competition">先竞赛题</button>
  </div>
  <div class="kid-h" style="margin-top:14px">遇到不会的题，打算怎么处理？</div>
- <div class="kid-choices">
+ <div class="kid-choices" data-group-id="stuck">
   <button class="kid-choice" data-choice="think10">先自己想 10 分钟</button>
   <button class="kid-choice" data-choice="askteacher">去问老师</button>
   <button class="kid-choice" data-choice="skip">先跳过，最后回头做</button>
@@ -3215,6 +3215,6 @@ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
  }catch(_){}
 });
 </script>
-<script src="/assets/kid.js?v=20261018"></script>
+<script src="/assets/kid.js?v=20261019"></script>
 </body>
 </html>

@@ -7,6 +7,8 @@
  *   - 【核心】扫描全页所有 onclick 处理器引用的函数，确认都已定义
  *     （这类"悬空处理器"正是"点击无反应"的根因）
  *   - 模拟点击关键按钮，验证弹窗确实打开且 CSS 可见
+ *   - 【决定卡持久化】点击语言/自主决定选项 → localStorage 落键 →
+ *    多问卡互不覆盖 → 重新 init（模拟刷新）后已选项全部恢复
  *   - 【回归护栏】弹窗不得嵌套在另一个弹窗内 / 打开时祖先链不得有 display:none
  *     （jsdom 只算元素自身样式，不模拟「祖先不渲染则子树不可见」，
  *      历史上 avatar-modal 少写一个 </div> 曾让 llm-settings-modal 假阳性通过）
@@ -208,6 +210,51 @@ function runPage(page) {
         else pass.push(`${c.name}: 祖先链无 display:none 阻断`);
       });
 
+
+      // 7) 【决定卡持久化 · 2026-10-19 回归护栏】Latin/自主决定刷新后不得丢失：
+      //    点击 → picked + localStorage 落键；多问卡两组互不覆盖；
+      //    重新 init（模拟 F5 / 部署流水线刷新）后已选项全部恢复
+      try {
+        var decideCards = [...doc.querySelectorAll('.kid-decide-card')];
+        if (decideCards.length) {
+          var dcard = decideCards[0];
+          var dgroups = [...dcard.querySelectorAll('.kid-choices')];
+          if (!dgroups.length) {
+            fail.push('决定卡缺少 .kid-choices 选项组');
+          } else {
+            var dopt1 = dgroups[0].querySelector('[data-choice]');
+            dopt1.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+            if (dopt1.classList.contains('picked')) pass.push('决定卡：点击后进入 picked 选中态');
+            else fail.push('决定卡：点击后未进入 picked 选中态');
+            var dkey1 = dgroups[0].dataset.kidStampKey;
+            if (dkey1 && window.localStorage.getItem(dkey1) === dopt1.dataset.choice)
+              pass.push('决定卡：localStorage 已写入 ' + dkey1 + '=' + dopt1.dataset.choice);
+            else fail.push('决定卡：localStorage 未写入选择（key=' + dkey1 + '）');
+            if (dgroups.length > 1) {
+              var dopt2 = dgroups[1].querySelector('[data-choice]');
+              dopt2.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+              if (dopt1.classList.contains('picked') && dopt2.classList.contains('picked'))
+                pass.push('决定卡：多问卡两组选择互不覆盖（key 分组修复验证）');
+              else fail.push('决定卡：第二问的选择覆盖了第一问（key 互斥 bug 复现）');
+            }
+            // 模拟刷新：重新 init（幂等）→ 已选项必须全部恢复
+            window.KidStamp.init('body');
+            var allBack = true, lost = [];
+            dgroups.forEach(function (g) {
+              var k = g.dataset.kidStampKey;
+              var v = k ? window.localStorage.getItem(k) : null;
+              var hit = v ? [...g.querySelectorAll('[data-choice]')].filter(function (o) { return o.dataset.choice === v; })[0] : null;
+              if (!hit || !hit.classList.contains('picked')) { allBack = false; lost.push(k || '(无 key)'); }
+            });
+            if (allBack) pass.push('决定卡：重新 init（模拟 F5 刷新）后已选项全部恢复');
+            else fail.push('决定卡：重新 init 后已选项丢失（刷新不持久）：' + lost.join('、'));
+            var dstamp = dcard.querySelector('.kid-stamp');
+            if (dstamp && dstamp.textContent && dstamp.textContent.trim() !== '待你决定')
+              pass.push('决定卡：角标显示「' + dstamp.textContent.trim() + '」');
+            else fail.push('决定卡：角标未反映已选状态');
+          }
+        }
+      } catch (e) { fail.push('决定卡持久化测试抛错：' + e.message); }
       resolve({ pass, fail });
     }, 400);
   });

@@ -56,6 +56,8 @@ data/*.tmp
 data/llm_config.json
 data/auth_state.json
 data/uploads/
+data/notes_*.json
+data/decide_*.json
 data/*.log
 
 # ── CI 手动触发器：仅供一次性诊断用，不要入库 ──

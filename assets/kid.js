@@ -354,71 +354,187 @@
     }
   };
 
-  /* ================================================================ KidStamp */
-  /* 给 .kid-decide-card 加「待你决定」角标，并支持卡片内 data-choice 单选互斥。
-     这里是孩子自己拍板的事，只记录孩子的选择（key = kid-stamp-<页面标识>-<卡片序号>）。 */
-  var KidStamp = {
-    init: function (rootSelector) {
-      var root = resolveRoot(rootSelector);
-      $$(root, '.kid-decide-card').forEach(function (card) {
-        var idx = docIndex(card, '.kid-decide-card');
-        var key = 'kid-stamp-' + pageId() + '-' + idx;
-        if (!claim(card)) { KidStamp._sync(card, key); return; }
+/* ================================================================ KidStamp */
+/* 给 .kid-decide-card 加「待你决定」角标，并支持卡片内 data-choice 单选互斥。
+   这里是孩子自己拍板的事，只记录孩子的选择。
 
-        if (!card.querySelector('.kid-stamp')) {
-          card.appendChild(el('span', 'kid-stamp', '待你决定'));
+   key 规则（2026-10-19 加固，修复「刷新后选择丢失/互覆」）：
+     kid-stamp-<页面标识>-<卡片ID>[-<分组ID>]
+   - 卡片ID：取卡片 data-decide-id；缺省退回文档序号（兼容未标注的旧页）。
+     显式 ID 让 key 不随 DOM 增删/排序漂移——旧版按序号命名，改版插一张卡
+     就会让所有已选状态"失踪"。
+   - 分组ID：一组 .kid-choices 一个 key。一张卡里问多个问题时各组互不覆盖
+     （旧版整卡共用一个 key：选第二问会把第一问的选择当场抹掉，刷新后只剩
+     最后选的那个）。分组 data-group-id 缺省时，多组卡按组序 1/2/…；
+     单组卡不带分组后缀——与旧 key 格式保持兼容。
+   - 旧 key 迁移：新 key 还没有值、且旧整卡 key 存的选择属于本组选项时，
+     自动继承旧值，版本升级不丢孩子已经做出的选择。
+
+   持久化两层（与 Notes 同一协议）：
+     1) localStorage：本机即时渲染、断网可用——浏览器刷新（F5）不回退
+     2) 服务端 /api/decide/<child>：跨设备/换浏览器/清缓存后的真源；
+        部署流水线 rsync --exclude='data/'，绝不会覆盖它
+   首次 init 时拉取一次（本地优先，仅当服务端 updatedAt 更新才覆盖）；
+   每次选择防抖 300ms 推送全量快照。任一层失败都静默降级，不影响另一层。 */
+var KidStamp = {
+  _pulled: false,
+
+  init: function (rootSelector) {
+    var root = resolveRoot(rootSelector);
+    $$(root, '.kid-decide-card').forEach(function (card) {
+      var cardIdx = docIndex(card, '.kid-decide-card');
+      var cardId = card.dataset.decideId || String(cardIdx);
+      /* 角标（幂等：卡片 DOM 被重建后重新 init 会补上） */
+      if (!card.querySelector('.kid-stamp')) {
+        card.appendChild(el('span', 'kid-stamp', '待你决定'));
+      }
+      card.classList.add('kid-has-stamp');
+      var legacyKey = 'kid-stamp-' + pageId() + '-' + cardIdx; /* 旧版整卡一个 key */
+      var legacyPicked = load(legacyKey);
+      var groups = $$(card, '.kid-choices');
+      if (!groups.length) groups = [card];
+      groups.forEach(function (g, gi) {
+        var gid = g.dataset.groupId || (groups.length > 1 ? String(gi + 1) : '');
+        var key = 'kid-stamp-' + pageId() + '-' + cardId + (gid ? '-' + gid : '');
+        var opts = $$(g, '[data-choice]');
+        if (!opts.length) return;
+        g.dataset.kidStampKey = key;
+        /* 旧 key 迁移：新 key 未写值，且旧整卡 key 存的选择属于本组 → 继承 */
+        if (load(key) == null && legacyPicked != null &&
+            opts.some(function (o) { return o.dataset.choice === legacyPicked; })) {
+          store(key, legacyPicked);
         }
-        /* 标记「本卡已挂角标」，供 kid.css 的 .kid-has-stamp 让标题让位。
-           不能用 .kid-stamp + .kid-h 相邻选择器——角标是 appendChild 到卡片末尾的。 */
-        card.classList.add('kid-has-stamp');
-        var options = $$(card, '[data-choice]');
-        options.forEach(function (opt) {
+        if (!claim(g)) { KidStamp._syncGroup(g); return; }
+        opts.forEach(function (opt) {
           opt.setAttribute('role', 'radio');
           opt.setAttribute('aria-checked', 'false');
-          opt.addEventListener('click', function (e) {
-            e.stopPropagation();
+          var pick = function () {
             store(key, opt.dataset.choice);
-            KidStamp._sync(card, key);
+            KidStamp._syncGroup(g);
+            KidStamp._syncBadge(card);
             notify();
-          });
+            KidStamp.push();
+          };
+          opt.addEventListener('click', function (e) { e.stopPropagation(); pick(); });
           opt.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-              e.preventDefault();
-              store(key, opt.dataset.choice);
-              KidStamp._sync(card, key);
-              notify();
+              e.preventDefault(); pick();
             }
           });
         });
-        KidStamp._sync(card, key);
+        KidStamp._syncGroup(g);
       });
-      return true;
-    },
+      KidStamp._syncBadge(card);
+    });
+    if (!KidStamp._pulled) { KidStamp._pulled = true; KidStamp.pull(); }
+    return true;
+  },
 
-    /** 回填孩子的选择：同卡互斥、选中加 .picked、角标显示已选项 */
-    _sync: function (card, key) {
-      if (!card) return;
-      var picked = load(key);
-      var opts = $$(card, '[data-choice]');
-      var hit = null;
-      opts.forEach(function (opt) {
-        var on = picked != null && opt.dataset.choice === picked;
-        opt.classList.toggle('picked', on);
-        opt.setAttribute('aria-checked', on ? 'true' : 'false');
-        if (on) hit = opt;
-      });
-      card.classList.toggle('kid-has-pick', picked != null);
-      var stamp = card.querySelector('.kid-stamp');
-      if (!stamp) return;
-      if (picked == null) { stamp.textContent = '待你决定'; return; }
-      var label = picked;
-      if (hit) {
-        label = hit.dataset.choiceLabel || (hit.textContent || '').trim() || picked;
-        if (label.length > 12) label = label.slice(0, 12) + '…';
+  /** 回填一组的选择：同组互斥、选中加 .picked */
+  _syncGroup: function (group) {
+    if (!group) return;
+    var key = group.dataset.kidStampKey;
+    var picked = key ? load(key) : null;
+    $$(group, '[data-choice]').forEach(function (opt) {
+      var on = picked != null && opt.dataset.choice === picked;
+      opt.classList.toggle('picked', on);
+      opt.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+  },
+
+  /** 角标文案：单问卡「你的选择：…」；多问卡「已决定 N/M」；未选「待你决定」 */
+  _syncBadge: function (card) {
+    if (!card) return;
+    var groups = $$(card, '.kid-choices');
+    var picked = 0, firstLabel = '';
+    groups.forEach(function (g) {
+      var key = g.dataset.kidStampKey;
+      var val = key ? load(key) : null;
+      if (val == null) return;
+      picked++;
+      if (!firstLabel) {
+        var hit = $$(g, '[data-choice]').filter(function (o) { return o.dataset.choice === val; })[0];
+        if (hit) firstLabel = hit.dataset.choiceLabel || (hit.textContent || '').trim() || val;
       }
-      stamp.textContent = '你的选择：' + label;
-    }
-  };
+    });
+    card.classList.toggle('kid-has-pick', picked > 0);
+    var stamp = card.querySelector('.kid-stamp');
+    if (!stamp) return;
+    if (!picked) { stamp.textContent = '待你决定'; return; }
+    if (groups.length > 1) { stamp.textContent = '已决定 ' + picked + '/' + groups.length; return; }
+    var label = firstLabel || '';
+    if (label.length > 12) label = label.slice(0, 12) + '…';
+    stamp.textContent = '你的选择：' + label;
+  },
+
+  /* ---- 服务端同步：localStorage 即时渲染，服务端做跨设备真源 ---- */
+  _child: function () {
+    try {
+      return String(window.KID_CHILD || (document.body && document.body.dataset.kidPage) || 'diya');
+    } catch (e) { return 'diya'; }
+  },
+  _syncAtKey: function () { return 'kid-decide-sync-at-' + this._child(); },
+  _pushTimer: null,
+
+  /** 全量快照：{localStorage key: choice}，只收集本页真实存在的组 */
+  snapshot: function () {
+    var out = {};
+    $$('.kid-decide-card .kid-choices').forEach(function (g) {
+      var k = g.dataset.kidStampKey;
+      if (!k) return;
+      var v = load(k);
+      if (v != null) out[k] = v;
+    });
+    return out;
+  },
+
+  /** 防抖推送（每次选择后调用；失败静默降级，本地已写） */
+  push: function () {
+    if (typeof fetch !== 'function') return;
+    clearTimeout(this._pushTimer);
+    var self = this;
+    this._pushTimer = setTimeout(function () {
+      var payload = self.snapshot();
+      if (!Object.keys(payload).length) return;
+      var at = new Date().toISOString();
+      fetch('/api/decide/' + self._child(), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payload: payload, updatedAt: at })
+      }).then(function (r) {
+        if (r && r.ok) { try { localStorage.setItem(self._syncAtKey(), at); } catch (e) {} }
+      }).catch(function () { /* 静默降级：本地已写，下次选择再试 */ });
+    }, 300);
+  },
+
+  /** 首次 init 拉取一次：本地优先，仅当服务端 updatedAt 更新才覆盖 */
+  pull: function () {
+    if (typeof fetch !== 'function') return;
+    var self = this;
+    fetch('/api/decide/' + this._child())
+      .then(function (r) { return (r && r.ok) ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.payload || typeof d.payload !== 'object') return;
+        var localAt = '';
+        try { localAt = localStorage.getItem(self._syncAtKey()) || ''; } catch (e) {}
+        if (localAt && d.updatedAt && d.updatedAt <= localAt) return;
+        var changed = false;
+        Object.keys(d.payload).forEach(function (k) {
+          var v = d.payload[k];
+          if (typeof v !== 'string' || !v) return;
+          if (load(k) !== v) { store(k, v); changed = true; }
+        });
+        if (d.updatedAt) { try { localStorage.setItem(self._syncAtKey(), d.updatedAt); } catch (e) {} }
+        if (changed) {
+          $$('.kid-decide-card').forEach(function (card) {
+            $$(card, '.kid-choices').forEach(function (g) { self._syncGroup(g); });
+            self._syncBadge(card);
+          });
+        }
+      })
+      .catch(function () { /* 静默降级：用本地状态 */ });
+  }
+};
 
   /* ============================================================== KidStreak */
   /* 连续打卡：记录「今天完成了任务」的天数；支持每周 1 个休息日

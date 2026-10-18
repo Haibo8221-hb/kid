@@ -1671,6 +1671,54 @@ def notes_api(child):
     _set_cors(resp)
     return resp
 
+# ── Decide（孩子的自主决定：Latin 要不要继续学等）───────────────────────
+# 与 Notes 同构：自由 payload（{前端 localStorage key: choice}）+ updatedAt，
+# 前端本地即时渲染、服务端做跨设备真源。data/decide_<child>.json 运行时生成，
+# 不在 git 跟踪范围；CI rsync --exclude='data/'，部署流水线不会覆盖它。
+def _decide_path(child):
+    return os.path.join(DATA_DIR, f'decide_{child}.json')
+
+@app.route('/api/decide/<child>', methods=['GET', 'PUT', 'OPTIONS'])
+def decide_api(child):
+    """决定卡状态读写。存储形态：{'updatedAt': ISO8601, 'payload': {key: choice}}"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+
+    child = _safe_child(child)
+    path = _decide_path(child)
+
+    if request.method == 'GET':
+        data = _cached_json_read(path, ttl=10) or {}
+        if not isinstance(data, dict):
+            data = {}
+        payload = data.get('payload')
+        resp = jsonify({
+            'child': child,
+            'updatedAt': data.get('updatedAt') or '',
+            'payload': payload if isinstance(payload, dict) else {},
+        })
+        _set_cors(resp)
+        return resp
+
+    # PUT：整体覆盖（前端每次提交全量快照，天然幂等）
+    body = request.get_json(force=True, silent=True) or {}
+    payload = body.get('payload')
+    if not isinstance(payload, dict):
+        resp = jsonify({'ok': False, 'error': 'payload 必须是对象'})
+        _set_cors(resp)
+        return resp, 400
+    updated_at = str(body.get('updatedAt') or datetime.now().isoformat())
+    atomic_write(path, {'updatedAt': updated_at, 'payload': payload},
+                 ensure_ascii=False, indent=2)
+    _json_cache.pop(path, None)
+    resp = jsonify({'ok': True, 'updatedAt': updated_at})
+    _set_cors(resp)
+    return resp
+
 
 # ── SMC Progress Records (trend tracking) ─────────────────────
 SMC_DATA_FILE = os.path.join(DATA_DIR, 'smc_records.json')
