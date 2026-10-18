@@ -41,6 +41,23 @@ jobs:
               echo "===== v2 dir ====="
               ls -d "${{ secrets.SITE_ROOT }}/v2" 2>/dev/null || echo "v2/ NOT present (offline ok)"
               echo
+              echo "===== v3 dir (2026-10-18 新增预览子树) ====="
+              ls -la "${{ secrets.SITE_ROOT }}/v3" 2>/dev/null | head -20 || echo "v3/ NOT present"
+              echo
+              echo "===== assets dir ====="
+              ls -la "${{ secrets.SITE_ROOT }}/assets" 2>/dev/null | head -12 || echo "assets/ NOT present"
+              echo
+              echo "===== app.html fingerprint ====="
+              ls -la "${{ secrets.SITE_ROOT }}/app.html" "${{ secrets.SITE_ROOT }}/jemma.html" 2>/dev/null
+              md5sum "${{ secrets.SITE_ROOT }}/app.html" "${{ secrets.SITE_ROOT }}/jemma.html" 2>/dev/null
+              echo
+              echo "===== nginx root directives (all vhosts) ====="
+              grep -rn "root\s\|server_name\|listen" /www/server/panel/vhost/nginx/*.conf 2>/dev/null | grep -v "\.bak\|\.orig" | head -40
+              echo
+              echo "===== git state in webroot (排查疑似 revert) ====="
+              git -C "${{ secrets.SITE_ROOT }}" log --oneline -3 2>/dev/null || echo "no git or not a repo"
+              git -C "${{ secrets.SITE_ROOT }}" status --short 2>/dev/null | head -10
+              echo
               echo "===== index.html v2 links ====="
               grep -n "v2" "${{ secrets.SITE_ROOT }}/index.html" 2>/dev/null || echo "no v2 in index.html"
               echo
