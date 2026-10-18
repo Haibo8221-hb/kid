@@ -137,3 +137,75 @@ jobs:
           script: |
             chown -R www:www "${{ secrets.SITE_ROOT }}/v3"
             echo "==> /v3 deploy done: https://112.74.40.8/v3/app.html · https://112.74.40.8/v3/jemma.html"
+
+      # ── IP 直连兼容层（2026-10-19 诊断结论）──────────────────────────
+      # 公网唯一入口是 IP：112.74.40.8 的 vhost root = /var/www/plan（2026-10-14 旧镜像），
+      # 域名 vhost（xgrow.me / grow-consultant.com）被阿里云 ICP 备案拦截（Beaver 403）。
+      # 页面内 /assets/* 为绝对路径 → 必须在 /var/www/plan 根下提供 assets/；
+      # /v3 子树整体镜像到 /var/www/plan/v3，主站 HTML 不覆盖（保持现状）。
+      # 不用 --delete：保留该目录的 legacy 文件（.env.local / error_images / data 等）。
+      # 长期正解：宝塔面板把 112.74.40.8 站点根目录改为 /www/wwwroot/kid，
+      # 之后本兼容层与上面的 /v3 步骤可合并为一处。
+      - name: Mirror assets/ to IP vhost root (/var/www/plan)
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          echo "$KEY" > "$RUNNER_TEMP/key.pem"
+          chmod 600 "$RUNNER_TEMP/key.pem"
+          rsync -az \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='downloads/' \
+            --exclude='resources/' \
+            --exclude='backups/' \
+            --exclude='research_collector.py' \
+            --exclude='deploy.sh' \
+            --exclude='.workbuddy/' \
+            --exclude='tests/' \
+            --exclude='internal/' \
+            --exclude='.versions/' \
+            --exclude='*/.versions/' \
+            --exclude='data/' \
+            --exclude='logs/' \
+            --exclude='key.pem' \
+            -e "ssh -p ${{ secrets.ECS_PORT }} -i $RUNNER_TEMP/key.pem -o StrictHostKeyChecking=no" \
+            ./assets/ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/plan/assets/
+
+      - name: Mirror /v3 subtree to IP vhost (/var/www/plan/v3)
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          echo "$KEY" > "$RUNNER_TEMP/key.pem"
+          chmod 600 "$RUNNER_TEMP/key.pem"
+          rsync -az \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='downloads/' \
+            --exclude='resources/' \
+            --exclude='backups/' \
+            --exclude='research_collector.py' \
+            --exclude='deploy.sh' \
+            --exclude='.workbuddy/' \
+            --exclude='tests/' \
+            --exclude='internal/' \
+            --exclude='.versions/' \
+            --exclude='*/.versions/' \
+            --exclude='data/' \
+            --exclude='logs/' \
+            --exclude='key.pem' \
+            -e "ssh -p ${{ secrets.ECS_PORT }} -i $RUNNER_TEMP/key.pem -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/plan/v3/
+
+      - name: Patch /v3 index + fix ownership on IP mirror
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            set -e
+            # /v3 首页改为站内相对链接，避免跳回旧主站
+            sed -i 's|href="/app.html"|href="app.html"|g; s|href="/jemma.html"|href="jemma.html"|g' /var/www/plan/v3/index.html
+            chown -R www:www /var/www/plan/assets /var/www/plan/v3
+            echo "==> IP mirror done: http://112.74.40.8/v3/app.html · http://112.74.40.8/v3/jemma.html"
