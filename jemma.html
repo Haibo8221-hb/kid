@@ -321,6 +321,33 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 #toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:10px 18px;border-radius:8px;font-size:14px;z-index:300;display:none;transition:opacity 0.3s}
 #toast.show{display:block}
 .empty-state{font-size:14px;color:var(--text2);padding:20px;text-align:center}
+
+/* ==========================================================================
+   低龄化重构新增样式（2026-10-18）：折叠区 / 徽章墙 / 贴士三行 / Today 布局
+   ========================================================================== */
+/* 通用折叠区（<details>）：My Plan / My Stuff 的收纳组 */
+.kid-details{margin:0 0 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.kid-details>summary{cursor:pointer;padding:12px 16px;font-size:14px;font-weight:700;color:var(--text);list-style:none;user-select:none}
+.kid-details>summary::-webkit-details-marker{display:none}
+.kid-details>summary::before{content:'▸ ';color:var(--accent)}
+.kid-details[open]>summary::before{content:'▾ '}
+.kid-details>*:not(summary){padding:0 16px 14px}
+/* Today #4 科目徽章墙 */
+.kid-badge-wall{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.kid-badge{font-family:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:999px;border:2px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;transition:transform .12s,border-color .12s,background .12s}
+.kid-badge:hover{transform:scale(1.05)}
+.kid-badge.star{border-color:var(--yellow)}
+.kid-badge.watch{border-color:var(--accent)}
+.kid-badge.on{border-color:var(--accent2);color:var(--accent2)}
+.kid-badge-say{margin:4px 0 10px;padding:12px 16px;border-radius:10px;background:var(--surface2);border-left:4px solid var(--accent2);font-size:15px;line-height:1.7;color:var(--text)}
+/* 今日小贴士：三行结构（方法 / 为什么 / 现在就做） */
+.tip-single-row{display:flex;gap:8px;margin-top:8px;font-size:14.5px;line-height:1.7;color:var(--text2)}
+.tip-single-row .tip-single-icon{flex-shrink:0}
+/* Today 页 streak 徽章贴在标题行右侧 */
+#kid-streak-box{margin-left:auto}
+/* Today 打勾卡内的任务主行/副行间距（kid.css 的 kid-task-label/kid-sub 复用） */
+#today-3 .kid-task-label{font-size:15.5px}
+#today-3 .kid-sub{display:block;margin-top:2px;font-size:13px;color:var(--text2)}
 </style>
 <!-- 移动端适配：本页原有布局无媒体查询，窄屏下压缩间距与字号 -->
 <style>
@@ -355,15 +382,11 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
  </div>
 </div>
 <ul class="sidebar-nav">
-<li><a href="#" data-tab="dashboard" class="active" onclick="switchTab('dashboard');return false">🏠 Dashboard</a></li>
-<li><a href="#" data-tab="routes" onclick="switchTab('routes');return false">🗺️ Route Compare</a></li>
-<li><a href="#" data-tab="resources" onclick="switchTab('resources');return false">📦 Learning Resources</a></li>
-<li><a href="#" data-tab="planner" onclick="switchTab('planner');return false">📅 Weekly Plan</a></li>
-<li><a href="#" data-tab="notes" onclick="switchTab('notes');return false">📝 Notes</a></li>
-<li><a href="#" data-tab="weekly-review" onclick="switchTab('weekly-review');return false">📋 Weekly Review</a></li>
-<li><a href="#" data-tab="chat" onclick="switchTab('chat');return false">💬 AI Chat</a></li>
-<li><a href="#" data-tab="errors" onclick="switchTab('errors');return false">❌ Error Book</a></li>
-<li><a href="#" data-tab="upload" onclick="switchTab('upload');return false">📤 Upload</a></li>
+<li><a href="#" data-tab="today" class="active" onclick="switchTab('today');return false">🏠 Today</a></li>
+<li><a href="#" data-tab="plan" onclick="switchTab('plan');return false">📅 My Plan</a></li>
+<li><a href="#" data-tab="stuff" onclick="switchTab('stuff');return false">📦 My Stuff</a></li>
+<li><a href="#" data-tab="errors" onclick="switchTab('errors');return false">📗 Error Book</a></li>
+<li><a href="#" data-tab="chat" onclick="switchTab('chat');return false">💬 Ask AI</a></li>
 </ul>
 <div class="sidebar-bottom">
 <div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">My Stuff</div>
@@ -377,135 +400,66 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <main class="main">
 <div class="header-bar">
 <h2>Jemma's Study Space</h2>
-<div class="admin-info"><a href="#" onclick="logout();return false" style="color:var(--red)">Logout</a></div>
+<div class="admin-info" style="font-size:12px;color:var(--text2)">你的事，你决定</div>
 </div>
 
 <!-- 
  DASHBOARD
  -->
-<div id="tab-dashboard" class="tab-panel active">
-<div class="panel-title"> Jemma · My Year 9</div>
+<div id="tab-today" class="tab-panel active">
 
-<!-- 我的身份卡：这个页面是什么、只属于谁 -->
+<!-- ① Hi, Jemma! 问候卡：这是谁的空间 + 今天先做哪一件 -->
 <div class="kid-who-card">
-  <div class="kid-who-name">Jemma</div>
-  <div class="kid-who-meta">Year 9 · GCSE 2029 年 5 月 · Headington</div>
-  <p class="kid-who-msg">这是<b>只属于你一个人</b>的学习台。你的成绩、错题、计划、笔记都只存在这里——姐姐看不到，爸爸妈妈也可以陪你一起看，但内容都是你的。</p>
-  <p class="kid-who-msg" style="margin-top:8px">离 GCSE 还有 <b>4 年</b>，离大学还有 <b>6 年</b>——所以现在<b>不用急着定方向</b>。这三年（Y9–Y11）要做的事只有两个：<b>保持好奇</b>，把<b>你喜欢的学科学扎实</b>。</p>
+  <div class="kid-who-name">Hi, Jemma! 👋</div>
+  <div class="kid-who-meta">Year 9 · Headington</div>
+  <p class="kid-who-msg">这是<b>只属于你</b>的小空间——你的星星、错题、计划，都只属于你。</p>
   <div class="kid-who-todo">
     <div class="kid-ask-card" data-placeholder="写下来，比如：今天我想先练 Bebras">
       <strong>今天先做哪一件？</strong>
-      <span class="kid-hint">先练 Bebras 的题，还是先做点别的？挑<b>一件</b>做完就够了，不用全做完。</span>
+      <span class="kid-hint">挑<b>一件</b>做完就够了，不用全做完。</span>
     </div>
   </div>
 </div>
 
-<!-- Countdown Strip -->
-<div id="countdown-strip" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap"></div>
+<!-- 今日全勾后的「停止提示」：考试/比赛年最重要的交互——完成就收工 -->
+<div id="today-stop" class="kid-stop-hint" hidden>🎉 今天的三件事都完成啦！今天到此为止，去休息吧～</div>
 
-<!-- Next 3 Weeks Plan（Jemma 定制版） -->
+<!-- ② 今天打勾卡 Today's 3：一屏内完成主要任务 -->
 <div class="section" style="border-left:4px solid var(--accent2)">
-<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
- <div class="section-title" style="margin:0"> 📌 Next 3 Weeks · 15 Oct → 4 Nov</div>
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+ <div class="section-title" style="margin:0"> ✅ 今天打勾卡 · Today's 3</div>
+ <span class="kid-streak" id="kid-streak-box" title="连续打卡：每天完成一件事就算一天"></span>
 </div>
-<div id="twp-jemma" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"></div>
-<div id="kid-progress" data-kid-label="这三周完成了几件" style="margin:12px 0 0"></div>
+<div id="today-3" style="display:grid;gap:10px"></div>
+<div id="kid-progress" data-kid-label="今天完成了几件" style="margin:12px 0 0"></div>
 </div>
 
-<!-- Study Tips Rotator -->
+<!-- ③ 下一个比赛倒计时：只看最近的一个，大数字 -->
+<div id="countdown-next" style="margin-bottom:16px"></div>
+
+<!-- ④ 我的科目小星星：点一颗星，听一句话 -->
+<div class="section">
+<div class="section-title"> ⭐ 我的科目小星星</div>
+<div class="kid-badge-wall" id="subject-badges"></div>
+<div class="kid-badge-say" id="badge-say" hidden></div>
+<details class="kid-details">
+<summary>📊 看全部科目和雷达图</summary>
+<div class="subject-grid" id="subject-grid" style="margin-top:10px"></div>
+<div style="display:flex;justify-content:center;margin-top:12px"><canvas id="radarCanvas" width="340" height="340" style="width:300px;height:300px"></canvas></div>
+<div class="radar-legend" id="radar-legend" style="text-align:center"></div>
+</details>
+</div>
+
+<!-- ⑤ 今日小贴士：一张卡，三行结构 -->
 <div id="study-tips" style="margin-bottom:16px"></div>
 
-<!-- Subject Analysis - From Latest Exam Report -->
-<div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%);border-color:#2a2f42">
-<div class="section-title"> Latest Report · October 2026 Half-Term (Y9) — Effort Ratings</div>
-<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
-<div class="subject-grid" id="subject-grid" style="flex:1;min-width:0">
- <!-- JS populated -->
-</div>
-<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px">
-<canvas id="radarCanvas" width="340" height="340" style="width:340px;height:340px"></canvas>
-<div class="radar-legend" id="radar-legend"></div>
-</div>
-</div>
-</div>
-
-<!-- Stat Cards -->
-<div class="stat-cards">
-<div class="stat-card"><div class="lbl">Tasks Done</div><div class="val" id="dash-jemma-pct">--%</div><div class="sub" id="dash-jemma-sub">Loading...</div></div>
-<div class="stat-card"><div class="lbl">Key Countdown</div><div class="val" id="dash-key-timer">--</div><div class="sub" id="dash-key-label">--</div></div>
-</div>
-<!-- SWOT + School Assessment -->
-<div class="dash-grid">
-<div class="section">
-<div class="section-title"> 我擅长的 · My Strengths</div>
-<div style="font-size:14px;line-height:1.8;color:var(--accent2)">
- 7 科 Effort「Above Standard」— Maths / English / German / History / Geography / Biology / Art<br>
- Maths — 7月 88%（超中位 13 分）+ 这次努力度 Above，双确认<br>
- English 大翻身 — 3月老师还说「分析的时候会卡住」，这次 Dr McKendry 给了 Above<br>
- Biology 止住下滑 — 之前 77→72 让人担心，这次努力度 Above<br>
- German — 15/15 的势头保持着，TU9 德国路线顺利<br>
- 钢琴 Grade 8 备考中（校外科目，报告不评）
-</div>
-</div>
-<div class="section kid-focus-card">
-<div class="section-title"> 需要重点关注 · My Watch List</div>
-<div style="font-size:15px;line-height:2;color:var(--text2)">
- <div class="kid-focus-item"><b>Physics 努力度只是 Meeting</b> — 7月82%能力没问题，但 Mrs Streule 这次评级不高（同一位老师给姐姐 Diya 的是 Above）——状态问题，不是能力问题</div>
- <div class="kid-focus-item"><b>Computing 努力度 Meeting</b> — 竞赛实力（Bebras Distinction）早超过课堂要求，但 Mr Howe 的课堂评级平平——上课参与度和比赛能力是两回事</div>
- <div class="kid-focus-item"><b>Chemistry 努力度 Meeting</b> — 7月74%(+2)成绩尚可，努力度评级偏软，别让它变成下一个下滑科目</div>
- <div class="kid-focus-item"><b>Latin 不在课表里了</b> — 报告里出现的是 Classical Civilisation——是不是已经换科了？要确认一下</div>
- <div class="kid-focus-item"><b>这页只有努力度评级</b> — 没有成绩分数页，家长会记得要一份 Performance 数据</div>
- <div class="kid-focus-item"><b>第一个比赛季</b> — Bebras 11月、IMC 1月27日。结果是反馈，不是判决</div>
-</div>
-</div>
-</div>
-<!-- RiskHeatmap + EnglishRiskchain -->
-<div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%)">
-<div class="section-title">Risk Heatmap</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;font-size:14px">
-<div style="padding:8px 12px;background:rgba(255,169,77,0.1);border-radius:8px;border-left:3px solid var(--orange)">
- <b>英语信心</b> — Resolved ✓ — 3月「分析会卡住」→ 10月 Effort Above（Dr McKendry）
-</div>
-<div style="padding:8px 12px;background:rgba(255,212,59,0.1);border-radius:8px;border-left:3px solid var(--yellow)">
- <b>上课不举手</b> — Low Probability·Low Impact — 历史/Drama 不太愿意开口 — 多鼓励就好
-</div>
-<div style="padding:8px 12px;background:rgba(255,212,59,0.08);border-radius:8px;border-left:3px solid var(--yellow)">
- <b>Biology 下滑</b> — Resolved ✓ — 努力度回到 Above（Mrs Mawdesley）
-</div>
-<div style="padding:8px 12px;background:rgba(255,169,77,0.1);border-radius:8px;border-left:3px solid var(--orange)">
- <b>STEM 课堂努力度偏软</b> — Med Probability·Med Impact — Physics/Computing/Chemistry 全是 Meeting — 能力都够，是课堂投入的信号，轻推不施压
-</div>
-<div style="padding:8px 12px;background:rgba(56,217,169,0.1);border-radius:8px;border-left:3px solid var(--accent2)">
- <b>第一个比赛季（Bebras + IMC）</b> — Low Probability·Med Impact — 第一次去试试；结果是反馈，不是判决
-</div>
-<div style="padding:8px 12px;background:rgba(56,217,169,0.08);border-radius:8px;border-left:3px solid var(--accent2)">
- <b>还有 6 年到大学</b> — Confirmed·Positive — 时间够，不着急定方向，喜欢什么就先学什么
-</div>
-</div>
-<div style="margin-top:12px;font-size:15px;color:var(--text2);line-height:2">
-<div style="color:var(--accent2);font-weight:600;margin-bottom:4px">我的判断 · My Take</div>
-<b>Year 9 是最后一个「什么都试」的年</b> — 数学 + 编程 + 科学 + 画画，放在一起是很有意思的一条路<br>
-英语的信心要慢慢养 — 这是「敢不敢开口」的问题，不是「会不会」的问题。还有 4 年多，慢慢来就好<br>
-<b style="color:var(--accent2)">我的做法：</b> 压力小一点、兴趣大一点 — 先做喜欢的，需要补的轻轻推一下
-</div>
-</div>
-<!-- Task List -->
-<div class="section">
-<div class="section-title"> Task List</div>
-<div id="jemma-tasks"><div class="empty-state">Loading...</div></div>
-<div class="flex-row" style="margin-top:10px">
-<input type="text" id="jemma-task-input" placeholder="Add new task..." style="flex:1">
-<button class="btn" onclick="addTask('jemma')">+</button>
-</div>
-</div>
-
-<!-- 需要 Jemma 自己决定的：家长不替她选 -->
+<!-- 首屏之下（滚动一次）：该你决定 + 写两句反思 + 笔记 -->
 <div class="kid-decide-card">
   <div class="kid-h">这件事该你决定 · Your Call</div>
   <p style="font-size:15px;line-height:1.9;margin-top:6px">
     <b>Latin 要不要继续学？</b><br>
-    Latin 现在是你最弱的一科（57.5%）。但它也有一个别人都没有的好处：它同时算「古典语言」和「人文」两边的敲门砖，学过的大学一眼就认。
-    <b>选哪个都行，重要的是这是你自己选的。</b>
+    Latin 现在分最低（57.5%），但它有一个别人都没有的好处：同时算「古典语言」和「人文」两边的敲门砖。
+    <b>选哪个都行，重要的是你自己选的。</b>
   </p>
   <div class="kid-choices">
     <button class="kid-choice" type="button" data-choice="继续学 Latin"
@@ -517,15 +471,75 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
   </div>
 </div>
 
-<!-- 一个只属于她的反思问题 -->
 <div class="kid-ask-card" data-placeholder="比如：第 18 题——我当时读到 'displaced' 就以为是说人受伤，其实是说物体被排开。我没敢往下想，怕选错。">
   <strong>上次考试，哪道题你觉得本来能对？</strong>
   <span class="kid-hint">点开写两句就行：当时卡在哪一步？下次看到这种题，第一反应是什么？</span>
 </div>
-<!-- 5-8Monthly Plan Overview -->
-<div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%)">
-<div class="section-title">Year 9 Plan · 2026-27</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;font-size:14px">
+
+<details class="kid-details" id="notes-details">
+<summary>📝 写两句笔记</summary>
+<textarea id="notes-area" placeholder="写点笔记…（课堂要点、待办、想法都行）"
+ style="width:100%;min-height:180px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;padding:12px;resize:vertical;font-family:inherit;line-height:1.6"
+ oninput="saveNotes()"></textarea>
+<div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+<button class="btn" onclick="saveNotesNow()"> Save</button>
+<span style="font-size:11px;color:var(--accent2)" id="notes-status"></span>
+</div>
+</details>
+</div>
+
+<!-- 
+ MY PLAN（收纳：三周计划 / 周计划 / 任务 / 倒计时 / 路线 / 全年计划 / 报告完整版）
+ -->
+<div id="tab-plan" class="tab-panel">
+<div class="panel-title">📅 My Plan · 我的计划</div>
+
+<!-- 这三周：与 Today 打勾卡同一数据源，两边勾选自动同步 -->
+<div class="section" style="border-left:4px solid var(--accent2)">
+<div class="section-title"> 📌 这三周 · 15 Oct → 4 Nov</div>
+<div id="twp-jemma" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"></div>
+</div>
+
+<!-- 每周时间表 -->
+<div class="section" style="margin-bottom:12px">
+<div class="planner-controls">
+<span style="font-size:14px;font-weight:700;color:var(--accent)">每周时间表 · <span id="jemma-week-label"></span></span>
+<button class="btn" onclick="savePlanner('jemma')" style="margin-left:auto">Save</button>
+<button class="planner-dl-btn" onclick="downloadWeekPlan('jemma')">Download</button>
+</div>
+<div style="overflow-x:auto">
+<table class="jtimetable" id="jemma-planner"></table>
+</div>
+</div>
+
+<!-- 更多任务 -->
+<div class="section">
+<div class="section-title"> 更多任务 · More Tasks</div>
+<div id="jemma-tasks"><div class="empty-state">Loading...</div></div>
+<div class="flex-row" style="margin-top:10px">
+<input type="text" id="jemma-task-input" placeholder="Add new task..." style="flex:1">
+<button class="btn" onclick="addTask('jemma')">+</button>
+</div>
+</div>
+
+<!-- 接下来的日子（完整倒计时） -->
+<div class="section">
+<div class="section-title"> ⏳ 接下来的日子</div>
+<div id="countdown-strip" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap"></div>
+</div>
+
+<!-- 长大以后的路 -->
+<details class="kid-details">
+<summary>🗺️ 长大以后的路 · 升学路线对比</summary>
+<div id="routes-list">
+<div class="section"><div class="empty-state">Loading...</div></div>
+</div>
+</details>
+
+<!-- Year 9 全年计划 -->
+<details class="kid-details">
+<summary>📆 Year 9 全年计划</summary>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;font-size:14px;margin-top:10px">
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
 <b>Now → 1 Nov · Bebras sprint</b> · 20 days out<br>
 Bebras past puzzles — 2-3 per week (bebras.uk)<br>
@@ -568,12 +582,12 @@ Do UKMT puzzles — NRICH / UKMT 每天 10 分钟就够
 <button class="btn" onclick="genExecTasks()" style="font-size:11px">Extract key todos to task list</button>
 <span style="font-size:11px;color:var(--accent2)" id="exec-task-status"></span>
 </div>
-</div>
-<!-- Long-term Roadmap -->
-<div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%)">
-<div class="section-title">Long-term Plan · From Y9 to University</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;font-size:14px">
-<!-- Phase 1 -->
+</details>
+
+<!-- 长大以后的路（Long-term Plan） -->
+<details class="kid-details">
+<summary>🎓 从 Y9 到大学</summary>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;font-size:14px;margin-top:10px">
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
 <b>Phase A · Y9 Exploration Phase（就是现在）</b><br>
  发现 1-2 门真正喜欢的科目<br>
@@ -598,7 +612,6 @@ PS portfolio + academic reading notes
  Interview prep + competition credentials<br>
  从自己的强项出发 — 前面 3 年（Y9–Y11）积累的东西这时候才兑现
 </div>
-<!-- Phase 4 -->
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent2)">
 <b>我的节奏 · My Timeline</b><br>
  现在 Y9，离 GCSE 还有 4 年多，到大学 6 年<br>
@@ -623,114 +636,174 @@ PS portfolio + academic reading notes
 <b style="color:var(--accent2)">Strategy:</b> Low Pressure + High Interest + Build Foundation
 </div>
 </div>
-</div>
-</div>
+</details>
 
-<!-- 
- ROUTES
- -->
-<div id="tab-routes" class="tab-panel">
-<div class="panel-title">Admissions Route Compare</div>
-<div id="routes-list">
-<div class="section"><div class="empty-state">Loading...</div></div>
-</div>
-</div>
-
-<!-- 
- RESOURCES
- -->
-<div id="tab-resources" class="tab-panel">
-<div class="panel-title">Resources · Direct Download</div>
+<!-- 10月报告完整版（Strengths / Watch List / Risk Heatmap 原文保留） -->
+<details class="kid-details">
+<summary>📋 10月报告 · 完整版</summary>
+<div class="dash-grid" style="margin-top:10px">
 <div class="section">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 0">
+<div class="section-title"> 我擅长的 · My Strengths</div>
+<div style="font-size:14px;line-height:1.8;color:var(--accent2)">
+ 7 科 Effort「Above Standard」— Maths / English / German / History / Geography / Biology / Art<br>
+ Maths — 7月 88%（超中位 13 分）+ 这次努力度 Above，双确认<br>
+ English 大翻身 — 3月老师还说「分析的时候会卡住」，这次 Dr McKendry 给了 Above<br>
+ Biology 止住下滑 — 之前 77→72 让人担心，这次努力度 Above<br>
+ German — 15/15 的势头保持着，TU9 德国路线顺利<br>
+ 钢琴 Grade 8 备考中（校外科目，报告不评）
+</div>
+</div>
+<div class="section kid-focus-card">
+<div class="section-title"> 需要重点关注 · My Watch List</div>
+<div style="font-size:15px;line-height:2;color:var(--text2)">
+ <div class="kid-focus-item"><b>Physics 努力度只是 Meeting</b> — 7月82%能力没问题，但 Mrs Streule 这次评级不高（同一位老师给姐姐 Diya 的是 Above）——状态问题，不是能力问题</div>
+ <div class="kid-focus-item"><b>Computing 努力度 Meeting</b> — 竞赛实力（Bebras Distinction）早超过课堂要求，但 Mr Howe 的课堂评级平平——上课参与度和比赛能力是两回事</div>
+ <div class="kid-focus-item"><b>Chemistry 努力度 Meeting</b> — 7月74%(+2)成绩尚可，努力度评级偏软，别让它变成下一个下滑科目</div>
+ <div class="kid-focus-item"><b>Latin 不在课表里了</b> — 报告里出现的是 Classical Civilisation——是不是已经换科了？要确认一下</div>
+ <div class="kid-focus-item"><b>这页只有努力度评级</b> — 没有成绩分数页，家长会记得要一份 Performance 数据</div>
+ <div class="kid-focus-item"><b>第一个比赛季</b> — Bebras 11月、IMC 1月27日。结果是反馈，不是判决</div>
+</div>
+</div>
+</div>
+<div class="section" style="background:linear-gradient(135deg,#1a1d28 0%,#1e2232 100%);margin-top:12px">
+<div class="section-title">Risk Heatmap</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;font-size:14px">
+<div style="padding:8px 12px;background:rgba(255,169,77,0.1);border-radius:8px;border-left:3px solid var(--orange)">
+ <b>英语信心</b> — Resolved ✓ — 3月「分析会卡住」→ 10月 Effort Above（Dr McKendry）
+</div>
+<div style="padding:8px 12px;background:rgba(255,212,59,0.1);border-radius:8px;border-left:3px solid var(--yellow)">
+ <b>上课不举手</b> — Low Probability·Low Impact — 历史/Drama 不太愿意开口 — 多鼓励就好
+</div>
+<div style="padding:8px 12px;background:rgba(255,212,59,0.08);border-radius:8px;border-left:3px solid var(--yellow)">
+ <b>Biology 下滑</b> — Resolved ✓ — 努力度回到 Above（Mrs Mawdesley）
+</div>
+<div style="padding:8px 12px;background:rgba(255,169,77,0.1);border-radius:8px;border-left:3px solid var(--orange)">
+ <b>STEM 课堂努力度偏软</b> — Med Probability·Med Impact — Physics/Computing/Chemistry 全是 Meeting — 能力都够，是课堂投入的信号，轻推不施压
+</div>
+<div style="padding:8px 12px;background:rgba(56,217,169,0.1);border-radius:8px;border-left:3px solid var(--accent2)">
+ <b>第一个比赛季（Bebras + IMC）</b> — Low Probability·Med Impact — 第一次去试试；结果是反馈，不是判决
+</div>
+<div style="padding:8px 12px;background:rgba(56,217,169,0.08);border-radius:8px;border-left:3px solid var(--accent2)">
+ <b>还有 6 年到大学</b> — Confirmed·Positive — 时间够，不着急定方向，喜欢什么就先学什么
+</div>
+</div>
+<div style="margin-top:12px;font-size:15px;color:var(--text2);line-height:2">
+<div style="color:var(--accent2);font-weight:600;margin-bottom:4px">我的判断 · My Take</div>
+<b>Year 9 是最后一个「什么都试」的年</b> — 数学 + 编程 + 科学 + 画画，放在一起是很有意思的一条路<br>
+英语的信心要慢慢养 — 这是「敢不敢开口」的问题，不是「会不会」的问题。还有 4 年多，慢慢来就好<br>
+<b style="color:var(--accent2)">我的做法：</b> 压力小一点、兴趣大一点 — 先做喜欢的，需要补的轻轻推一下
+</div>
+</div>
+</details>
+
+<!-- Weekly Review -->
+<details class="kid-details">
+<summary>📋 Weekly Review</summary>
+<div style="font-size:12px;color:var(--text2);margin:8px 0">Auto-generated summary from this week&apos;s learning activities</div>
+<div id="weekly-review-content"><div class="empty-state">Coming soon -- weekly AI review will appear here</div></div>
+</details>
+</div>
+
+<!-- 
+ MY STUFF（收纳：上传 / 练习卡 / 答案成绩单 / 网页资源）
+ -->
+<div id="tab-stuff" class="tab-panel">
+<div class="panel-title">📦 My Stuff · 我的东西</div>
+
+<!-- 上传作业（置顶大按钮区） -->
+<div class="section" style="border-left:4px solid var(--accent)">
+<div class="section-title"> 📤 上传作业 / 报告</div>
+<div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.7">
+  拍照或选文件上传，自动认出科目/分数/错题，可以一键存进错题本。
+</div>
+<div id="upload-drop" style="border:2px dashed var(--border);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .15s">
+  <div style="font-size:32px;margin-bottom:8px">📄</div>
+  <div style="font-size:14px;font-weight:600;margin-bottom:4px">拖拽文件到此处，或点击选择</div>
+  <div style="font-size:11px;color:var(--text2)">可多选批量上传 · 逐文件独立识别</div>
+  <input type="file" id="upload-input" multiple accept=".png,.jpg,.jpeg,.webp,.pdf" style="display:none">
+</div>
+<div id="upload-queue" style="margin-top:16px"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px">
+  <div class="section-title" style="margin-bottom:0">历史记录</div>
+  <button class="btn btn-sm" onclick="refreshUploadList()">刷新</button>
+</div>
+<div id="upload-list"><div class="error-empty">Loading...</div></div>
+</div>
+
+<!-- 练习卡 ×4：每卡一句「这是什么」 -->
+<div class="section">
+<div class="section-title"> 📚 练习卷 · 点开就能做</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
 
 <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
-  <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Physics Mock Test</div>
+  <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;">⚗️ Physics Mock Test</div>
   <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
-    Year 8 · Static Electricity, Magnetism, Electromagnets, Density, Pressure, Moments, Circuits<br>
-    75 marks · 38 questions · Difficulty ★ to ★★★
+    这是什么：一套物理小考卷（电与磁、密度、电路）。<br>38 题 · 75 分 · 难度 ★~★★★
   </div>
-  <a href="/jemma_physics_mock.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Mock Test</a>
+  <a href="/jemma_physics_mock.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">开始做</a>
 </div>
 
-    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
-      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Creative Writing Analysis</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
-        "The Message in the Bottle" · Detailed feedback on Jemma's story<br>
-        Strengths, corrections, polished version, book recommendations
-      </div>
-      <a href="/jemma_writing_analysis.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Analysis</a>
-    </div>
+<div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+  <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;">🧮 Maths Mock Test v3</div>
+  <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
+    这是什么：一套数学综合练习（16 个已学主题）。<br>46 题 · 100 分 · 难度 ★~★★★
+  </div>
+  <a href="/jemma_maths_mock.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">开始做</a>
+</div>
 
-    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
-      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Writing Workbook</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
-        28 exercises · Creative Writing (18) + PEEL Analysis (10)<br>
-        Year 8-9 level · PEEL framework, self-paced with difficulty levels
-      </div>
-      <a href="/jemma_writing_workbook_v2.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Workbook</a>
-      <a href="/jemma_writing_workbook_v2_answers.html" target="_blank" style="display:inline-block;background:#8b5a2b;color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;margin-left:6px;">Answer Key</a>
-    </div>
+<div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+  <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;">📖 Treasure Island Practice</div>
+  <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
+    这是什么：一篇《金银岛》选段的阅读练习（改错+阅读+概括+创作）。<br>70 分钟 · 48 分 · 答案在最后
+  </div>
+  <a href="/jemma_practice_assessment_2.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">开始做</a>
+</div>
 
-    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
-      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Treasure Island Practice</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
-        1hr 10min paper · Extract from <em>Treasure Island</em> (R.L. Stevenson)<br>
-        Proofreading + Reading + Summary + PEZL Analysis + Creative Writing · 48 marks<br>
-        <span style="color:#b85c38;font-size:11px;">Answers included on last page of paper</span>
-      </div>
-      <a href="/jemma_practice_assessment_2.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Paper</a>
-    </div>
-
-    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
-      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Maths Mock Test v3</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
-        Year 8 · All 16 starred topics · Standard Form, Mixed Numbers, FDP, Inequalities, Sequences, y=mx+c, Proportion, Distance-Time Graphs, Circles, Transformations, Constructions, Loci, Bearings<br>
-        100 marks · 46 questions · Difficulty ★ to ★★★
-      </div>
-      <a href="/jemma_maths_mock.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">Open Mock Test</a>
-      <a href="/jemma_maths_error_analysis.html" target="_blank" style="display:inline-block;background:var(--accent2);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;margin-left:6px;">Error Analysis (72/100)</a>
-    </div>
-
-    <div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
-      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;"> Electromagnetism Test Results</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
-        KS3 Science Electromagnetism · 19/27 marks (70%)<br>
-        Question-by-question grading, feedback, strengths &amp; 3 recommendations
-      </div>
-      <a href="/downloads/jemma_physics_electromagnetism_results.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">View Results</a>
-    </div>
+<div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+  <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;">✍️ Writing Workbook</div>
+  <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">
+    这是什么：28 篇写作练习（创意写作 18 + PEEL 分析 10），自己掌握进度。
+  </div>
+  <a href="/jemma_writing_workbook_v2.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">开始做</a>
+</div>
 
 </div>
 </div>
 
-<div class="section" style="margin-top:14px">
-<div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px">Web &amp; Download Resources</div>
-<div class="filter-bar" id="resource-filter" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+<!-- 折叠：答案与成绩单（入口保留，防作弊考虑收进折叠） -->
+<details class="kid-details">
+<summary>🔑 答案与成绩单（做完再看）</summary>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:10px">
+<div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+  <div style="font-weight:600;font-size:13px;margin-bottom:6px;">Writing Workbook · Answer Key</div>
+  <a href="/jemma_writing_workbook_v2_answers.html" target="_blank" style="display:inline-block;background:#8b5a2b;color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">打开答案</a>
+</div>
+<div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+  <div style="font-weight:600;font-size:13px;margin-bottom:6px;">Maths Mock · Error Analysis（72/100）</div>
+  <a href="/jemma_maths_error_analysis.html" target="_blank" style="display:inline-block;background:var(--accent2);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">看错题分析</a>
+</div>
+<div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+  <div style="font-weight:600;font-size:13px;margin-bottom:6px;">Electromagnetism Results（19/27）</div>
+  <a href="/downloads/jemma_physics_electromagnetism_results.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">看成绩单</a>
+</div>
+<div class="resource-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+  <div style="font-weight:600;font-size:13px;margin-bottom:6px;">Creative Writing Analysis（作文点评）</div>
+  <a href="/jemma_writing_analysis.html" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;padding:5px 14px;border-radius:5px;font-size:12px;text-decoration:none;">看点评</a>
+</div>
+</div>
+</details>
+
+<!-- 折叠：网页资源 -->
+<details class="kid-details">
+<summary>🔗 网页资源（网站和链接）</summary>
+<div class="filter-bar" id="resource-filter" style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">
 <button class="filter-btn active" data-filter="all" onclick="filterResources('all')">All</button>
 <button class="filter-btn" data-filter="maths" onclick="filterResources('maths')">Maths</button>
 <button class="filter-btn" data-filter="computing" onclick="filterResources('computing')">Computing</button>
 <button class="filter-btn" data-filter="jemma" onclick="filterResources('jemma')">Jemma</button>
 </div>
 <div id="resource-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px"></div>
-</div>
-</div>
-
-<!-- 
- PLANNER
- -->
-<div id="tab-planner" class="tab-panel">
-<div class="panel-title">Weekly Plan</div>
-<div class="section" style="margin-bottom:12px">
-<div class="planner-controls">
-<span style="font-size:14px;font-weight:700;color:var(--accent)">Fixed Weekly Template</span>
-<button class="btn" onclick="savePlanner('jemma')" style="margin-left:auto">Save</button>
-<button class="planner-dl-btn" onclick="downloadWeekPlan('jemma')">Download</button>
-</div>
-</div>
-<div style="overflow-x:auto">
-<table class="jtimetable" id="jemma-planner"></table>
-</div>
+</details>
 </div>
 
 <!-- 
@@ -752,12 +825,9 @@ PS portfolio + academic reading notes
 </div>
 </div>
 
-<!-- 
- NOTES
- -->
 <!-- ERROR BOOK -->
 <div id="tab-errors" class="tab-panel">
-<div class="panel-title">❌ Error Book · Jemma</div>
+<div class="panel-title">📗 Error Book · 错题本</div>
 <div class="filter-bar" id="error-filter-bar">
 <button class="filter-btn active" data-subject="all" onclick="filterErrors('all')">All</button>
 <button class="filter-btn" data-subject="Maths" onclick="filterErrors('Maths')">Maths</button>
@@ -772,50 +842,10 @@ PS portfolio + academic reading notes
 <button class="filter-btn" data-subject="Computing" onclick="filterErrors('Computing')">Computing</button>
 </div>
 <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
-<button class="btn" onclick="openErrorModal()">+ Add Error</button>
+<button class="btn" id="add-error-btn" onclick="openErrorModal()">+ Add Error</button>
 <span id="error-count" style="font-size:12px;color:var(--text2);margin-left:8px"></span>
 </div>
 <div id="error-list"><div class="error-empty">Loading...</div></div>
-</div>
-
-<div id="tab-upload" class="tab-panel">
-<div class="panel-title">📤 上传作业 / 报告 <span style="font-size:11px;color:var(--accent2);margin-left:8px">Jemma</span></div>
-<div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">
-  支持截图（PNG/JPG/WEBP ≤10MB）与 PDF（≤30MB、≤20 页）。上传后自动 OCR 识别 → 结构化抽取（科目/分数/错题），可一键存入错题本。
-</div>
-<div id="upload-drop" style="border:2px dashed var(--border);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .15s">
-  <div style="font-size:32px;margin-bottom:8px">📄</div>
-  <div style="font-size:14px;font-weight:600;margin-bottom:4px">拖拽文件到此处，或点击选择</div>
-  <div style="font-size:11px;color:var(--text2)">可多选批量上传 · 逐文件独立识别</div>
-  <input type="file" id="upload-input" multiple accept=".png,.jpg,.jpeg,.webp,.pdf" style="display:none">
-</div>
-<div id="upload-queue" style="margin-top:16px"></div>
-<div style="display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px">
-  <div class="section-title" style="margin-bottom:0">历史记录</div>
-  <button class="btn btn-sm" onclick="refreshUploadList()">刷新</button>
-</div>
-<div id="upload-list"><div class="error-empty">Loading...</div></div>
-</div>
-<div id="tab-notes" class="tab-panel">
-<div class="panel-title"> Notes</div>
-<div class="section">
-<textarea id="notes-area" placeholder="Write study notes hereideasrisk log..." 
- style="width:100%;min-height:400px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:12px;resize:vertical;font-family:inherit;line-height:1.6"
- oninput="saveNotes()"></textarea>
-<div style="margin-top:8px;display:flex;align-items:center;gap:10px">
-<button class="btn" onclick="saveNotesNow()"> Save</button>
-<span style="font-size:11px;color:var(--accent2)" id="notes-status"></span>
-</div>
-</div>
-</div>
-
-<!-- Weekly Review -->
-<div id="tab-weekly-review" class="tab-panel">
-<div class="panel-title"> Weekly Review</div>
-<div class="section">
-<div style="font-size:12px;color:var(--text2);margin-bottom:12px">Auto-generated summary from this week&apos;s learning activities</div>
-<div id="weekly-review-content"><div class="empty-state">Coming soon -- weekly AI review will appear here</div></div>
-</div>
 </div>
 
 </main>
@@ -823,7 +853,7 @@ PS portfolio + academic reading notes
 <div id="toast"></div>
 
 <script>window.KID_CHILD='jemma';</script>
-<script src="assets/kid-common.js?v=20261015"></script>
+<script src="assets/kid-common.js?v=20261018"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -1586,7 +1616,7 @@ function filterResources(f){
  renderResources();
 }
 
-// Tab Navigation 
+// Tab Navigation（低龄化重构后：Today / My Plan / My Stuff / Error Book / Ask AI 五个 tab）
 function switchTab(tab){
  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));
@@ -1595,29 +1625,49 @@ function switchTab(tab){
  const nav=document.querySelector('.sidebar-nav a[data-tab="'+tab+'"]');
  if(nav) nav.classList.add('active');
  // Load data for each tab
- if(tab==='dashboard') loadDashboard();
- if(tab==='planner') loadPlannerView();
- if(tab==='routes') loadRoutes();
- if(tab==='resources') loadResources();
+ if(tab==='today'){ loadDashboard(); initKidLayer(); }
+ if(tab==='plan'){ loadPlannerView(); loadRoutes(); }
+ if(tab==='stuff'){ loadResources(); }
  if(tab==='chat') loadChatHistory();
  if(tab==='errors') loadErrorBook();
- if(tab==='notes') loadNotes();
- if(tab==='weekly-review') loadNotes();
 }
 
-// Study Tips Rotator — Updated 01 Sep 2026: 8 tips — structured Python path + debugging + self-directed learning + focus windows + STEM identity
+// Study Tips Rotator — 低龄化重设计（2026-10-18）：三行结构
+// 🔍 一句话方法（head）· 💡 为什么（why）· ✅ 现在就做（now）
+// 内容要点与原 8 张卡一一对应，不丢失；只把 600 词长文压成三行。
 const STUDY_TIPS_JEMMA = [
- // === KEPT: Core foundation (3) ===
- {id:'tip_02',cat:'general',p:'p0', head:'🧠 Active Recall: Close the book & explain — the stumble IS the learning', detail:'Reading the same page 5 times feels like studying but it\'s the weakest way to learn. Your brain tricks you: "yeah I know this." Instead: read ONCE, close the book, explain it out loud. If you stumble, THAT\'S what you need to study — the stumble is not failure, it\'s a map. Research shows students using active recall remember 50% more after one week than re-readers. Works for EVERYTHING — coding concepts, science facts, maths methods.', action:'Today: pick ONE concept from Python you learned this week. Close your laptop. Explain it out loud. Where did you stumble? Re-read ONLY that part. Try again. Then do the same with a science fact. 10 minutes total.'},
- {id:'j_new50',cat:'computing',p:'p0', head:'🐍 Escape “tutorial hell”: build first, then look up only what you’re stuck on', detail:'The biggest trap for new coders is watching tutorial after tutorial and still not being able to build anything on your own (Chinese learners call it “会写但不会用” — can write it, but can’t use it). The fix is project-first learning: pick a small real project, try to build it with ONLY what you already know, and look up just the one thing you’re stuck on. Perfect first projects: (1) Rock Paper Scissors (use the random module so the computer chooses), (2) Mad Libs (ask for words, then fill them into a funny story), (3) a number-guessing game, (4) a password generator. Each is 10–25 lines and teaches input, output, if/else, loops and random. When you finish, CHANGE something (add a score, add lives) — that “change it” step is where the real learning happens.', action:'Today: open replit.com and build Rock Paper Scissors from memory (import random → computer picks 1–3 → you pick → compare). If stuck, look up ONLY the random part, then keep going. When it works, add a score counter and show your family. Next: Mad Libs.'},
- {id:'j_new30',cat:'maths',p:'p1', head:'🏅 UKMT IMC Past Paper Sprint: 60 minutes, 25 questions — train for your maths competition', detail:'The UKMT Intermediate Maths Challenge (IMC) is for Years 11 and below, so it is the right competition for you now (JMC is for Years 7-8 only — you have graduated past it). The IMC format: 25 multiple-choice questions, 60 minutes. The first 15 are more approachable, the last 10 are HARD puzzles. Scoring: +4 correct, -1 wrong, 0 blank — the same mark scheme as JMC, one difficulty notch higher. The training plan: (1) Download ONE past IMC paper from ukmt.org.uk (free → Past Papers → Intermediate). (2) Set a 60-minute timer. (3) Do questions 1-15 FIRST — these are your "banker" marks. Aim for 11+/15. (4) Questions 16-20: try them all, but if stuck for >3 minutes, SKIP. (5) Questions 21-25: these are genius-level. Try them for fun, but BLANK any you\'re unsure of (better 0 than -1). (6) Mark yourself. Bronze ≈ 30-40 marks. Silver ≈ 40-50. Gold ≈ 50+. (7) For every wrong answer, read the SOLUTION (included in the PDF) — this is where the real learning happens. UKMT solutions teach you problem-solving tricks you can\'t learn in class. Do one paper every 2 weeks. Track your score. Watch it climb.', action:'This week: download the most recent IMC paper from ukmt.org.uk → Past Papers → Intermediate. Print it. Set 60 min timer. Do questions 1-15 first. Mark yourself. Read EVERY solution — even for the ones you got right, because UKMT solutions often show shortcuts you didn\'t think of. Write down 3 new problem-solving tricks you learned. Do another paper in 2 weeks.'},
-
- // === NEW: structured path + debugging + self-directed learning + windows + STEM identity (5) ===
- {id:'j_s01',cat:'computing',p:'p0', head:'🧭 Follow ONE free structured path — stop hopping between random tutorials', detail:'You learn fastest when you follow a single, well-designed course instead of bouncing between YouTube videos. Two excellent free options: (1) Raspberry Pi Foundation\'s "Introduction to Python" project path (projects.raspberrypi.org) — written for ages 10-13, each project builds on the last; (2) PyCrafters from the Python Institute — a free course with two levels: "Explorer" (guided, step-by-step, ages 11-12, perfect for you) and "Adventurer" (independent challenges, ages 13-14). PyCrafters even teaches you to plan projects with a Kanban board and document your work — real engineer habits. Pick one, and finish it before starting another.', action:'Today: open projects.raspberrypi.org and start the first "Introduction to Python" project (or sign up for PyCrafters Explorer). Complete ONE full project this week. When it works, change one thing (colour, speed, message) and show someone.'},
- {id:'j_s02',cat:'computing',p:'p1', head:'🐞 Become a debugger: read the error message first, then the line number — before asking for help', detail:'Real programmers spend more time reading error messages than writing code — and so should you. The error message is not scary, it is a map: it tells you the exact LINE where Python got stuck and usually WHAT went wrong ("NameError: name x is not defined" = you used a variable before creating it; "SyntaxError" = a typo like a missing colon; "IndentationError" = your spacing is off). The habit that makes you independent: (1) read the last line of the error, (2) go to the line number it names, (3) look at that line and the line above, (4) try ONE fix yourself, (5) only then ask for help. Students who do this before asking learn much faster.', action:'This week: the next time your code throws an error (it will!), write the error type and line number in your learning log, guess the fix, try it, and note what worked — all BEFORE asking anyone. Keep a mini list of "errors I now understand".'},
- {id:'j_s03',cat:'general',p:'p1', head:'🧭 Run your own learning: the 6-step self-directed loop (goal → "done?" → steps → timeline → resources → reflect)', detail:'Independent learners (the ones who thrive later) plan their own learning instead of waiting to be told. Researchers describe a 6-step loop you can use for any new skill — coding, maths, a science topic: (1) set a specific GOAL ("build a quiz game", not "get better at Python"); (2) decide what "done" looks like ("it runs and keeps score"); (3) list the steps in order; (4) put a timeline on them; (5) gather your resources (tutorials, docs, books); (6) after you finish, reflect on what worked. This is metacognition — thinking about your own thinking — and it is the single strongest predictor of long-term success.', action:'This week: write one 6-step plan for a small project you actually want to build (a quiz, a game, a calculator). Use your learning log. Tick off the steps as you go, and on Sunday write two lines: what worked + what you would change next time.'},
- {id:'j_s04',cat:'general',p:'p0', head:'⏱️ Tiny focused windows: 15-30 minutes, ONE skill, at a fixed time', detail:'You do not need hours — you need consistency. Study-skill research for your age says short, focused sessions beat long ones, and a regular time beats willpower. The formula: (1) pick a fixed daily time (e.g. right after school, after a snack); (2) set a 15-30 minute timer; (3) work on ONE thing only (one Python project, one puzzle, one science topic) — no phone, no extra tabs; (4) stop when the timer ends. Repeat most days. This builds a habit that carries you through GCSE and A-level without ever feeling like a grind. Aim for "most days", not "perfect".', action:'This week: choose your daily window (15-25 min) and a fixed time. Do it 5 out of 7 days — one coding session, one NRICH puzzle, one science recap. Set a phone timer each time. At the end of the week, count the days you hit it and celebrate.'},
- {id:'j_s05',cat:'general',p:'p1', head:'🌟 You are 13 — STEM interest in girls peaks at 11 and drops at 13. Protect your spark.', detail:'Here is a number worth knowing: girls show equal interest in STEM as boys at primary school, but confidence starts dropping in middle school — and only about 21% of engineering students are women. You are exactly at the age where the spark is easiest to lose, so protect it on purpose. The two things research says keep girls in STEM: (1) role models you can see yourself in — watch "day in the life" videos of women engineers and coders, and ask your teachers if you can sit in on a school "Girls into Electronics" session; (2) make your work visible — show your projects, enter competitions, so it feels real and public, not just a private hobby. You already have a Bebras Distinction (top 25% in school) — that is proof you belong.', action:'This week: watch ONE "women in tech / engineering, day in the life" video and write in your learning log "which part of her job looks fun to me?". Then show your latest Python project to one family member and explain how it works.'},
+ {id:'tip_02',cat:'general',p:'p0',
+  head:'📖 合上书，讲出来',
+  why:'讲不出来的地方，就是还没学会的地方——卡住的那一刻，就是下一步要学的地图。',
+  now:'挑一个这周学的概念（Python 或科学都行），合上书讲 10 分钟，卡住的地方重看那一页。'},
+ {id:'j_new50',cat:'computing',p:'p0',
+  head:'🐍 先做小项目，卡住再查',
+  why:'只看教程不动手，永远学不会自己造东西。第一个项目：石头剪刀布。',
+  now:'打开 replit.com，凭记忆写石头剪刀布。卡住只查 random 怎么用，写完加个计分。'},
+ {id:'j_new30',cat:'maths',p:'p1',
+  head:'🏅 60 分钟做套 IMC 真题',
+  why:'IMC 前 15 题是稳得分，后 10 题练眼界。先拿稳会做的，比死磕难题分高。',
+  now:'下载一份 IMC 往年卷，先只做前 15 题，对答案，把每道错题的解法读一遍。'},
+ {id:'j_s01',cat:'computing',p:'p0',
+  head:'🧭 跟着一条路线学到底',
+  why:'东看一个视频、西看一个教程，最容易半途而废。一条路线学完，再开新的。',
+  now:'打开 Raspberry Pi 的 Python 第一课，这周做完一个完整项目，做完改一样东西（颜色/速度/文字）。'},
+ {id:'j_s02',cat:'computing',p:'p1',
+  head:'🐞 先读报错，再问人',
+  why:'报错不吓人，它是地图：告诉你第几行、哪里错了。会读报错的人学得快一倍。',
+  now:'下次代码报错，先把错误类型和行号记在本子上，猜一个修法再动手——然后才问人。'},
+ {id:'j_s03',cat:'general',p:'p1',
+  head:'🗺️ 自己定目标，分六步走',
+  why:'会自己计划的人，学什么都快：目标 → 什么样算完成 → 步骤 → 时间 → 资料 → 复盘。',
+  now:'给一个真想做的项目（小测验/游戏/计算器）写 6 步计划，周日写两行：什么管用 + 下次改什么。'},
+ {id:'j_s04',cat:'general',p:'p0',
+  head:'⏱️ 每天 15-30 分钟就够',
+  why:'短而固定，比周末突击三小时管用。习惯比强度重要。',
+  now:'选一个固定时间（比如放学后），定 15-25 分钟计时器，这周做到 5 天就庆祝。'},
+ {id:'j_s05',cat:'general',p:'p1',
+  head:'🌟 13 岁，也要守住好奇心',
+  why:'很多女生在这个年纪把 STEM 兴趣收起来了——你已经有 Bebras Distinction，你属于这里。',
+  now:'看一个「女工程师的一天」视频，写下哪部分看起来好玩；再把最新的 Python 项目讲给家人听。'},
 ];
 
 let todayTips = [];
@@ -1659,30 +1709,27 @@ function renderTipCard(el){
  const rem = 3 - (JSON.parse(localStorage.getItem('study_tips_viewed_jemma')||'{}')[t.id] || 0);
  const isFirst = currentTipIndex === 0;
  const isLast = currentTipIndex === todayTips.length - 1;
+ const why = t.why || t.detail || '';
+ const now = t.now || t.action || '';
 
  el.innerHTML = `
- <div class="tips-header"> Today's Tip <span class="tips-refresh">· ${rem} views left for this tip</span></div>
+ <div class="tips-header"> 今日小贴士 <span class="tips-refresh">· 还能换 ${rem} 次</span></div>
  <div class="tip-single-card">
   <span class="tip-cat-badge ${t.cat}">${t.cat.toUpperCase()}</span>
   <div class="tip-single-head">${t.head}</div>
-  <div class="tip-single-detail">${t.detail}</div>
-  <div class="tip-single-action">${t.action}</div>
+  <div class="tip-single-row"><span class="tip-single-icon">💡</span><span>${why}</span></div>
+  <div class="tip-single-row"><span class="tip-single-icon">✅</span><span>${now}</span></div>
  </div>
  <div class="tip-nav">
-  <button onclick="prevTip()" id="tip-prev-btn"${isFirst?' disabled':''}>Previous</button>
+  <button onclick="prevTip()" id="tip-prev-btn"${isFirst?' disabled':''}>◀ 上一张</button>
   <span class="tip-counter">Tip ${currentTipIndex + 1} / ${todayTips.length}</span>
-  <button onclick="nextTip()" id="tip-next-btn"${isLast?' disabled':''}>Next</button>
+  <button onclick="nextTip()" id="tip-next-btn"${isLast?' disabled':''}>下一张 ▶</button>
  </div>`;
 }
 
-// Dashboard 
+// Dashboard（Today 首页：低龄化重构后只保留一屏 5 区块所需的数据）
 async function loadDashboard(){
- try{
- const dj = await fetch('/api/dashboard/jemma').then(r=>r.json()).catch(()=>({tasks_done:0,tasks_total:0}));
- const dp=dj.tasks_total>0?Math.round(dj.tasks_done/dj.tasks_total*100):0;
- document.getElementById('dash-jemma-pct').textContent=dp+'%';
- document.getElementById('dash-jemma-sub').textContent=`${dj.tasks_done||0}/${dj.tasks_total||0} tasks`;
- }catch(e){console.error('dash load err',e)}
+ renderToday3();
  loadStudyTips();
  drawMainRadar();
  initSubjectAnalysis();
@@ -1693,16 +1740,16 @@ async function loadDashboard(){
 
 function initSubjectAnalysis(){
  const subjects=[
- {name:'Mathematics', grade:'Effort: Above', status:'above', trend:'Ms Cave · 7月88%超中位13分，努力度再获认可', bar:85, tag:'Consistent Star', tagClass:'green'},
- {name:'English', grade:'Effort: Above', status:'above', trend:'Dr McKendry · 3月「分析会卡住」→ 努力度Above，大翻身', bar:85, tag:'Big Climb', tagClass:'green'},
- {name:'German', grade:'Effort: Above', status:'above', trend:'Mrs McVean · 15/15 之后继续保持 — TU9 路线顺', bar:85, tag:'TU9 Ready', tagClass:'green'},
- {name:'History', grade:'Effort: Above', status:'above', trend:'Mr Davies · 结构化+分析力强', bar:85, tag:'Strong Writer', tagClass:'green'},
- {name:'Geography', grade:'Effort: Above', status:'above', trend:'Dr Prata · 新上榜的强科', bar:85, tag:'Strong', tagClass:'green'},
- {name:'Biology', grade:'Effort: Above', status:'above', trend:'Mrs Mawdesley · 止住下滑（7月77→72），努力度翻身', bar:85, tag:'Turnaround', tagClass:'green'},
- {name:'Art', grade:'Effort: Above', status:'above', trend:'Mrs Sherwood · 7月老师原话「a talented Artist」', bar:85, tag:'Creative Star', tagClass:'green'},
- {name:'Physics', grade:'Effort: Meeting', status:'meeting', trend:'Mrs Streule · 7月82%能力很强，但这次努力度评级不高', bar:62, tag:'Watch Effort', tagClass:'yellow'},
- {name:'Computing', grade:'Effort: Meeting', status:'meeting', trend:'Mr Howe · Bebras Distinction——竞赛水平远超课堂，但课堂努力度平平', bar:62, tag:'Watch Effort', tagClass:'yellow'},
- {name:'Chemistry', grade:'Effort: Meeting', status:'meeting', trend:'Mrs Campbell · 7月74%(+2)成绩不差，努力度评级偏软', bar:62, tag:'Watch Effort', tagClass:'yellow'},
+ {name:'Mathematics', grade:'Effort: Above', status:'above', trend:'Ms Cave · 7月88%超中位13分，努力度再获认可', bar:85, tag:'Consistent Star', tagClass:'green', say:'7月 88% 超中位 13 分，这次努力度又是 Above，稳！'},
+ {name:'English', grade:'Effort: Above', status:'above', trend:'Dr McKendry · 3月「分析会卡住」→ 努力度Above，大翻身', bar:85, tag:'Big Climb', tagClass:'green', say:'从「分析会卡住」到 Above，你搞定了！'},
+ {name:'German', grade:'Effort: Above', status:'above', trend:'Mrs McVean · 15/15 之后继续保持 — TU9 路线顺', bar:85, tag:'TU9 Ready', tagClass:'green', say:'15/15 的势头保持着，TU9 德国路线顺'},
+ {name:'History', grade:'Effort: Above', status:'above', trend:'Mr Davies · 结构化+分析力强', bar:85, tag:'Strong Writer', tagClass:'green', say:'结构化+分析力强，Mr Davies 认可的写作者'},
+ {name:'Geography', grade:'Effort: Above', status:'above', trend:'Dr Prata · 新上榜的强科', bar:85, tag:'Strong', tagClass:'green', say:'新上榜的强科，Dr Prata 也点了赞'},
+ {name:'Biology', grade:'Effort: Above', status:'above', trend:'Mrs Mawdesley · 止住下滑（7月77→72），努力度翻身', bar:85, tag:'Turnaround', tagClass:'green', say:'之前 77→72 让人担心，这次努力度翻身'},
+ {name:'Art', grade:'Effort: Above', status:'above', trend:'Mrs Sherwood · 7月老师原话「a talented Artist」', bar:85, tag:'Creative Star', tagClass:'green', say:'老师原话：a talented Artist'},
+ {name:'Physics', grade:'Effort: Meeting', status:'meeting', trend:'Mrs Streule · 7月82%能力很强，但这次努力度评级不高', bar:62, tag:'Watch Effort', tagClass:'yellow', say:'7月 82% 能力没问题，上课再举手就更棒啦'},
+ {name:'Computing', grade:'Effort: Meeting', status:'meeting', trend:'Mr Howe · Bebras Distinction——竞赛水平远超课堂，但课堂努力度平平', bar:62, tag:'Watch Effort', tagClass:'yellow', say:'Bebras Distinction！比赛远超课堂，上课也露一手？'},
+ {name:'Chemistry', grade:'Effort: Meeting', status:'meeting', trend:'Mrs Campbell · 7月74%(+2)成绩不差，努力度评级偏软', bar:62, tag:'Watch Effort', tagClass:'yellow', say:'7月 74%(+2)，爬坡中，别让它滑下去'},
  {name:'Classical Civilisation', grade:'Effort: Meeting', status:'meeting', trend:'Mrs Workman · 新科目（替代 Latin？待确认）', bar:62, tag:'New', tagClass:'yellow'},
  {name:'Drama', grade:'Effort: Meeting', status:'meeting', trend:'Mr Rogers · 举手发言还要再推一把', bar:62, tag:'On Track', tagClass:'yellow'},
  {name:'Business', grade:'Effort: Meeting', status:'meeting', trend:'Mrs Workman', bar:62, tag:'On Track', tagClass:'yellow'},
@@ -1710,36 +1757,42 @@ function initSubjectAnalysis(){
  {name:'Physical Education', grade:'Effort: Meeting', status:'meeting', trend:'Mrs Lamb', bar:62, tag:'On Track', tagClass:'yellow'},
  {name:'P.S.H.E.', grade:'Effort: Meeting', status:'meeting', trend:'Mr Cropper', bar:62, tag:'On Track', tagClass:'yellow'},
  ];
+ // Today #4：徽章墙（Above 全上 + 重点关注的 3 科，点一颗听一句话）
+ const badgeBox=document.getElementById('subject-badges');
+ if(badgeBox){
+  const featured=subjects.filter(s=>s.status==='above'||s.tag==='Watch Effort');
+  badgeBox.innerHTML=featured.map((s,i)=>{
+   const cls=s.status==='above'?'kid-badge star':'kid-badge watch';
+   const icon=s.status==='above'?'⭐':'🌱';
+   return `<button type="button" class="${cls}" data-say="${s.say||''}" data-name="${s.name}">${icon} ${s.name}</button>`;
+  }).join('');
+  badgeBox.querySelectorAll('.kid-badge').forEach(btn=>{
+   btn.addEventListener('click',()=>{
+    const say=document.getElementById('badge-say');
+    if(!say) return;
+    badgeBox.querySelectorAll('.kid-badge').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    say.hidden=false;
+    say.innerHTML=`<b>${btn.dataset.name}</b> · ${btn.dataset.say}`;
+   });
+  });
+ }
+ // My Plan/Today 折叠：全部科目卡（原有完整渲染）
  const grid=document.getElementById('subject-grid');
  if(!grid) return;
  grid.innerHTML=subjects.map(s=>{
- const cardClass=s.status==='risk'?' subject-card risk':s.status==='above'?' subject-card excellent':' subject-card';
- return `<div class="${cardClass.trim()}">
- <div class="sj-name">${s.name}</div>
- <div class="sj-grade ${s.status}">${s.grade}</div>
- <div class="sj-trend">${s.trend}</div>
- <div class="sj-bar"><div class="sj-bar-fill" style="width:${s.bar}%;background:${s.status==='risk'?'var(--red)':s.status==='above'?'var(--accent2)':'var(--accent)'}"></div></div>
- ${s.tag?`<span class="sj-tag tag ${s.tagClass}">${s.tag}</span>`:''}
- </div>`;
+  const cardClass=s.status==='risk'?' subject-card risk':s.status==='above'?' subject-card excellent':' subject-card';
+  return `<div class="${cardClass.trim()}">
+  <div class="sj-name">${s.name}</div>
+  <div class="sj-grade ${s.status}">${s.grade}</div>
+  <div class="sj-trend">${s.trend}</div>
+  <div class="sj-bar"><div class="sj-bar-fill" style="width:${s.bar}%;background:${s.status==='risk'?'var(--red)':s.status==='above'?'var(--accent2)':'var(--accent)'}"></div></div>
+  ${s.tag?`<span class="sj-tag tag ${s.tagClass}">${s.tag}</span>`:''}
+  </div>`;
  }).join('');
-
- // Single critical countdown in stat card
- updateKeyTimer();
- setInterval(updateKeyTimer, 60000);
 }
 
-function updateKeyTimer(){
- const gcseDate=new Date('2029-05-01');
- const now=new Date();
- const diff=gcseDate-now;
- const days=Math.floor(diff/86400000);
- const el=document.getElementById('dash-key-timer');
- const lbl=document.getElementById('dash-key-label');
- if(el) el.textContent=days+' days';
- if(lbl) lbl.textContent='Until GCSE 2029.5';
-}
-
-// Radar Chart 
+// Radar Chart
 function drawRadar(canvasId, labels, datasets, legendId){
  const canvas=document.getElementById(canvasId);
  if(!canvas) return;
@@ -1812,13 +1865,8 @@ async function loadChild(child){
  await Promise.all([loadTasks(child), loadPlanner(child)]);
 }
 
-// Chat 
+// Chat（jemma 单孩页面，无聊天对象切换）
 let currentChatChild='jemma';
-function switchChatChild(child){
- currentChatChild=child;
- document.getElementById('chat-hdr-title').textContent='Chat with Jemma';
- loadChatHistory();
-}
 function markdownToHtml(md){
  if(!md) return '';
  let html=md;
@@ -1950,10 +1998,7 @@ async function clearChatHistory(){
  }catch(e){toast('Clear failed');}
 }
 
-// Logout 
-function logout(){
- window.location.replace('index.html');
-}
+// Logout（唯一出口在侧栏底部；此处为带服务端会话清理的实现）
 const AVATARS=['\uD83D\uDC67','\uD83D\uDC69\u200D\uD83D\uDD2C','\uD83D\uDC69\u200D\uD83D\uDCBB','\uD83D\uDC69\u200D\uD83C\uDFA8','\uD83D\uDC69\u200D\uD83D\uDD27','\uD83D\uDC69\u200D\uD83D\uDE80','\uD83C\uDF1F','\uD83C\uDFAF','\uD83D\uDD2C','\uD83D\uDCA1','\uD83E\uDDE0','\uD83D\uDCD0','\uD83D\uDC31','\uD83E\uDD8A','\uD83C\uDF38','\uD83C\uDF0D','\uD83C\uDF0A','\uD83C\uDF08','\u2601\uFE0F','\u2728','\uD83D\uDD25','\uD83D\uDCA5','\uD83C\uDFB5','\uD83C\uDFAE','\uD83D\uDCDA','\uD83D\uDC8E','\uD83D\uDD2E','\uD83D\uDD2D','\uD83E\uDDD0','\uD83C\uDF0C','\u2699\uFE0F','\u26A1'];
 const THEMES={
  blue:{accent:'#4f8cff',accent2:'#38d9a9'},
@@ -1999,21 +2044,20 @@ function applyTheme(theme){
  document.documentElement.style.setProperty('--accent',t.accent);
  document.documentElement.style.setProperty('--accent2',t.accent2);
 }
+// 连续打卡语义修正（M3）：侧栏 profile-streak 改由 KidStreak 管理（真实连续打卡天数）；
+// 本函数只保留「周计划填充度 → level/xp」的既有公式，不再伪造 streak 文案。
 function updateStreak(){
- // Fixed template: count days with any content
  const data=plannerData['jemma']||{};
  const dayKeys=['mon','tue','wed','thu','fri','sat','sun'];
  let filledDays=0;
  dayKeys.forEach(dk=>{
- if(Object.values(data[dk]||{}).some(v=>v&&v.trim())) filledDays++;
+  if(Object.values(data[dk]||{}).some(v=>v&&v.trim())) filledDays++;
  });
- document.getElementById('profile-streak').textContent=`${filledDays}/7 days · plans set`;
- const hdr=document.getElementById('header-streak'); if(hdr) hdr.textContent=`${filledDays}/7 days`;
  const lv=1+Math.floor(filledDays/2);
  document.getElementById('profile-level').textContent=lv;
  document.getElementById('profile-xp-fill').style.width=Math.round(filledDays/7*100)+'%';
  const p=JSON.parse(localStorage.getItem('profile_jemma')||'{}');
- p.streak=filledDays; p.level=lv; localStorage.setItem('profile_jemma',JSON.stringify(p));
+ p.level=lv; localStorage.setItem('profile_jemma',JSON.stringify(p));
 }
 
 // ── Upload（作业上传与识别入库，child=jemma）──────────────────
@@ -2225,6 +2269,7 @@ async function retryExtract(uid){
   }catch(e){ toast('❌ 网络错误'); }
 }
 
+// Logout（带服务端会话清理，侧栏底部入口）
 function logout(){
  sessionStorage.removeItem('jemma_auth');
  try{
@@ -2233,7 +2278,7 @@ function logout(){
  }catch(e){ window.location.replace('index.html'); }
 }
 
-// Countdown 
+// Countdown：Today 只显示「下一个」大卡；完整列表在 My Plan
 function renderCountdown(){
  const today=new Date(); today.setHours(0,0,0,0);
  const events = [
@@ -2241,69 +2286,135 @@ function renderCountdown(){
  {label:'Bebras 2026', date:'2026-11-01', emoji:'🦫', color:'#2980b9'},
   {label:'GCSE Starts', date:'2029-05-01', emoji:'📚', color:'#e74c3c'}
  ];
+ // My Plan：完整倒计时条
  const strip=document.getElementById('countdown-strip');
- if(!strip) return;
- strip.innerHTML = events.map(e=>{
- const d=new Date(e.date); d.setHours(0,0,0,0);
- const diff=Math.ceil((d-today)/86400000);
- let text;
- if(diff<0) text='Done!';
- else if(diff===0) text='TODAY';
- else if(diff===1) text='Tomorrow';
- else text=diff+' days';
- return `<div style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;text-align:center;${diff<=7?'border-color:'+e.color+';box-shadow:0 0 8px '+e.color+'44':''}">
- <div style="font-size:24px">${e.emoji}</div>
- <div style="font-size:11px;color:var(--text2);margin-top:4px">${e.label}</div>
- <div style="font-size:20px;font-weight:700;color:${e.color};margin-top:2px" class="${diff<=7?'pulse-glow':''}">${text}</div>
- <div style="font-size:10px;color:var(--text2)">${d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
- </div>`;
- }).join('');
+ if(strip){
+  strip.innerHTML = events.map(e=>{
+   const d=new Date(e.date); d.setHours(0,0,0,0);
+   const diff=Math.ceil((d-today)/86400000);
+   let text;
+   if(diff<0) text='Done!';
+   else if(diff===0) text='TODAY';
+   else if(diff===1) text='Tomorrow';
+   else text=diff+' days';
+   return `<div style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;text-align:center;${diff<=7?'border-color:'+e.color+';box-shadow:0 0 8px '+e.color+'44':''}">
+   <div style="font-size:24px">${e.emoji}</div>
+   <div style="font-size:11px;color:var(--text2);margin-top:4px">${e.label}</div>
+   <div style="font-size:20px;font-weight:700;color:${e.color};margin-top:2px" class="${diff<=7?'pulse-glow':''}">${text}</div>
+   <div style="font-size:10px;color:var(--text2)">${d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+   </div>`;
+  }).join('');
+ }
+ // Today：下一个（最近的未来事件）大数字卡
+ const nextBox=document.getElementById('countdown-next');
+ if(nextBox){
+  const upcoming=events.map(e=>({...e,d:new Date(e.date+'T00:00:00')})).filter(e=>e.d>=today).sort((a,b)=>a.d-b.d);
+  const e=upcoming[0]||events[events.length-1];
+  const diff=Math.ceil((e.d-today)/86400000);
+  const text=diff===0?'就是今天！':diff===1?'明天！':diff+' 天';
+  nextBox.innerHTML=`
+  <div style="display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px">
+   <div style="font-size:40px">${e.emoji}</div>
+   <div style="flex:1;min-width:0">
+    <div style="font-size:13px;color:var(--text2)">下一个 · ${e.label}</div>
+    <div style="font-size:28px;font-weight:800;color:${e.color};line-height:1.2">${text}</div>
+   </div>
+   <div style="font-size:12px;color:var(--text2);text-align:right">结果是反馈<br>不是判决</div>
+  </div>`;
+ }
 }
 
 // ── 三周执行计划（Jemma · Year 9 定制） ──
+// actions：每周拆成 3 个可勾小行动——Today 打勾卡与 My Plan 周卡共用 data-task-id，勾选自动同步
 const TWP_JEMMA = [
  {id:'w1-errors', taskLabel:'Week 1 · 错题本习惯', label:'Week 1 · 起步与习惯', start:'2026-10-15', end:'2026-10-21',
   goal:'错题本习惯建立：每天 1 道错题进 Error Book（含错在哪、正确思路两行）',
-  focus:'<b>本周</b> Maths / Science / German 各挑 1 个薄弱点写进周计划 · Bebras 往年题试做 1 套（找手感）'},
+  focus:'<b>本周</b> Maths / Science / German 各挑 1 个薄弱点写进周计划 · Bebras 往年题试做 1 套（找手感）',
+  actions:[
+   {id:'w1-d1', label:'每天 1 道错题进 Error Book', sub:'错了没关系，记下来就会了'},
+   {id:'w1-d2', label:'Bebras 往年题试做 1 套', sub:'找手感，不用计时'},
+   {id:'w1-d3', label:'三科各写 1 个薄弱点', sub:'Maths / Science / German 挑一个就行'}
+  ]},
  {id:'w2-flashcards', taskLabel:'Week 2 · 三科闪卡 5 张', label:'Week 2 · 主动回忆', start:'2026-10-22', end:'2026-10-28',
   goal:'三科各建 5 张闪卡（遮住答案自己说一遍再翻面），每天 20 分钟',
-  focus:'<b>10/25</b> 留白休息 · <b>half term</b> 每天最多一个 2h 深度块，下午晚上彻底休息 · Bebras 第 2 套限时'},
+  focus:'<b>10/25</b> 留白休息 · <b>half term</b> 每天最多一个 2h 深度块，下午晚上彻底休息 · Bebras 第 2 套限时',
+  actions:[
+   {id:'w2-d1', label:'三科各做 5 张闪卡', sub:'正面写问题，背面写答案'},
+   {id:'w2-d2', label:'每天闪卡 20 分钟', sub:'遮住答案，先自己说一遍'},
+   {id:'w2-d3', label:'10/25 留白休息', sub:'休息也是计划的一部分'}
+  ]},
  {id:'w3-bebras-review', taskLabel:'Week 3 · Bebras 错题三分类', label:'Week 3 · 复盘与冲刺', start:'2026-10-29', end:'2026-11-04',
   goal:'Bebras 赛前复盘：错题三分类（粗心/没懂/没时间）， biggest 桶就是冲刺重点',
-  focus:'<b>11 月 Bebras</b>（日期以学校通知为准）· 赛后把每道错题按三分类记回 Error Book'}
+  focus:'<b>11 月 Bebras</b>（日期以学校通知为准）· 赛后把每道错题按三分类记回 Error Book',
+  actions:[
+   {id:'w3-d1', label:'Bebras 第 2 套限时做', sub:'45 分钟，就当比赛'},
+   {id:'w3-d2', label:'错题分三类', sub:'粗心 / 没懂 / 没时间'},
+   {id:'w3-d3', label:'赛后错题记回 Error Book', sub:'按分类写两行：错在哪+正确思路'}
+  ]},
 ];
+// 当前周判定：今天落在哪个周区间；都不在就取最近的一周
+function currentTwpWeek(){
+ const today=new Date().toISOString().slice(0,10);
+ let w=TWP_JEMMA.find(x=>today>=x.start&&today<=x.end);
+ if(!w) w=TWP_JEMMA.filter(x=>x.end>=today).sort((a,b)=>a.start<b.start?-1:1)[0]||TWP_JEMMA[TWP_JEMMA.length-1];
+ return w;
+}
+// Today #2：今天打勾卡（当前周的 3 个小行动）
+function renderToday3(){
+ const el=document.getElementById('today-3');
+ if(!el) return;
+ const w=currentTwpWeek();
+ el.innerHTML=`<div style="font-size:12px;color:var(--text2);margin-bottom:2px">${w.label} · 做完一件勾一件</div>`+
+ w.actions.map(a=>`
+  <div class="kid-task-card" data-task-id="${a.id}" data-task-label="${w.taskLabel} · ${a.label}" title="点一下就能勾掉">
+   <span class="kid-task-label">${a.label}</span>
+   <span class="kid-sub">${a.sub}</span>
+  </div>`).join('');
+}
+// My Plan：三周卡（每周内嵌 3 个可勾小行动，与 Today 同步）
 function renderTwpJemma(){
   const el=document.getElementById('twp-jemma');
   if(!el) return;
   const today=new Date().toISOString().slice(0,10);
-  const base='background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px 14px 48px;';
+  const base='background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;';
   el.innerHTML=TWP_JEMMA.map(w=>{
     let extra='';
     if(today>w.end) extra='opacity:0.55;';
     else if(today>=w.start) extra='border-left:3px solid var(--accent2);background:rgba(56,217,169,0.08);';
     const badge=today>=w.start&&today<=w.end?'<span style="float:right;font-size:9px;font-weight:700;padding:1px 8px;border-radius:8px;background:var(--accent2);color:#fff">本周</span>':'';
-    return `<div style="${base}${extra}" class="kid-task-card" data-task-id="${w.id}" data-task-label="${w.taskLabel}" title="点一下就能勾掉">
+    const acts=w.actions.map(a=>`
+     <div class="kid-task-card" data-task-id="${a.id}" data-task-label="${w.taskLabel} · ${a.label}" title="点一下就能勾掉" style="margin-bottom:8px">
+      <span class="kid-task-label" style="font-size:13.5px">${a.label}</span>
+     </div>`).join('');
+    return `<div style="${base}${extra}">
      <div style="font-size:12px;font-weight:700">${w.label}${badge}</div>
      <div style="font-size:10px;color:var(--text2);margin-top:2px">${w.start.slice(5).replace('-','/')} – ${w.end.slice(5).replace('-','/')}</div>
      <div style="font-size:11.5px;margin-top:6px;line-height:1.5">${w.goal}</div>
      <div style="font-size:11px;color:var(--text2);margin-top:6px;line-height:1.6">${w.focus}</div>
-    </div>`;
+     <div style="margin-top:10px;display:grid;gap:6px">${acts}</div>
+     </div>`;
   }).join('');
 }
 
-// Init 
-document.addEventListener('DOMContentLoaded',()=>{
- loadProfile();
- loadDashboard();
- renderTwpJemma();
- try{ setupUploadZone(); refreshUploadList(); }catch(_){}
- // 儿童互动组件：可勾选任务 / 提问卡 / 决策选择 / 完成进度
+// Init
+// 儿童互动层：可勾选任务 / 提问卡 / 决策选择 / 完成进度 / 连续打卡 / 撒彩带
+// 幂等设计（重复调用不重复绑事件）；switchTab 重建 Today 卡片后需再调一次恢复绑定。
+function initKidLayer(){
  try{
    KidCheck.init('body');
    KidAsk.init('body');
    KidStamp.init('body');
    KidProgress.render('#kid-progress');
+   KidStreak.listen('#kid-streak-box');   // 真实连续打卡（每周 1 天休息日不断签）
+   KidCheer.onAllDone('#today-stop');     // 今日全勾：撒彩带 + 「今天到此为止」
  }catch(_){}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ loadProfile();
+ loadDashboard();
+ renderTwpJemma();
+ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
+ initKidLayer();
 });
 </script>
 
@@ -2382,6 +2493,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 </div>
 </div>
 
-<script src="/assets/kid.js"></script>
+<script src="/assets/kid.js?v=20261018"></script>
 </body>
 </html>

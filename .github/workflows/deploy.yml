@@ -85,3 +85,55 @@ jobs:
             chown -R www:www "${{ secrets.SITE_ROOT }}"
             systemctl restart plan-api
             echo "==> deploy done"
+
+      # ── /v3 预览子树：与主站同源，供孩子体验新版；主站内容不受影响 ──
+      # 页面内 /api/* 与 /assets/* 均为绝对路径，/v3 复用主站后端与静态资源，
+      # 因此无需独立 data/ logs/（运行时数据仍以服务器主站为唯一真源）。
+      - name: Prepare /v3 directory on ECS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            set -e
+            mkdir -p "${{ secrets.SITE_ROOT }}/v3"
+            chown -R www:www "${{ secrets.SITE_ROOT }}/v3"
+
+      - name: Rsync /v3 preview subtree (main site untouched)
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          echo "$KEY" > "$RUNNER_TEMP/key.pem"
+          chmod 600 "$RUNNER_TEMP/key.pem"
+          # --delete 仅作用于 /v3 子树；排除清单与主站部署保持一致
+          rsync -az --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='downloads/' \
+            --exclude='resources/' \
+            --exclude='backups/' \
+            --exclude='research_collector.py' \
+            --exclude='deploy.sh' \
+            --exclude='.workbuddy/' \
+            --exclude='tests/' \
+            --exclude='internal/' \
+            --exclude='.versions/' \
+            --exclude='*/.versions/' \
+            --exclude='data/' \
+            --exclude='logs/' \
+            --exclude='key.pem' \
+            -e "ssh -p ${{ secrets.ECS_PORT }} -i $RUNNER_TEMP/key.pem -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:${{ secrets.SITE_ROOT }}/v3/
+
+      - name: Fix /v3 ownership
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            chown -R www:www "${{ secrets.SITE_ROOT }}/v3"
+            echo "==> /v3 deploy done: https://112.74.40.8/v3/app.html · https://112.74.40.8/v3/jemma.html"

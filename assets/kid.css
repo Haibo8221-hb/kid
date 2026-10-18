@@ -587,7 +587,90 @@
 .kid-choice.picked::before{content:"✓ ";color:var(--kid-decide-ink)}
 
 /* ==========================================================================
-   6. 响应式：窄屏把左边框移到顶部，卡片整块可点
+   7. 连续打卡徽章（KidStreak）
+   ========================================================================== */
+.kid-streak{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 14px;
+  border-radius:999px;
+  background:var(--kid-focus-tint),var(--kid-card-bg);
+  border:1px solid var(--kid-card-border);
+  font-size:14px;
+  font-weight:700;
+  line-height:1.5;
+  color:var(--kid-ink);
+}
+.kid-streak-fire{font-size:15px}
+.kid-streak-medal{
+  border-color:var(--kid-focus);
+  background:var(--kid-focus-hover),var(--kid-card-bg);
+  color:var(--kid-focus-ink);
+}
+.kid-streak-toast{
+  position:fixed;
+  left:50%;
+  bottom:32px;
+  z-index:9999;
+  transform:translate(-50%,16px);
+  padding:10px 20px;
+  border-radius:999px;
+  background:var(--kid-focus);
+  color:#1a1206;
+  font-size:15px;
+  font-weight:800;
+  box-shadow:0 6px 24px rgba(0,0,0,.28);
+  opacity:0;
+  transition:opacity .3s,transform .3s;
+  pointer-events:none;
+}
+.kid-streak-toast.show{opacity:1;transform:translate(-50%,0)}
+:root.kid-light .kid-streak-toast{color:#fff}
+
+/* ==========================================================================
+   8. 撒彩带（KidCheer）—— 纯 CSS，无图片无外部库
+   ========================================================================== */
+.kid-cheer-layer{
+  position:fixed;
+  inset:0;
+  z-index:9998;
+  pointer-events:none;
+  overflow:hidden;
+}
+.kid-cheer-bit{
+  position:absolute;
+  top:-14px;
+  width:9px;
+  height:14px;
+  opacity:.95;
+  animation-name:kid-cheer-fall;
+  animation-timing-function:cubic-bezier(.2,.6,.4,1);
+  animation-fill-mode:forwards;
+}
+@keyframes kid-cheer-fall{
+  0%{transform:translateY(-10vh) rotate(0deg)}
+  100%{transform:translateY(110vh) rotate(720deg)}
+}
+/* 今日任务全部完成后的停止提示（KidCheer.onAllDone 显示） */
+.kid-stop-hint{
+  margin:0 0 14px;
+  padding:14px 18px;
+  border-radius:var(--kid-radius);
+  border:2px dashed var(--kid-done-border);
+  background:var(--kid-done-tint);
+  font-size:16px;
+  font-weight:700;
+  line-height:1.7;
+  color:var(--kid-done-ink);
+}
+@media (prefers-reduced-motion:reduce){
+  .kid-cheer-layer{display:none}
+  .kid-streak-toast{transition:none}
+}
+
+/* ==========================================================================
+   9. 响应式：窄屏把左边框移到顶部，卡片整块可点
    ========================================================================== */
 @media (max-width:768px){
   .kid-focus-card,

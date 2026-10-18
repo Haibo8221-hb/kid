@@ -136,6 +136,13 @@
           var on = !card.classList.contains('checked');
           KidCheck._apply(card, on);
           store(key, on ? '1' : '0');
+          // 同一任务在同页多处渲染（Today 打勾卡 + My Plan 三周卡）时保持视觉同步
+          var tid = card.dataset.taskId;
+          if (tid) {
+            $$('.kid-task-card').forEach(function (c) {
+              if (c !== card && c.dataset.taskId === tid) KidCheck._apply(c, load(key) === '1');
+            });
+          }
           notify();
         };
         KidCheck._apply(card, load(key) === '1');
@@ -413,10 +420,163 @@
     }
   };
 
+  /* ============================================================== KidStreak */
+  /* 连续打卡：记录「今天完成了任务」的天数；支持每周 1 个休息日
+     （漏打一天不断签，防止孩子为保连签带病学习）。
+     key = kid-streak-<页面标识>，值 JSON {count, lastDate, restWeek}。
+     用法：
+       KidStreak.render('#streak-box');   // 渲染「🔥 连打卡 N 天」
+       KidStreak.record();                // 今天完成打卡（幂等，可反复调）
+       KidStreak.listen('#streak-box');   // 自动：有任务勾着时 record + 刷新徽章
+     里程碑：3/7/14/30/50/100 天弹 toast。 */
+  var KidStreak = {
+    _today: function () {
+      var d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    },
+    _daysBetween: function (a, b) { /* yyyy-mm-dd 字符串差，按 UTC 天数 */
+      var t = function (s) { var p = s.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); };
+      return Math.round((t(b) - t(a)) / 86400000);
+    },
+    _weekKey: function (d) { /* ISO 周标识（周一为一周起点） */
+      var t = new Date(d + 'T00:00:00Z');
+      t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7) + 3); /* 本周四 */
+      var first = Date.UTC(t.getUTCFullYear(), 0, 4);
+      var firstThu = new Date(first);
+      firstThu.setUTCDate(firstThu.getUTCDate() - ((firstThu.getUTCDay() + 6) % 7) + 3);
+      var week = 1 + Math.round((t - firstThu) / (7 * 86400000));
+      return t.getUTCFullYear() + '-W' + week;
+    },
+    _read: function () {
+      var raw = load('kid-streak-' + pageId());
+      if (!raw) return { count: 0, lastDate: null, restWeek: null };
+      try {
+        var st = JSON.parse(raw);
+        return { count: st.count | 0, lastDate: st.lastDate || null, restWeek: st.restWeek || null };
+      } catch (e) { return { count: 0, lastDate: null, restWeek: null }; }
+    },
+    _write: function (st) { store('kid-streak-' + pageId(), JSON.stringify(st)); },
+
+    /** 今天完成打卡（幂等：同一天重复调用不叠加）。返回最新状态 */
+    record: function () {
+      var today = KidStreak._today();
+      var st = KidStreak._read();
+      if (st.lastDate === today) return st;             /* 今天已打 */
+      if (!st.lastDate) {
+        st = { count: 1, lastDate: today, restWeek: null };
+      } else {
+        var diff = KidStreak._daysBetween(st.lastDate, today);
+        if (diff === 1) st.count += 1;                  /* 连续 */
+        else if (diff === 2 && st.restWeek !== KidStreak._weekKey(today)) {
+          st.count += 1;                                /* 漏一天：用掉本周休息日，不断签 */
+          st.restWeek = KidStreak._weekKey(today);
+        } else st.count = 1;                            /* 断签，重新开始 */
+        st.lastDate = today;
+      }
+      KidStreak._write(st);
+      KidStreak._milestone(st.count);
+      return st;
+    },
+
+    /** 里程碑 toast：3/7/14/30/50/100 天 */
+    _milestone: function (n) {
+      if ([3, 7, 14, 30, 50, 100].indexOf(n) === -1) return;
+      var box = el('div', 'kid-streak-toast', '🔥 连打卡 ' + n + ' 天！给自己鼓个掌 👏');
+      document.body.appendChild(box);
+      setTimeout(function () { box.classList.add('show'); }, 16);
+      setTimeout(function () {
+        box.classList.remove('show');
+        setTimeout(function () { box.remove(); }, 400);
+      }, 3200);
+    },
+
+    /** 渲染 streak 徽章到目标容器（幂等） */
+    render: function (elSelector) {
+      $$(elSelector).forEach(function (box) {
+        if (!box || box.nodeType !== 1) return;
+        box.classList.add('kid-streak');
+        var st = KidStreak._read();
+        var today = KidStreak._today();
+        box.dataset.count = st.count;
+        box.classList.toggle('kid-streak-medal', st.count >= 3);
+        box.innerHTML = '';
+        box.appendChild(el('span', 'kid-streak-fire', '🔥'));
+        box.appendChild(el('span', 'kid-streak-text',
+          st.lastDate === today ? '连打卡 ' + st.count + ' 天' :
+          st.count > 0 ? '连打卡 ' + st.count + ' 天 · 今天还没打卡' :
+          '今天完成一件事，就开始连打卡'));
+      });
+    },
+
+    /** 自动模式：监听勾选变化，有任务勾着时 record；加载时 render */
+    listen: function (elSelector) {
+      KidStreak.render(elSelector);
+      if (document.documentElement && !document.documentElement.dataset.kidStreakBound) {
+        document.documentElement.dataset.kidStreakBound = '1';
+        document.addEventListener('kid:change', function () {
+          if (document.querySelector('.kid-task-card.checked')) KidStreak.record();
+          KidStreak.render(elSelector);
+        });
+      }
+    }
+  };
+
+  /* =============================================================== KidCheer */
+  /* 撒彩带：纯 CSS 动画，无外部库、无图片；同设备同一天最多 3 次（防刷）。
+     key = kid-cheer-<页面标识>-<日期>（计数）。
+     用法：
+       KidCheer.cheer();                     // 立即撒一次
+       KidCheer.onAllDone('#today-stop');    // 今日任务全勾时自动撒 + 显示停止提示 */
+  var KidCheer = {
+    _today: KidStreak._today,
+    _key: function () { return 'kid-cheer-' + pageId() + '-' + KidCheer._today(); },
+    _quota: function () {
+      var n = parseInt(load(KidCheer._key()) || '0', 10);
+      return isNaN(n) ? 0 : n;
+    },
+
+    cheer: function () {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (KidCheer._quota() >= 3) return;
+      store(KidCheer._key(), String(KidCheer._quota() + 1));
+      var layer = el('div', 'kid-cheer-layer');
+      layer.setAttribute('aria-hidden', 'true');
+      var colors = ['#f59e0b', '#8b5cf6', '#10b981', '#06b6d4', '#ef4444', '#f97316', '#3b82f6'];
+      for (var i = 0; i < 36; i++) {
+        var bit = el('i', 'kid-cheer-bit');
+        bit.style.left = (Math.random() * 100) + 'vw';
+        bit.style.background = colors[i % colors.length];
+        bit.style.animationDelay = (Math.random() * 0.25) + 's';
+        bit.style.animationDuration = (0.9 + Math.random() * 0.7) + 's';
+        if (i % 3 === 0) bit.style.borderRadius = '50%';
+        if (i % 5 === 0) { bit.style.width = '7px'; bit.style.height = '12px'; }
+        layer.appendChild(bit);
+      }
+      document.body.appendChild(layer);
+      setTimeout(function () { layer.remove(); }, 2200);
+    },
+
+    /** 今日任务全部完成：撒彩带 + 显示「今天到此为止」停止提示（考试年硬约束） */
+    onAllDone: function (msgSelector) {
+      if (document.documentElement && document.documentElement.dataset.kidCheerBound) return;
+      document.documentElement.dataset.kidCheerBound = '1';
+      document.addEventListener('kid:change', function () {
+        var cards = document.querySelectorAll('.kid-task-card');
+        var done = document.querySelectorAll('.kid-task-card.checked');
+        if (!cards.length || cards.length !== done.length) return;
+        KidCheer.cheer();
+        var box = msgSelector ? document.querySelector(msgSelector) : null;
+        if (box) { box.hidden = false; box.classList.add('show'); }
+      });
+    }
+  };
+
   /* ------------------------------------------------------------------ 导出 */
   global.KidCheck = KidCheck;
   global.KidAsk = KidAsk;
   global.KidProgress = KidProgress;
   global.KidStamp = KidStamp;
+  global.KidStreak = KidStreak;
+  global.KidCheer = KidCheer;
 
 })(window);

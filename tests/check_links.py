@@ -10,6 +10,8 @@ DEFAULT_FILES = ['app.html', 'jemma.html', 'index.html', 'english_p1_answers.htm
 HREF = re.compile(r'href="([^"]+)"')
 SKIP_PREFIX = ('http', '#', 'javascript:', 'mailto:', 'data:', 'tel:')
 PLACEHOLDER = ('$', '{')      # ${item.url} / $1 之类模板占位符，跳过
+# JS 动态拼接的 href 值（如 href="'+u+'"），非静态路径，跳过
+DYNAMIC_JS = ("'",)
 
 # 服务器专有目录：这些文件只存在于 ECS（体积大 / 版权资料），既不入 git 也不参与 rsync，
 # 因此在 CI（干净 checkout）里必然"不存在"，不能算失效链接。
@@ -27,6 +29,8 @@ def scan(root, files):
         for u in HREF.findall(src):
             u = u.strip()
             if u.startswith(SKIP_PREFIX) or u.startswith(PLACEHOLDER):
+                continue
+            if any(q in u for q in DYNAMIC_JS):
                 continue
             rel = u.lstrip('/').split('?')[0].split('#')[0]
             if not rel or rel.startswith(PLACEHOLDER):

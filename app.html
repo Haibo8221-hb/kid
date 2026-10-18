@@ -365,14 +365,6 @@ canvas.radar{width:240px!important;height:240px!important}
 .chat-input-row button:hover{background:#7aa5ff}
 .chat-input-row button:disabled{opacity:0.5;cursor:not-allowed}
 
-/* Wiki */
-.wiki-entry{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
-.we-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.we-date{font-size:11px;color:var(--text2);white-space:nowrap}
-.we-title{font-size:13px;font-weight:600;flex:1}
-.we-content{font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-wrap}
-.we-tags{display:flex;gap:6px;margin-top:8px}
-
 /* Tab panel base */
 .tab-panel{display:none}
 .tab-panel.active{display:block}
@@ -516,6 +508,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <li><a href="#" data-tab="planner" onclick="switchTab('planner');return false">📅 Weekly Plan</a></li>
 <li><a href="#" data-tab="notes" onclick="switchTab('notes');return false">📝 Notes</a></li>
 <li><a href="#" data-tab="errors" onclick="switchTab('errors');return false">❌ Error Book</a></li>
+<li><a href="#" data-tab="subject-analysis" onclick="switchTab('subject-analysis');return false">📊 Subject Analysis</a></li>
 <li><a href="#" data-tab="upload" onclick="switchTab('upload');return false">📤 Upload</a></li>
 <li><a href="#" data-tab="weekly-review" onclick="switchTab('weekly-review');return false">📋 Weekly Review</a></li>
 <li><a href="#" data-tab="chat" onclick="switchTab('chat');return false">💬 AI Chat</a></li>
@@ -636,7 +629,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <div class="section kid-focus-card">
 <div class="section-title"> 需要重点关注 · My Watch List</div>
 <div style="font-size:15px;line-height:2;color:var(--text2)">
- <div class="kid-focus-item"><b>化学 44%</b> — 考试会暴露真实漏洞（电解、离子结构）</div>
+ <div class="kid-focus-item"><b>化学</b> — Oct26 等级 6（6/7 月 mock 44% → 明显回升），冲 7 还差一级</div>
  <div class="kid-focus-item"><b>英语分析深度</b> — 词汇量还要往上加</div>
  <div class="kid-focus-item"><b>物理必做实验</b> — 方法描述要背下来</div>
  <div class="kid-focus-item"><b>化学 A-level 还在考虑中</b> — 看 GCSE 结果再定（不进我的主线，只当备用）</div>
@@ -652,15 +645,15 @@ canvas.radar{width:240px!important;height:240px!important}
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
 <div style="padding:14px 16px;min-height:80px;background:rgba(255,107,107,0.1);border-radius:10px;border-left:4px solid var(--red);font-size:14px;line-height:1.7">
 <div style="font-weight:700;color:var(--red);margin-bottom:4px">HIGH RISK</div>
-Chemistry 44% — Exam gap is real. A-level viability in question
+Chemistry — A-level 决策存疑：≥7 才评估，GCSE 结果后定
 </div>
 <div style="padding:14px 16px;min-height:80px;background:rgba(255,169,77,0.1);border-radius:10px;border-left:4px solid var(--orange);font-size:14px;line-height:1.7">
 <div style="font-weight:700;color:var(--orange);margin-bottom:4px">MEDIUM RISK</div>
-English analysis depth · History 16-marker SPAG
+English · History — 分析深度与 16-marker 步骤，4-6 周可训练
 </div>
 <div style="padding:14px 16px;min-height:80px;background:rgba(56,217,169,0.1);border-radius:10px;border-left:4px solid var(--accent2);font-size:14px;line-height:1.7">
 <div style="font-weight:700;color:var(--accent2);margin-bottom:4px">LOW / CONFIRMED</div>
-Maths 75% · Physics 71% · English improving ⬆️ · Drama 68% surprise
+Maths · Physics · English ⬆️ — 优势已确认；Drama 68% 惊喜项，维持即可
 </div>
 </div>
 <div style="margin-top:12px;font-size:14px;color:var(--text2);line-height:1.8">
@@ -817,7 +810,7 @@ Hong Kong parallel: HKUST+PolyU
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
  <div class="section-title" style="margin:0"> 📌 当前主计划 · Next 3 Weeks（15 Oct → 4 Nov）</div>
 </div>
-<div id="twp-diya-route" class="twp-grid"></div>
+<div style="font-size:13px;color:var(--text2);line-height:1.7">📌 本周三周计划见 <a href="#" onclick="switchTab('dashboard');return false" style="color:var(--accent)">Dashboard → 当前主计划</a>（同一计划只保留 Dashboard 一份，避免两处各改）</div>
 <div style="margin-top:10px;font-size:11px;color:var(--text2)">
  其他规划文档（Diya Plan v7 · Route Overview · Summer Guide · A-Level Analysis）见 <a href="#" onclick="switchTab('resources');return false" style="color:var(--accent)">Learning Resources → Planning Docs</a>
 </div>
@@ -852,9 +845,9 @@ Hong Kong parallel: HKUST+PolyU
 <div id="tab-planner" class="tab-panel">
 <div class="panel-title"> Weekly Plan</div>
 <div class="planner-controls" style="margin-bottom:12px">
-<button class="btn-sm" onclick="changeWeek('diya',-1)"></button>
+<button class="btn-sm" onclick="changeWeek('diya',-1)" title="上一周">‹</button>
 <span id="planner-sync-label" style="font-size:13px;font-weight:600">--</span>
-<button class="btn-sm" onclick="changeWeek('diya',1)"></button>
+<button class="btn-sm" onclick="changeWeek('diya',1)" title="下一周">›</button>
 <button class="btn" onclick="savePlanner('diya')" style="margin-left:auto"> Save</button>
 <button class="btn-sm" onclick="downloadWeekPlan()" style="margin-left:4px"> Download</button>
 </div>
@@ -923,32 +916,9 @@ Hong Kong parallel: HKUST+PolyU
 </div>
 </div>
 
-<!-- Wiki Modal -->
-<div class="modal-overlay" id="wiki-modal">
-<div class="modal">
-<h3> Add Entry</h3>
-<div class="form-group">
-<input type="date" id="wiki-date-input" style="width:auto">
-</div>
-<div class="form-group">
-<input type="text" id="wiki-title-input" placeholder="Title">
-</div>
-<div class="form-group">
-<textarea id="wiki-content-input" placeholder="Content..." rows="5"></textarea>
-</div>
-<div class="form-group">
-<input type="text" id="wiki-tags-input" placeholder="Tags (comma-separated)">
-</div>
-<div class="modal-actions">
-<button class="btn" onclick="closeWikiModal()">Cancel</button>
-<button class="btn" onclick="saveWikiEntry()">Save</button>
-</div>
-</div>
-</div>
-
 <!-- 
- ERROR BOOK
- -->
+ERROR BOOK
+-->
 <div id="tab-errors" class="tab-panel">
 <div class="panel-title"> Error Book · Diya</div>
 <div class="filter-bar" id="error-filter-bar">
@@ -1136,7 +1106,7 @@ Hong Kong parallel: HKUST+PolyU
 <div id="ver-badge" style="position:fixed;left:6px;bottom:6px;z-index:400;font-size:10px;color:var(--text2);opacity:0.5;pointer-events:none;font-family:monospace"></div>
 
 <script>window.KID_CHILD='diya';</script>
-<script src="assets/kid-common.js?v=20261015"></script>
+<script src="assets/kid-common.js?v=20261018"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -1317,7 +1287,7 @@ function addNewNote(){
 function switchNotesTab(subj){
  currentNotesTab = subj;
  document.querySelectorAll('#notes-tabs .ntab').forEach(b=>b.classList.toggle('active',b.textContent.trim()===subj||(subj==='all'&&b.textContent.trim()==='All')));
- // Show/hide add button: only visible when a subject is selected (not 'all')
+ // Add button: 始终可见（任何 tab 下都可添加笔记）
  const btn = document.getElementById('add-note-btn');
  if(btn) btn.classList.add('visible');
  renderNotes();
@@ -1393,68 +1363,11 @@ function deleteNote(id, subject){
 // 倒计时仅保留「尚未到来」的项目。
 // 已移除（2026-10-15，均已过期，保留会误导家长执行）：
 //   · GCSE 首场· Eng Lit P1（2026-05-11，已考完）
-//   · GCSE Maths P1 non-calc（2026-05-14，已考完）
-//   · UKMT SMC（2026-10-07，已考完；结果 11 月到校，见学习方案 W4/W5）
-//   · Summer Break（2026-07-01，已过）
-// 保留项：仅保留 Diya 自己未来的锚点
-const TIMER_TARGETS = [
- {id:'t-gcse', name:'我的 GCSE 开考', target:'2027-05-12', tag:'Diya', tagClass:'green'},
- {id:'t-halfterm', name:'Half Term', target:'2026-10-26', tag:'Mine', tagClass:'yellow'}
- // TODO(#13)：Half Term 属学校校历项（现按通用值），请以学校校历核对后修正
-];
-
 // Radar Chart (Canvas) 
 
 // Dashboard 
 
-// Child Tabs 
-function renderTasks(child){
- const container=document.getElementById(child+'-tasks');
- if(!container) return;
- const tasks=tasksData[child]||{};
- const categories={
- 'English':{label:'English',color:'var(--red)'},
- 'Art':{label:'Art',color:'var(--orange)'},
- 'Maths':{label:'Maths',color:'var(--accent)'},
- 'Science':{label:'Science',color:'var(--accent2)'},
- 'competition':{label:'Competition',color:'var(--yellow)'},
- 'general':{label:'General',color:'var(--text2)'}
- };
- // Group tasks by category prefix
- const grouped={};
- Object.entries(tasks).forEach(([k,v])=>{
- const parts=k.split('-');
- const cat=parts.length>1?categories[parts[0]]?parts[0]:'general':'general';
- const isObj=v&&typeof v==='object';
- const done=isObj?v.done:!!v;
- const name=isObj?(v.name||parts.slice(1).join('-')):(parts.length>1?k.slice(cat.length+1):k);
- if(!grouped[cat]) grouped[cat]=[];
- grouped[cat].push({key:k,done:done,name:name});
- });
-
- let html='';
- Object.entries(grouped).forEach(([cat,items])=>{
- const catInfo=categories[cat]||categories.general;
- html+=`<div class="task-section">
- <div class="task-section-header"><span class="task-section-title" style="color:${catInfo.color}">${catInfo.label}</span></div>
- <div class="task-list">`;
- if(items.length===0){
- html+=`<div style="font-size:11px;color:var(--text2);padding:6px 0">No tasks</div>`;
- } else {
- html+=items.map(item=>`
- <div class="task-item ${item.done?'done':''}" onclick="toggleTask('${child}','${item.key}',this)">
- <div class="cb ${item.done?'checked':''}">${item.done?'':''}</div>
- <span class="task-name">${item.name}</span>
- </div>
- `).join('');
- }
- html+=`</div></div>`;
- });
- if(Object.keys(grouped).length===0){
- html=`<div class="empty-state">No tasks yet, add below</div>`;
- }
- container.innerHTML=html;
-}
+// Child Tabs
 async function addTask(child){
  const input=document.getElementById(child+'-task-input');
  if(!input) return;
@@ -1474,6 +1387,7 @@ async function toggleTask(child,key,el){
  if(isObj){ entry.done = done; } else { tasksData[child][key] = done; }
  await saveTasks(child);
  renderTasks(child);  // full re-render to move between pending/done sections
+ if(done) loadStreak(true);  // 勾选任务 = 今日学习打卡，刷新侧栏真实连续天数
 }
 // Planner 
 function loadPlannerView(){
@@ -1942,18 +1856,18 @@ function switchTab(tab){
  if(tab==='dashboard') loadDashboard();
  if(tab==='route-compare') loadRoutes();
  if(tab==='planner') loadPlannerView();
- if(tab==='routes') loadRoutes();
  if(tab==='resources') loadResources();
  if(tab==='chat') loadChatHistory();
  if(tab==='weekly-review') loadReviewWizard();
  if(tab==='notes') loadNotes();
  if(tab==='errors') loadErrorBook();
+ if(tab==='subject-analysis') loadSubjectAnalysis();
 }
 
 // Dashboard 
 async function loadDashboard(){
  try{
- const dj = await fetch('/api/dashboard/diya').then(r=>r.json()).catch(()=>({tasks_done:0,tasks_total:0,recent_wiki:[],chat_summaries:[]}));
+ const dj = await fetch('/api/dashboard/diya').then(r=>r.json()).catch(()=>({tasks_done:0,tasks_total:0}));
  const dp=dj.tasks_total>0?Math.round(dj.tasks_done/dj.tasks_total*100):0;
  const pctEl = document.getElementById('dash-diya-pct');
  const subEl = document.getElementById('dash-diya-sub');
@@ -1968,24 +1882,6 @@ async function loadDashboard(){
   else if(dp>=50) ctaEl.textContent='Halfway there!';
   else ctaEl.textContent='Keep going!';
  }
- // Render wiki & chat summaries
- const wikiSum=document.getElementById('diya-wiki-summary');
- if(wikiSum && dj.recent_wiki && dj.recent_wiki.length>0){
-  wikiSum.innerHTML=dj.recent_wiki.map(w=>
-   `<div style="margin-bottom:6px;padding:6px 8px;background:var(--surface2);border-radius:6px;font-size:11px;line-height:1.4">
-    <div style="font-weight:600;color:var(--accent)">${escHtml(w.title||'No title')}</div>
-    <div style="color:var(--text2);margin-top:2px">${escHtml(w.content_preview||'')}</div>
-    ${w.tags&&w.tags.length?`<div style="margin-top:3px">${w.tags.map(t=>`<span class="tag">${escHtml(t)}</span>`).join('')}</div>`:''}
-   </div>`).join('');
- }else if(wikiSum) wikiSum.textContent='No journal entries yet';
- const chatSum=document.getElementById('diya-chat-summary');
- if(chatSum && dj.chat_summaries && dj.chat_summaries.length>0){
-  chatSum.innerHTML=dj.chat_summaries.map(c=>
-   `<div style="margin-bottom:6px;padding:6px 8px;background:var(--surface2);border-radius:6px;font-size:11px;line-height:1.4">
-    <div style="color:var(--accent);font-weight:600;margin-bottom:2px">Q: ${escHtml(c.user||'')}</div>
-    <div style="color:var(--text2)">A: ${escHtml(c.ai||'')}</div>
-   </div>`).join('');
- }else if(chatSum) chatSum.textContent='No AI chats yet';
  }catch(e){console.error('dash load err',e)}
  // Load error book stats
  try{
@@ -1993,9 +1889,7 @@ async function loadDashboard(){
     const total = er.total || 0;
     const bySubject = er.by_subject || {};
     const errEl = document.getElementById('dash-error-count');
-    const errSub = document.getElementById('dash-error-sub');
     if(errEl) errEl.textContent = total;
-    if(errSub) errSub.textContent = 'tracked errors';
     // Subject breakdown bars (server already aggregated by subject — avoids shipping the full ~276KB file)
     const barsEl = document.getElementById('error-breakdown-bars');
     if(barsEl && total>0){
@@ -2139,8 +2033,7 @@ async function submitSMCRecord(){
   correct: parseInt(val('smc-correct')||'0', 10) || 0,
   wrong: parseInt(val('smc-wrong')||'0', 10) || 0,
   blank: parseInt(val('smc-blank')||'0', 10) || 0,
-  weakness: val('smc-weakness'),
-  notes: val('smc-notes') || ''
+  weakness: val('smc-weakness')
  };
  try{
   const r = await fetch('/api/smc-records', {
@@ -2161,8 +2054,8 @@ async function submitSMCRecord(){
  }catch(e){ alert('Save error: ' + e.message); }
 }
 
-// Streak
-function loadStreak(){
+// Streak（bump=true 表示今日已完成至少一个任务：续签或重开）
+function loadStreak(bump){
  const key = 'diya_streak';
  let data;
  try { data = JSON.parse(localStorage.getItem(key)); } catch(e) {}
@@ -2170,7 +2063,10 @@ function loadStreak(){
  const today = new Date().toISOString().split('T')[0];
  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
- if (data.lastDate === yesterday) {
+ if (bump && data.lastDate !== today) {
+  data.count = data.lastDate === yesterday ? data.count + 1 : 1;
+  data.lastDate = today;
+ } else if (data.lastDate === yesterday) {
   // Continued streak — keep count
  } else if (data.lastDate !== today) {
   data.count = 0;
@@ -2183,16 +2079,6 @@ function loadStreak(){
  }
 
  localStorage.setItem(key, JSON.stringify(data));
-}
-
-function startStreak(){
- const key = 'diya_streak';
- const today = new Date().toISOString().split('T')[0];
- const data = { count: 1, lastDate: today };
- localStorage.setItem(key, JSON.stringify(data));
- const el = document.getElementById('profile-streak');
- if (el) { el.textContent = 'Streak 1 day'; el.style.color = 'var(--text2)'; }
- toast('Day 1! Come back tomorrow');
 }
 
 // Diya Grades (Jemma-style subject cards) 
@@ -2296,29 +2182,13 @@ const labels=['Math','Phys','Chem','Drama','Art','Eng L.','Eng Lt.','Hist'];
 drawRadar('radarChart', labels, [[70,70,60,80,60,60,50,50]], 'radar-legend');
 }
 
-// Child Panel Loader 
-async function loadChild(child){
- await Promise.all([loadTasks(child), loadPlanner(child)]);
- drawChildRadar(child);
-}
-function drawChildRadar(child){
- const labels=['Maths','Science','Art','Coding','English','Design'];
- const isDiya=child==='diya';
- const data=isDiya?[78,72,88,65,55,90]:[85,80,65,75,78,60];
- drawRadar(child+'-radar', labels, [data], child+'-radar-legend');
-}
-
 // Chat 
 let currentChatChild='diya';
-function switchChatChild(child){
- currentChatChild=child;
- document.getElementById('chat-hdr-title').textContent=' Chat with '+(child==='diya'?'Diya':'Jemma');
- loadChatHistory();
-}
 function markdownToHtml(md){
  // Minimal markdown → HTML converter for chat bubbles
  if(!md) return '';
- let html=md;
+ // 安全：入口先转义 & < >，后续替换产生的标签不受影响（防 HTML 注入）
+ let html=String(md).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
  // Code blocks (```)
  html=html.replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>');
  // Inline code
@@ -2337,12 +2207,16 @@ function markdownToHtml(md){
  html=html.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
  // Wrap consecutive <li> in <ul>
  html=html.replace(/((?:<li>.*<\/li>\n?)+)/g,'<ul>$1</ul>');
- // Blockquotes
- html=html.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+ // Blockquotes（兼容转义后的 &gt; 与原文 > 两种输入）
+ html=html.replace(/^(?:&gt;|>)\s?(.+)$/gm,'<blockquote>$1</blockquote>');
  // Horizontal rules
  html=html.replace(/^---$/gm,'<hr>');
- // Links
- html=html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');
+ // Links（协议白名单：http/https/mailto 外降级为纯文本，防 javascript: URL）
+ html=html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(m,text,url){
+  const u=(url||'').trim();
+  if(/^(https?:|mailto:)/i.test(u)) return '<a href="'+u+'" target="_blank">'+text+'</a>';
+  return text;
+ });
  // Paragraphs: double newlines
  html=html.replace(/\n\n+/g,'</p><p>');
  html='<p>'+html+'</p>';
@@ -2540,75 +2414,12 @@ async function loadReviewHistory(){
  }
 }
 
-// Wiki 
-let currentWikiChild='diya';
-function switchWikiChild(child){
- currentWikiChild=child;
- loadWikiEntries();
-}
-async function loadWikiEntries(){
- const container=document.getElementById('wiki-entries');
- if(!container) return;
- try{
- const r=await fetch('/api/wiki/diya');
- const data=await r.json();
- const entries=Array.isArray(data)?data:(data.entries||[]);
- if(entries.length===0){
- container.innerHTML='<div class="empty-state">No entries yet, try adding one?</div>';
- return;
- }
- container.innerHTML=entries.map(e=>`
- <div class="wiki-entry">
- <div class="we-header">
- <span class="we-date">${e.date||''}</span>
- <span class="we-title">${e.title||'(untitled)'}</span>
- <button class="btn-sm" onclick="deleteWikiEntry('${e.id}')">Delete</button>
- </div>
- <div class="we-content">${e.content||''}</div>
- ${e.tags?'<div class="we-tags">'+(Array.isArray(e.tags)?e.tags:(e.tags||'').split(',')).map(t=>'<span class="tag">'+((t||'').toString().trim())+'</span>').join(' ')+'</div>':''}
- </div>
- `).join('');
- }catch(e){
- container.innerHTML='<div class="empty-state">Load failed</div>';
- }
-}
-function openWikiModal(){
- document.getElementById('wiki-modal').style.display='flex';
- document.getElementById('wiki-date-input').valueAsDate=new Date();
-}
-function closeWikiModal(){
- document.getElementById('wiki-modal').style.display='none';
-}
-async function saveWikiEntry(){
- const date=document.getElementById('wiki-date-input').value;
- const title=document.getElementById('wiki-title-input').value.trim();
- const content=document.getElementById('wiki-content-input').value.trim();
- const tags=document.getElementById('wiki-tags-input').value.trim();
- if(!title||!content){toast('Please fill in title and content');return;}
- try{
- await fetch('/api/wiki/diya',{
- method:'POST',
- headers:{'Content-Type':'application/json'},
- body:JSON.stringify({date,title,content,tags})
- });
- closeWikiModal();
- loadWikiEntries();
- toast('Saved ');
- }catch(e){toast('Save failed');}
-}
-async function deleteWikiEntry(id){
- if(!confirm('Confirm delete?')) return;
- try{
- await fetch('/api/wiki/diya/'+id,{method:'DELETE'});
- loadWikiEntries();
- toast('Deleted');
- }catch(e){toast('Delete failed');}
-}
-
 // Countdown Strip 
 const COUNTDOWN_ITEMS = [
  {icon:'📚', name:'GCSE Exams Begin', target:'2027-05-12'},
- {icon:'🎓', name:'Sixth Form Starts', target:'2027-09-01'}
+ {icon:'🎓', name:'Sixth Form Starts', target:'2027-09-01'},
+ // TODO(#13)：Half Term 属学校校历项（现按通用值），请以学校校历核对后修正
+ {icon:'🌴', name:'Half Term', target:'2026-10-26'}
 ];
 function renderCountdownStrip(){
  const el = document.getElementById('countdown-strip');
@@ -2887,7 +2698,8 @@ async function saveError(){
 }
 async function deleteError(id){
  const error = errorsData.find(e=>e.id===id);
- const label = error?(error.subject||'')+' — '+(error.question||'').slice(0,50):'this error';
+ const q = error ? (typeof error.question==='string'?error.question:(error.question?.question||error.question?.original_question||'')) : '';
+ const label = error ? (error.subject||'')+' — '+q.slice(0,50) : 'this error';
  if(!confirm(`Delete "${label}"?\nThis cannot be undone.`)) return;
  try{
   const r = await fetch('/api/errors/diya/'+id,{method:'DELETE'});
@@ -2901,7 +2713,7 @@ async function loadSubjectAnalysis(){
  const container = document.getElementById('sa-grid');
  if(!container) return;
  try{
- const r = await fetch('/api/errors/diya');
+ const r = await fetch('/api/errors/diya?limit=200');
  const data = await r.json();
  const errors = Array.isArray(data)?data:(data.errors||data.entries||[]);
  const bySubject = {};
@@ -2924,24 +2736,6 @@ async function loadSubjectAnalysis(){
  </div>`;
  }).join('');
  }catch(e){ container.innerHTML='<div class="error-empty">Load failed</div>'; }
-}
-
-// Activity Feed 
-async function loadActivityFeed(){
- const container = document.getElementById('activity-feed');
- if(!container) return;
- try{
- const [chatR, wikiR] = await Promise.all([
- fetch('/api/chat/diya').then(r=>r.ok?r.json():[]).catch(()=>[]),
- fetch('/api/wiki/diya').then(r=>r.ok?r.json():{}).catch(()=>({}))
- ]);
- const chats = Array.isArray(chatR)?chatR.slice(-10):[];
- const wikis = Array.isArray(wikiR.entries)?wikiR.entries.slice(-5):[];
- let html = '';
- wikis.forEach(w=>{ html+=`<div style="padding:4px 8px;background:var(--surface2);border-radius:6px"><b></b> ${w.title||''} <span style="color:var(--text2);font-size:11px">${w.date||''}</span></div>`; });
- chats.slice(-8).forEach(c=>{ html+=`<div style="padding:4px 8px;background:var(--surface2);border-radius:6px"><b></b> ${(c.user||'').slice(0,40)}</div>`; });
- container.innerHTML = html||'<div class="empty-state">No recent activity</div>';
- }catch(e){ container.innerHTML='<div class="empty-state">Loading...</div>'; }
 }
 
 // Profile 
@@ -3047,7 +2841,7 @@ function llmTestSettings(){
 // Toast 
 // Enhanced Task Render — minimalist list + collapsible completed
 const _esc=s=>String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
-function renderTasksEnhanced(child){
+function renderTasks(child){
  const container = document.getElementById(child+'-tasks');
  if(!container) return;
  const tasks = tasksData[child]||{};
@@ -3124,8 +2918,6 @@ async function deleteTaskItem(child, key){
  renderTasks(child);
 }
 
-// Use enhanced task renderer
-renderTasks = renderTasksEnhanced;
 
 // Logout 
 // ── Upload（作业上传与识别入库）──────────────────────────
@@ -3403,7 +3195,6 @@ document.addEventListener('DOMContentLoaded',()=>{
  setTheme(theme);
  loadDashboard();
  renderThreeWeekPlan('twp-diya');
- renderThreeWeekPlan('twp-diya-route');
 loadStreak();
 // Upload 页初始化（拖拽区 + 历史列表）
 try{ setupUploadZone(); refreshUploadList(); }catch(_){}
@@ -3424,6 +3215,6 @@ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
  }catch(_){}
 });
 </script>
-<script src="/assets/kid.js"></script>
+<script src="/assets/kid.js?v=20261018"></script>
 </body>
 </html>
