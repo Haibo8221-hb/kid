@@ -181,5 +181,25 @@ A._login_rate_clear(_ip)
 r = c.post('/api/auth/login', json={'password': 'verify-pass-123'}, environ_base={'REMOTE_ADDR': _ip})
 check(r.status_code == 200, f'清除计数后可正常登录（实际 {r.status_code}）')
 
+
+print('== Decide 决定卡持久化接口（2026-10-19：Latin 等自主选择）==')
+dc = Authed(A._make_token())
+r = app.test_client().get('/api/decide/jemma')
+check(r.status_code == 401, f'未登录访问 decide 401（实际 {r.status_code}）')
+r = dc.get('/api/decide/jemma')
+d = r.get_json()
+check(r.status_code == 200 and d['child'] == 'jemma' and d['payload'] == {},
+      '初始 decide 快照为空')
+r = dc.put('/api/decide/jemma', json={'payload': {'kid-stamp-jemma-latin': '继续学 Latin'},
+                                      'updatedAt': '2026-10-18T22:10:00+00:00'})
+check(r.status_code == 200 and (r.get_json() or {}).get('ok'), 'PUT decide 快照成功')
+r = dc.get('/api/decide/jemma')
+d = r.get_json()
+check(d['payload'].get('kid-stamp-jemma-latin') == '继续学 Latin', 'GET 读回已存选择（刷新/跨设备真源）')
+check(d['updatedAt'] == '2026-10-18T22:10:00+00:00', 'updatedAt 原样返回供前端比较新旧')
+r = dc.put('/api/decide/jemma', json={'payload': 'not-a-dict'})
+check(r.status_code == 400, f'payload 非对象 400（实际 {r.status_code}）')
+check(A._safe_child('../../etc') == 'diya', '非法 child 回退白名单默认值（防路径穿越）')
+
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
 sys.exit(1 if FAILS else 0)
