@@ -605,7 +605,7 @@ canvas.radar{width:240px!important;height:240px!important}
 
 <!-- Subject Analysis -->
 <div class="section" style="background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%)">
-<div class="section-title"> Latest Grades Analysis · Headington 2025-26</div>
+<div class="section-title"> Latest Grades Analysis · Headington Oct 2026 Half-Term (Y11)</div>
 <div class="subject-grid" id="subject-grid"></div>
 <div class="stats-row">
  <div class="radar-wrap-mini">
@@ -2198,16 +2198,15 @@ function startStreak(){
 // Diya Grades (Jemma-style subject cards) 
 function initDiyaGrades(){
 const subjects=[
-{name:'Maths', grade:'Above · 75%', status:'above', trend:'Near-perfect calculator paper', bar:75, tag:'Best Subject', tagClass:'green'},
-{name:'FMaths', grade:'Enrolled ⚠️', status:'risk', trend:'Short course from Y11 · ⚠️ 入学门槛待确认（文件写 GCSE 7+，存档基准 8-9，当前预测 6/5、追踪 75%）→ 2026-11 数学出分后须确认入学资格。若不达标，Plan A 三科→两门，剑桥/帝国均需三门 → 第三门（Art/Chemistry）升为承重项', bar:80, tag:'门槛待确认', tagClass:'yellow'},
-{name:'Physics', grade:'Above · 71%', status:'above', trend:'Confidence + skills both growing', bar:71, tag:'Building', tagClass:'green'},
-{name:'Chemistry', grade:'Meeting · 44% ⚠️', status:'risk', trend:'Exam score exposes knowledge gaps', bar:44, tag:'CRITICAL', tagClass:'red'},
-{name:'History', grade:'Meeting · 62%', status:'meeting', trend:'Nervous but delivered well', bar:62, tag:'Solid', tagClass:'green'},
-{name:'Drama', grade:'Meeting · 68%', status:'meeting', trend:'Writes extremely well', bar:68, tag:'Surprise Strength', tagClass:'green'},
-{name:'Business', grade:'Pass · 64%', status:'meeting', trend:'Active participation, confident answers', bar:64, tag:'New', tagClass:'green'},
-{name:'Art', grade:'Meeting · 4', status:'meeting', trend:'New landscape direction', bar:50, tag:'Rebuilding', tagClass:'yellow'},
-{name:'Eng Lang', grade:'Meeting · 6 ⬆️ · 59%', status:'meeting', trend:'Accepted LD support — big win', bar:59, tag:'IMPROVING', tagClass:'green'},
-{name:'Eng Lit', grade:'Meeting · 5 ⬆️ · 57%', status:'meeting', trend:'Solid base to build on', bar:57, tag:'IMPROVING', tagClass:'green'}
+{name:'Maths', grade:'Oct26 · 7', status:'above', trend:'Effort Meeting (Mrs O\'Flaherty) · 7月卷面75% → 等级7稳定，冲8/9', bar:70, tag:'Push to 8/9', tagClass:'green'},
+{name:'FMaths', grade:'Oct26 · 未出分', status:'risk', trend:'Mr Channer · Effort Meeting · 首个评估未出分；入学资格须在11月mock出分后确认（门槛GCSE 7+/存档基准8-9）', bar:0, tag:'Awaiting 1st grade', tagClass:'yellow'},
+{name:'Physics', grade:'Oct26 · 7', status:'above', trend:'全科唯一 Effort Above Standard（Mrs Streule）· BPhO IPC 路线正轨', bar:70, tag:'Strongest Effort', tagClass:'green'},
+{name:'Chemistry', grade:'Oct26 · 6', status:'risk', trend:'7月mock 44% → 等级6，明显回升；但A-level化学门槛=7，还差1级（Mrs Rossington）', bar:60, tag:'PUSH TO 7', tagClass:'yellow'},
+{name:'History', grade:'Oct26 · 5', status:'meeting', trend:'GCSE后弃科，保持及格即可（Mrs Compton）', bar:50, tag:'Drop after GCSE', tagClass:'yellow'},
+{name:'Drama', grade:'Oct26 · 8/7', status:'above', trend:'全科最高等级（Mr Rogers）', bar:80, tag:'Top Grade', tagClass:'green'},
+{name:'Art', grade:'Oct26 · 6/5', status:'meeting', trend:'7月等级4 → 6，显著回升（Mrs Dalgleish）', bar:60, tag:'Recovered', tagClass:'green'},
+{name:'Eng Lang', grade:'Oct26 · 6', status:'meeting', trend:'稳定6，LD支持继续（Dr Westwood）· 满足Imperial工程语言要求线以上', bar:60, tag:'Steady', tagClass:'green'},
+{name:'Eng Lit', grade:'Oct26 · 5', status:'meeting', trend:'Y11目标冲6（Dr Westwood）', bar:50, tag:'Building', tagClass:'yellow'}
 ];
  const grid=document.getElementById('subject-grid');
  if(!grid) return;
@@ -2293,8 +2292,8 @@ function drawRadar(svgId, labels, datasets, legendId){
  } else if(leg){ leg.innerHTML=''; }
 }
 function drawMainRadar(){
-const labels=['Math','F.Math','Phys','Chem','Hist','Drama','Art','Eng L.','Eng Lt.'];
-drawRadar('radarChart', labels, [[75,80,71,44,62,68,50,59,57]], 'radar-legend');
+const labels=['Math','Phys','Chem','Drama','Art','Eng L.','Eng Lt.','Hist'];
+drawRadar('radarChart', labels, [[70,70,60,80,60,60,50,50]], 'radar-legend');
 }
 
 // Child Panel Loader 

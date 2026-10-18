@@ -52,8 +52,8 @@ jobs:
         env:
           KEY: ${{ secrets.ECS_SSH_KEY }}
         run: |
-          echo "$KEY" > key.pem
-          chmod 600 key.pem
+          echo "$KEY" > "$RUNNER_TEMP/key.pem"
+          chmod 600 "$RUNNER_TEMP/key.pem"
           # ⚠️ data/ 与 logs/ 是运行时数据，服务器为唯一真源，绝不能被本地旧副本覆盖或被 --delete 删除
           rsync -az --delete \
             --exclude='.git/' \
@@ -70,7 +70,8 @@ jobs:
             --exclude='*/.versions/' \
             --exclude='data/' \
             --exclude='logs/' \
-            -e "ssh -p ${{ secrets.ECS_PORT }} -i key.pem -o StrictHostKeyChecking=no" \
+            --exclude='key.pem' \
+            -e "ssh -p ${{ secrets.ECS_PORT }} -i $RUNNER_TEMP/key.pem -o StrictHostKeyChecking=no" \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:${{ secrets.SITE_ROOT }}/
 
       - name: Fix ownership and restart backend
