@@ -42,19 +42,74 @@ const PAGES = [
     requiredFns: [
       'openLLMSettings', 'llmSaveSettings', 'llmTestSettings', 'llmToggleKey',
       'sendChatMsg', 'loadDashboard', 'loadResources', 'toast',
-      'renderTasks', 'markdownToHtml', 'switchTab',
+      'renderTasks', 'markdownToHtml', 'switchTab', 'renderToday3Diya', 'checkReviewDue',
     ],
     modalCases: [
       { name: 'LLM 设置弹窗', btnId: 'llm-settings-btn', modalId: 'llm-settings-modal' },
       { name: '头像选择弹窗', btnId: 'profile-avatar', modalId: 'avatar-modal' },
     ],
-    fetchMock: () => Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({
-        endpoint: 'https://api.openai.com/v1', model: 'gpt-4o',
-        temperature: 0.3, has_key: true, key_masked: 'sk-a…z',
-      }),
-    }),
+    streakGuard: true,
+    // url 感知 fetch mock：/api/twp 返回周计划（R5 异步化后三周卡由数据驱动渲染，
+    // 不 mock 它则 .kid-task-card 不渲染，R1 的 Streak/Cheer 回归断言会被静默跳过）
+    fetchMock: (url) => {
+      if (String(url).includes('/api/twp')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            child: 'diya', updatedAt: '2026-10-19T00:00:00+03:00',
+            nextCycleEnd: '2026-11-04', version: 1,
+            weeks: [
+              { id: 'w1', label: 'Week 1 · 启动与摸底', start: '2026-10-15', end: '2026-10-21',
+                goal: '节奏立起来', focus: '摸底',
+                actions: [{ id: 'w1-d1', label: 'ESAT 摸底', sub: '40 分钟' }] },
+              { id: 'w2', label: 'Week 2 · 定向补漏', start: '2026-10-22', end: '2026-10-28',
+                goal: '只补没懂的', focus: '补漏',
+                actions: [{ id: 'w2-d1', label: '补一类错题', sub: '' }] },
+              { id: 'w3', label: 'Week 3 · 收口与锁定', start: '2026-10-29', end: '2026-11-04',
+                goal: '固化决定', focus: '锁定',
+                actions: [{ id: 'w3-d1', label: '第二次 ESAT', sub: '' }] },
+            ],
+          }),
+        });
+      }
+      if (String(url).includes('/api/errors/')) {
+        if (String(url).includes('stats=1')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              child: 'diya', total: 2, by_subject: { Maths: 2 }, by_cause: { careless: 1 },
+              mastered_total: 0, active_total: 2, new_this_week: 2,
+            }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            { id: 'e1', subject: 'Maths', question: 'R7 mock Q1', solution: 'S1', date: '2026-10-18', type: 'concept' },
+            { id: 'e2', subject: 'Physics', question: 'R7 mock Q2', solution: 'S2', date: '2026-10-19', type: 'careless' },
+          ]),
+        });
+      }
+      if (String(url).includes('/api/tasks')) {
+        // 返回含 twp- 键的任务集：① 恢复 Task List onclick 护栏（toggleTask 等）
+        // ② 验证 R2 过滤——twp 键不得渲染进 Task List（由 TWP 区渲染）
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            'general-demo-task': false,
+            'english-petal': { done: false, name: 'PETAL' },
+            'twp-diya-w1-d1': false,
+          }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          endpoint: 'https://api.openai.com/v1', model: 'gpt-4o',
+          temperature: 0.3, has_key: true, key_masked: 'sk-a…z',
+        }),
+      });
+    },
   },
   {
     name: 'jemma.html (Jemma)',
@@ -69,6 +124,7 @@ const PAGES = [
       { name: '头像选择弹窗', btnId: 'profile-avatar', modalId: 'avatar-modal' },
       { name: '错题弹窗', btnId: 'add-error-btn', modalId: 'error-modal' },
     ],
+    streakGuard: true,
     fetchMock: () => Promise.resolve({ ok: true, json: () => Promise.resolve({}) }),
   },
 ];
@@ -252,11 +308,125 @@ function runPage(page) {
             if (dstamp && dstamp.textContent && dstamp.textContent.trim() !== '待你决定')
               pass.push('决定卡：角标显示「' + dstamp.textContent.trim() + '」');
             else fail.push('决定卡：角标未反映已选状态');
+            // R14：decide-once 卡已决归档条（全部问题已决 → 折叠 + 点开可改）
+            if (dcard.dataset.decideOnce === 'true') {
+              var dbar = dcard.querySelector('.kid-decided-bar');
+              if (dbar && dbar.textContent.indexOf('已决定') !== -1)
+                pass.push('R14：已决归档条（' + dbar.textContent.trim() + '）');
+              else fail.push('R14：归档条未出现（decide-once 未生效）');
+              if (dbar) {
+                dbar.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+                if (dcard.classList.contains('kid-expanded')) pass.push('R14：点归档条可展开改选');
+                else fail.push('R14：归档条点击未展开');
+              }
+            }
           }
         }
       } catch (e) { fail.push('决定卡持久化测试抛错：' + e.message); }
-      resolve({ pass, fail });
-    }, 400);
+
+      // R8：KidAsk 周轮换问题池已应用（strong 文案非空且来自池）
+      try {
+        var pk = doc.querySelector('.kid-ask-card[data-question-pool] strong');
+        if (pk && pk.textContent.trim()) pass.push('R8：周轮换问题池已应用（本周问：「' + pk.textContent.trim().slice(0, 18) + '」）');
+        else fail.push('R8：问题池未应用（strong 为空或缺失）');
+      } catch (e) { fail.push('R8：断言抛错 ' + e.message); }
+
+      // 8) 【R1 回归护栏 · 2026-10-19】连续打卡链路：侧栏徽章由 KidStreak 渲染；
+      //    勾选任务卡 → kid-streak key 写入 + 天数 +1（Diya 历史上勾选与 streak 脱钩，此为其回归护栏）
+      try {
+        if (page.streakGuard && typeof window.KidStreak === 'object') {
+          var skey = 'kid-streak-' + (window.KID_CHILD || 'unknown');
+          window.localStorage.removeItem(skey);
+          window.KidStreak.render('#profile-streak');
+          var sBox = doc.getElementById('profile-streak');
+          if (sBox && /连打卡|开始/.test(sBox.textContent))
+            pass.push('Streak：侧栏徽章已由 KidStreak 渲染（' + sBox.textContent.trim() + '）');
+          else if (sBox)
+            fail.push('Streak：侧栏 #profile-streak 仍是旧文案「' + sBox.textContent.trim() + '」（未接入 KidStreak）');
+          // 勾选一张任务卡 → 当天打卡写入
+          var tcard = doc.querySelector('.kid-task-card');
+          if (tcard) {
+            tcard.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+            var sraw = window.localStorage.getItem(skey);
+            var st = sraw ? JSON.parse(sraw) : null;
+            if (st && st.count === 1 && st.lastDate) pass.push('Streak：勾选任务卡当天打卡已写入（count=1）');
+            else fail.push('Streak：勾选任务卡未写入打卡（key=' + skey + '，raw=' + sraw + '）——勾选与打卡脱钩');
+          }
+          // 全勾 → 停止提示可见（KidCheer.onAllDone 绑定验证）
+          var cards = [...doc.querySelectorAll('.kid-task-card')];
+          var stopHint = doc.getElementById('today-stop');
+          if (cards.length && stopHint) {
+            cards.forEach(function (c) { if (!c.classList.contains('checked')) c.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })); });
+            if (!stopHint.hidden) pass.push('Cheer：任务全勾后「今天到此为止」停止提示已显示');
+            else fail.push('Cheer：任务全勾后 #today-stop 仍隐藏（KidCheer.onAllDone 未接入）');
+          }
+          window.localStorage.removeItem(skey);
+        }
+      } catch (e) { fail.push('Streak/Cheer 回归测试抛错：' + e.message); }
+
+      // R2 server 同步断言：data-sync="server" 的卡勾选 → KidTasksBridge → saveTasks
+      // 落盘 tasks_<child>（twp- 前缀键）。saveTasks 在点击的微任务内完成，这里用下一个
+      // 宏任务读取后再 resolve，保证断言进入汇总（此前把 setTimeout 嵌在测试体内、
+      // 从外层定时器起算必然晚于 resolve，结果被静默吞掉——已修复）。
+      setTimeout(function () {
+        try {
+          var child0 = window.KID_CHILD || 'unknown';
+          var raw = window.localStorage.getItem('tasks_' + child0);
+          if (raw && raw.indexOf('"twp-') !== -1)
+            pass.push('Tasks：勾选已写入服务端任务存储（twp- 前缀键，单源化生效）');
+          else
+            fail.push('Tasks：勾选未写入 tasks_' + child0 + '（KidTasksBridge 未生效或 saveTasks 未落盘）');
+          var taskEl = doc.getElementById(child0 + '-tasks');
+          var taskHtml = taskEl ? taskEl.innerHTML : '';
+          if (taskHtml.indexOf('twp-') === -1)
+            pass.push('Tasks：twp- 键已被 Task List 过滤（不双显示）');
+          else
+            fail.push('Tasks：twp- 键泄漏进 Task List（过滤失效）');
+          // R3：Diya 页「今天三件事」渲染护栏
+          if (child0 === 'diya') {
+            var t3 = doc.getElementById('diya-today-3');
+            var t3n = t3 ? t3.querySelectorAll('.kid-task-card').length : 0;
+            if (t3n >= 1) pass.push('R3：今天三件事已渲染（' + t3n + ' 张卡，含 server 同步标记=' + (t3.querySelector('[data-sync="server"]') ? '是' : '否') + '）');
+            else fail.push('R3：#diya-today-3 未渲染 Today 卡（数据加载或钩子失效）');
+            var tp = doc.getElementById('today-progress');
+            if (tp && tp.classList.contains('kid-progress')) pass.push('R3：Today 进度条已渲染（scope=今天三件）');
+            else fail.push('R3：#today-progress 未渲染 KidProgress');
+          }
+        } catch (e) { fail.push('Tasks：同步断言抛错 ' + e.message); }
+
+        // R7：Test me 遮挡自测链路——需先 loadErrorBook 灌入 mock 错题（Error Book tab
+        // 在 smoke 里未被打开过，池子为空），加载完成后再启动自测并断言
+        if (child0 === 'diya' && typeof window.loadErrorBook === 'function' &&
+            typeof window.startQuizMode === 'function') {
+          window.loadErrorBook().then(function () {
+            try {
+              window.startQuizMode();
+              var tm = doc.getElementById('test-mode-panel');
+              if (tm && !tm.hidden && tm.innerHTML.indexOf('Test me') !== -1)
+                pass.push('R7：Test me 自测面板已启动（题面渲染，mock 错题入池）');
+              else { fail.push('R7：Test me 未启动（错题数据未加载或空池）'); return; }
+              var leak = tm.innerHTML.indexOf('S1') !== -1;
+              if (leak) fail.push('R7：题面直接泄漏了答案文本（遮挡失效）');
+              else pass.push('R7：题面未泄漏答案文本（遮挡生效）');
+              window.quizWrong();
+              var crow = doc.getElementById('quiz-cause-row');
+              var brow = doc.getElementById('quiz-btn-row');
+              if (crow && !crow.hidden && brow && brow.style.display === 'none')
+                pass.push('R7：「还是不会」后错因三选一出现且评价按钮收起（必选门槛生效）');
+              else fail.push('R7：quizWrong 后错因行/按钮行状态不对');
+              window.pickQuizCause('concept');
+              window.endQuizMode();
+              var tm2 = doc.getElementById('test-mode-panel');
+              if (tm2 && tm2.hidden) pass.push('R7：退出自测后列表视图还原');
+              else fail.push('R7：endQuizMode 未还原列表视图');
+            } catch (e) { fail.push('R7：断言抛错 ' + e.message); }
+            resolve({ pass, fail });
+          });
+          return;   // resolve 移入上方 then（loadErrorBook 微任务内完成，早于任何宏任务汇总）
+        }
+        resolve({ pass, fail });
+      }, 150);
+    }, 700);
   });
 }
 

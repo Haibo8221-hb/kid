@@ -719,3 +719,29 @@
   .kid-focus-item{padding:10px 12px 10px 30px}
   .kid-focus-item::before{left:12px;top:18px}
 }
+
+/* ==========================================================================
+   R14（2026-10-19）：决定卡「已决归档」态——全部问题已决时整卡折叠为一条
+   ✅ 汇总条（决定 + 日期），点击展开可改选；bar 始终保持可见。
+   ========================================================================== */
+.kid-decided-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  margin:0 0 10px;
+  padding:10px 14px;
+  border:none;
+  border-radius:var(--kid-radius,10px);
+  background:var(--kid-focus-hover),rgba(16,185,129,.12);
+  border:1px solid var(--kid-focus,#10b981);
+  color:var(--kid-focus-ink,#065f46);
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  text-align:left;
+}
+.kid-decided-bar:hover{filter:brightness(1.04)}
+.kid-decided>*:not(.kid-decided-bar){display:none}
+.kid-decided.kid-expanded>*:not(.kid-decided-bar){display:block}
+.kid-decided.kid-expanded>.kid-decided-bar{display:flex}

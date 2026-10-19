@@ -265,7 +265,17 @@ def atomic_write(path, obj, **kw):
     tmp = path + '.tmp'
     with open(tmp, 'w', encoding='utf-8') as f:
         json.dump(obj, f, **kw)
-    os.replace(tmp, path)
+    # Windows 下目标文件可能被杀毒/索引短暂占用导致 os.replace 报 WinError 5；
+    # 短退避重试 5 次（总计约 1.5s），Linux 语义不变（replace 原子且不失败）。
+    last_err = None
+    for attempt in range(5):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError as e:
+            last_err = e
+            time.sleep(0.05 * (attempt + 1))
+    raise last_err
 
 def _sse(payload):
     """序列化为 SSE data 行，对内容做 JSON 转义（P1-2 修复未转义导致前端解析失败）。"""
@@ -356,6 +366,7 @@ def tasks_api():
     fpath = os.path.join(DATA_DIR, f'tasks_{user}.json')
     if request.method == 'POST':
         atomic_write(fpath, data.get('tasks', {}), ensure_ascii=False)
+        _json_cache.pop(fpath, None)   # R2：写后失效缓存，dashboard 聚合立即读到新值
         resp = jsonify({'ok': True})
     else:
         if os.path.exists(fpath):
@@ -936,10 +947,18 @@ def dashboard_api(child=None):
     chat_recent = messages[-6:] if messages else []
 
     # Load tasks
+    # R2（2026-10-19）：twp-* 前缀键 = 三周计划勾选（由三周计划区渲染），与日常任务分开统计，
+    # 避免混入环形进度导致分母膨胀；twp 完成度单独输出供前端分列显示。
     tasks_path = os.path.join(DATA_DIR, f'tasks_{child}.json')
-    tasks = _cached_json_read(tasks_path, ttl=15) or {}
+    tasks_all = _cached_json_read(tasks_path, ttl=15) or {}
+    tasks = {k: v for k, v in tasks_all.items()
+             if not (isinstance(k, str) and k.startswith('twp-'))}
+    twp_tasks = {k: v for k, v in tasks_all.items()
+                 if isinstance(k, str) and k.startswith('twp-')}
     tasks_total = len(tasks)
     tasks_done = sum(1 for v in tasks.values() if (v if isinstance(v, bool) else v.get('done', False)))
+    twp_total = len(twp_tasks)
+    twp_done = sum(1 for v in twp_tasks.values() if (v if isinstance(v, bool) else v.get('done', False)))
 
     # Summarize wiki entries (last 5)
     recent_wiki = [
@@ -974,6 +993,8 @@ def dashboard_api(child=None):
         'chat_summaries': chat_summaries,
         'tasks_done': tasks_done,
         'tasks_total': tasks_total,
+        'twp_done': twp_done,
+        'twp_total': twp_total,
         'updated': datetime.now().isoformat()
     })
     _set_cors(resp)
@@ -1507,12 +1528,17 @@ def get_errors(child):
     # Aggregate mode for dashboard (avoids shipping the full ~276KB file to the client)
     if request.args.get('stats') == '1':
         by_subject = {}
+        by_cause = {}
         mastered_total = 0
         for e in errors:
             if not isinstance(e, dict):
                 continue
             s = e.get('subject', 'Other')
             by_subject[s] = by_subject.get(s, 0) + 1
+            # R7-b：错因三分类统计（粗心/没懂/没时间；未分类不计入）
+            c = e.get('cause')
+            if c:
+                by_cause[c] = by_cause.get(c, 0) + 1
             if e.get('mastered'):
                 mastered_total += 1
         week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
@@ -1524,6 +1550,7 @@ def get_errors(child):
             'child': child,
             'total': len(errors),
             'by_subject': by_subject,
+            'by_cause': by_cause,
             # #12：分页后前端拿不到全量数据，计数改由服务端提供
             'mastered_total': mastered_total,
             'active_total': len(errors) - mastered_total,
@@ -1601,12 +1628,12 @@ def error_item(child, err_id):
         _set_cors(resp)
         return resp
 
-    # PUT：局部更新（含 mastered 勾选）
+    # PUT：局部更新（含 mastered 勾选 / R7 错因三分类）
     data = request.get_json(force=True, silent=True) or {}
     found = False
     for e in errors:
         if str(e.get('id')) == str(err_id):
-            for k in ('subject', 'question', 'solution', 'type', 'tags', 'date', 'mastered'):
+            for k in ('subject', 'question', 'solution', 'type', 'tags', 'date', 'mastered', 'cause'):
                 if k in data:
                     e[k] = data[k]
             found = True
@@ -1716,6 +1743,90 @@ def decide_api(child):
                  ensure_ascii=False, indent=2)
     _json_cache.pop(path, None)
     resp = jsonify({'ok': True, 'updatedAt': updated_at})
+    _set_cors(resp)
+    return resp
+
+
+# ── Three-Week Plan (TWP) 三周计划：改计划不再需要发版 ──────────
+# 存储形态（data/twp_<child>.json）与种子（data-seed/twp_<child>.json）同构：
+#   {'child','version','updatedAt','nextCycleEnd','weeks':[{id,label,start,end,goal,focus,actions:[{id,label,sub}]}]}
+# GET：优先读运行时文件；不存在则从种子复制一份（服务器 data/ 为真源，种子随 rsync 上线）。
+# PUT：家长更新计划（weeks 结构校验：至少 1 周、每周必有 start/end/label、actions 可选）。
+TWP_SEED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data-seed')
+
+def _twp_path(child):
+    return os.path.join(DATA_DIR, f'twp_{child}.json')
+
+def _twp_seed_path(child):
+    return os.path.join(TWP_SEED_DIR, f'twp_{child}.json')
+
+def _twp_valid(data):
+    """结构校验：weeks 至少 1 周，每周含 label/start/end（YYYY-MM-DD）；actions 若有须为 list。"""
+    if not isinstance(data, dict) or not isinstance(data.get('weeks'), list) or not data['weeks']:
+        return False
+    for w in data['weeks']:
+        if not isinstance(w, dict) or not w.get('label') or not w.get('start') or not w.get('end'):
+            return False
+        if 'actions' in w and not isinstance(w['actions'], list):
+            return False
+    return True
+
+@app.route('/api/twp/<child>', methods=['GET', 'PUT', 'OPTIONS'])
+def twp_api(child):
+    """三周计划读写（R5：数据外置，前端异步拉取 + localStorage 降级）。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+
+    child = _safe_child(child)
+    path = _twp_path(child)
+
+    if request.method == 'GET':
+        data = _cached_json_read(path, ttl=10)
+        if not isinstance(data, dict) or not data.get('weeks'):
+            # 运行时文件不存在/为空：从种子复制一份（首次访问自动初始化）
+            seed = _twp_seed_path(child)
+            if os.path.exists(seed):
+                try:
+                    with open(seed, encoding='utf-8') as f:
+                        data = json.load(f)
+                    atomic_write(path, data, ensure_ascii=False, indent=2)
+                    _json_cache.pop(path, None)
+                except Exception:
+                    data = {}
+        if not isinstance(data, dict):
+            data = {}
+        resp = jsonify({
+            'child': child,
+            'updatedAt': data.get('updatedAt') or '',
+            'nextCycleEnd': data.get('nextCycleEnd') or '',
+            'version': data.get('version') or 0,
+            'weeks': data.get('weeks') if isinstance(data.get('weeks'), list) else [],
+            'seeded': not os.path.exists(path) or not data.get('weeks'),
+        })
+        _set_cors(resp)
+        return resp
+
+    # PUT：家长更新计划（全量覆盖，前端提交完整 weeks）
+    body = request.get_json(force=True, silent=True) or {}
+    weeks = body.get('weeks')
+    if not _twp_valid({'weeks': weeks}):
+        resp = jsonify({'ok': False, 'error': 'weeks 结构非法：至少 1 周，每周须含 label/start/end，actions 为数组'})
+        _set_cors(resp)
+        return resp, 400
+    doc = {
+        'child': child,
+        'version': int(body.get('version') or 0) + 1,
+        'updatedAt': str(body.get('updatedAt') or datetime.now().isoformat()),
+        'nextCycleEnd': str(body.get('nextCycleEnd') or ''),
+        'weeks': weeks,
+    }
+    atomic_write(path, doc, ensure_ascii=False, indent=2)
+    _json_cache.pop(path, None)
+    resp = jsonify({'ok': True, 'version': doc['version'], 'updatedAt': doc['updatedAt']})
     _set_cors(resp)
     return resp
 

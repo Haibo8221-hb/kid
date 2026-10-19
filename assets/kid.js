@@ -134,10 +134,14 @@
 
         var toggle = function () {
           var on = !card.classList.contains('checked');
+          var tid = card.dataset.taskId;
           KidCheck._apply(card, on);
           store(key, on ? '1' : '0');
+          // R2：data-sync="server" 的卡（三周计划）勾选同步服务端 tasks_<child>.json（twp- 前缀键）
+          if (card.dataset.sync === 'server' && global.KidTasksBridge && tid) {
+            try { global.KidTasksBridge.setDone(tid, on); } catch (e) { /* 服务端不可达：本地已写 */ }
+          }
           // 同一任务在同页多处渲染（Today 打勾卡 + My Plan 三周卡）时保持视觉同步
-          var tid = card.dataset.taskId;
           if (tid) {
             $$('.kid-task-card').forEach(function (c) {
               if (c !== card && c.dataset.taskId === tid) KidCheck._apply(c, load(key) === '1');
@@ -180,6 +184,18 @@
       $$(root, '.kid-ask-card').forEach(function (card) {
         var idx = docIndex(card, '.kid-ask-card');
         var key = 'kid-ask-' + pageId() + '-' + idx;
+        // R8：周轮换问题池——data-question-pool 为 JSON 数组，按自然周（epoch 周）轮换，
+        // 同一周内问题固定；无池或不合法时保持页面原文案
+        if (card.dataset.questionPool) {
+          try {
+            var pool = JSON.parse(card.dataset.questionPool);
+            if (pool && pool.length) {
+              var wi = Math.floor(Date.now() / 604800000);
+              var qEl = card.querySelector('strong');
+              if (qEl) qEl.textContent = pool[wi % pool.length];
+            }
+          } catch (e) { /* 池格式错误：保持原文案 */ }
+        }
         if (!claim(card)) { KidAsk._sync(card, key); return; }
 
         /* 问题本体：没有 .kid-ask-q 就把原有内容收进去，保证斜体样式与点击区都在 */
@@ -410,6 +426,7 @@ var KidStamp = {
           opt.setAttribute('aria-checked', 'false');
           var pick = function () {
             store(key, opt.dataset.choice);
+            store(key + '__at', new Date().toISOString());   // R14：记录决定时间（归档条显示）
             KidStamp._syncGroup(g);
             KidStamp._syncBadge(card);
             notify();
@@ -459,12 +476,39 @@ var KidStamp = {
     });
     card.classList.toggle('kid-has-pick', picked > 0);
     var stamp = card.querySelector('.kid-stamp');
-    if (!stamp) return;
-    if (!picked) { stamp.textContent = '待你决定'; return; }
-    if (groups.length > 1) { stamp.textContent = '已决定 ' + picked + '/' + groups.length; return; }
-    var label = firstLabel || '';
-    if (label.length > 12) label = label.slice(0, 12) + '…';
-    stamp.textContent = '你的选择：' + label;
+    if (!picked) { if (stamp) stamp.textContent = '待你决定'; return; }
+    if (groups.length > 1) { if (stamp) stamp.textContent = '已决定 ' + picked + '/' + groups.length; }
+    else {
+      var label0 = firstLabel || '';
+      if (label0.length > 12) label0 = label0.slice(0, 12) + '…';
+      if (stamp) stamp.textContent = '你的选择：' + label0;
+    }
+    // R14：data-decide-once 卡——全部问题已决时折叠为归档条（点开可改选）
+    if (card.dataset.decideOnce === 'true') {
+      var bar = card.querySelector('.kid-decided-bar');
+      var allPicked = picked >= groups.length;
+      if (allPicked) {
+        card.classList.add('kid-decided');
+        if (!bar) {
+          bar = el('button', 'kid-decided-bar');
+          bar.type = 'button';
+          bar.setAttribute('aria-expanded', 'false');
+          bar.addEventListener('click', function () {
+            var open = card.classList.toggle('kid-expanded');
+            bar.setAttribute('aria-expanded', open ? 'true' : 'false');
+          });
+          card.insertBefore(bar, card.firstChild);
+        }
+        var at = '';
+        try { at = load(groups[0].dataset.kidStampKey + '__at') || ''; } catch (e) {}
+        var dstr = at ? '（' + at.slice(0, 10) + '）' : '';
+        bar.textContent = '✅ 已决定：' + (firstLabel || '') + dstr + ' · 点开可改';
+      } else {
+        card.classList.remove('kid-decided');
+        card.classList.remove('kid-expanded');
+        if (bar) bar.remove();
+      }
+    }
   },
 
   /* ---- 服务端同步：localStorage 即时渲染，服务端做跨设备真源 ---- */
@@ -672,13 +716,21 @@ var KidStamp = {
       setTimeout(function () { layer.remove(); }, 2200);
     },
 
-    /** 今日任务全部完成：撒彩带 + 显示「今天到此为止」停止提示（考试年硬约束） */
-    onAllDone: function (msgSelector) {
+    /** 今日任务全部完成：撒彩带 + 显示「今天到此为止」停止提示（考试年硬约束）。
+        scopeSelector 可选：只统计该容器内的任务卡（如 Today's 3 区块），
+        缺省统计全页——避免周级/历史卡挡住「今天完成」的判定。 */
+    onAllDone: function (msgSelector, scopeSelector) {
       if (document.documentElement && document.documentElement.dataset.kidCheerBound) return;
       document.documentElement.dataset.kidCheerBound = '1';
       document.addEventListener('kid:change', function () {
-        var cards = document.querySelectorAll('.kid-task-card');
-        var done = document.querySelectorAll('.kid-task-card.checked');
+        var scope = scopeSelector ? document.querySelector(scopeSelector) : null;
+        var cards = scope
+          ? scope.querySelectorAll('.kid-task-card')
+          : document.querySelectorAll('.kid-task-card');
+        var done = [];
+        for (var i = 0; i < cards.length; i++) {
+          if (cards[i].classList.contains('checked')) done.push(cards[i]);
+        }
         if (!cards.length || cards.length !== done.length) return;
         KidCheer.cheer();
         var box = msgSelector ? document.querySelector(msgSelector) : null;

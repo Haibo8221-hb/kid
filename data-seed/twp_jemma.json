@@ -1,0 +1,50 @@
+{
+  "child": "jemma",
+  "version": 1,
+  "updatedAt": "2026-10-19T00:00:00+03:00",
+  "nextCycleEnd": "2026-11-04",
+  "weeks": [
+    {
+      "id": "w1-errors",
+      "taskLabel": "Week 1 · 错题本习惯",
+      "label": "Week 1 · 起步与习惯",
+      "start": "2026-10-15",
+      "end": "2026-10-21",
+      "goal": "错题本习惯建立：每天 1 道错题进 Error Book（含错在哪、正确思路两行）",
+      "focus": "<b>本周</b> Maths / Science / German 各挑 1 个薄弱点写进周计划 · Bebras 往年题试做 1 套（找手感）",
+      "actions": [
+        { "id": "w1-d1", "label": "每天 1 道错题进 Error Book", "sub": "错了没关系，记下来就会了" },
+        { "id": "w1-d2", "label": "Bebras 往年题试做 1 套", "sub": "找手感，不用计时" },
+        { "id": "w1-d3", "label": "三科各写 1 个薄弱点", "sub": "Maths / Science / German 挑一个就行" }
+      ]
+    },
+    {
+      "id": "w2-flashcards",
+      "taskLabel": "Week 2 · 三科闪卡 5 张",
+      "label": "Week 2 · 主动回忆",
+      "start": "2026-10-22",
+      "end": "2026-10-28",
+      "goal": "三科各建 5 张闪卡（遮住答案自己说一遍再翻面），每天 20 分钟",
+      "focus": "<b>10/25</b> 留白休息 · <b>half term</b> 每天最多一个 2h 深度块，下午晚上彻底休息 · Bebras 第 2 套限时",
+      "actions": [
+        { "id": "w2-d1", "label": "三科各做 5 张闪卡", "sub": "正面写问题，背面写答案" },
+        { "id": "w2-d2", "label": "每天闪卡 20 分钟", "sub": "遮住答案，先自己说一遍" },
+        { "id": "w2-d3", "label": "10/25 留白休息", "sub": "休息也是计划的一部分" }
+      ]
+    },
+    {
+      "id": "w3-bebras-review",
+      "taskLabel": "Week 3 · Bebras 错题三分类",
+      "label": "Week 3 · 复盘与冲刺",
+      "start": "2026-10-29",
+      "end": "2026-11-04",
+      "goal": "Bebras 赛前复盘：错题三分类（粗心/没懂/没时间），biggest 桶就是冲刺重点",
+      "focus": "<b>11 月 Bebras</b>（日期以学校通知为准）· 赛后把每道错题按三分类记回 Error Book",
+      "actions": [
+        { "id": "w3-d1", "label": "Bebras 第 2 套限时做", "sub": "45 分钟，就当比赛" },
+        { "id": "w3-d2", "label": "错题分三类", "sub": "粗心 / 没懂 / 没时间" },
+        { "id": "w3-d3", "label": "赛后错题记回 Error Book", "sub": "按分类写两行：错在哪+正确思路" }
+      ]
+    }
+  ]
+}

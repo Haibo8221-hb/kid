@@ -52,6 +52,8 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 rgba(79,140,255,0)}50%{box-shadow:0 0 12px rgba(79,140,255,0.3)}}
 .avatar-picker{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 0}
 .profile-streak{font-size:11px;color:var(--orange);margin-top:6px;font-weight:600}
+/* R1：KidStreak 接管侧栏徽章后，胶囊样式在侧栏窄容器内收缩适配 */
+.profile-streak.kid-streak{display:flex;justify-content:center;padding:4px 10px;font-size:12px;gap:6px}
 .avatar-option{font-size:32px;padding:8px;cursor:pointer;border-radius:8px;text-align:center;transition:transform 0.15s,background 0.15s}
 .avatar-option:hover{transform:scale(1.25);background:var(--surface2)}
 .avatar-option.selected{background:var(--accent);border-radius:12px}
@@ -483,7 +485,7 @@ canvas.radar{width:240px!important;height:240px!important}
 .twp-week .tw-focus b{color:var(--orange)}
 </style>
 <!-- 儿童友好高亮与互动组件层（与 Jemma 页面共用同一套，保证高亮逻辑一致） -->
-<link rel="stylesheet" href="/assets/kid.css">
+<link rel="stylesheet" href="/assets/kid.css?v=202610191">
 </head>
 <body data-kid-page="diya">
 
@@ -557,7 +559,7 @@ canvas.radar{width:240px!important;height:240px!important}
   <div class="kid-who-todo">
     <span class="kid-ask-card">
       <strong>今天先做哪一件？</strong>
-      <span class="kid-hint">在下面「本周三件事」里挑一件，勾掉它就够了。不用一次做完所有事。</span>
+      <span class="kid-hint">在下面「今天三件事」里挑一件，勾掉它就够了。不用一次做完所有事。</span>
     </span>
   </div>
 </div>
@@ -565,7 +567,34 @@ canvas.radar{width:240px!important;height:240px!important}
 <!-- Countdown Strip -->
 <div id="countdown-strip" class="countdown-strip"></div>
 
-<!-- Next 3 Weeks Plan（靠前展示 · 与 Route Compare 同源渲染） -->
+<!-- 今日任务全部完成后的「停止提示」：完成就收工，不过度学习（与 Jemma 同款交互） -->
+<div id="today-stop" class="kid-stop-hint" hidden>🎉 今天三件事都完成啦！今天到此为止，去休息吧～</div>
+
+<!-- 今天三件事（R3）：当前周三条日粒度行动，勾选即打卡并同步服务端（twp-* 单源） -->
+<div class="section" style="border-left:4px solid var(--accent)">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+ <div class="section-title" style="margin:0"> ✅ 今天三件事 · Today's 3</div>
+</div>
+<div id="diya-today-3" style="display:grid;gap:10px"></div>
+<div id="today-progress" data-kid-label="今天完成了几件" style="margin:12px 0 0"></div>
+<!-- R8：本周反思（问题池按周轮换，保持新鲜感） -->
+<div class="kid-ask-card" style="margin-top:14px"
+     data-placeholder="写两句就行，写给自己看的。"
+     data-question-pool='["本周哪件事最卡？卡在哪一步？","这周有没有一件小事让你自豪？","下周最想改进的一点是什么？","哪一科让你最累？为什么？"]'>
+  <strong>本周反思</strong>
+  <span class="kid-hint">点开写两句就行——每周换一个问题。</span>
+</div>
+</div>
+
+<!-- 本周复盘提醒（R6）：距上次 Weekly Review ≥7 天时显示，可当周关闭 -->
+<div id="review-due-hint" class="section" hidden style="border-left:4px solid var(--orange);padding:12px 16px;font-size:14px;line-height:1.8;margin-bottom:10px">
+  <b>📋 本周复盘还没做</b> · 7 个问题约 3 分钟，把这一周变成下一周的计划。
+  <button class="btn" onclick="switchTab('weekly-review')" style="margin-left:8px;padding:4px 12px;font-size:12px">去做复盘 →</button>
+  <button class="btn-sm" onclick="dismissReviewHint()" style="border:1px solid var(--border);background:none;color:var(--text2);padding:4px 10px;font-size:12px;margin-left:6px">本周不再提醒</button>
+</div>
+
+<!-- Next 3 Weeks Plan（靠前展示 · R5：数据来自 /api/twp/diya，到期自动提示） -->
+<div id="twp-cycle-hint" class="section" hidden style="border-left:4px solid var(--orange);padding:10px 16px;font-size:13px;line-height:1.7;color:var(--text2);margin-bottom:10px"></div>
 <div class="section" style="border-left:4px solid var(--accent2)">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
  <div class="section-title" style="margin:0"> 📌 Next 3 Weeks · 15 Oct → 4 Nov</div>
@@ -574,7 +603,7 @@ canvas.radar{width:240px!important;height:240px!important}
 </div>
 
 <!-- 需要你自己决定：家长不替你选 -->
-<div class="section kid-decide-card kid-has-stamp" data-decide-id="diya-call">
+<div class="section kid-decide-card kid-has-stamp" data-decide-id="diya-call" data-decide-once="true">
  <div class="section-title"> 需要你自己决定 · Your Call</div>
  <p class="kid-lead">下面这几件事，最后拍板的是你。选完记下来就行——之后如果想改，随时能改。</p>
  <div class="kid-h">今天先做哪一门？</div>
@@ -591,7 +620,6 @@ canvas.radar{width:240px!important;height:240px!important}
   <button class="kid-choice" data-choice="skip">先跳过，最后回头做</button>
  </div>
 </div>
-<div id="kid-progress" style="margin:14px 0"></div>
 
 <!-- Study Tips -->
 <div id="study-tips" style="margin-bottom:16px"></div>
@@ -629,12 +657,12 @@ canvas.radar{width:240px!important;height:240px!important}
 <div class="section kid-focus-card">
 <div class="section-title"> 需要重点关注 · My Watch List</div>
 <div style="font-size:15px;line-height:2;color:var(--text2)">
- <div class="kid-focus-item"><b>化学</b> — Oct26 等级 6（6/7 月 mock 44% → 明显回升），冲 7 还差一级</div>
- <div class="kid-focus-item"><b>英语分析深度</b> — 词汇量还要往上加</div>
- <div class="kid-focus-item"><b>物理必做实验</b> — 方法描述要背下来</div>
- <div class="kid-focus-item"><b>化学 A-level 还在考虑中</b> — 看 GCSE 结果再定（不进我的主线，只当备用）</div>
- <div class="kid-focus-item"><b>历史长答题</b> — 16 分题的答题步骤丢分</div>
- <div class="kid-focus-item"><b>SMC 模考 70/125</b> — 数论和代数推理有断档（Q9-13 全塌）</div>
+ <div class="kid-focus-item" data-goal="chem7"><b>化学</b> — Oct26 等级 6（6/7 月 mock 44% → 明显回升），冲 7 还差一级<span class="goal-progress" id="gp-chem7" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="petal"><b>英语分析深度</b> — 词汇量还要往上加<span class="goal-progress" id="gp-petal" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="practical"><b>物理必做实验</b> — 方法描述要背下来<span class="goal-progress" id="gp-practical" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="chem-alevel"><b>化学 A-level 还在考虑中</b> — 看 GCSE 结果再定（不进我的主线，只当备用）<span class="goal-progress" id="gp-chem-alevel" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="hist16"><b>历史长答题</b> — 16 分题的答题步骤丢分<span class="goal-progress" id="gp-hist16" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="smc"><b>SMC 模考 70/125</b> — 数论和代数推理有断档（Q9-13 全塌）<span class="goal-progress" id="gp-smc" style="color:var(--accent2);font-weight:600"></span></div>
 </div>
 </div>
 </div>
@@ -707,6 +735,15 @@ Maths+Physics are strong but not a free pass — A-level is 3-4× harder than GC
 </div>
 <div id="diya-tasks"><div class="empty-state">Loading...</div></div>
 <div class="flex-row" style="margin-top:10px">
+<select id="diya-task-goal" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface2);color:var(--text)">
+<option value="">🎯 关联目标（可选）</option>
+<option value="chem7">化学冲 7</option>
+<option value="petal">英语分析深度</option>
+<option value="practical">物理必做实验</option>
+<option value="chem-alevel">化学 A-level 取舍</option>
+<option value="hist16">历史 16-marker</option>
+<option value="smc">SMC 补漏</option>
+</select>
 <input type="text" id="diya-task-input" placeholder="Add new task..." style="flex:1">
 <button class="btn" onclick="addTask('diya')">+</button>
 </div>
@@ -932,10 +969,13 @@ ERROR BOOK
 <button class="filter-btn" data-subject="History" onclick="filterErrors('History')">History</button>
 <button class="filter-btn" data-subject="Drama" onclick="filterErrors('Drama')">Drama</button>
 </div>
-<div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+<div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap" id="error-toolbar">
 <button class="btn" onclick="openErrorModal()">+ Add Error</button>
+<button class="btn" onclick="startQuizMode()" style="background:var(--accent2)">🎯 Test me</button>
 <span id="error-count" style="font-size:12px;color:var(--text2);margin-left:8px"></span>
 </div>
+<!-- R7-a：遮挡自测面板（激活时隐藏筛选/列表，结束后还原） -->
+<div id="test-mode-panel" hidden></div>
 <div id="error-list"><div class="error-empty">Loading...</div></div>
 </div>
 
@@ -1017,6 +1057,15 @@ ERROR BOOK
 <div class="form-group">
 <label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">Tags (comma-separated)</label>
 <input type="text" id="error-tags-input" placeholder="e.g. SMC, algebra, AQA_Paper1">
+</div>
+<div class="form-group">
+<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">错因（R7：粗心 / 没懂 / 没时间）</label>
+<select id="error-cause-input" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)">
+<option value="">先不分类</option>
+<option value="careless">⚡ 粗心</option>
+<option value="concept">🧩 没懂</option>
+<option value="time">⏱ 没时间</option>
+</select>
 </div>
 <div class="modal-actions">
 <button class="btn" onclick="closeErrorModal()">Cancel</button>
@@ -1106,7 +1155,7 @@ ERROR BOOK
 <div id="ver-badge" style="position:fixed;left:6px;bottom:6px;z-index:400;font-size:10px;color:var(--text2);opacity:0.5;pointer-events:none;font-family:monospace"></div>
 
 <script>window.KID_CHILD='diya';</script>
-<script src="assets/kid-common.js?v=20261018"></script>
+<script src="assets/kid-common.js?v=20261019"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -1368,14 +1417,21 @@ function deleteNote(id, subject){
 // Dashboard 
 
 // Child Tabs
+// R9：Watch List 目标注册表（id 与 Watch List 卡 data-goal 一一对应）
+const GOAL_LABELS={'chem7':'化学冲7','petal':'英语深度','practical':'物理实验','chem-alevel':'化学取舍','hist16':'历史16分','smc':'SMC补漏'};
 async function addTask(child){
  const input=document.getElementById(child+'-task-input');
  if(!input) return;
  const name=input.value.trim();
  if(!name) return;
+ const goalSel=document.getElementById(child+'-task-goal');
+ const goal=(goalSel&&goalSel.value)?goalSel.value:'';
  const key='general-'+Date.now();
  if(!tasksData[child]) tasksData[child]={};
- tasksData[child][key]=false;
+ // R9+R11：选了目标存 goal；统一携带 created_at（执行轨迹/拖延统计）
+ tasksData[child][key]=goal
+   ?{done:false,name:name,goal:goal,created_at:new Date().toISOString()}
+   :{done:false,name:name,created_at:new Date().toISOString()};
  await saveTasks(child);
  input.value='';
 }
@@ -1384,7 +1440,16 @@ async function toggleTask(child,key,el){
  const isObj = entry && typeof entry === 'object';
  const currentDone = isObj ? entry.done : entry;
  const done = !currentDone;
- if(isObj){ entry.done = done; } else { tasksData[child][key] = done; }
+ // R11：勾选写 completed_at、取消清除——执行轨迹（复盘统计「本周实际完成/平均拖延」用）
+ if(isObj){
+  entry.done = done;
+  if(done) entry.completed_at = new Date().toISOString(); else delete entry.completed_at;
+ } else {
+  // 布尔旧值任务：勾选时升级为对象携带时间戳；name 由 key 派生（renderTasks 兼容）
+  tasksData[child][key] = done
+    ? {done:true, name:key.split('-').slice(1).join('-').replace(/_/g,' '), completed_at:new Date().toISOString()}
+    : false;
+ }
  await saveTasks(child);
  renderTasks(child);  // full re-render to move between pending/done sections
  if(done) loadStreak(true);  // 勾选任务 = 今日学习打卡，刷新侧栏真实连续天数
@@ -1874,7 +1939,7 @@ async function loadDashboard(){
  const ctaEl = document.getElementById('dash-diya-cta');
  const ringEl = document.getElementById('task-ring-fg');
  if(pctEl) pctEl.textContent=dp+'%';
- if(subEl) subEl.textContent=`${dj.tasks_done||0}/${dj.tasks_total||0} tasks`;
+ if(subEl) subEl.textContent=`${dj.tasks_done||0}/${dj.tasks_total||0} tasks`+((dj.twp_total||0)>0?` · 三周计划 ${dj.twp_done||0}/${dj.twp_total}`:'');
  if(ringEl){const c=125.6;ringEl.setAttribute('stroke-dashoffset',c-(dp/100)*c);}
  if(ctaEl){
   if(dp===100) ctaEl.textContent='All done!';
@@ -1917,6 +1982,7 @@ async function loadDashboard(){
     window.__dashTimer = setInterval(updateCountdownStrip, 60000);
  loadStudyTips();
  loadTasks('diya');
+ checkReviewDue();          // R6：距上次复盘 ≥7 天时顶部提醒
  loadSMCProgress();
 }
 
@@ -2056,29 +2122,25 @@ async function submitSMCRecord(){
 
 // Streak（bump=true 表示今日已完成至少一个任务：续签或重开）
 function loadStreak(bump){
- const key = 'diya_streak';
- let data;
- try { data = JSON.parse(localStorage.getItem(key)); } catch(e) {}
- if (!data) data = { count: 0, lastDate: null };
- const today = new Date().toISOString().split('T')[0];
- const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
- if (bump && data.lastDate !== today) {
-  data.count = data.lastDate === yesterday ? data.count + 1 : 1;
-  data.lastDate = today;
- } else if (data.lastDate === yesterday) {
-  // Continued streak — keep count
- } else if (data.lastDate !== today) {
-  data.count = 0;
- }
-
- const el = document.getElementById('profile-streak');
- if (el) {
-  el.textContent = `Streak ${data.count} day${data.count !== 1 ? 's' : ''}`;
-  el.style.color = data.count >= 7 ? 'var(--accent2)' : data.count >= 3 ? 'var(--orange)' : 'var(--text2)';
- }
-
- localStorage.setItem(key, JSON.stringify(data));
+ /* R1（2026-10-19）：Diya 侧栏 streak 已由 KidStreak 组件接管（真实连续打卡 + 每周休息日）。
+    本函数仅保留两个职责：
+    1) 一次性迁移：旧 diya_streak key → kid-streak-diya（KidStreak 格式），只在 KidStreak key 为空时执行
+    2) 兼容旧调用点：toggleTask(bump=true) 转调 KidStreak.record()；渲染统一交给 KidStreak.listen */
+ try{
+  if(typeof KidStreak === 'undefined') return;
+  const newKey = 'kid-streak-diya';
+  let migrated = null;
+  try { migrated = JSON.parse(localStorage.getItem(newKey)); } catch(e) {}
+  if(!migrated){
+   let old = null;
+   try { old = JSON.parse(localStorage.getItem('diya_streak')); } catch(e) {}
+   if(old && old.count > 0){
+    KidStreak._write({ count: old.count|0, lastDate: old.lastDate || null, restWeek: null });
+   }
+  }
+  if(bump) KidStreak.record();
+  KidStreak.render('#profile-streak');
+ }catch(e){ /* KidStreak 未加载时静默：侧栏维持原文案，不影响其他功能 */ }
 }
 
 // Diya Grades (Jemma-style subject cards) 
@@ -2302,6 +2364,31 @@ async function clearChatHistory(){
  }catch(e){toast('Clear failed');}
 }
 
+// ── R6：本周复盘到期检测（Today 顶部提醒，当周可关闭）──────────
+function reviewWeekKey(){
+ const d=new Date(); const day=(d.getDay()+6)%7;   // 周一为一周起点
+ d.setDate(d.getDate()-day);
+ return d.toISOString().slice(0,10);
+}
+function dismissReviewHint(){
+ try{ sessionStorage.setItem('review_hint_dismissed', reviewWeekKey()); }catch(_){}
+ const box=document.getElementById('review-due-hint');
+ if(box) box.hidden=true;
+}
+async function checkReviewDue(){
+ try{
+  if(sessionStorage.getItem('review_hint_dismissed')===reviewWeekKey()) return;
+  const r=await fetch('/api/review?user=diya');
+  const reviews=await r.json();
+  const last=reviews&&reviews[0]&&reviews[0].date;
+  const days=last?Math.floor((Date.now()-new Date(last+'T00:00:00'))/86400000):999;
+  if(days>=7){
+   const box=document.getElementById('review-due-hint');
+   if(box) box.hidden=false;
+  }
+ }catch(_){ /* 服务端不可达：不打扰 */ }
+}
+
 // Weekly Review Wizard
 let reviewStep=0;
 let reviewAnswers={};
@@ -2314,8 +2401,14 @@ const reviewQuestions=[
  {id:'priority',q:'6. Next week\'s top priority',hint:'e.g. Finish SMC 2023 Paper / Revise Macbeth Act 2',type:'textarea'},
  {id:'proud',q:'7. What made you proud?',hint:'Anything! Doesn\'t have to be academic. A small win, a kind moment, something that made you smile.',type:'textarea'}
 ];
-function loadReviewWizard(){
+let reviewSysCompletion=null;   // R10：系统统计完成率（复盘预填对照）
+async function loadReviewWizard(){
  reviewStep=0;reviewAnswers={};
+ try{
+  const dj=await fetch('/api/dashboard/diya').then(r=>r.json());
+  const t=dj.tasks_total||0;
+  reviewSysCompletion=t?Math.round((dj.tasks_done||0)/t*100):0;
+ }catch(_){ reviewSysCompletion=null; }
  renderReviewStep();
  loadReviewHistory();
 }
@@ -2327,7 +2420,10 @@ function renderReviewStep(){
  document.getElementById('rw-progress').innerHTML=`<div class="rw-progress-fill" style="width:${pct}%"></div><div style="text-align:center;font-size:11px;color:var(--text2);margin-top:4px">Step ${reviewStep+1} of ${total}</div>`;
  let stepHTML=`<h3>${q.q}</h3>`;
  if(q.type==='number'){
-  stepHTML+=`<input type="number" id="rw-input" value="${reviewAnswers[q.id]||''}" placeholder="${q.hint}" min="${q.id==='rating'?1:0}" max="${q.id==='rating'?10:100}" onchange="reviewAnswers['${q.id}']=this.value">`;
+  // R10：完成率题预填系统统计值（可修改），placeholder 说明来源
+  const prefill=(q.id==='completion'&&reviewAnswers[q.id]===undefined&&reviewSysCompletion!=null)?reviewSysCompletion:'';
+  const hint2=(q.id==='completion'&&reviewSysCompletion!=null)?`（系统统计：${reviewSysCompletion}%，可改）`:'';
+  stepHTML+=`<input type="number" id="rw-input" value="${prefill}" placeholder="${q.hint}${hint2}" min="${q.id==='rating'?1:0}" max="${q.id==='rating'?10:100}" onchange="reviewAnswers['${q.id}']=this.value">`;
  } else {
   stepHTML+=`<textarea id="rw-input" rows="3" placeholder="${q.hint}" oninput="reviewAnswers['${q.id}']=this.value">${reviewAnswers[q.id]||''}</textarea>`;
  }
@@ -2363,9 +2459,39 @@ async function reviewSubmit(){
   improve:reviewAnswers.improve||'',
   priority:reviewAnswers.priority||'',
   proud:reviewAnswers.proud||'',
+  sys_completion:(reviewSysCompletion!=null?reviewSysCompletion:''),
   date:new Date().toISOString().split('T')[0]
  };
  if(!review.wentwell&&!review.hard&&!review.proud){toast('Please fill in at least one section');return;}
+ // R11：执行轨迹——本周实际完成 N 件 + 平均拖延 X 天（completed_at - created_at）
+ try{
+  const wkAgo=Date.now()-7*86400000;
+  let doneN=0, delaySum=0, delayN=0;
+  Object.values(tasksData['diya']||{}).forEach(v=>{
+   if(!v||typeof v!=='object'||!v.done||!v.completed_at) return;
+   const ct=Date.parse(v.completed_at);
+   if(isNaN(ct)||ct<wkAgo) return;
+   doneN++;
+   if(v.created_at){
+    const dd=(ct-Date.parse(v.created_at))/86400000;
+    if(!isNaN(dd)&&dd>=0){ delaySum+=dd; delayN++; }
+   }
+  });
+  review.sys_tasks_done=doneN;
+  if(delayN) review.sys_avg_days=Math.round(delaySum/delayN*10)/10;
+ }catch(_){}
+ // R12：下周 top priority 自动转为任务（每 ISO 周幂等，防重复提交重复建）
+ try{
+  if(review.priority){
+   const key='general-review-priority-'+reviewWeekKey();
+   if(!tasksData['diya']) tasksData['diya']={};
+   if(!tasksData['diya'][key]){
+    tasksData['diya'][key]={done:false,name:'下周优先：'+review.priority.slice(0,40),goal:''};
+    await saveTasks('diya');
+    review.task_created=true;
+   }
+  }
+ }catch(_){ /* 转任务失败不阻断复盘保存 */ }
  try{
   await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:'diya',review})});
   toast('Review saved!');
@@ -2388,7 +2514,10 @@ function renderReviews(container,reviews){
    <span class="rh-date">Week of ${r.date||'Unknown'}</span>
    <div class="rh-stats">
     <span class="rh-stat ${(r.completion||0)>=80?'good':(r.completion||0)>=50?'ok':'bad'}">Completion: ${r.completion||0}%</span>
+    ${r.sys_completion!==''&&r.sys_completion!=null?`<span class="rh-stat" style="color:var(--text2)">系统: ${r.sys_completion}%</span>`:''}
+    ${r.sys_tasks_done!=null?`<span class="rh-stat" style="color:var(--text2)">本周实际完成 ${r.sys_tasks_done} 件${r.sys_avg_days!=null?' · 平均拖延 '+r.sys_avg_days+' 天':''}</span>`:''}
     <span class="rh-stat ${(r.rating||0)>=8?'good':(r.rating||0)>=5?'ok':'bad'}">Rating: ${r.rating||0}/10</span>
+    ${r.task_created?'<span class="rh-stat good">✅ 优先级已转任务</span>':''}
    </div>
   </div>
   <div class="rh-body">
@@ -2599,6 +2728,11 @@ async function refreshErrorStats(){
   if(d.mastered_total>0) parts.push(`<span style="color:var(--accent2);font-weight:700">${d.mastered_total} mastered</span>`);
   if(d.active_total>0) parts.push(`<span style="color:var(--orange);font-weight:700">${d.active_total} active</span>`);
   if(d.new_this_week>0) parts.push(`${d.new_this_week} new this week`);
+  // R7-b：错因三分类摘要（最多列前两，避免顶栏过长）
+  const bc=d.by_cause||{};
+  const causeParts=Object.entries(bc).sort((a,b)=>b[1]-a[1]).slice(0,2)
+    .map(([c,n])=>`${CAUSE_LABELS[c]||c} ${n}`);
+  if(causeParts.length) parts.push(causeParts.join(' · '));
   if(!parts.length) parts.push('No errors');
   el.innerHTML = parts.join(' · ');
  }catch(e){}
@@ -2624,6 +2758,143 @@ function markMastered(id){
  renderErrors();
  refreshErrorStats();   // #12：分页后计数以服务端统计为准
 }
+// ── R7-a：错题再测「Test me」——遮挡自评模式 ─────────────────────
+// 随机抽 5 题（优先未 mastered），只显示题面隐藏答案；「我看会了」/「还是不会」
+// 自评；仍错必须选错因（R7-b：粗心/没懂/没时间）并自动去掉 mastered。
+const CAUSE_LABELS={'careless':'⚡ 粗心','concept':'🧩 没懂','time':'⏱ 没时间'};
+let quiz = null;   // {queue, idx, right, wrong, wrongList:[]}
+
+function _shuffle(arr){
+ for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+ return arr;
+}
+function startQuizMode(){
+ const pool=_shuffle(errorsData.filter(e=>!e.mastered).slice());
+ const rest=_shuffle(errorsData.filter(e=>e.mastered).slice());
+ const picked=pool.slice();
+ while(picked.length<5 && rest.length) picked.push(rest.shift());
+ picked.length=Math.min(picked.length,5);
+ if(!picked.length){ toast('错题本还是空的，先记一道错题吧'); return; }
+ quiz={queue:picked,idx:0,right:0,wrong:0,wrongList:[]};
+ renderQuiz();
+}
+function _quizToggle(show){
+ const panel=document.getElementById('test-mode-panel');
+ const list=document.getElementById('error-list');
+ const bar=document.getElementById('error-filter-bar');
+ const toolbar=document.getElementById('error-toolbar');
+ if(panel) panel.hidden=!show;
+ if(list) list.style.display=show?'none':'';
+ if(bar) bar.style.display=show?'none':'';
+ if(toolbar) toolbar.style.display=show?'none':'';
+}
+function quizQuestionText(e){
+ if(typeof e.question==='string') return e.question;
+ return (e.question&&(e.question.question||e.question.original_question))||e.original_question||'（此题无文字题面，凭图片回忆）';
+}
+function renderQuiz(){
+ _quizToggle(true);
+ const panel=document.getElementById('test-mode-panel');
+ if(!panel||!quiz) return;
+ if(quiz.idx>=quiz.queue.length){ renderQuizResult(); return; }
+ const e=quiz.queue[quiz.idx];
+ panel.innerHTML=`
+ <div class="section" style="border-left:4px solid var(--accent2)">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+   <div class="section-title" style="margin:0">🎯 Test me · 第 ${quiz.idx+1} / ${quiz.queue.length} 题</div>
+   <span class="ec-subject">${e.subject||'?'}</span>
+   <button class="btn-sm" onclick="endQuizMode()" style="margin-left:auto">退出</button>
+  </div>
+  <p style="font-size:12px;color:var(--text2);margin-bottom:10px">先遮住答案，自己说一遍做法，再翻面对照。答案在下面（先别看！点完评价再看）。</p>
+  <div style="background:var(--surface2);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.8;white-space:pre-wrap">${escHtml(quizQuestionText(e))}</div>
+  <div id="quiz-cause-row" hidden style="margin-top:12px">
+   <div style="font-size:13px;color:var(--orange);font-weight:700;margin-bottom:8px">这题为什么没做对？（选一个）</div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" onclick="pickQuizCause('careless')" style="background:var(--yellow);color:#1a1206">⚡ 粗心</button>
+    <button class="btn" onclick="pickQuizCause('concept')" style="background:var(--red)">🧩 没懂</button>
+    <button class="btn" onclick="pickQuizCause('time')" style="background:var(--accent)">⏱ 没时间</button>
+   </div>
+  </div>
+  <div id="quiz-answer-reveal" hidden style="margin-top:12px;background:var(--surface2);border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.8">
+   <div style="color:var(--accent2);font-weight:700;margin-bottom:6px">正确答案 / 解法</div>
+   <div style="white-space:pre-wrap">${escHtml((typeof e.solution==='string'?e.solution:(e.solution_display||(e.solution&&e.solution.explanation)||e.correct_solution||''))||'（此题未录入解法，翻 Error Book 对照）')}</div>
+  </div>
+  <div id="quiz-btn-row" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+   <button class="btn" onclick="quizReveal()" style="background:none;border:1px solid var(--border);color:var(--text2)">👁 翻面对照</button>
+   <button class="btn" onclick="quizRight()" style="background:var(--accent2)">✓ 我看会了</button>
+   <button class="btn" onclick="quizWrong()" style="background:var(--red)">✗ 还是不会</button>
+  </div>
+ </div>`;
+}
+function quizReveal(){
+ const r=document.getElementById('quiz-answer-reveal');
+ if(r) r.hidden=!r.hidden;
+}
+function _quizNext(){ quiz.idx++; renderQuiz(); }
+function quizRight(){
+ quiz.right++;
+ const e=quiz.queue[quiz.idx];
+ // 自评会了：顺势清除错因（之前的归类不再成立），mastered 保持不动（由孩子自行决定）
+ if(e&&e.cause) _quizSaveCause(e.id,'');
+ _quizNext();
+}
+function quizWrong(){
+ quiz.wrong++;
+ quiz.wrongList.push(quiz.queue[quiz.idx]);
+ const row=document.getElementById('quiz-cause-row');
+ if(row){ row.hidden=false; }
+ const btns=document.getElementById('quiz-btn-row');
+ if(btns) btns.style.display='none';   // 必须先选错因才能继续
+}
+async function _quizSaveCause(id,cause){
+ try{
+  const err=errorsData.find(x=>x.id===id);
+  const wasMastered=!!(err&&err.mastered);
+  await fetch(`/api/errors/${KID_CHILD}/${encodeURIComponent(id)}`,
+   {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({cause:cause,...((cause==='')?{}:{mastered:false})})});
+  // 本地同步：mastered 双层（localStorage map + 对象标记）按需清理
+  if(err){
+   err.cause=cause||undefined;
+   if(cause&&wasMastered){
+    err.mastered=false; err.masteredDate=null;
+    const mastered=JSON.parse(localStorage.getItem('mastered_errors_diya')||'{}');
+    delete mastered[id];
+    localStorage.setItem('mastered_errors_diya',JSON.stringify(mastered));
+   }
+  }
+ }catch(_){ /* 服务端不可达：本地状态已在 renderErrors 时尽力同步 */ }
+}
+function pickQuizCause(cause){
+ const e=quiz&&quiz.queue[quiz.idx];
+ if(e) _quizSaveCause(e.id,cause);
+ _quizNext();
+}
+function renderQuizResult(){
+ const panel=document.getElementById('test-mode-panel');
+ if(!panel||!quiz) return;
+ const pct=quiz.queue.length?Math.round(quiz.right/quiz.queue.length*100):0;
+ const msg=pct>=80?'太棒了，这几题真的会了！':pct>=50?'过半会了，剩下的错因已经记下来了。':'没关系，错因都记下来了，下次再战。';
+ panel.innerHTML=`
+ <div class="section" style="border-left:4px solid var(--accent2)">
+  <div class="section-title">🎯 本轮结果</div>
+  <div style="font-size:15px;line-height:2">
+   ✓ 我看会了：<b style="color:var(--accent2)">${quiz.right}</b> 题<br>
+   ✗ 还是不会：<b style="color:var(--red)">${quiz.wrong}</b> 题（错因已记回 Error Book，自动去掉 mastered）
+  </div>
+  ${quiz.wrongList.length?`<div style="margin-top:10px;font-size:13px;color:var(--text2)">仍错的科目：${[...new Set(quiz.wrongList.map(e=>e.subject||'?'))].join('、')}</div>`:''}
+  <div style="margin-top:8px;font-size:14px;color:var(--accent2);font-weight:700">${msg}</div>
+  <div style="margin-top:14px;display:flex;gap:10px">
+   <button class="btn" onclick="endQuizMode()" style="background:var(--accent2)">返回错题本</button>
+   <button class="btn" onclick="startQuizMode()" style="background:none;border:1px solid var(--border);color:var(--text2)">再来一轮</button>
+  </div>
+ </div>`;
+}
+function endQuizMode(){
+ quiz=null;
+ _quizToggle(false);
+ loadErrorBook();   // 还原列表（含 mastered/错因的最新状态）
+}
+
 function renderErrors(){
  const container = document.getElementById('error-list');
  if(!container) return;
@@ -2644,10 +2915,12 @@ function renderErrors(){
    const etype = e.error_type||e.type||'other';
    const exam = e.exam||e.source||'';
    const tags = Array.isArray(e.tags)?e.tags:(typeof e.tags==='string'?e.tags.split(','):[]);
+   const cause = CAUSE_LABELS[e.cause]?`<span class="ec-type" style="color:var(--orange);font-weight:700">${CAUSE_LABELS[e.cause]}</span>`:'';
    return `<div class="error-card${e.mastered?' err-mastered':''}">
    <div class="ec-topbar">
      <span class="ec-subject">${e.subject||'?'}</span>
      <span class="ec-type">${etype.replace(/_/g,' ')}</span>
+     ${cause}
      <span class="ec-priority ${priority}">${priority.toUpperCase()}</span>
      <span class="ec-date">${formatRelativeDate(e.date||e.created_at||'')}</span>
    </div>
@@ -2685,7 +2958,8 @@ async function saveError(){
  question: document.getElementById('error-question-input').value,
  solution: document.getElementById('error-solution-input').value,
  type: document.getElementById('error-type-input').value,
- tags: document.getElementById('error-tags-input').value
+ tags: document.getElementById('error-tags-input').value,
+ cause: (document.getElementById('error-cause-input')||{}).value||''
  };
  if(!body.subject||!body.question){ toast('Please fill in subject and question'); return; }
  try{
@@ -2717,15 +2991,33 @@ async function loadSubjectAnalysis(){
  const data = await r.json();
  const errors = Array.isArray(data)?data:(data.errors||data.entries||[]);
  const bySubject = {};
+ const byCause = {};
  errors.forEach(e=>{
  if(!bySubject[e.subject]) bySubject[e.subject] = {count:0,types:{},tags:{}};
  bySubject[e.subject].count++;
  if(e.type) bySubject[e.subject].types[e.type] = (bySubject[e.subject].types[e.type]||0)+1;
+ if(e.cause) byCause[e.cause] = (byCause[e.cause]||0)+1;   // R7-b
  if(e.tags) e.tags.split(',').forEach(t=>{ const tt=t.trim(); if(tt) bySubject[e.subject].tags[tt]=(bySubject[e.subject].tags[tt]||0)+1; });
  });
+ // R7-b：全局错因分布条（放在学科卡之前）
+ const causeTotal=Object.values(byCause).reduce((a,b)=>a+b,0);
+ const causeBar=causeTotal?`
+ <div class="section" style="margin-bottom:14px;border-left:4px solid var(--orange)">
+ <div class="section-title">🧭 错因分布 · Why mistakes happen</div>
+ ${Object.entries(byCause).sort((a,b)=>b[1]-a[1]).map(([c,n])=>{
+ const pct=Math.round(n/causeTotal*100);
+ return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px">
+ <div style="width:88px;white-space:nowrap">${CAUSE_LABELS[c]||c}</div>
+ <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+ <div style="height:100%;width:${pct}%;background:${c==='concept'?'var(--red)':c==='careless'?'var(--yellow)':'var(--accent)'};border-radius:4px"></div>
+ </div>
+ <div style="width:56px;text-align:right;color:var(--text2)">${n} 题 · ${pct}%</div>
+ </div>`;}).join('')}
+ <div style="font-size:12px;color:var(--text2);margin-top:8px">🧩 没懂占比高 → 回到概念重学；⚡ 粗心多 → 做题放慢 + 写步骤；⏱ 没时间多 → 限时练习找节奏。</div>
+ </div>`:'';
  const sorted = Object.entries(bySubject).sort((a,b)=>b[1].count-a[1].count);
  if(!sorted.length){ container.innerHTML='<div class="error-empty">No data yet. Add errors to see analysis.</div>'; return; }
- container.innerHTML = sorted.map(([subj,data])=>{
+ container.innerHTML = causeBar + sorted.map(([subj,data])=>{
  const topType = Object.entries(data.types).sort((a,b)=>b[1]-a[1])[0];
  const risk = data.count>10?'risk':data.count>5?'warning':'good';
  return `<div class="sa-card ${risk}">
@@ -2855,14 +3147,30 @@ function renderTasks(child){
  };
  const grouped={};
  Object.entries(tasks).forEach(([k,v])=>{
+ if(k.indexOf('twp-')===0) return;   // R2：三周计划勾选由 TWP 区渲染，不进 Task List
  const parts=k.split('-');
  const cat=parts.length>1?categories[parts[0]]?parts[0]:'general':'general';
  const isObj=v&&typeof v==='object';
  const done=isObj?v.done:!!v;
  const name=isObj?(v.name||parts.slice(1).join('-')):(parts.length>1?k.slice(cat.length+1):k);
+ const goal=isObj?v.goal||'':'';
  if(!grouped[cat]) grouped[cat]=[];
- grouped[cat].push({key:k,done:done,name:name});
+ grouped[cat].push({key:k,done:done,name:name,goal:goal});
  });
+ // R9：目标进度回写 Watch List（任务 x/y）
+ try{
+  const gAgg={};
+  Object.values(tasks).forEach(v=>{
+   if(!v||typeof v!=='object'||!v.goal) return;
+   gAgg[v.goal]=gAgg[v.goal]||{done:0,total:0};
+   gAgg[v.goal].total++;
+   if(v.done) gAgg[v.goal].done++;
+  });
+  Object.keys(GOAL_LABELS).forEach(g=>{
+   const el=document.getElementById('gp-'+g);
+   if(el) el.textContent=gAgg[g]?` · 🎯 ${gAgg[g].done}/${gAgg[g].total}`:'';
+  });
+ }catch(_){}
  let html='';
  Object.entries(grouped).forEach(([cat,items])=>{
  const catInfo=categories[cat]||categories.general;
@@ -2878,7 +3186,7 @@ function renderTasks(child){
  html+=pendingItems.map(item=>`
  <div class="task-item" onclick="toggleTask('${_esc(child)}','${_esc(item.key)}',this)">
  <div class="cb"></div>
- <span class="task-name" contenteditable="true" onblur="renameTask('${_esc(child)}','${_esc(item.key)}',this.textContent)">${item.name}</span>
+ <span class="task-name" contenteditable="true" onblur="renameTask('${_esc(child)}','${_esc(item.key)}',this.textContent)">${item.name}</span>${item.goal?`<span style="font-size:10px;color:var(--accent2);margin-left:6px;white-space:nowrap">🎯 ${GOAL_LABELS[item.goal]||item.goal}</span>`:''}
  <button class="task-del" onclick="event.stopPropagation();deleteTaskItem('${_esc(child)}','${_esc(item.key)}')">×</button>
  </div>
  `).join('');
@@ -2891,7 +3199,7 @@ function renderTasks(child){
  html+=doneItems.map(item=>`
  <div class="task-item done" onclick="toggleTask('${_esc(child)}','${_esc(item.key)}',this)">
  <div class="cb checked">✓</div>
- <span class="task-name" contenteditable="true" onblur="renameTask('${_esc(child)}','${_esc(item.key)}',this.textContent)">${item.name}</span>
+ <span class="task-name" contenteditable="true" onblur="renameTask('${_esc(child)}','${_esc(item.key)}',this.textContent)">${item.name}</span>${item.goal?`<span style="font-size:10px;color:var(--accent2);margin-left:6px;white-space:nowrap">🎯 ${GOAL_LABELS[item.goal]||item.goal}</span>`:''}
  <button class="task-del" onclick="event.stopPropagation();deleteTaskItem('${_esc(child)}','${_esc(item.key)}')">×</button>
  </div>
  `).join('');
@@ -3153,37 +3461,97 @@ function logout(){
  }catch(e){ window.location.replace('index.html'); }
 }
 
-// ── 三周执行计划（Dashboard 与 Route Compare 共用渲染） ──
-const THREE_WEEK_PLAN = {
-  weeks:[
-    {label:'Week 1 · 启动与摸底', start:'2026-10-15', end:'2026-10-21',
-     goal:'节奏立起来 + 拿到第一份真实数据（本周不学新知识点）',
-     focus:'<b>10/16</b> ESAT Maths1 限时摸底（27题/40min/禁计算器） · <b>10/17</b> 错题三分类：粗心/没懂/没时间'},
-    {label:'Week 2 · 定向补漏', start:'2026-10-22', end:'2026-10-28',
-     goal:'只补「没懂」那一类，不碰已经会的（10/25 留白休息）',
-     focus:'<b>10/26</b> 错题「先遮答案自己写」新规上线 · <b>10/27</b> 微积分 7 集收尾（half term 每天最多一个 2h 深度块）'},
-    {label:'Week 3 · 收口与锁定', start:'2026-10-29', end:'2026-11-04',
-     goal:'把前两周的发现固化成决定',
-     focus:'<b>10/31</b> 第二次 ESAT 限时 + 家长陪同核对主申两校 · <b>11/01</b> 化学保留/降级取舍 + 倒计时扩为 4 项'}
-  ]
-};
+// ── 三周执行计划（R5：数据外置 /api/twp/diya，localStorage 降级；Dashboard 与 Route Compare 共用渲染） ──
+// 加载顺序：先读 localStorage 缓存立即渲染（无感首屏）→ 再拉服务端，有更新则重渲染并写缓存。
+// 断网/接口异常时静默用缓存，页面永不空窗。
+const TWP_CACHE_KEY = 'twp_diya_cache';
+let THREE_WEEK_PLAN = { weeks: [] };
 function renderThreeWeekPlan(elId){
   const el = document.getElementById(elId);
   if(!el) return;
+  if(!THREE_WEEK_PLAN.weeks.length){ el.innerHTML=''; return; }
   const today = new Date().toISOString().slice(0,10);
   el.innerHTML = THREE_WEEK_PLAN.weeks.map(w=>{
     const state = today > w.end ? 'past' : (today >= w.start ? 'current' : '');
     const badge = state==='current' ? '<span class="tw-badge">本周</span>' : '';
+    const actions = (w.actions||[]).map(a=>`
+      <div class="kid-task-card" data-task-id="diya-${a.id}" data-sync="server" data-task-label="${w.label} · ${a.label}" title="点一下就能勾掉" style="margin-top:6px">
+        <span class="kid-task-label" style="font-size:13px">${a.label}${a.sub?` <span style="font-size:11px;color:var(--text2)">· ${a.sub}</span>`:''}</span>
+      </div>`).join('');
+    const sumLabel = (w.actions&&w.actions.length) ? '本周小结：三件都做完了就勾一下' : `这周的「${w.goal}」做完了就勾一下`;
     return `<div class="twp-week ${state}">
      <div class="tw-label">${w.label}<span class="tw-range">${w.range||(w.start.slice(5).replace('-','/')+' – '+w.end.slice(5).replace('-','/'))}</span>${badge}</div>
      <div class="tw-goal">${w.goal}</div>
      <div class="tw-focus">${w.focus}</div>
-     <div class="kid-task-card" data-task-id="diya-${w.start}" data-task-label="${w.label}">
+     ${actions}
+     <div class="kid-task-card" data-task-id="diya-${w.start}" data-sync="server" data-task-label="${w.label}">
        <span class="kid-toggle"></span>
-       <span class="kid-task-label">这周的「${w.goal}」做完了就勾一下</span>
+       <span class="kid-task-label">${sumLabel}</span>
      </div>
     </div>`;
   }).join('');
+  try{ KidCheck.init('#'+elId); }catch(_){}   // 重渲染后恢复勾选绑定（幂等；elId 需加 # 前缀）
+}
+// R3：今天三件事——当前周的日粒度行动卡（数据源同三周计划 /api/twp/diya）
+function currentTwpWeekDiya(){
+ const weeks=THREE_WEEK_PLAN.weeks||[];
+ if(!weeks.length) return null;
+ const today=new Date().toISOString().slice(0,10);
+ let w=weeks.find(x=>today>=x.start&&today<=x.end);
+ if(!w) w=weeks.filter(x=>x.end>=today).sort((a,b)=>a.start<b.start?-1:1)[0]||weeks[weeks.length-1];
+ return w;
+}
+function renderToday3Diya(){
+ const el=document.getElementById('diya-today-3');
+ if(!el) return;
+ const w=currentTwpWeekDiya();
+ if(!w){ el.innerHTML='<div class="empty-state">计划加载中…</div>'; return; }
+ el.innerHTML=`<div style="font-size:12px;color:var(--text2);margin-bottom:2px">${w.label} · 做完一件勾一件</div>`+
+ (w.actions||[]).map(a=>`
+  <div class="kid-task-card" data-task-id="diya-${a.id}" data-sync="server" data-task-label="${w.label} · ${a.label}" title="点一下就能勾掉">
+   <span class="kid-task-label">${a.label}</span>
+   <span class="kid-sub" style="font-size:11px;color:var(--text2)">${a.sub||''}</span>
+  </div>`).join('');
+ try{ KidCheck.init('#diya-today-3'); }catch(_){}   // 重渲染后恢复绑定（幂等）
+}
+function showTwpCycleHint(nextCycleEnd){
+  // 到期提示：周期结束前 7 天内（或已过期）在 Dashboard 顶部提示家长更新计划
+  try{
+    const box = document.getElementById('twp-cycle-hint');
+    if(!box || !nextCycleEnd) return;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const end = new Date(nextCycleEnd + 'T00:00:00');
+    const days = Math.ceil((end - today) / 86400000);
+    if(days < 0){ box.hidden = false; box.innerHTML = '📌 本期三周计划已于 ' + nextCycleEnd + ' 结束。请爸爸妈妈在计划里更新下一周期（改服务器计划即可，无需更新网页）。'; }
+    else if(days <= 7){ box.hidden = false; box.innerHTML = '📌 本期三周计划还有 ' + days + ' 天结束（' + nextCycleEnd + '）。爸爸妈妈可以准备下一周期了。'; }
+  }catch(_){}
+}
+async function loadThreeWeekPlan(){
+  // R2 对账钩子：loadTasks 把服务端 twp-* 状态写回渲染缓存后，重渲染三周卡 + 今天三件事（幂等）
+  window.onTwpReconciled = function(){ renderThreeWeekPlan('twp-diya'); renderToday3Diya(); };
+  // 1) 缓存先行
+  try{
+    const cached = JSON.parse(localStorage.getItem(TWP_CACHE_KEY) || 'null');
+    if(cached && cached.weeks && cached.weeks.length){
+      THREE_WEEK_PLAN = cached;
+      renderThreeWeekPlan('twp-diya');
+      renderToday3Diya();
+      showTwpCycleHint(cached.nextCycleEnd);
+    }
+  }catch(_){}
+  // 2) 服务端真源
+  try{
+    const r = await fetch('/api/twp/diya');
+    if(!r.ok) return;
+    const d = await r.json();
+    if(d.weeks && d.weeks.length){
+      THREE_WEEK_PLAN = { weeks: d.weeks, nextCycleEnd: d.nextCycleEnd };
+      localStorage.setItem(TWP_CACHE_KEY, JSON.stringify(THREE_WEEK_PLAN));
+      renderThreeWeekPlan('twp-diya');
+      renderToday3Diya();
+      showTwpCycleHint(d.nextCycleEnd);
+    }
+  }catch(_){ /* 断网：保持缓存渲染 */ }
 }
 
 // Init 
@@ -3194,7 +3562,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  const theme = localStorage.getItem('diya_theme')||'blue';
  setTheme(theme);
  loadDashboard();
- renderThreeWeekPlan('twp-diya');
+ loadThreeWeekPlan();
 loadStreak();
 // Upload 页初始化（拖拽区 + 历史列表）
 try{ setupUploadZone(); refreshUploadList(); }catch(_){}
@@ -3206,15 +3574,17 @@ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
      if(_t){ _t.textContent='⚠️ LLM 模块未加载(版本 '+APP_VERSION+')：很可能是浏览器/代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或访问 https://112.74.40.8/app.html?v='+APP_VERSION; _t.style.background='#f59e0b'; _t.classList.add('show'); setTimeout(function(){_t.classList.remove('show');_t.style.background='';},15000); }
    }
  }catch(_){}
- // 儿童互动组件：可勾选任务 / 提问卡 / 决策选择 / 完成进度
+ // 儿童互动组件：可勾选任务 / 提问卡 / 决策选择 / 完成进度 / 连续打卡 / 撒彩带
  try{
    KidCheck.init('body');
    KidAsk.init('body');
    KidStamp.init('body');
-   KidProgress.render('#kid-progress');
+   KidProgress.render('#today-progress');   // R3：进度条只统计「今天三件事」
+   KidStreak.listen('#profile-streak');     // 真实连续打卡（每周 1 天休息日不断签），接管侧栏徽章
+   KidCheer.onAllDone('#today-stop', '#diya-today-3');  // 今天三件全勾：撒彩带 + 收工提示
  }catch(_){}
 });
 </script>
-<script src="/assets/kid.js?v=20261019"></script>
+<script src="/assets/kid.js?v=202610191"></script>
 </body>
 </html>

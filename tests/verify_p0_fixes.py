@@ -201,5 +201,82 @@ r = dc.put('/api/decide/jemma', json={'payload': 'not-a-dict'})
 check(r.status_code == 400, f'payload 非对象 400（实际 {r.status_code}）')
 check(A._safe_child('../../etc') == 'diya', '非法 child 回退白名单默认值（防路径穿越）')
 
+
+print('== TWP 三周计划接口（R5：2026-10-19 数据外置）==')
+tc = Authed(A._make_token())
+r = app.test_client().get('/api/twp/diya')
+check(r.status_code == 401, f'未登录访问 twp 401（实际 {r.status_code}）')
+r = tc.get('/api/twp/diya')
+d = r.get_json()
+check(r.status_code == 200 and d['child'] == 'diya', 'GET twp 返回孩子标识')
+check(isinstance(d.get('weeks'), list) and len(d['weeks']) >= 1,
+      f'GET twp 有周数据（weeks={len(d.get("weeks") or [])}；种子或运行时）')
+if d.get('weeks'):
+    w1 = d['weeks'][0]
+    check(all(k in w1 for k in ('label', 'start', 'end')),
+          'weeks[0] 含 label/start/end 必填字段')
+# PUT 全量覆盖 + 读回
+_weeks = [{'id': 'tw1', 'label': 'Test Week', 'start': '2026-11-05', 'end': '2026-11-11',
+           'goal': 'g', 'focus': 'f', 'actions': [{'id': 'a1', 'label': 'x', 'sub': 'y'}]}]
+r = tc.put('/api/twp/diya', json={'weeks': _weeks, 'nextCycleEnd': '2026-11-11'})
+check(r.status_code == 200 and (r.get_json() or {}).get('ok') and r.get_json()['version'] >= 1,
+      'PUT twp 全量覆盖成功且版本号递增')
+r = tc.get('/api/twp/diya')
+d = r.get_json()
+check(d['weeks'][0]['id'] == 'tw1' and d['nextCycleEnd'] == '2026-11-11',
+      'GET 读回更新后的计划（改计划无需发版）')
+r = tc.put('/api/twp/diya', json={'weeks': [{'label': '缺字段'}]})
+check(r.status_code == 400, f'weeks 结构非法 400（实际 {r.status_code}）')
+r = tc.put('/api/twp/diya', json={'weeks': []})
+check(r.status_code == 400, f'空 weeks 400（实际 {r.status_code}）')
+# 恢复种子内容（避免污染后续断言环境）
+_seed = _json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                     'data-seed', 'twp_diya.json'), encoding='utf-8'))
+tc.put('/api/twp/diya', json=_seed)
+
+
+print('== R7 错因字段（cause PUT 读写回环 + stats 聚合）==')
+ac = Authed(A._make_token())
+r = ac.post('/api/errors/diya', json={'subject': 'Maths', 'question': 'R7 cause test', 'date': '2026-10-19'})
+check(r.status_code == 200 and (r.get_json() or {}).get('ok'), 'POST 错题（R7 测试用）')
+_errs = ac.get('/api/errors/diya').get_json()
+_errs = _errs if isinstance(_errs, list) else (_errs.get('errors') or [])
+_rid = next((e['id'] for e in _errs if e.get('question') == 'R7 cause test'), None)
+check(_rid is not None, '新错题有 id（R7 前置）')
+r = ac.put(f'/api/errors/diya/{_rid}', json={'cause': 'concept', 'mastered': False})
+check(r.status_code == 200 and (r.get_json() or {}).get('ok'), 'PUT cause=concept 成功（R7 自测回写）')
+def _err_list():
+    d = ac.get('/api/errors/diya').get_json()
+    return d if isinstance(d, list) else (d.get('errors') or d.get('entries') or [])
+_hit = next((e for e in _err_list() if isinstance(e, dict) and e.get('id') == _rid), {})
+check(_hit.get('cause') == 'concept', 'GET 读回 cause 字段')
+r = ac.get('/api/errors/diya?stats=1')
+d = r.get_json()
+check(d.get('by_cause', {}).get('concept') == 1, f"stats by_cause 聚合正确（{d.get('by_cause')}）")
+r = ac.put(f'/api/errors/diya/{_rid}', json={'cause': ''})
+_hit = next((e for e in _err_list() if isinstance(e, dict) and e.get('id') == _rid), {})
+check(_hit.get('cause', '') == '', 'PUT 空串清除错因（自评会了时复用）')
+r = ac.delete(f'/api/errors/diya/{_rid}')
+check(r.status_code == 200, '清理 R7 测试错题')
+
+print('== Dashboard twp 聚合（R2：三周计划勾选与日常任务分开统计）==')
+ac = Authed(A._make_token())
+r = ac.post('/api/tasks', json={'user': 'diya', 'tasks': {
+    'general-maths-drill': True,
+    'english-petal': {'done': False, 'name': 'PETAL'},
+    'twp-diya-w1-d1': True,
+    'twp-diya-w1-d2': False,
+}})
+check(r.status_code == 200 and (r.get_json() or {}).get('ok'), 'POST /api/tasks 写入含 twp 键的任务集')
+r = ac.get('/api/dashboard/diya')
+d = r.get_json()
+check(d['tasks_total'] == 2 and d['tasks_done'] == 1,
+      f"日常任务统计不含 twp 键（total={d['tasks_total']}, done={d['tasks_done']}）")
+check(d.get('twp_total') == 2 and d.get('twp_done') == 1,
+      f"twp 完成度单独聚合（done={d.get('twp_done')}/{d.get('twp_total')}）")
+# 清理：恢复空任务集，避免影响其他用例
+ac.post('/api/tasks', json={'user': 'diya', 'tasks': {}})
+
+
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
 sys.exit(1 if FAILS else 0)

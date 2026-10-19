@@ -361,7 +361,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 }
 </style>
 <!-- 儿童友好高亮与互动组件层（共享样式表，两个孩子的页面各自独立渲染） -->
-<link rel="stylesheet" href="/assets/kid.css">
+<link rel="stylesheet" href="/assets/kid.css?v=202610191">
 </head>
 <body data-kid-page="jemma">
 
@@ -424,6 +424,9 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <!-- 今日全勾后的「停止提示」：考试/比赛年最重要的交互——完成就收工 -->
 <div id="today-stop" class="kid-stop-hint" hidden>🎉 今天的三件事都完成啦！今天到此为止，去休息吧～</div>
 
+<!-- R5：三周计划到期提示（周期末 7 天 / 已过期时显示） -->
+<div id="twp-cycle-hint" class="kid-stop-hint" hidden style="border-color:var(--orange);background:rgba(255,169,77,0.08)"></div>
+
 <!-- ② 今天打勾卡 Today's 3：一屏内完成主要任务 -->
 <div class="section" style="border-left:4px solid var(--accent2)">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
@@ -454,7 +457,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <div id="study-tips" style="margin-bottom:16px"></div>
 
 <!-- 首屏之下（滚动一次）：该你决定 + 写两句反思 + 笔记 -->
-<div class="kid-decide-card" data-decide-id="latin">
+<div class="kid-decide-card" data-decide-id="latin" data-decide-once="true">
   <div class="kid-h">这件事该你决定 · Your Call</div>
   <p style="font-size:15px;line-height:1.9;margin-top:6px">
     <b>Latin 要不要继续学？</b><br>
@@ -471,7 +474,8 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
   </div>
 </div>
 
-<div class="kid-ask-card" data-placeholder="比如：第 18 题——我当时读到 'displaced' 就以为是说人受伤，其实是说物体被排开。我没敢往下想，怕选错。">
+<div class="kid-ask-card" data-placeholder="比如：第 18 题——我当时读到 'displaced' 就以为是说人受伤，其实是说物体被排开。我没敢往下想，怕选错。"
+     data-question-pool='["上次考试，哪道题你觉得本来能对？","最近哪道错题你现在会做了？","哪道题你跳过了？为什么？","这周上课有没有哪个瞬间你听懂了别人没懂的？"]'>
   <strong>上次考试，哪道题你觉得本来能对？</strong>
   <span class="kid-hint">点开写两句就行：当时卡在哪一步？下次看到这种题，第一反应是什么？</span>
 </div>
@@ -853,7 +857,7 @@ PS portfolio + academic reading notes
 <div id="toast"></div>
 
 <script>window.KID_CHILD='jemma';</script>
-<script src="assets/kid-common.js?v=20261018"></script>
+<script src="assets/kid-common.js?v=20261019"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -1181,10 +1185,11 @@ function renderTasks(child){
  };
  const grouped={};
  Object.entries(tasks).forEach(([k,v])=>{
+ if(k.indexOf('twp-')===0) return;   // R2：三周计划勾选由 Today/My Plan 区渲染，不进 Task List
  const parts=k.split('-');
  const cat=parts.length>1?categories[parts[0]]?parts[0]:'general':'general';
  if(!grouped[cat]) grouped[cat]=[];
- const name=typeof v==='object'?v.name:(parts.length>1?k.slice(cat.length+1):k);
+ const name=typeof v==='object'?(v.name||parts.slice(1).join('-')):(parts.length>1?k.slice(cat.length+1):k);
  const done=typeof v==='object'?v.done:!!v;
  grouped[cat].push({key:k,done:done,name:name});
  });
@@ -1243,7 +1248,7 @@ async function addTask(child){
  if(!name) return;
  const key='general-'+Date.now();
  if(!tasksData[child]) tasksData[child]={};
- tasksData[child][key]={done:false,name:name};
+ tasksData[child][key]={done:false,name:name,created_at:new Date().toISOString()};   // R11：created_at 执行轨迹
  await saveTasks(child);
  renderTasks(child);
  input.value='';
@@ -2324,9 +2329,12 @@ function renderCountdown(){
  }
 }
 
-// ── 三周执行计划（Jemma · Year 9 定制） ──
+// ── 三周执行计划（Jemma · Year 9 定制 · R5：数据外置 /api/twp/jemma，localStorage 降级） ──
 // actions：每周拆成 3 个可勾小行动——Today 打勾卡与 My Plan 周卡共用 data-task-id，勾选自动同步
-const TWP_JEMMA = [
+// 加载顺序与 Diya 相同：缓存先行渲染 → 服务端真源覆盖 → 渲染后恢复组件绑定（幂等）
+const TWP_CACHE_KEY = 'twp_jemma_cache';
+let TWP_JEMMA = [];
+const TWP_JEMMA_SEED = [
  {id:'w1-errors', taskLabel:'Week 1 · 错题本习惯', label:'Week 1 · 起步与习惯', start:'2026-10-15', end:'2026-10-21',
   goal:'错题本习惯建立：每天 1 道错题进 Error Book（含错在哪、正确思路两行）',
   focus:'<b>本周</b> Maths / Science / German 各挑 1 个薄弱点写进周计划 · Bebras 往年题试做 1 套（找手感）',
@@ -2354,6 +2362,7 @@ const TWP_JEMMA = [
 ];
 // 当前周判定：今天落在哪个周区间；都不在就取最近的一周
 function currentTwpWeek(){
+ if(!TWP_JEMMA.length) return null;
  const today=new Date().toISOString().slice(0,10);
  let w=TWP_JEMMA.find(x=>today>=x.start&&today<=x.end);
  if(!w) w=TWP_JEMMA.filter(x=>x.end>=today).sort((a,b)=>a.start<b.start?-1:1)[0]||TWP_JEMMA[TWP_JEMMA.length-1];
@@ -2364,17 +2373,19 @@ function renderToday3(){
  const el=document.getElementById('today-3');
  if(!el) return;
  const w=currentTwpWeek();
+ if(!w){ el.innerHTML='<div class="empty-state">计划加载中…</div>'; return; }
  el.innerHTML=`<div style="font-size:12px;color:var(--text2);margin-bottom:2px">${w.label} · 做完一件勾一件</div>`+
- w.actions.map(a=>`
-  <div class="kid-task-card" data-task-id="${a.id}" data-task-label="${w.taskLabel} · ${a.label}" title="点一下就能勾掉">
+ (w.actions||[]).map(a=>`
+  <div class="kid-task-card" data-task-id="${a.id}" data-sync="server" data-task-label="${w.taskLabel||w.label} · ${a.label}" title="点一下就能勾掉">
    <span class="kid-task-label">${a.label}</span>
-   <span class="kid-sub">${a.sub}</span>
+   <span class="kid-sub">${a.sub||''}</span>
   </div>`).join('');
 }
 // My Plan：三周卡（每周内嵌 3 个可勾小行动，与 Today 同步）
 function renderTwpJemma(){
   const el=document.getElementById('twp-jemma');
   if(!el) return;
+  if(!TWP_JEMMA.length){ el.innerHTML='<div class="empty-state">计划加载中…</div>'; return; }
   const today=new Date().toISOString().slice(0,10);
   const base='background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;';
   el.innerHTML=TWP_JEMMA.map(w=>{
@@ -2382,8 +2393,8 @@ function renderTwpJemma(){
     if(today>w.end) extra='opacity:0.55;';
     else if(today>=w.start) extra='border-left:3px solid var(--accent2);background:rgba(56,217,169,0.08);';
     const badge=today>=w.start&&today<=w.end?'<span style="float:right;font-size:9px;font-weight:700;padding:1px 8px;border-radius:8px;background:var(--accent2);color:#fff">本周</span>':'';
-    const acts=w.actions.map(a=>`
-     <div class="kid-task-card" data-task-id="${a.id}" data-task-label="${w.taskLabel} · ${a.label}" title="点一下就能勾掉" style="margin-bottom:8px">
+    const acts=(w.actions||[]).map(a=>`
+     <div class="kid-task-card" data-task-id="${a.id}" data-sync="server" data-task-label="${w.taskLabel||w.label} · ${a.label}" title="点一下就能勾掉" style="margin-bottom:8px">
       <span class="kid-task-label" style="font-size:13.5px">${a.label}</span>
      </div>`).join('');
     return `<div style="${base}${extra}">
@@ -2394,6 +2405,44 @@ function renderTwpJemma(){
      <div style="margin-top:10px;display:grid;gap:6px">${acts}</div>
      </div>`;
   }).join('');
+}
+// 到期提示：周期结束前 7 天（或已过期）在 Today 顶部提示家长更新
+function showTwpCycleHint(nextCycleEnd){
+  try{
+    const box=document.getElementById('twp-cycle-hint');
+    if(!box||!nextCycleEnd) return;
+    const today=new Date(); today.setHours(0,0,0,0);
+    const end=new Date(nextCycleEnd+'T00:00:00');
+    const days=Math.ceil((end-today)/86400000);
+    if(days<0){ box.hidden=false; box.innerHTML='📌 这期计划已经结束啦。让爸爸妈妈准备下一期吧～'; }
+    else if(days<=7){ box.hidden=false; box.innerHTML='📌 这期计划还有 '+days+' 天就结束咯。'; }
+  }catch(_){}
+}
+async function loadTwpJemma(){
+  // R2 对账钩子：loadTasks 把服务端 twp-* 状态写回渲染缓存后，重渲染两处卡片（幂等）
+  window.onTwpReconciled = function(){ renderToday3(); renderTwpJemma(); initKidLayer(); };
+  // 1) 缓存先行（种子兜底：首次访问且无缓存时用页面内种子，保证离线也有内容）
+  try{
+    const cached=JSON.parse(localStorage.getItem(TWP_CACHE_KEY)||'null');
+    if(cached&&cached.weeks&&cached.weeks.length){
+      TWP_JEMMA=cached.weeks;
+    }else{
+      TWP_JEMMA=TWP_JEMMA_SEED;
+    }
+  }catch(_){ TWP_JEMMA=TWP_JEMMA_SEED; }
+  renderToday3(); renderTwpJemma(); initKidLayer();
+  // 2) 服务端真源
+  try{
+    const r=await fetch('/api/twp/jemma');
+    if(!r.ok) return;
+    const d=await r.json();
+    if(d.weeks&&d.weeks.length){
+      TWP_JEMMA=d.weeks;
+      localStorage.setItem(TWP_CACHE_KEY,JSON.stringify({weeks:d.weeks,nextCycleEnd:d.nextCycleEnd}));
+      renderToday3(); renderTwpJemma(); initKidLayer();
+      showTwpCycleHint(d.nextCycleEnd);
+    }
+  }catch(_){ /* 断网：保持缓存渲染 */ }
 }
 
 // Init
@@ -2406,13 +2455,13 @@ function initKidLayer(){
    KidStamp.init('body');
    KidProgress.render('#kid-progress');
    KidStreak.listen('#kid-streak-box');   // 真实连续打卡（每周 1 天休息日不断签）
-   KidCheer.onAllDone('#today-stop');     // 今日全勾：撒彩带 + 「今天到此为止」
+   KidCheer.onAllDone('#today-stop', '#today-3');   // 今日全勾：撒彩带 + 「今天到此为止」（只看 Today 三件）
  }catch(_){}
 }
 document.addEventListener('DOMContentLoaded',()=>{
  loadProfile();
  loadDashboard();
- renderTwpJemma();
+ loadTwpJemma();
  try{ setupUploadZone(); refreshUploadList(); }catch(_){}
  initKidLayer();
 });
@@ -2493,6 +2542,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 </div>
 </div>
 
-<script src="/assets/kid.js?v=20261019"></script>
+<script src="/assets/kid.js?v=202610191"></script>
 </body>
 </html>
