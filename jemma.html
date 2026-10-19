@@ -2454,7 +2454,7 @@ function initKidLayer(){
    KidStamp.init('body');
    KidProgress.render('#kid-progress');
    KidStreak.listen('#kid-streak-box');   // 真实连续打卡（每周 1 天休息日不断签）
-   KidCheer.onAllDone('#today-stop');     // 今日全勾：撒彩带 + 「今天到此为止」
+   KidCheer.onAllDone('#today-stop', '#today-3');   // 今日全勾：撒彩带 + 「今天到此为止」（只看 Today 三件）
  }catch(_){}
 }
 document.addEventListener('DOMContentLoaded',()=>{

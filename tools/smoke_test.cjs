@@ -42,7 +42,7 @@ const PAGES = [
     requiredFns: [
       'openLLMSettings', 'llmSaveSettings', 'llmTestSettings', 'llmToggleKey',
       'sendChatMsg', 'loadDashboard', 'loadResources', 'toast',
-      'renderTasks', 'markdownToHtml', 'switchTab',
+      'renderTasks', 'markdownToHtml', 'switchTab', 'renderToday3Diya', 'checkReviewDue',
     ],
     modalCases: [
       { name: 'LLM 设置弹窗', btnId: 'llm-settings-btn', modalId: 'llm-settings-modal' },
@@ -345,6 +345,16 @@ function runPage(page) {
             pass.push('Tasks：twp- 键已被 Task List 过滤（不双显示）');
           else
             fail.push('Tasks：twp- 键泄漏进 Task List（过滤失效）');
+          // R3：Diya 页「今天三件事」渲染护栏
+          if (child0 === 'diya') {
+            var t3 = doc.getElementById('diya-today-3');
+            var t3n = t3 ? t3.querySelectorAll('.kid-task-card').length : 0;
+            if (t3n >= 1) pass.push('R3：今天三件事已渲染（' + t3n + ' 张卡，含 server 同步标记=' + (t3.querySelector('[data-sync="server"]') ? '是' : '否') + '）');
+            else fail.push('R3：#diya-today-3 未渲染 Today 卡（数据加载或钩子失效）');
+            var tp = doc.getElementById('today-progress');
+            if (tp && tp.classList.contains('kid-progress')) pass.push('R3：Today 进度条已渲染（scope=今天三件）');
+            else fail.push('R3：#today-progress 未渲染 KidProgress');
+          }
         } catch (e) { fail.push('Tasks：同步断言抛错 ' + e.message); }
         resolve({ pass, fail });
       }, 150);

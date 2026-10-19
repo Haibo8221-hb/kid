@@ -676,13 +676,21 @@ var KidStamp = {
       setTimeout(function () { layer.remove(); }, 2200);
     },
 
-    /** 今日任务全部完成：撒彩带 + 显示「今天到此为止」停止提示（考试年硬约束） */
-    onAllDone: function (msgSelector) {
+    /** 今日任务全部完成：撒彩带 + 显示「今天到此为止」停止提示（考试年硬约束）。
+        scopeSelector 可选：只统计该容器内的任务卡（如 Today's 3 区块），
+        缺省统计全页——避免周级/历史卡挡住「今天完成」的判定。 */
+    onAllDone: function (msgSelector, scopeSelector) {
       if (document.documentElement && document.documentElement.dataset.kidCheerBound) return;
       document.documentElement.dataset.kidCheerBound = '1';
       document.addEventListener('kid:change', function () {
-        var cards = document.querySelectorAll('.kid-task-card');
-        var done = document.querySelectorAll('.kid-task-card.checked');
+        var scope = scopeSelector ? document.querySelector(scopeSelector) : null;
+        var cards = scope
+          ? scope.querySelectorAll('.kid-task-card')
+          : document.querySelectorAll('.kid-task-card');
+        var done = [];
+        for (var i = 0; i < cards.length; i++) {
+          if (cards[i].classList.contains('checked')) done.push(cards[i]);
+        }
         if (!cards.length || cards.length !== done.length) return;
         KidCheer.cheer();
         var box = msgSelector ? document.querySelector(msgSelector) : null;
