@@ -361,7 +361,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 }
 </style>
 <!-- 儿童友好高亮与互动组件层（共享样式表，两个孩子的页面各自独立渲染） -->
-<link rel="stylesheet" href="/assets/kid.css">
+<link rel="stylesheet" href="/assets/kid.css?v=202610191">
 </head>
 <body data-kid-page="jemma">
 
@@ -457,7 +457,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <div id="study-tips" style="margin-bottom:16px"></div>
 
 <!-- 首屏之下（滚动一次）：该你决定 + 写两句反思 + 笔记 -->
-<div class="kid-decide-card" data-decide-id="latin">
+<div class="kid-decide-card" data-decide-id="latin" data-decide-once="true">
   <div class="kid-h">这件事该你决定 · Your Call</div>
   <p style="font-size:15px;line-height:1.9;margin-top:6px">
     <b>Latin 要不要继续学？</b><br>
@@ -474,7 +474,8 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
   </div>
 </div>
 
-<div class="kid-ask-card" data-placeholder="比如：第 18 题——我当时读到 'displaced' 就以为是说人受伤，其实是说物体被排开。我没敢往下想，怕选错。">
+<div class="kid-ask-card" data-placeholder="比如：第 18 题——我当时读到 'displaced' 就以为是说人受伤，其实是说物体被排开。我没敢往下想，怕选错。"
+     data-question-pool='["上次考试，哪道题你觉得本来能对？","最近哪道错题你现在会做了？","哪道题你跳过了？为什么？","这周上课有没有哪个瞬间你听懂了别人没懂的？"]'>
   <strong>上次考试，哪道题你觉得本来能对？</strong>
   <span class="kid-hint">点开写两句就行：当时卡在哪一步？下次看到这种题，第一反应是什么？</span>
 </div>
@@ -1188,7 +1189,7 @@ function renderTasks(child){
  const parts=k.split('-');
  const cat=parts.length>1?categories[parts[0]]?parts[0]:'general':'general';
  if(!grouped[cat]) grouped[cat]=[];
- const name=typeof v==='object'?v.name:(parts.length>1?k.slice(cat.length+1):k);
+ const name=typeof v==='object'?(v.name||parts.slice(1).join('-')):(parts.length>1?k.slice(cat.length+1):k);
  const done=typeof v==='object'?v.done:!!v;
  grouped[cat].push({key:k,done:done,name:name});
  });
@@ -1247,7 +1248,7 @@ async function addTask(child){
  if(!name) return;
  const key='general-'+Date.now();
  if(!tasksData[child]) tasksData[child]={};
- tasksData[child][key]={done:false,name:name};
+ tasksData[child][key]={done:false,name:name,created_at:new Date().toISOString()};   // R11：created_at 执行轨迹
  await saveTasks(child);
  renderTasks(child);
  input.value='';
@@ -2541,6 +2542,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 </div>
 </div>
 
-<script src="/assets/kid.js?v=20261019"></script>
+<script src="/assets/kid.js?v=202610191"></script>
 </body>
 </html>

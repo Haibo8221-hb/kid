@@ -485,7 +485,7 @@ canvas.radar{width:240px!important;height:240px!important}
 .twp-week .tw-focus b{color:var(--orange)}
 </style>
 <!-- 儿童友好高亮与互动组件层（与 Jemma 页面共用同一套，保证高亮逻辑一致） -->
-<link rel="stylesheet" href="/assets/kid.css">
+<link rel="stylesheet" href="/assets/kid.css?v=202610191">
 </head>
 <body data-kid-page="diya">
 
@@ -577,6 +577,13 @@ canvas.radar{width:240px!important;height:240px!important}
 </div>
 <div id="diya-today-3" style="display:grid;gap:10px"></div>
 <div id="today-progress" data-kid-label="今天完成了几件" style="margin:12px 0 0"></div>
+<!-- R8：本周反思（问题池按周轮换，保持新鲜感） -->
+<div class="kid-ask-card" style="margin-top:14px"
+     data-placeholder="写两句就行，写给自己看的。"
+     data-question-pool='["本周哪件事最卡？卡在哪一步？","这周有没有一件小事让你自豪？","下周最想改进的一点是什么？","哪一科让你最累？为什么？"]'>
+  <strong>本周反思</strong>
+  <span class="kid-hint">点开写两句就行——每周换一个问题。</span>
+</div>
 </div>
 
 <!-- 本周复盘提醒（R6）：距上次 Weekly Review ≥7 天时显示，可当周关闭 -->
@@ -596,7 +603,7 @@ canvas.radar{width:240px!important;height:240px!important}
 </div>
 
 <!-- 需要你自己决定：家长不替你选 -->
-<div class="section kid-decide-card kid-has-stamp" data-decide-id="diya-call">
+<div class="section kid-decide-card kid-has-stamp" data-decide-id="diya-call" data-decide-once="true">
  <div class="section-title"> 需要你自己决定 · Your Call</div>
  <p class="kid-lead">下面这几件事，最后拍板的是你。选完记下来就行——之后如果想改，随时能改。</p>
  <div class="kid-h">今天先做哪一门？</div>
@@ -1421,8 +1428,10 @@ async function addTask(child){
  const goal=(goalSel&&goalSel.value)?goalSel.value:'';
  const key='general-'+Date.now();
  if(!tasksData[child]) tasksData[child]={};
- // R9：选了目标则存对象值（done/name/goal），renderTasks 据此显示徽章并回写 Watch List 进度
- tasksData[child][key]=goal?{done:false,name:name,goal:goal}:false;
+ // R9+R11：选了目标存 goal；统一携带 created_at（执行轨迹/拖延统计）
+ tasksData[child][key]=goal
+   ?{done:false,name:name,goal:goal,created_at:new Date().toISOString()}
+   :{done:false,name:name,created_at:new Date().toISOString()};
  await saveTasks(child);
  input.value='';
 }
@@ -1431,7 +1440,16 @@ async function toggleTask(child,key,el){
  const isObj = entry && typeof entry === 'object';
  const currentDone = isObj ? entry.done : entry;
  const done = !currentDone;
- if(isObj){ entry.done = done; } else { tasksData[child][key] = done; }
+ // R11：勾选写 completed_at、取消清除——执行轨迹（复盘统计「本周实际完成/平均拖延」用）
+ if(isObj){
+  entry.done = done;
+  if(done) entry.completed_at = new Date().toISOString(); else delete entry.completed_at;
+ } else {
+  // 布尔旧值任务：勾选时升级为对象携带时间戳；name 由 key 派生（renderTasks 兼容）
+  tasksData[child][key] = done
+    ? {done:true, name:key.split('-').slice(1).join('-').replace(/_/g,' '), completed_at:new Date().toISOString()}
+    : false;
+ }
  await saveTasks(child);
  renderTasks(child);  // full re-render to move between pending/done sections
  if(done) loadStreak(true);  // 勾选任务 = 今日学习打卡，刷新侧栏真实连续天数
@@ -2445,6 +2463,23 @@ async function reviewSubmit(){
   date:new Date().toISOString().split('T')[0]
  };
  if(!review.wentwell&&!review.hard&&!review.proud){toast('Please fill in at least one section');return;}
+ // R11：执行轨迹——本周实际完成 N 件 + 平均拖延 X 天（completed_at - created_at）
+ try{
+  const wkAgo=Date.now()-7*86400000;
+  let doneN=0, delaySum=0, delayN=0;
+  Object.values(tasksData['diya']||{}).forEach(v=>{
+   if(!v||typeof v!=='object'||!v.done||!v.completed_at) return;
+   const ct=Date.parse(v.completed_at);
+   if(isNaN(ct)||ct<wkAgo) return;
+   doneN++;
+   if(v.created_at){
+    const dd=(ct-Date.parse(v.created_at))/86400000;
+    if(!isNaN(dd)&&dd>=0){ delaySum+=dd; delayN++; }
+   }
+  });
+  review.sys_tasks_done=doneN;
+  if(delayN) review.sys_avg_days=Math.round(delaySum/delayN*10)/10;
+ }catch(_){}
  // R12：下周 top priority 自动转为任务（每 ISO 周幂等，防重复提交重复建）
  try{
   if(review.priority){
@@ -2480,6 +2515,7 @@ function renderReviews(container,reviews){
    <div class="rh-stats">
     <span class="rh-stat ${(r.completion||0)>=80?'good':(r.completion||0)>=50?'ok':'bad'}">Completion: ${r.completion||0}%</span>
     ${r.sys_completion!==''&&r.sys_completion!=null?`<span class="rh-stat" style="color:var(--text2)">系统: ${r.sys_completion}%</span>`:''}
+    ${r.sys_tasks_done!=null?`<span class="rh-stat" style="color:var(--text2)">本周实际完成 ${r.sys_tasks_done} 件${r.sys_avg_days!=null?' · 平均拖延 '+r.sys_avg_days+' 天':''}</span>`:''}
     <span class="rh-stat ${(r.rating||0)>=8?'good':(r.rating||0)>=5?'ok':'bad'}">Rating: ${r.rating||0}/10</span>
     ${r.task_created?'<span class="rh-stat good">✅ 优先级已转任务</span>':''}
    </div>
@@ -3549,6 +3585,6 @@ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
  }catch(_){}
 });
 </script>
-<script src="/assets/kid.js?v=20261019"></script>
+<script src="/assets/kid.js?v=202610191"></script>
 </body>
 </html>

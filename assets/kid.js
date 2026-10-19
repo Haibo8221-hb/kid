@@ -184,6 +184,18 @@
       $$(root, '.kid-ask-card').forEach(function (card) {
         var idx = docIndex(card, '.kid-ask-card');
         var key = 'kid-ask-' + pageId() + '-' + idx;
+        // R8：周轮换问题池——data-question-pool 为 JSON 数组，按自然周（epoch 周）轮换，
+        // 同一周内问题固定；无池或不合法时保持页面原文案
+        if (card.dataset.questionPool) {
+          try {
+            var pool = JSON.parse(card.dataset.questionPool);
+            if (pool && pool.length) {
+              var wi = Math.floor(Date.now() / 604800000);
+              var qEl = card.querySelector('strong');
+              if (qEl) qEl.textContent = pool[wi % pool.length];
+            }
+          } catch (e) { /* 池格式错误：保持原文案 */ }
+        }
         if (!claim(card)) { KidAsk._sync(card, key); return; }
 
         /* 问题本体：没有 .kid-ask-q 就把原有内容收进去，保证斜体样式与点击区都在 */
@@ -414,6 +426,7 @@ var KidStamp = {
           opt.setAttribute('aria-checked', 'false');
           var pick = function () {
             store(key, opt.dataset.choice);
+            store(key + '__at', new Date().toISOString());   // R14：记录决定时间（归档条显示）
             KidStamp._syncGroup(g);
             KidStamp._syncBadge(card);
             notify();
@@ -463,12 +476,39 @@ var KidStamp = {
     });
     card.classList.toggle('kid-has-pick', picked > 0);
     var stamp = card.querySelector('.kid-stamp');
-    if (!stamp) return;
-    if (!picked) { stamp.textContent = '待你决定'; return; }
-    if (groups.length > 1) { stamp.textContent = '已决定 ' + picked + '/' + groups.length; return; }
-    var label = firstLabel || '';
-    if (label.length > 12) label = label.slice(0, 12) + '…';
-    stamp.textContent = '你的选择：' + label;
+    if (!picked) { if (stamp) stamp.textContent = '待你决定'; return; }
+    if (groups.length > 1) { if (stamp) stamp.textContent = '已决定 ' + picked + '/' + groups.length; }
+    else {
+      var label0 = firstLabel || '';
+      if (label0.length > 12) label0 = label0.slice(0, 12) + '…';
+      if (stamp) stamp.textContent = '你的选择：' + label0;
+    }
+    // R14：data-decide-once 卡——全部问题已决时折叠为归档条（点开可改选）
+    if (card.dataset.decideOnce === 'true') {
+      var bar = card.querySelector('.kid-decided-bar');
+      var allPicked = picked >= groups.length;
+      if (allPicked) {
+        card.classList.add('kid-decided');
+        if (!bar) {
+          bar = el('button', 'kid-decided-bar');
+          bar.type = 'button';
+          bar.setAttribute('aria-expanded', 'false');
+          bar.addEventListener('click', function () {
+            var open = card.classList.toggle('kid-expanded');
+            bar.setAttribute('aria-expanded', open ? 'true' : 'false');
+          });
+          card.insertBefore(bar, card.firstChild);
+        }
+        var at = '';
+        try { at = load(groups[0].dataset.kidStampKey + '__at') || ''; } catch (e) {}
+        var dstr = at ? '（' + at.slice(0, 10) + '）' : '';
+        bar.textContent = '✅ 已决定：' + (firstLabel || '') + dstr + ' · 点开可改';
+      } else {
+        card.classList.remove('kid-decided');
+        card.classList.remove('kid-expanded');
+        if (bar) bar.remove();
+      }
+    }
   },
 
   /* ---- 服务端同步：localStorage 即时渲染，服务端做跨设备真源 ---- */

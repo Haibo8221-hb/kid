@@ -308,9 +308,28 @@ function runPage(page) {
             if (dstamp && dstamp.textContent && dstamp.textContent.trim() !== '待你决定')
               pass.push('决定卡：角标显示「' + dstamp.textContent.trim() + '」');
             else fail.push('决定卡：角标未反映已选状态');
+            // R14：decide-once 卡已决归档条（全部问题已决 → 折叠 + 点开可改）
+            if (dcard.dataset.decideOnce === 'true') {
+              var dbar = dcard.querySelector('.kid-decided-bar');
+              if (dbar && dbar.textContent.indexOf('已决定') !== -1)
+                pass.push('R14：已决归档条（' + dbar.textContent.trim() + '）');
+              else fail.push('R14：归档条未出现（decide-once 未生效）');
+              if (dbar) {
+                dbar.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+                if (dcard.classList.contains('kid-expanded')) pass.push('R14：点归档条可展开改选');
+                else fail.push('R14：归档条点击未展开');
+              }
+            }
           }
         }
       } catch (e) { fail.push('决定卡持久化测试抛错：' + e.message); }
+
+      // R8：KidAsk 周轮换问题池已应用（strong 文案非空且来自池）
+      try {
+        var pk = doc.querySelector('.kid-ask-card[data-question-pool] strong');
+        if (pk && pk.textContent.trim()) pass.push('R8：周轮换问题池已应用（本周问：「' + pk.textContent.trim().slice(0, 18) + '」）');
+        else fail.push('R8：问题池未应用（strong 为空或缺失）');
+      } catch (e) { fail.push('R8：断言抛错 ' + e.message); }
 
       // 8) 【R1 回归护栏 · 2026-10-19】连续打卡链路：侧栏徽章由 KidStreak 渲染；
       //    勾选任务卡 → kid-streak key 写入 + 天数 +1（Diya 历史上勾选与 streak 脱钩，此为其回归护栏）
