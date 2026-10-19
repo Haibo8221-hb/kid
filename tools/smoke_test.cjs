@@ -48,13 +48,38 @@ const PAGES = [
       { name: 'LLM 设置弹窗', btnId: 'llm-settings-btn', modalId: 'llm-settings-modal' },
       { name: '头像选择弹窗', btnId: 'profile-avatar', modalId: 'avatar-modal' },
     ],
-    fetchMock: () => Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({
-        endpoint: 'https://api.openai.com/v1', model: 'gpt-4o',
-        temperature: 0.3, has_key: true, key_masked: 'sk-a…z',
-      }),
-    }),
+    streakGuard: true,
+    // url 感知 fetch mock：/api/twp 返回周计划（R5 异步化后三周卡由数据驱动渲染，
+    // 不 mock 它则 .kid-task-card 不渲染，R1 的 Streak/Cheer 回归断言会被静默跳过）
+    fetchMock: (url) => {
+      if (String(url).includes('/api/twp')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            child: 'diya', updatedAt: '2026-10-19T00:00:00+03:00',
+            nextCycleEnd: '2026-11-04', version: 1,
+            weeks: [
+              { id: 'w1', label: 'Week 1 · 启动与摸底', start: '2026-10-15', end: '2026-10-21',
+                goal: '节奏立起来', focus: '摸底',
+                actions: [{ id: 'w1-d1', label: 'ESAT 摸底', sub: '40 分钟' }] },
+              { id: 'w2', label: 'Week 2 · 定向补漏', start: '2026-10-22', end: '2026-10-28',
+                goal: '只补没懂的', focus: '补漏',
+                actions: [{ id: 'w2-d1', label: '补一类错题', sub: '' }] },
+              { id: 'w3', label: 'Week 3 · 收口与锁定', start: '2026-10-29', end: '2026-11-04',
+                goal: '固化决定', focus: '锁定',
+                actions: [{ id: 'w3-d1', label: '第二次 ESAT', sub: '' }] },
+            ],
+          }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          endpoint: 'https://api.openai.com/v1', model: 'gpt-4o',
+          temperature: 0.3, has_key: true, key_masked: 'sk-a…z',
+        }),
+      });
+    },
   },
   {
     name: 'jemma.html (Jemma)',
@@ -69,6 +94,7 @@ const PAGES = [
       { name: '头像选择弹窗', btnId: 'profile-avatar', modalId: 'avatar-modal' },
       { name: '错题弹窗', btnId: 'add-error-btn', modalId: 'error-modal' },
     ],
+    streakGuard: true,
     fetchMock: () => Promise.resolve({ ok: true, json: () => Promise.resolve({}) }),
   },
 ];
@@ -255,6 +281,40 @@ function runPage(page) {
           }
         }
       } catch (e) { fail.push('决定卡持久化测试抛错：' + e.message); }
+
+      // 8) 【R1 回归护栏 · 2026-10-19】连续打卡链路：侧栏徽章由 KidStreak 渲染；
+      //    勾选任务卡 → kid-streak key 写入 + 天数 +1（Diya 历史上勾选与 streak 脱钩，此为其回归护栏）
+      try {
+        if (page.streakGuard && typeof window.KidStreak === 'object') {
+          var skey = 'kid-streak-' + (window.KID_CHILD || 'unknown');
+          window.localStorage.removeItem(skey);
+          window.KidStreak.render('#profile-streak');
+          var sBox = doc.getElementById('profile-streak');
+          if (sBox && /连打卡|开始/.test(sBox.textContent))
+            pass.push('Streak：侧栏徽章已由 KidStreak 渲染（' + sBox.textContent.trim() + '）');
+          else if (sBox)
+            fail.push('Streak：侧栏 #profile-streak 仍是旧文案「' + sBox.textContent.trim() + '」（未接入 KidStreak）');
+          // 勾选一张任务卡 → 当天打卡写入
+          var tcard = doc.querySelector('.kid-task-card');
+          if (tcard) {
+            tcard.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+            var sraw = window.localStorage.getItem(skey);
+            var st = sraw ? JSON.parse(sraw) : null;
+            if (st && st.count === 1 && st.lastDate) pass.push('Streak：勾选任务卡当天打卡已写入（count=1）');
+            else fail.push('Streak：勾选任务卡未写入打卡（key=' + skey + '，raw=' + sraw + '）——勾选与打卡脱钩');
+          }
+          // 全勾 → 停止提示可见（KidCheer.onAllDone 绑定验证）
+          var cards = [...doc.querySelectorAll('.kid-task-card')];
+          var stopHint = doc.getElementById('today-stop');
+          if (cards.length && stopHint) {
+            cards.forEach(function (c) { if (!c.classList.contains('checked')) c.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })); });
+            if (!stopHint.hidden) pass.push('Cheer：任务全勾后「今天到此为止」停止提示已显示');
+            else fail.push('Cheer：任务全勾后 #today-stop 仍隐藏（KidCheer.onAllDone 未接入）');
+          }
+          window.localStorage.removeItem(skey);
+        }
+      } catch (e) { fail.push('Streak/Cheer 回归测试抛错：' + e.message); }
+
       resolve({ pass, fail });
     }, 400);
   });

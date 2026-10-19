@@ -201,5 +201,39 @@ r = dc.put('/api/decide/jemma', json={'payload': 'not-a-dict'})
 check(r.status_code == 400, f'payload 非对象 400（实际 {r.status_code}）')
 check(A._safe_child('../../etc') == 'diya', '非法 child 回退白名单默认值（防路径穿越）')
 
+
+print('== TWP 三周计划接口（R5：2026-10-19 数据外置）==')
+tc = Authed(A._make_token())
+r = app.test_client().get('/api/twp/diya')
+check(r.status_code == 401, f'未登录访问 twp 401（实际 {r.status_code}）')
+r = tc.get('/api/twp/diya')
+d = r.get_json()
+check(r.status_code == 200 and d['child'] == 'diya', 'GET twp 返回孩子标识')
+check(isinstance(d.get('weeks'), list) and len(d['weeks']) >= 1,
+      f'GET twp 有周数据（weeks={len(d.get("weeks") or [])}；种子或运行时）')
+if d.get('weeks'):
+    w1 = d['weeks'][0]
+    check(all(k in w1 for k in ('label', 'start', 'end')),
+          'weeks[0] 含 label/start/end 必填字段')
+# PUT 全量覆盖 + 读回
+_weeks = [{'id': 'tw1', 'label': 'Test Week', 'start': '2026-11-05', 'end': '2026-11-11',
+           'goal': 'g', 'focus': 'f', 'actions': [{'id': 'a1', 'label': 'x', 'sub': 'y'}]}]
+r = tc.put('/api/twp/diya', json={'weeks': _weeks, 'nextCycleEnd': '2026-11-11'})
+check(r.status_code == 200 and (r.get_json() or {}).get('ok') and r.get_json()['version'] >= 1,
+      'PUT twp 全量覆盖成功且版本号递增')
+r = tc.get('/api/twp/diya')
+d = r.get_json()
+check(d['weeks'][0]['id'] == 'tw1' and d['nextCycleEnd'] == '2026-11-11',
+      'GET 读回更新后的计划（改计划无需发版）')
+r = tc.put('/api/twp/diya', json={'weeks': [{'label': '缺字段'}]})
+check(r.status_code == 400, f'weeks 结构非法 400（实际 {r.status_code}）')
+r = tc.put('/api/twp/diya', json={'weeks': []})
+check(r.status_code == 400, f'空 weeks 400（实际 {r.status_code}）')
+# 恢复种子内容（避免污染后续断言环境）
+_seed = _json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                     'data-seed', 'twp_diya.json'), encoding='utf-8'))
+tc.put('/api/twp/diya', json=_seed)
+
+
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
 sys.exit(1 if FAILS else 0)

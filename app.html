@@ -52,6 +52,8 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 rgba(79,140,255,0)}50%{box-shadow:0 0 12px rgba(79,140,255,0.3)}}
 .avatar-picker{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 0}
 .profile-streak{font-size:11px;color:var(--orange);margin-top:6px;font-weight:600}
+/* R1：KidStreak 接管侧栏徽章后，胶囊样式在侧栏窄容器内收缩适配 */
+.profile-streak.kid-streak{display:flex;justify-content:center;padding:4px 10px;font-size:12px;gap:6px}
 .avatar-option{font-size:32px;padding:8px;cursor:pointer;border-radius:8px;text-align:center;transition:transform 0.15s,background 0.15s}
 .avatar-option:hover{transform:scale(1.25);background:var(--surface2)}
 .avatar-option.selected{background:var(--accent);border-radius:12px}
@@ -565,7 +567,11 @@ canvas.radar{width:240px!important;height:240px!important}
 <!-- Countdown Strip -->
 <div id="countdown-strip" class="countdown-strip"></div>
 
-<!-- Next 3 Weeks Plan（靠前展示 · 与 Route Compare 同源渲染） -->
+<!-- 今日任务全部完成后的「停止提示」：完成就收工，不过度学习（与 Jemma 同款交互） -->
+<div id="today-stop" class="kid-stop-hint" hidden>🎉 本周三件事都完成啦！今天到此为止，去休息吧～</div>
+
+<!-- Next 3 Weeks Plan（靠前展示 · R5：数据来自 /api/twp/diya，到期自动提示） -->
+<div id="twp-cycle-hint" class="section" hidden style="border-left:4px solid var(--orange);padding:10px 16px;font-size:13px;line-height:1.7;color:var(--text2);margin-bottom:10px"></div>
 <div class="section" style="border-left:4px solid var(--accent2)">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
  <div class="section-title" style="margin:0"> 📌 Next 3 Weeks · 15 Oct → 4 Nov</div>
@@ -2056,29 +2062,25 @@ async function submitSMCRecord(){
 
 // Streak（bump=true 表示今日已完成至少一个任务：续签或重开）
 function loadStreak(bump){
- const key = 'diya_streak';
- let data;
- try { data = JSON.parse(localStorage.getItem(key)); } catch(e) {}
- if (!data) data = { count: 0, lastDate: null };
- const today = new Date().toISOString().split('T')[0];
- const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
- if (bump && data.lastDate !== today) {
-  data.count = data.lastDate === yesterday ? data.count + 1 : 1;
-  data.lastDate = today;
- } else if (data.lastDate === yesterday) {
-  // Continued streak — keep count
- } else if (data.lastDate !== today) {
-  data.count = 0;
- }
-
- const el = document.getElementById('profile-streak');
- if (el) {
-  el.textContent = `Streak ${data.count} day${data.count !== 1 ? 's' : ''}`;
-  el.style.color = data.count >= 7 ? 'var(--accent2)' : data.count >= 3 ? 'var(--orange)' : 'var(--text2)';
- }
-
- localStorage.setItem(key, JSON.stringify(data));
+ /* R1（2026-10-19）：Diya 侧栏 streak 已由 KidStreak 组件接管（真实连续打卡 + 每周休息日）。
+    本函数仅保留两个职责：
+    1) 一次性迁移：旧 diya_streak key → kid-streak-diya（KidStreak 格式），只在 KidStreak key 为空时执行
+    2) 兼容旧调用点：toggleTask(bump=true) 转调 KidStreak.record()；渲染统一交给 KidStreak.listen */
+ try{
+  if(typeof KidStreak === 'undefined') return;
+  const newKey = 'kid-streak-diya';
+  let migrated = null;
+  try { migrated = JSON.parse(localStorage.getItem(newKey)); } catch(e) {}
+  if(!migrated){
+   let old = null;
+   try { old = JSON.parse(localStorage.getItem('diya_streak')); } catch(e) {}
+   if(old && old.count > 0){
+    KidStreak._write({ count: old.count|0, lastDate: old.lastDate || null, restWeek: null });
+   }
+  }
+  if(bump) KidStreak.record();
+  KidStreak.render('#profile-streak');
+ }catch(e){ /* KidStreak 未加载时静默：侧栏维持原文案，不影响其他功能 */ }
 }
 
 // Diya Grades (Jemma-style subject cards) 
@@ -3153,37 +3155,71 @@ function logout(){
  }catch(e){ window.location.replace('index.html'); }
 }
 
-// ── 三周执行计划（Dashboard 与 Route Compare 共用渲染） ──
-const THREE_WEEK_PLAN = {
-  weeks:[
-    {label:'Week 1 · 启动与摸底', start:'2026-10-15', end:'2026-10-21',
-     goal:'节奏立起来 + 拿到第一份真实数据（本周不学新知识点）',
-     focus:'<b>10/16</b> ESAT Maths1 限时摸底（27题/40min/禁计算器） · <b>10/17</b> 错题三分类：粗心/没懂/没时间'},
-    {label:'Week 2 · 定向补漏', start:'2026-10-22', end:'2026-10-28',
-     goal:'只补「没懂」那一类，不碰已经会的（10/25 留白休息）',
-     focus:'<b>10/26</b> 错题「先遮答案自己写」新规上线 · <b>10/27</b> 微积分 7 集收尾（half term 每天最多一个 2h 深度块）'},
-    {label:'Week 3 · 收口与锁定', start:'2026-10-29', end:'2026-11-04',
-     goal:'把前两周的发现固化成决定',
-     focus:'<b>10/31</b> 第二次 ESAT 限时 + 家长陪同核对主申两校 · <b>11/01</b> 化学保留/降级取舍 + 倒计时扩为 4 项'}
-  ]
-};
+// ── 三周执行计划（R5：数据外置 /api/twp/diya，localStorage 降级；Dashboard 与 Route Compare 共用渲染） ──
+// 加载顺序：先读 localStorage 缓存立即渲染（无感首屏）→ 再拉服务端，有更新则重渲染并写缓存。
+// 断网/接口异常时静默用缓存，页面永不空窗。
+const TWP_CACHE_KEY = 'twp_diya_cache';
+let THREE_WEEK_PLAN = { weeks: [] };
 function renderThreeWeekPlan(elId){
   const el = document.getElementById(elId);
   if(!el) return;
+  if(!THREE_WEEK_PLAN.weeks.length){ el.innerHTML=''; return; }
   const today = new Date().toISOString().slice(0,10);
   el.innerHTML = THREE_WEEK_PLAN.weeks.map(w=>{
     const state = today > w.end ? 'past' : (today >= w.start ? 'current' : '');
     const badge = state==='current' ? '<span class="tw-badge">本周</span>' : '';
+    const actions = (w.actions||[]).map(a=>`
+      <div class="kid-task-card" data-task-id="diya-${a.id}" data-task-label="${w.label} · ${a.label}" title="点一下就能勾掉" style="margin-top:6px">
+        <span class="kid-task-label" style="font-size:13px">${a.label}${a.sub?` <span style="font-size:11px;color:var(--text2)">· ${a.sub}</span>`:''}</span>
+      </div>`).join('');
+    const sumLabel = (w.actions&&w.actions.length) ? '本周小结：三件都做完了就勾一下' : `这周的「${w.goal}」做完了就勾一下`;
     return `<div class="twp-week ${state}">
      <div class="tw-label">${w.label}<span class="tw-range">${w.range||(w.start.slice(5).replace('-','/')+' – '+w.end.slice(5).replace('-','/'))}</span>${badge}</div>
      <div class="tw-goal">${w.goal}</div>
      <div class="tw-focus">${w.focus}</div>
+     ${actions}
      <div class="kid-task-card" data-task-id="diya-${w.start}" data-task-label="${w.label}">
        <span class="kid-toggle"></span>
-       <span class="kid-task-label">这周的「${w.goal}」做完了就勾一下</span>
+       <span class="kid-task-label">${sumLabel}</span>
      </div>
     </div>`;
   }).join('');
+  try{ KidCheck.init('#'+elId); }catch(_){}   // 重渲染后恢复勾选绑定（幂等；elId 需加 # 前缀）
+}
+function showTwpCycleHint(nextCycleEnd){
+  // 到期提示：周期结束前 7 天内（或已过期）在 Dashboard 顶部提示家长更新计划
+  try{
+    const box = document.getElementById('twp-cycle-hint');
+    if(!box || !nextCycleEnd) return;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const end = new Date(nextCycleEnd + 'T00:00:00');
+    const days = Math.ceil((end - today) / 86400000);
+    if(days < 0){ box.hidden = false; box.innerHTML = '📌 本期三周计划已于 ' + nextCycleEnd + ' 结束。请爸爸妈妈在计划里更新下一周期（改服务器计划即可，无需更新网页）。'; }
+    else if(days <= 7){ box.hidden = false; box.innerHTML = '📌 本期三周计划还有 ' + days + ' 天结束（' + nextCycleEnd + '）。爸爸妈妈可以准备下一周期了。'; }
+  }catch(_){}
+}
+async function loadThreeWeekPlan(){
+  // 1) 缓存先行
+  try{
+    const cached = JSON.parse(localStorage.getItem(TWP_CACHE_KEY) || 'null');
+    if(cached && cached.weeks && cached.weeks.length){
+      THREE_WEEK_PLAN = cached;
+      renderThreeWeekPlan('twp-diya');
+      showTwpCycleHint(cached.nextCycleEnd);
+    }
+  }catch(_){}
+  // 2) 服务端真源
+  try{
+    const r = await fetch('/api/twp/diya');
+    if(!r.ok) return;
+    const d = await r.json();
+    if(d.weeks && d.weeks.length){
+      THREE_WEEK_PLAN = { weeks: d.weeks, nextCycleEnd: d.nextCycleEnd };
+      localStorage.setItem(TWP_CACHE_KEY, JSON.stringify(THREE_WEEK_PLAN));
+      renderThreeWeekPlan('twp-diya');
+      showTwpCycleHint(d.nextCycleEnd);
+    }
+  }catch(_){ /* 断网：保持缓存渲染 */ }
 }
 
 // Init 
@@ -3194,7 +3230,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  const theme = localStorage.getItem('diya_theme')||'blue';
  setTheme(theme);
  loadDashboard();
- renderThreeWeekPlan('twp-diya');
+ loadThreeWeekPlan();
 loadStreak();
 // Upload 页初始化（拖拽区 + 历史列表）
 try{ setupUploadZone(); refreshUploadList(); }catch(_){}
@@ -3206,12 +3242,14 @@ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
      if(_t){ _t.textContent='⚠️ LLM 模块未加载(版本 '+APP_VERSION+')：很可能是浏览器/代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或访问 https://112.74.40.8/app.html?v='+APP_VERSION; _t.style.background='#f59e0b'; _t.classList.add('show'); setTimeout(function(){_t.classList.remove('show');_t.style.background='';},15000); }
    }
  }catch(_){}
- // 儿童互动组件：可勾选任务 / 提问卡 / 决策选择 / 完成进度
+ // 儿童互动组件：可勾选任务 / 提问卡 / 决策选择 / 完成进度 / 连续打卡 / 撒彩带
  try{
    KidCheck.init('body');
    KidAsk.init('body');
    KidStamp.init('body');
    KidProgress.render('#kid-progress');
+   KidStreak.listen('#profile-streak');   // 真实连续打卡（每周 1 天休息日不断签），接管侧栏徽章
+   KidCheer.onAllDone('#today-stop');     // 今日全勾：撒彩带 + 「今天到此为止」
  }catch(_){}
 });
 </script>
