@@ -72,6 +72,24 @@ const PAGES = [
           }),
         });
       }
+      if (String(url).includes('/api/errors/')) {
+        if (String(url).includes('stats=1')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              child: 'diya', total: 2, by_subject: { Maths: 2 }, by_cause: { careless: 1 },
+              mastered_total: 0, active_total: 2, new_this_week: 2,
+            }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            { id: 'e1', subject: 'Maths', question: 'R7 mock Q1', solution: 'S1', date: '2026-10-18', type: 'concept' },
+            { id: 'e2', subject: 'Physics', question: 'R7 mock Q2', solution: 'S2', date: '2026-10-19', type: 'careless' },
+          ]),
+        });
+      }
       if (String(url).includes('/api/tasks')) {
         // 返回含 twp- 键的任务集：① 恢复 Task List onclick 护栏（toggleTask 等）
         // ② 验证 R2 过滤——twp 键不得渲染进 Task List（由 TWP 区渲染）
@@ -356,6 +374,37 @@ function runPage(page) {
             else fail.push('R3：#today-progress 未渲染 KidProgress');
           }
         } catch (e) { fail.push('Tasks：同步断言抛错 ' + e.message); }
+
+        // R7：Test me 遮挡自测链路——需先 loadErrorBook 灌入 mock 错题（Error Book tab
+        // 在 smoke 里未被打开过，池子为空），加载完成后再启动自测并断言
+        if (child0 === 'diya' && typeof window.loadErrorBook === 'function' &&
+            typeof window.startQuizMode === 'function') {
+          window.loadErrorBook().then(function () {
+            try {
+              window.startQuizMode();
+              var tm = doc.getElementById('test-mode-panel');
+              if (tm && !tm.hidden && tm.innerHTML.indexOf('Test me') !== -1)
+                pass.push('R7：Test me 自测面板已启动（题面渲染，mock 错题入池）');
+              else { fail.push('R7：Test me 未启动（错题数据未加载或空池）'); return; }
+              var leak = tm.innerHTML.indexOf('S1') !== -1;
+              if (leak) fail.push('R7：题面直接泄漏了答案文本（遮挡失效）');
+              else pass.push('R7：题面未泄漏答案文本（遮挡生效）');
+              window.quizWrong();
+              var crow = doc.getElementById('quiz-cause-row');
+              var brow = doc.getElementById('quiz-btn-row');
+              if (crow && !crow.hidden && brow && brow.style.display === 'none')
+                pass.push('R7：「还是不会」后错因三选一出现且评价按钮收起（必选门槛生效）');
+              else fail.push('R7：quizWrong 后错因行/按钮行状态不对');
+              window.pickQuizCause('concept');
+              window.endQuizMode();
+              var tm2 = doc.getElementById('test-mode-panel');
+              if (tm2 && tm2.hidden) pass.push('R7：退出自测后列表视图还原');
+              else fail.push('R7：endQuizMode 未还原列表视图');
+            } catch (e) { fail.push('R7：断言抛错 ' + e.message); }
+            resolve({ pass, fail });
+          });
+          return;   // resolve 移入上方 then（loadErrorBook 微任务内完成，早于任何宏任务汇总）
+        }
         resolve({ pass, fail });
       }, 150);
     }, 700);

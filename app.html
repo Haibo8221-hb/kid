@@ -962,10 +962,13 @@ ERROR BOOK
 <button class="filter-btn" data-subject="History" onclick="filterErrors('History')">History</button>
 <button class="filter-btn" data-subject="Drama" onclick="filterErrors('Drama')">Drama</button>
 </div>
-<div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+<div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap" id="error-toolbar">
 <button class="btn" onclick="openErrorModal()">+ Add Error</button>
+<button class="btn" onclick="startQuizMode()" style="background:var(--accent2)">🎯 Test me</button>
 <span id="error-count" style="font-size:12px;color:var(--text2);margin-left:8px"></span>
 </div>
+<!-- R7-a：遮挡自测面板（激活时隐藏筛选/列表，结束后还原） -->
+<div id="test-mode-panel" hidden></div>
 <div id="error-list"><div class="error-empty">Loading...</div></div>
 </div>
 
@@ -1047,6 +1050,15 @@ ERROR BOOK
 <div class="form-group">
 <label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">Tags (comma-separated)</label>
 <input type="text" id="error-tags-input" placeholder="e.g. SMC, algebra, AQA_Paper1">
+</div>
+<div class="form-group">
+<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">错因（R7：粗心 / 没懂 / 没时间）</label>
+<select id="error-cause-input" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)">
+<option value="">先不分类</option>
+<option value="careless">⚡ 粗心</option>
+<option value="concept">🧩 没懂</option>
+<option value="time">⏱ 没时间</option>
+</select>
 </div>
 <div class="modal-actions">
 <button class="btn" onclick="closeErrorModal()">Cancel</button>
@@ -2680,6 +2692,11 @@ async function refreshErrorStats(){
   if(d.mastered_total>0) parts.push(`<span style="color:var(--accent2);font-weight:700">${d.mastered_total} mastered</span>`);
   if(d.active_total>0) parts.push(`<span style="color:var(--orange);font-weight:700">${d.active_total} active</span>`);
   if(d.new_this_week>0) parts.push(`${d.new_this_week} new this week`);
+  // R7-b：错因三分类摘要（最多列前两，避免顶栏过长）
+  const bc=d.by_cause||{};
+  const causeParts=Object.entries(bc).sort((a,b)=>b[1]-a[1]).slice(0,2)
+    .map(([c,n])=>`${CAUSE_LABELS[c]||c} ${n}`);
+  if(causeParts.length) parts.push(causeParts.join(' · '));
   if(!parts.length) parts.push('No errors');
   el.innerHTML = parts.join(' · ');
  }catch(e){}
@@ -2705,6 +2722,143 @@ function markMastered(id){
  renderErrors();
  refreshErrorStats();   // #12：分页后计数以服务端统计为准
 }
+// ── R7-a：错题再测「Test me」——遮挡自评模式 ─────────────────────
+// 随机抽 5 题（优先未 mastered），只显示题面隐藏答案；「我看会了」/「还是不会」
+// 自评；仍错必须选错因（R7-b：粗心/没懂/没时间）并自动去掉 mastered。
+const CAUSE_LABELS={'careless':'⚡ 粗心','concept':'🧩 没懂','time':'⏱ 没时间'};
+let quiz = null;   // {queue, idx, right, wrong, wrongList:[]}
+
+function _shuffle(arr){
+ for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+ return arr;
+}
+function startQuizMode(){
+ const pool=_shuffle(errorsData.filter(e=>!e.mastered).slice());
+ const rest=_shuffle(errorsData.filter(e=>e.mastered).slice());
+ const picked=pool.slice();
+ while(picked.length<5 && rest.length) picked.push(rest.shift());
+ picked.length=Math.min(picked.length,5);
+ if(!picked.length){ toast('错题本还是空的，先记一道错题吧'); return; }
+ quiz={queue:picked,idx:0,right:0,wrong:0,wrongList:[]};
+ renderQuiz();
+}
+function _quizToggle(show){
+ const panel=document.getElementById('test-mode-panel');
+ const list=document.getElementById('error-list');
+ const bar=document.getElementById('error-filter-bar');
+ const toolbar=document.getElementById('error-toolbar');
+ if(panel) panel.hidden=!show;
+ if(list) list.style.display=show?'none':'';
+ if(bar) bar.style.display=show?'none':'';
+ if(toolbar) toolbar.style.display=show?'none':'';
+}
+function quizQuestionText(e){
+ if(typeof e.question==='string') return e.question;
+ return (e.question&&(e.question.question||e.question.original_question))||e.original_question||'（此题无文字题面，凭图片回忆）';
+}
+function renderQuiz(){
+ _quizToggle(true);
+ const panel=document.getElementById('test-mode-panel');
+ if(!panel||!quiz) return;
+ if(quiz.idx>=quiz.queue.length){ renderQuizResult(); return; }
+ const e=quiz.queue[quiz.idx];
+ panel.innerHTML=`
+ <div class="section" style="border-left:4px solid var(--accent2)">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+   <div class="section-title" style="margin:0">🎯 Test me · 第 ${quiz.idx+1} / ${quiz.queue.length} 题</div>
+   <span class="ec-subject">${e.subject||'?'}</span>
+   <button class="btn-sm" onclick="endQuizMode()" style="margin-left:auto">退出</button>
+  </div>
+  <p style="font-size:12px;color:var(--text2);margin-bottom:10px">先遮住答案，自己说一遍做法，再翻面对照。答案在下面（先别看！点完评价再看）。</p>
+  <div style="background:var(--surface2);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.8;white-space:pre-wrap">${escHtml(quizQuestionText(e))}</div>
+  <div id="quiz-cause-row" hidden style="margin-top:12px">
+   <div style="font-size:13px;color:var(--orange);font-weight:700;margin-bottom:8px">这题为什么没做对？（选一个）</div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" onclick="pickQuizCause('careless')" style="background:var(--yellow);color:#1a1206">⚡ 粗心</button>
+    <button class="btn" onclick="pickQuizCause('concept')" style="background:var(--red)">🧩 没懂</button>
+    <button class="btn" onclick="pickQuizCause('time')" style="background:var(--accent)">⏱ 没时间</button>
+   </div>
+  </div>
+  <div id="quiz-answer-reveal" hidden style="margin-top:12px;background:var(--surface2);border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.8">
+   <div style="color:var(--accent2);font-weight:700;margin-bottom:6px">正确答案 / 解法</div>
+   <div style="white-space:pre-wrap">${escHtml((typeof e.solution==='string'?e.solution:(e.solution_display||(e.solution&&e.solution.explanation)||e.correct_solution||''))||'（此题未录入解法，翻 Error Book 对照）')}</div>
+  </div>
+  <div id="quiz-btn-row" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+   <button class="btn" onclick="quizReveal()" style="background:none;border:1px solid var(--border);color:var(--text2)">👁 翻面对照</button>
+   <button class="btn" onclick="quizRight()" style="background:var(--accent2)">✓ 我看会了</button>
+   <button class="btn" onclick="quizWrong()" style="background:var(--red)">✗ 还是不会</button>
+  </div>
+ </div>`;
+}
+function quizReveal(){
+ const r=document.getElementById('quiz-answer-reveal');
+ if(r) r.hidden=!r.hidden;
+}
+function _quizNext(){ quiz.idx++; renderQuiz(); }
+function quizRight(){
+ quiz.right++;
+ const e=quiz.queue[quiz.idx];
+ // 自评会了：顺势清除错因（之前的归类不再成立），mastered 保持不动（由孩子自行决定）
+ if(e&&e.cause) _quizSaveCause(e.id,'');
+ _quizNext();
+}
+function quizWrong(){
+ quiz.wrong++;
+ quiz.wrongList.push(quiz.queue[quiz.idx]);
+ const row=document.getElementById('quiz-cause-row');
+ if(row){ row.hidden=false; }
+ const btns=document.getElementById('quiz-btn-row');
+ if(btns) btns.style.display='none';   // 必须先选错因才能继续
+}
+async function _quizSaveCause(id,cause){
+ try{
+  const err=errorsData.find(x=>x.id===id);
+  const wasMastered=!!(err&&err.mastered);
+  await fetch(`/api/errors/${KID_CHILD}/${encodeURIComponent(id)}`,
+   {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({cause:cause,...((cause==='')?{}:{mastered:false})})});
+  // 本地同步：mastered 双层（localStorage map + 对象标记）按需清理
+  if(err){
+   err.cause=cause||undefined;
+   if(cause&&wasMastered){
+    err.mastered=false; err.masteredDate=null;
+    const mastered=JSON.parse(localStorage.getItem('mastered_errors_diya')||'{}');
+    delete mastered[id];
+    localStorage.setItem('mastered_errors_diya',JSON.stringify(mastered));
+   }
+  }
+ }catch(_){ /* 服务端不可达：本地状态已在 renderErrors 时尽力同步 */ }
+}
+function pickQuizCause(cause){
+ const e=quiz&&quiz.queue[quiz.idx];
+ if(e) _quizSaveCause(e.id,cause);
+ _quizNext();
+}
+function renderQuizResult(){
+ const panel=document.getElementById('test-mode-panel');
+ if(!panel||!quiz) return;
+ const pct=quiz.queue.length?Math.round(quiz.right/quiz.queue.length*100):0;
+ const msg=pct>=80?'太棒了，这几题真的会了！':pct>=50?'过半会了，剩下的错因已经记下来了。':'没关系，错因都记下来了，下次再战。';
+ panel.innerHTML=`
+ <div class="section" style="border-left:4px solid var(--accent2)">
+  <div class="section-title">🎯 本轮结果</div>
+  <div style="font-size:15px;line-height:2">
+   ✓ 我看会了：<b style="color:var(--accent2)">${quiz.right}</b> 题<br>
+   ✗ 还是不会：<b style="color:var(--red)">${quiz.wrong}</b> 题（错因已记回 Error Book，自动去掉 mastered）
+  </div>
+  ${quiz.wrongList.length?`<div style="margin-top:10px;font-size:13px;color:var(--text2)">仍错的科目：${[...new Set(quiz.wrongList.map(e=>e.subject||'?'))].join('、')}</div>`:''}
+  <div style="margin-top:8px;font-size:14px;color:var(--accent2);font-weight:700">${msg}</div>
+  <div style="margin-top:14px;display:flex;gap:10px">
+   <button class="btn" onclick="endQuizMode()" style="background:var(--accent2)">返回错题本</button>
+   <button class="btn" onclick="startQuizMode()" style="background:none;border:1px solid var(--border);color:var(--text2)">再来一轮</button>
+  </div>
+ </div>`;
+}
+function endQuizMode(){
+ quiz=null;
+ _quizToggle(false);
+ loadErrorBook();   // 还原列表（含 mastered/错因的最新状态）
+}
+
 function renderErrors(){
  const container = document.getElementById('error-list');
  if(!container) return;
@@ -2725,10 +2879,12 @@ function renderErrors(){
    const etype = e.error_type||e.type||'other';
    const exam = e.exam||e.source||'';
    const tags = Array.isArray(e.tags)?e.tags:(typeof e.tags==='string'?e.tags.split(','):[]);
+   const cause = CAUSE_LABELS[e.cause]?`<span class="ec-type" style="color:var(--orange);font-weight:700">${CAUSE_LABELS[e.cause]}</span>`:'';
    return `<div class="error-card${e.mastered?' err-mastered':''}">
    <div class="ec-topbar">
      <span class="ec-subject">${e.subject||'?'}</span>
      <span class="ec-type">${etype.replace(/_/g,' ')}</span>
+     ${cause}
      <span class="ec-priority ${priority}">${priority.toUpperCase()}</span>
      <span class="ec-date">${formatRelativeDate(e.date||e.created_at||'')}</span>
    </div>
@@ -2766,7 +2922,8 @@ async function saveError(){
  question: document.getElementById('error-question-input').value,
  solution: document.getElementById('error-solution-input').value,
  type: document.getElementById('error-type-input').value,
- tags: document.getElementById('error-tags-input').value
+ tags: document.getElementById('error-tags-input').value,
+ cause: (document.getElementById('error-cause-input')||{}).value||''
  };
  if(!body.subject||!body.question){ toast('Please fill in subject and question'); return; }
  try{
@@ -2798,15 +2955,33 @@ async function loadSubjectAnalysis(){
  const data = await r.json();
  const errors = Array.isArray(data)?data:(data.errors||data.entries||[]);
  const bySubject = {};
+ const byCause = {};
  errors.forEach(e=>{
  if(!bySubject[e.subject]) bySubject[e.subject] = {count:0,types:{},tags:{}};
  bySubject[e.subject].count++;
  if(e.type) bySubject[e.subject].types[e.type] = (bySubject[e.subject].types[e.type]||0)+1;
+ if(e.cause) byCause[e.cause] = (byCause[e.cause]||0)+1;   // R7-b
  if(e.tags) e.tags.split(',').forEach(t=>{ const tt=t.trim(); if(tt) bySubject[e.subject].tags[tt]=(bySubject[e.subject].tags[tt]||0)+1; });
  });
+ // R7-b：全局错因分布条（放在学科卡之前）
+ const causeTotal=Object.values(byCause).reduce((a,b)=>a+b,0);
+ const causeBar=causeTotal?`
+ <div class="section" style="margin-bottom:14px;border-left:4px solid var(--orange)">
+ <div class="section-title">🧭 错因分布 · Why mistakes happen</div>
+ ${Object.entries(byCause).sort((a,b)=>b[1]-a[1]).map(([c,n])=>{
+ const pct=Math.round(n/causeTotal*100);
+ return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px">
+ <div style="width:88px;white-space:nowrap">${CAUSE_LABELS[c]||c}</div>
+ <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+ <div style="height:100%;width:${pct}%;background:${c==='concept'?'var(--red)':c==='careless'?'var(--yellow)':'var(--accent)'};border-radius:4px"></div>
+ </div>
+ <div style="width:56px;text-align:right;color:var(--text2)">${n} 题 · ${pct}%</div>
+ </div>`;}).join('')}
+ <div style="font-size:12px;color:var(--text2);margin-top:8px">🧩 没懂占比高 → 回到概念重学；⚡ 粗心多 → 做题放慢 + 写步骤；⏱ 没时间多 → 限时练习找节奏。</div>
+ </div>`:'';
  const sorted = Object.entries(bySubject).sort((a,b)=>b[1].count-a[1].count);
  if(!sorted.length){ container.innerHTML='<div class="error-empty">No data yet. Add errors to see analysis.</div>'; return; }
- container.innerHTML = sorted.map(([subj,data])=>{
+ container.innerHTML = causeBar + sorted.map(([subj,data])=>{
  const topType = Object.entries(data.types).sort((a,b)=>b[1]-a[1])[0];
  const risk = data.count>10?'risk':data.count>5?'warning':'good';
  return `<div class="sa-card ${risk}">

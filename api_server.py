@@ -1528,12 +1528,17 @@ def get_errors(child):
     # Aggregate mode for dashboard (avoids shipping the full ~276KB file to the client)
     if request.args.get('stats') == '1':
         by_subject = {}
+        by_cause = {}
         mastered_total = 0
         for e in errors:
             if not isinstance(e, dict):
                 continue
             s = e.get('subject', 'Other')
             by_subject[s] = by_subject.get(s, 0) + 1
+            # R7-b：错因三分类统计（粗心/没懂/没时间；未分类不计入）
+            c = e.get('cause')
+            if c:
+                by_cause[c] = by_cause.get(c, 0) + 1
             if e.get('mastered'):
                 mastered_total += 1
         week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
@@ -1545,6 +1550,7 @@ def get_errors(child):
             'child': child,
             'total': len(errors),
             'by_subject': by_subject,
+            'by_cause': by_cause,
             # #12：分页后前端拿不到全量数据，计数改由服务端提供
             'mastered_total': mastered_total,
             'active_total': len(errors) - mastered_total,
@@ -1622,12 +1628,12 @@ def error_item(child, err_id):
         _set_cors(resp)
         return resp
 
-    # PUT：局部更新（含 mastered 勾选）
+    # PUT：局部更新（含 mastered 勾选 / R7 错因三分类）
     data = request.get_json(force=True, silent=True) or {}
     found = False
     for e in errors:
         if str(e.get('id')) == str(err_id):
-            for k in ('subject', 'question', 'solution', 'type', 'tags', 'date', 'mastered'):
+            for k in ('subject', 'question', 'solution', 'type', 'tags', 'date', 'mastered', 'cause'):
                 if k in data:
                     e[k] = data[k]
             found = True

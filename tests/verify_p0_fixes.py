@@ -235,6 +235,30 @@ _seed = _json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abs
 tc.put('/api/twp/diya', json=_seed)
 
 
+print('== R7 错因字段（cause PUT 读写回环 + stats 聚合）==')
+ac = Authed(A._make_token())
+r = ac.post('/api/errors/diya', json={'subject': 'Maths', 'question': 'R7 cause test', 'date': '2026-10-19'})
+check(r.status_code == 200 and (r.get_json() or {}).get('ok'), 'POST 错题（R7 测试用）')
+_errs = ac.get('/api/errors/diya').get_json()
+_errs = _errs if isinstance(_errs, list) else (_errs.get('errors') or [])
+_rid = next((e['id'] for e in _errs if e.get('question') == 'R7 cause test'), None)
+check(_rid is not None, '新错题有 id（R7 前置）')
+r = ac.put(f'/api/errors/diya/{_rid}', json={'cause': 'concept', 'mastered': False})
+check(r.status_code == 200 and (r.get_json() or {}).get('ok'), 'PUT cause=concept 成功（R7 自测回写）')
+def _err_list():
+    d = ac.get('/api/errors/diya').get_json()
+    return d if isinstance(d, list) else (d.get('errors') or d.get('entries') or [])
+_hit = next((e for e in _err_list() if isinstance(e, dict) and e.get('id') == _rid), {})
+check(_hit.get('cause') == 'concept', 'GET 读回 cause 字段')
+r = ac.get('/api/errors/diya?stats=1')
+d = r.get_json()
+check(d.get('by_cause', {}).get('concept') == 1, f"stats by_cause 聚合正确（{d.get('by_cause')}）")
+r = ac.put(f'/api/errors/diya/{_rid}', json={'cause': ''})
+_hit = next((e for e in _err_list() if isinstance(e, dict) and e.get('id') == _rid), {})
+check(_hit.get('cause', '') == '', 'PUT 空串清除错因（自评会了时复用）')
+r = ac.delete(f'/api/errors/diya/{_rid}')
+check(r.status_code == 200, '清理 R7 测试错题')
+
 print('== Dashboard twp 聚合（R2：三周计划勾选与日常任务分开统计）==')
 ac = Authed(A._make_token())
 r = ac.post('/api/tasks', json={'user': 'diya', 'tasks': {
