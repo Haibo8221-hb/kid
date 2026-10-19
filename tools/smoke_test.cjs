@@ -72,6 +72,18 @@ const PAGES = [
           }),
         });
       }
+      if (String(url).includes('/api/tasks')) {
+        // 返回含 twp- 键的任务集：① 恢复 Task List onclick 护栏（toggleTask 等）
+        // ② 验证 R2 过滤——twp 键不得渲染进 Task List（由 TWP 区渲染）
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            'general-demo-task': false,
+            'english-petal': { done: false, name: 'PETAL' },
+            'twp-diya-w1-d1': false,
+          }),
+        });
+      }
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({
@@ -315,8 +327,28 @@ function runPage(page) {
         }
       } catch (e) { fail.push('Streak/Cheer 回归测试抛错：' + e.message); }
 
-      resolve({ pass, fail });
-    }, 400);
+      // R2 server 同步断言：data-sync="server" 的卡勾选 → KidTasksBridge → saveTasks
+      // 落盘 tasks_<child>（twp- 前缀键）。saveTasks 在点击的微任务内完成，这里用下一个
+      // 宏任务读取后再 resolve，保证断言进入汇总（此前把 setTimeout 嵌在测试体内、
+      // 从外层定时器起算必然晚于 resolve，结果被静默吞掉——已修复）。
+      setTimeout(function () {
+        try {
+          var child0 = window.KID_CHILD || 'unknown';
+          var raw = window.localStorage.getItem('tasks_' + child0);
+          if (raw && raw.indexOf('"twp-') !== -1)
+            pass.push('Tasks：勾选已写入服务端任务存储（twp- 前缀键，单源化生效）');
+          else
+            fail.push('Tasks：勾选未写入 tasks_' + child0 + '（KidTasksBridge 未生效或 saveTasks 未落盘）');
+          var taskEl = doc.getElementById(child0 + '-tasks');
+          var taskHtml = taskEl ? taskEl.innerHTML : '';
+          if (taskHtml.indexOf('twp-') === -1)
+            pass.push('Tasks：twp- 键已被 Task List 过滤（不双显示）');
+          else
+            fail.push('Tasks：twp- 键泄漏进 Task List（过滤失效）');
+        } catch (e) { fail.push('Tasks：同步断言抛错 ' + e.message); }
+        resolve({ pass, fail });
+      }, 150);
+    }, 700);
   });
 }
 

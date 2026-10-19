@@ -1112,7 +1112,7 @@ ERROR BOOK
 <div id="ver-badge" style="position:fixed;left:6px;bottom:6px;z-index:400;font-size:10px;color:var(--text2);opacity:0.5;pointer-events:none;font-family:monospace"></div>
 
 <script>window.KID_CHILD='diya';</script>
-<script src="assets/kid-common.js?v=20261018"></script>
+<script src="assets/kid-common.js?v=20261019"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -1880,7 +1880,7 @@ async function loadDashboard(){
  const ctaEl = document.getElementById('dash-diya-cta');
  const ringEl = document.getElementById('task-ring-fg');
  if(pctEl) pctEl.textContent=dp+'%';
- if(subEl) subEl.textContent=`${dj.tasks_done||0}/${dj.tasks_total||0} tasks`;
+ if(subEl) subEl.textContent=`${dj.tasks_done||0}/${dj.tasks_total||0} tasks`+((dj.twp_total||0)>0?` · 三周计划 ${dj.twp_done||0}/${dj.twp_total}`:'');
  if(ringEl){const c=125.6;ringEl.setAttribute('stroke-dashoffset',c-(dp/100)*c);}
  if(ctaEl){
   if(dp===100) ctaEl.textContent='All done!';
@@ -2857,6 +2857,7 @@ function renderTasks(child){
  };
  const grouped={};
  Object.entries(tasks).forEach(([k,v])=>{
+ if(k.indexOf('twp-')===0) return;   // R2：三周计划勾选由 TWP 区渲染，不进 Task List
  const parts=k.split('-');
  const cat=parts.length>1?categories[parts[0]]?parts[0]:'general':'general';
  const isObj=v&&typeof v==='object';
@@ -3169,7 +3170,7 @@ function renderThreeWeekPlan(elId){
     const state = today > w.end ? 'past' : (today >= w.start ? 'current' : '');
     const badge = state==='current' ? '<span class="tw-badge">本周</span>' : '';
     const actions = (w.actions||[]).map(a=>`
-      <div class="kid-task-card" data-task-id="diya-${a.id}" data-task-label="${w.label} · ${a.label}" title="点一下就能勾掉" style="margin-top:6px">
+      <div class="kid-task-card" data-task-id="diya-${a.id}" data-sync="server" data-task-label="${w.label} · ${a.label}" title="点一下就能勾掉" style="margin-top:6px">
         <span class="kid-task-label" style="font-size:13px">${a.label}${a.sub?` <span style="font-size:11px;color:var(--text2)">· ${a.sub}</span>`:''}</span>
       </div>`).join('');
     const sumLabel = (w.actions&&w.actions.length) ? '本周小结：三件都做完了就勾一下' : `这周的「${w.goal}」做完了就勾一下`;
@@ -3178,7 +3179,7 @@ function renderThreeWeekPlan(elId){
      <div class="tw-goal">${w.goal}</div>
      <div class="tw-focus">${w.focus}</div>
      ${actions}
-     <div class="kid-task-card" data-task-id="diya-${w.start}" data-task-label="${w.label}">
+     <div class="kid-task-card" data-task-id="diya-${w.start}" data-sync="server" data-task-label="${w.label}">
        <span class="kid-toggle"></span>
        <span class="kid-task-label">${sumLabel}</span>
      </div>
@@ -3199,6 +3200,8 @@ function showTwpCycleHint(nextCycleEnd){
   }catch(_){}
 }
 async function loadThreeWeekPlan(){
+  // R2 对账钩子：loadTasks 把服务端 twp-* 状态写回渲染缓存后，重渲染三周卡（幂等）
+  window.onTwpReconciled = function(){ renderThreeWeekPlan('twp-diya'); };
   // 1) 缓存先行
   try{
     const cached = JSON.parse(localStorage.getItem(TWP_CACHE_KEY) || 'null');

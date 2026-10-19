@@ -134,10 +134,14 @@
 
         var toggle = function () {
           var on = !card.classList.contains('checked');
+          var tid = card.dataset.taskId;
           KidCheck._apply(card, on);
           store(key, on ? '1' : '0');
+          // R2：data-sync="server" 的卡（三周计划）勾选同步服务端 tasks_<child>.json（twp- 前缀键）
+          if (card.dataset.sync === 'server' && global.KidTasksBridge && tid) {
+            try { global.KidTasksBridge.setDone(tid, on); } catch (e) { /* 服务端不可达：本地已写 */ }
+          }
           // 同一任务在同页多处渲染（Today 打勾卡 + My Plan 三周卡）时保持视觉同步
-          var tid = card.dataset.taskId;
           if (tid) {
             $$('.kid-task-card').forEach(function (c) {
               if (c !== card && c.dataset.taskId === tid) KidCheck._apply(c, load(key) === '1');

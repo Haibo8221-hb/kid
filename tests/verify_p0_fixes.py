@@ -235,5 +235,24 @@ _seed = _json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abs
 tc.put('/api/twp/diya', json=_seed)
 
 
+print('== Dashboard twp 聚合（R2：三周计划勾选与日常任务分开统计）==')
+ac = Authed(A._make_token())
+r = ac.post('/api/tasks', json={'user': 'diya', 'tasks': {
+    'general-maths-drill': True,
+    'english-petal': {'done': False, 'name': 'PETAL'},
+    'twp-diya-w1-d1': True,
+    'twp-diya-w1-d2': False,
+}})
+check(r.status_code == 200 and (r.get_json() or {}).get('ok'), 'POST /api/tasks 写入含 twp 键的任务集')
+r = ac.get('/api/dashboard/diya')
+d = r.get_json()
+check(d['tasks_total'] == 2 and d['tasks_done'] == 1,
+      f"日常任务统计不含 twp 键（total={d['tasks_total']}, done={d['tasks_done']}）")
+check(d.get('twp_total') == 2 and d.get('twp_done') == 1,
+      f"twp 完成度单独聚合（done={d.get('twp_done')}/{d.get('twp_total')}）")
+# 清理：恢复空任务集，避免影响其他用例
+ac.post('/api/tasks', json={'user': 'diya', 'tasks': {}})
+
+
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
 sys.exit(1 if FAILS else 0)

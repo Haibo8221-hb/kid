@@ -856,7 +856,7 @@ PS portfolio + academic reading notes
 <div id="toast"></div>
 
 <script>window.KID_CHILD='jemma';</script>
-<script src="assets/kid-common.js?v=20261018"></script>
+<script src="assets/kid-common.js?v=20261019"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -1184,6 +1184,7 @@ function renderTasks(child){
  };
  const grouped={};
  Object.entries(tasks).forEach(([k,v])=>{
+ if(k.indexOf('twp-')===0) return;   // R2：三周计划勾选由 Today/My Plan 区渲染，不进 Task List
  const parts=k.split('-');
  const cat=parts.length>1?categories[parts[0]]?parts[0]:'general':'general';
  if(!grouped[cat]) grouped[cat]=[];
@@ -2374,7 +2375,7 @@ function renderToday3(){
  if(!w){ el.innerHTML='<div class="empty-state">计划加载中…</div>'; return; }
  el.innerHTML=`<div style="font-size:12px;color:var(--text2);margin-bottom:2px">${w.label} · 做完一件勾一件</div>`+
  (w.actions||[]).map(a=>`
-  <div class="kid-task-card" data-task-id="${a.id}" data-task-label="${w.taskLabel||w.label} · ${a.label}" title="点一下就能勾掉">
+  <div class="kid-task-card" data-task-id="${a.id}" data-sync="server" data-task-label="${w.taskLabel||w.label} · ${a.label}" title="点一下就能勾掉">
    <span class="kid-task-label">${a.label}</span>
    <span class="kid-sub">${a.sub||''}</span>
   </div>`).join('');
@@ -2392,7 +2393,7 @@ function renderTwpJemma(){
     else if(today>=w.start) extra='border-left:3px solid var(--accent2);background:rgba(56,217,169,0.08);';
     const badge=today>=w.start&&today<=w.end?'<span style="float:right;font-size:9px;font-weight:700;padding:1px 8px;border-radius:8px;background:var(--accent2);color:#fff">本周</span>':'';
     const acts=(w.actions||[]).map(a=>`
-     <div class="kid-task-card" data-task-id="${a.id}" data-task-label="${w.taskLabel||w.label} · ${a.label}" title="点一下就能勾掉" style="margin-bottom:8px">
+     <div class="kid-task-card" data-task-id="${a.id}" data-sync="server" data-task-label="${w.taskLabel||w.label} · ${a.label}" title="点一下就能勾掉" style="margin-bottom:8px">
       <span class="kid-task-label" style="font-size:13.5px">${a.label}</span>
      </div>`).join('');
     return `<div style="${base}${extra}">
@@ -2417,6 +2418,8 @@ function showTwpCycleHint(nextCycleEnd){
   }catch(_){}
 }
 async function loadTwpJemma(){
+  // R2 对账钩子：loadTasks 把服务端 twp-* 状态写回渲染缓存后，重渲染两处卡片（幂等）
+  window.onTwpReconciled = function(){ renderToday3(); renderTwpJemma(); initKidLayer(); };
   // 1) 缓存先行（种子兜底：首次访问且无缓存时用页面内种子，保证离线也有内容）
   try{
     const cached=JSON.parse(localStorage.getItem(TWP_CACHE_KEY)||'null');

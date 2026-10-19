@@ -103,11 +103,15 @@ async function loadTasks(child){
  const r=await fetch('/api/tasks?user='+child);
  const data=await r.json();
  tasksData[child]=data;
+ // R2（2026-10-19）：恢复在线后自动补推离线期间的勾选（saveTasks 全量 PUT 天然带上）
+ try{ if(localStorage.getItem('twp_pending_'+child)){ saveTasks(child); } }catch(e){}
+ if(window.KidTasksBridge) window.KidTasksBridge.replay(child);
  renderTasks(child);
  }catch(e){
  // Fallback to localStorage
  const ls=localStorage.getItem('tasks_'+child);
  tasksData[child]=ls?JSON.parse(ls):{};
+ if(window.KidTasksBridge) window.KidTasksBridge.replay(child);
  renderTasks(child);
  }
 }
@@ -137,15 +141,76 @@ async function saveTasks(child){
  method:'POST',
  headers:{'Content-Type':'application/json'},
  body:JSON.stringify({user:child,tasks:tasksData[child]})
- });
+ }).then(r=>{ if(!r.ok) throw new Error('status '+r.status); });
  localStorage.setItem('tasks_'+child,JSON.stringify(tasksData[child]));
+ try{ localStorage.removeItem('twp_pending_'+child); }catch(e){}
  toast('Synced ');
+ return true;
  }catch(e){
  // Save to localStorage as fallback
  localStorage.setItem('tasks_'+child,JSON.stringify(tasksData[child]));
+ try{ localStorage.setItem('twp_pending_'+child,'1'); }catch(e2){}
  toast('Saved locally');
+ return false;
  }
 }
+
+/* ── R2 任务单源化（2026-10-19）─────────────────────────────────────
+   三周计划卡（KidCheck data-sync="server"）的勾选状态以服务端 tasks_<child>.json
+   的 twp-* 前缀键为唯一真源；localStorage kid-check-* 只作渲染缓存。
+   - 写路径：KidCheck 勾选 → KidTasksBridge.setDone → tasksData[twp-*] → saveTasks PUT
+     （失败置 twp_pending 标记，恢复在线后 loadTasks 自动补推）
+   - 读路径：loadTasks 成功 → replay() 把服务端 twp-* 对账回 kid-check-*（跨设备一致）；
+     有未同步的本地勾选时跳过对账（本地优先，防离线勾选被服务端旧值覆盖）
+   - tasksData 未就绪时的早期点击挂入 twp_prewrite_ 队列，replay 时回放（防 PUT 清空任务） */
+window.KidTasksBridge = {
+ setDone: function(taskId, done){
+  const child = (window.KID_CHILD || 'diya');
+  try{
+   if (tasksData && tasksData[child]) {
+    this._apply(child, taskId, done);
+    saveTasks(child);
+   } else {
+    const q = JSON.parse(localStorage.getItem('twp_prewrite_' + child) || '{}');
+    q[taskId] = !!done;
+    localStorage.setItem('twp_prewrite_' + child, JSON.stringify(q));
+   }
+  }catch(e){}
+ },
+ _apply: function(child, taskId, done){
+  const key = 'twp-' + taskId;
+  const cur = tasksData[child][key];
+  if (cur && typeof cur === 'object') cur.done = !!done;
+  else tasksData[child][key] = !!done;
+ },
+ replay: function(child){
+  try{
+   // 1) 回放：tasks 未就绪时的挂起勾选
+   const pre = JSON.parse(localStorage.getItem('twp_prewrite_' + child) || '{}');
+   if (Object.keys(pre).length && tasksData && tasksData[child]) {
+    const self = this;
+    Object.keys(pre).forEach(function(tid){ self._apply(child, tid, pre[tid]); });
+    localStorage.setItem('twp_prewrite_' + child, '{}');
+    saveTasks(child);
+   }
+   // 2) 对账：无未同步标记时，服务端 twp-* → localStorage kid-check-*（仅渲染缓存）
+   let pending = false;
+   try { pending = !!localStorage.getItem('twp_pending_' + child); } catch(e) {}
+   if (!pending && tasksData && tasksData[child]) {
+    const pid = window.KID_CHILD || child;
+    Object.keys(tasksData[child]).forEach(function(k){
+     if (typeof k !== 'string' || k.indexOf('twp-') !== 0) return;
+     const v = tasksData[child][k];
+     const done = (v && typeof v === 'object') ? !!v.done : !!v;
+     const lkey = 'kid-check-' + pid + '-' + k.slice(4);
+     const cur = localStorage.getItem(lkey);
+     if ((cur === '1') !== done) localStorage.setItem(lkey, done ? '1' : '0');
+    });
+   }
+  }catch(e){}
+  if (typeof window.onTwpReconciled === 'function') { try { window.onTwpReconciled(); } catch(e) {} }
+ }
+};
 
 function toast(msg,dur=2500){
  const t=document.getElementById('toast');

@@ -265,7 +265,17 @@ def atomic_write(path, obj, **kw):
     tmp = path + '.tmp'
     with open(tmp, 'w', encoding='utf-8') as f:
         json.dump(obj, f, **kw)
-    os.replace(tmp, path)
+    # Windows 下目标文件可能被杀毒/索引短暂占用导致 os.replace 报 WinError 5；
+    # 短退避重试 5 次（总计约 1.5s），Linux 语义不变（replace 原子且不失败）。
+    last_err = None
+    for attempt in range(5):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError as e:
+            last_err = e
+            time.sleep(0.05 * (attempt + 1))
+    raise last_err
 
 def _sse(payload):
     """序列化为 SSE data 行，对内容做 JSON 转义（P1-2 修复未转义导致前端解析失败）。"""
@@ -356,6 +366,7 @@ def tasks_api():
     fpath = os.path.join(DATA_DIR, f'tasks_{user}.json')
     if request.method == 'POST':
         atomic_write(fpath, data.get('tasks', {}), ensure_ascii=False)
+        _json_cache.pop(fpath, None)   # R2：写后失效缓存，dashboard 聚合立即读到新值
         resp = jsonify({'ok': True})
     else:
         if os.path.exists(fpath):
@@ -936,10 +947,18 @@ def dashboard_api(child=None):
     chat_recent = messages[-6:] if messages else []
 
     # Load tasks
+    # R2（2026-10-19）：twp-* 前缀键 = 三周计划勾选（由三周计划区渲染），与日常任务分开统计，
+    # 避免混入环形进度导致分母膨胀；twp 完成度单独输出供前端分列显示。
     tasks_path = os.path.join(DATA_DIR, f'tasks_{child}.json')
-    tasks = _cached_json_read(tasks_path, ttl=15) or {}
+    tasks_all = _cached_json_read(tasks_path, ttl=15) or {}
+    tasks = {k: v for k, v in tasks_all.items()
+             if not (isinstance(k, str) and k.startswith('twp-'))}
+    twp_tasks = {k: v for k, v in tasks_all.items()
+                 if isinstance(k, str) and k.startswith('twp-')}
     tasks_total = len(tasks)
     tasks_done = sum(1 for v in tasks.values() if (v if isinstance(v, bool) else v.get('done', False)))
+    twp_total = len(twp_tasks)
+    twp_done = sum(1 for v in twp_tasks.values() if (v if isinstance(v, bool) else v.get('done', False)))
 
     # Summarize wiki entries (last 5)
     recent_wiki = [
@@ -974,6 +993,8 @@ def dashboard_api(child=None):
         'chat_summaries': chat_summaries,
         'tasks_done': tasks_done,
         'tasks_total': tasks_total,
+        'twp_done': twp_done,
+        'twp_total': twp_total,
         'updated': datetime.now().isoformat()
     })
     _set_cors(resp)
