@@ -196,6 +196,22 @@ jobs:
             -e "ssh -p ${{ secrets.ECS_PORT }} -i $RUNNER_TEMP/key.pem -o StrictHostKeyChecking=no" \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/plan/v3/
 
+      # ── 正式上线（2026-10-19）：主站 HTML 镜像到 IP 直连入口 ──────────
+      # 公网唯一入口是 http://112.74.40.8/（vhost root=/var/www/plan，旧镜像）。
+      # V3 全量测试通过后，把主站页面同步过去（仅 *.html，不用 --delete，
+      # 保留该目录的 legacy 文件：.env.local / error_images / data 等）。
+      # 长期正解仍是宝塔把站点根改为 /www/wwwroot/kid，届时删除本步骤。
+      - name: Mirror main HTML pages to IP vhost root (/var/www/plan)
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          echo "$KEY" > "$RUNNER_TEMP/key.pem"
+          chmod 600 "$RUNNER_TEMP/key.pem"
+          rsync -az \
+            -e "ssh -p ${{ secrets.ECS_PORT }} -i $RUNNER_TEMP/key.pem -o StrictHostKeyChecking=no" \
+            --include='*.html' --exclude='*' \
+            ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/plan/
+
       - name: Patch /v3 index + fix ownership on IP mirror
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -208,4 +224,5 @@ jobs:
             # /v3 首页改为站内相对链接，避免跳回旧主站
             sed -i 's|href="/app.html"|href="app.html"|g; s|href="/jemma.html"|href="jemma.html"|g' /var/www/plan/v3/index.html
             chown -R www:www /var/www/plan/assets /var/www/plan/v3
-            echo "==> IP mirror done: http://112.74.40.8/v3/app.html · http://112.74.40.8/v3/jemma.html"
+            chown www:www /var/www/plan/*.html 2>/dev/null || true
+            echo "==> IP mirror done: http://112.74.40.8/app.html · http://112.74.40.8/jemma.html · http://112.74.40.8/v3/app.html"
