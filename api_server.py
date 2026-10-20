@@ -2528,5 +2528,157 @@ def api_homework_update(entry_id):
     return jsonify({'ok': False, 'error': 'Entry not found'}), 404
 
 
+
+# ── 学习目标工作台 · 服务器数据 API（2026-10-20）──────────────────────────
+# 背景：目标台页面有两种部署形态——
+#   ① 资料库页（window.__SMART_PAGE__.database）→ 数据落在资料库数据表
+#   ② 服务器独立目录（/goals/）→ 没有 SDK，改走本组端点，数据落服务器 data/goals.json
+# 两形态的数据结构完全一致（goals / checks / stages），页面按运行时选择后端。
+# 认证：全部在 /api/ 前缀下，自动复用 _auth_gate 会话校验（未登录返回 401）。
+# 写操作遵循与主页一致的约定：atomic_write + 失效 _json_cache。
+
+_GOALS_FILE = 'goals.json'
+
+
+def _goals_path():
+    return os.path.join(DATA_DIR, _GOALS_FILE)
+
+
+def _read_goals():
+    data = _cached_json_read(_goals_path(), ttl=5)
+    if not isinstance(data, dict):
+        data = {}
+    data.setdefault('goals', [])
+    data.setdefault('checks', [])
+    data.setdefault('stages', [])
+    return data
+
+
+def _write_goals(data):
+    p = _goals_path()
+    atomic_write(p, data, ensure_ascii=False, indent=2)
+    _json_cache.pop(p, None)
+
+
+@app.route('/api/goals', methods=['GET', 'OPTIONS'])
+def goals_api():
+    """读取全部目标 / 打卡 / 阶段（页面首屏一次性拉取，体量小无需分页）。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+    data = _read_goals()
+    _set_cors(jsonify(data))
+    return jsonify(data)
+
+
+@app.route('/api/goals/goal', methods=['POST', 'OPTIONS'])
+def goals_create():
+    """新建目标（同时可选带首段阶段）。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+    body = request.get_json(force=True, silent=True) or {}
+    goal = body.get('goal') or {}
+    if not goal.get('目标ID'):
+        resp = jsonify({'ok': False, 'error': 'missing 目标ID'})
+        _set_cors(resp)
+        return resp, 400
+    data = _read_goals()
+    goal.setdefault('record_id', uuid.uuid4().hex[:12])
+    data['goals'].append(goal)
+    for st in (body.get('stages') or []):
+        st.setdefault('record_id', uuid.uuid4().hex[:12])
+        data['stages'].append(st)
+    _write_goals(data)
+    resp = jsonify({'ok': True, 'id': goal['record_id'], 'stages': len(body.get('stages') or [])})
+    _set_cors(resp)
+    return resp
+
+
+@app.route('/api/goals/goal/<gid>', methods=['PUT', 'OPTIONS'])
+def goals_update(gid):
+    """增量更新目标字段（完成量、连续天数、状态、节奏提示等）。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'PUT, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+    patch = request.get_json(force=True, silent=True) or {}
+    data = _read_goals()
+    hit = None
+    for g in data['goals']:
+        if g.get('record_id') == gid or g.get('目标ID') == gid:
+            for k, v in patch.items():
+                g[k] = v
+            hit = g
+            break
+    if not hit:
+        resp = jsonify({'ok': False, 'error': 'not found'})
+        _set_cors(resp)
+        return resp, 404
+    _write_goals(data)
+    resp = jsonify({'ok': True})
+    _set_cors(resp)
+    return resp
+
+
+@app.route('/api/goals/checkin', methods=['POST', 'OPTIONS'])
+def goals_checkin():
+    """写入一条打卡记录，并同步累计量/投入/连续天数到目标（服务端一次事务完成）。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+    body = request.get_json(force=True, silent=True) or {}
+    check = body.get('check') or {}
+    patch = body.get('goal_patch') or {}
+    if not check.get('记录ID'):
+        resp = jsonify({'ok': False, 'error': 'missing 记录ID'})
+        _set_cors(resp)
+        return resp, 400
+    data = _read_goals()
+    check.setdefault('record_id', uuid.uuid4().hex[:12])
+    data['checks'].append(check)
+    gid = check.get('目标ID')
+    for g in data['goals']:
+        if g.get('目标ID') == gid or g.get('record_id') == gid:
+            for k, v in patch.items():
+                g[k] = v
+            break
+    _write_goals(data)
+    resp = jsonify({'ok': True, 'id': check['record_id']})
+    _set_cors(resp)
+    return resp
+
+
+@app.route('/api/goals/stage', methods=['POST', 'OPTIONS'])
+def goals_stage():
+    """新增阶段记录。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+    body = request.get_json(force=True) or {}
+    st = body.get('stage') or body
+    data = _read_goals()
+    st.setdefault('record_id', uuid.uuid4().hex[:12])
+    data['stages'].append(st)
+    _write_goals(data)
+    resp = jsonify({'ok': True, 'id': st['record_id']})
+    _set_cors(resp)
+    return resp
+
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=int(os.environ.get('PORT', 5000)), debug=False)

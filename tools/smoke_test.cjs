@@ -405,7 +405,9 @@ function runPage(page) {
               if (tm && !tm.hidden && tm.innerHTML.indexOf('Test me') !== -1)
                 pass.push('R7：Test me 自测面板已启动（题面渲染，mock 错题入池）');
               else { fail.push('R7：Test me 未启动（错题数据未加载或空池）'); return; }
-              var leak = tm.innerHTML.indexOf('S1') !== -1;
+              // 只检查题面框：答案在 hidden 的 #quiz-answer-reveal 里，innerHTML 全文匹配会误判
+              var qBox = tm.querySelector('div[style*="pre-wrap"]');
+              var leak = !!(qBox && qBox.textContent.indexOf('S1') !== -1);
               if (leak) fail.push('R7：题面直接泄漏了答案文本（遮挡失效）');
               else pass.push('R7：题面未泄漏答案文本（遮挡生效）');
               window.quizWrong();

@@ -212,6 +212,27 @@ jobs:
             --include='*.html' --exclude='*' \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/plan/
 
+      # ── 学习目标工作台（Diya）：独立目录部署 + 首次注入目标数据 ──────
+      # 页面部署到 /var/www/plan/goals/（与主站平级的独立目录，不污染主站文件）
+      # 数据走同源 /api/goals（Flask），落在服务器 data/goals.json —— 多端同步、真实存储。
+      - name: Deploy learning goal workspace to /goals
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          echo "$KEY" > "$RUNNER_TEMP/key.pem"
+          chmod 600 "$RUNNER_TEMP/key.pem"
+          ssh -p ${{ secrets.ECS_PORT }} -i "$RUNNER_TEMP/key.pem" -o StrictHostKeyChecking=no \
+            ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }} \
+            "mkdir -p /var/www/plan/goals /www/wwwroot/kid/data"
+          rsync -az \
+            -e "ssh -p ${{ secrets.ECS_PORT }} -i $RUNNER_TEMP/key.pem -o StrictHostKeyChecking=no" \
+            ./learning-goal-workspace/ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/plan/goals/
+          # 首次部署才注入种子数据；已有 goals.json 绝不覆盖（保护孩子真实数据）
+          ssh -p ${{ secrets.ECS_PORT }} -i "$RUNNER_TEMP/key.pem" -o StrictHostKeyChecking=no \
+            ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }} \
+            'if [ ! -f /www/wwwroot/kid/data/goals.json ]; then cp /www/wwwroot/kid/data-seed/goals_seed.json /www/wwwroot/kid/data/goals.json && chown www:www /www/wwwroot/kid/data/goals.json && echo "==> goals seed injected"; else echo "==> goals.json exists, keep runtime data"; fi; chown -R www:www /var/www/plan/goals'
+          echo "==> Goal workspace: http://112.74.40.8/goals/"
+
       - name: Patch /v3 index + fix ownership on IP mirror
         uses: appleboy/ssh-action@v1.0.3
         with:
