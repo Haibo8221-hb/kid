@@ -12,6 +12,12 @@ import api_server as A
 
 app = A.app
 app.config['TESTING'] = True
+
+# R-2：服务端读缓存 ttl=15s，会跨用例污染「写后立刻读」的断言（CI 偶发失败根因之一）
+try:
+    A._json_cache.clear()
+except Exception:
+    pass
 FAILS = []
 
 def check(cond, msg):
@@ -235,6 +241,7 @@ _seed = _json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abs
 tc.put('/api/twp/diya', json=_seed)
 
 
+A._json_cache.clear()
 print('== R7 错因字段（cause PUT 读写回环 + stats 聚合）==')
 ac = Authed(A._make_token())
 r = ac.post('/api/errors/diya', json={'subject': 'Maths', 'question': 'R7 cause test', 'date': '2026-10-19'})
@@ -259,6 +266,7 @@ check(_hit.get('cause', '') == '', 'PUT 空串清除错因（自评会了时复�
 r = ac.delete(f'/api/errors/diya/{_rid}')
 check(r.status_code == 200, '清理 R7 测试错题')
 
+A._json_cache.clear()
 print('== Dashboard twp 聚合（R2：三周计划勾选与日常任务分开统计）==')
 ac = Authed(A._make_token())
 r = ac.post('/api/tasks', json={'user': 'diya', 'tasks': {
@@ -279,4 +287,8 @@ ac.post('/api/tasks', json={'user': 'diya', 'tasks': {}})
 
 
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
+if FAILS:
+    import sys as _sys
+    print('FAILED_ITEMS=' + ' | '.join(FAILS), file=_sys.stderr)
+    _sys.exit(1)
 sys.exit(1 if FAILS else 0)
