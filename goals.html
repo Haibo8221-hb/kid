@@ -270,6 +270,7 @@
   var DB_STAGES  = '1MDvvnykFG9DtBfXhfLw1G';  // 目标阶段
 
   var STATE = { goals:[], checks:[], stages:[], options:{}, outbox:[] };
+  window.__LGW_STATE__=STATE;   // 调试/自测只读入口
   var UI = { view:'today', goalId:null, sheet:null, wizard:{step:1,draft:null} };
   var db = (window.__SMART_PAGE__ && window.__SMART_PAGE__.database) || null;
 
@@ -361,21 +362,32 @@
     return 1;
   }
   /* 连续漏打天数（从昨天往回数，跳过休息日） */
+  /* 漏打卡天数：从昨天往回数，跳过休息日。
+     下界 = max(目标开始日期, 今天-60)：目标刚创建时开始日期之前的日子不算"漏打"，
+     否则新目标一上线就会被判成"断了 52/60 天"。 */
   function missedDays(g){
     var map=checkMap(g['目标ID']), n=0, d=addDays(today(),-1);
+    var floor=addDays(today(),-60);
+    var start=dateKey(g['开始日期']);
+    // 开始日期比 60 天前更晚 → 以开始日期为下界（目标创建前的日子不算漏打）
+    if(start&&diffDays(start,floor)>0) floor=start;
     for(var i=0;i<60;i++){
+      if(diffDays(d,floor)<0) break;             // 已越过下界，不再累计
       if(map[d]){ if(String(map[d]['打卡类型'])==='补记'){ /* 补记也算这天有动作 */ } else { break; } }
       else { if(isRestDay(g,d)){ d=addDays(d,-1); continue; } n++; }
       d=addDays(d,-1);
     }
     return n;
   }
-  /* 连续打卡天数（休息日不断签）；无打卡历史时回退到目标表里已存的连续天数 */
+  /* 连续打卡天数（休息日不断签）；无打卡历史时回退到目标表里已存的连续天数。
+     同样以开始日期为下界，避免把目标之前的日子算成断签。 */
   function streakOf(g){
     if(!checksOf(g['目标ID']).length) return num(g['连续天数']);
     var map=checkMap(g['目标ID']), n=0, d=today();
     if(!map[d]) d=addDays(d,-1);
+    var start=dateKey(g['开始日期']);
     for(var i=0;i<400;i++){
+      if(start&&diffDays(d,start)<0) break;     // 早于开始日期 → 停
       if(map[d]) n++;
       else if(!isRestDay(g,d)) break;
       d=addDays(d,-1);
@@ -964,6 +976,13 @@
     return r;
   }
   function input(name,value,type,ph){ var i=el('input'); i.name=name; i.type=type||'text'; i.value=value==null?'':value; if(ph) i.placeholder=ph; return i; }
+  function textareaBox(name,value,ph,rows){
+    var t=el('textarea'); t.name=name; t.rows=rows||3; t.value=value==null?'':value;
+    if(ph) t.placeholder=ph;
+    t.style.minHeight=(rows||3)*22+'px';
+    t.style.lineHeight='1.6';
+    return t;
+  }
   function selectBox(dbId,field,value,ph){
     var s=el('select'); s.name=field;
     var o=el('option',null,ph||'请选择'); o.value=''; s.appendChild(o);
@@ -1053,8 +1072,8 @@
       body.appendChild(addb);
       body.appendChild(frow('每周休息日',selectBox(DB_GOALS,'休息日',d.restDay)));
       body.appendChild(frow('每周休几天',input('restQuota',d.restQuota,'number','1 天即可，别排太满')));
-      body.appendChild(frow('卡住时怎么办？（写一句预案）',input('contingency',d.contingency,'text','例如：一躺下就想刷手机 → 把书放枕头上，先读 2 页')));
-      body.appendChild(frow('今天想先做什么？（可留空）',input('plan',d.plan,'text','例如：今晚先背 20 个')));
+      body.appendChild(frow('卡住时怎么办？（可写多行）',textareaBox('contingency',d.contingency,'例如：一躺下就想刷手机 → 把书放枕头上，先读 2 页再看手机',3)));
+      body.appendChild(frow('今天想先做什么？（可留空，可写多行）',textareaBox('plan',d.plan,'例如：今晚先背 20 个；明天把周三要默写的实验描述写一遍',2)));
     }
     cacheFields(body,'wizard');
     openSheet(w.step===1?'新目标 · 第 1 步：我想要什么':(w.step===2?'新目标 · 第 2 步：做到什么时候':'新目标 · 第 3 步：怎么拆、怎么兜底'),
@@ -1163,10 +1182,10 @@
     box.appendChild(frow('截止日期',end));
     var cap=input('dailyCap',num(g['每日上限']),'number','留空 = 不限');
     box.appendChild(frow('每日上限',cap));
-    var plan=input('plan',planText(g),'text','拆解说明');
-    box.appendChild(frow('我的计划',plan));
-    var cg=input('contingency',contingency(g),'text','卡住时怎么办');
-    box.appendChild(frow('预案',cg));
+    var plan=textareaBox('plan',planText(g),'例如：每天 20 个：先背 10 个新词，再复习 10 个旧的',4);
+    box.appendChild(frow('我的计划（可写多行）',plan));
+    var cg=textareaBox('contingency',contingency(g),'例如：一躺下就想刷手机 → 把书放枕头上，先读 2 页',4);
+    box.appendChild(frow('卡住时的预案（可写多行）',cg));
     var rd=selectBox(DB_GOALS,'休息日',g['休息日']);
     box.appendChild(frow('每周休息日',rd));
     var rq=input('restQuota',restQuota(g),'number','每周休几天');
