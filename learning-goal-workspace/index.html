@@ -230,8 +230,12 @@
   <div id="syncBanner" class="banner" hidden>📡 有 <b id="outboxCount">0</b> 条记录没传上去，恢复网络后会自动补传。</div>
 
   <div id="loginBox" class="loginbox" hidden>
-    🔒 本页是学习平台的一部分，请先在主站登录后再进入（不需要单独登录）。
-    <a href="/app.html">去主站登录 →</a>
+    <div>🔒 本页是学习平台的一部分，请先在主站登录后再进入（不需要单独登录）。</div>
+    <div class="lmsg" style="margin:4px 0 8px">登录完回到这个页面，会自动接上同一个登录态。</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <a href="/app.html">去主站登录 →</a>
+      <button type="button" id="btnRetrySrv" class="btn sm">我已登录，重新连接</button>
+    </div>
   </div>
 
   <!-- AI 改单：用一句话说想怎么改，AI 直接改数据并回显 -->
@@ -1372,7 +1376,8 @@
     var box=$('#todayList');
     var tip=el('div','card empty','正在载入示例数据…');
     box.innerHTML=''; box.appendChild(tip);
-    srvRequest('/seed',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+    srvEnsure()
+      .then(function(){ return srvRequest('/seed',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); })
       .then(function(r){
         if(r&&r.ok===false&&r.reason==='already_has_goals'){ toast('已有目标，未载入示例'); return loadAll(); }
         toast('示例数据已载入');
@@ -1403,22 +1408,38 @@
   function aiSend(){
     var box=$('#aiInput'); var msg=(box.value||'').trim();
     if(!msg){ toast('先说一句你想怎么改'); return; }
-    if(!SRV.ready){ toast('本页需先在主站登录并连接服务器'); return; }
     aiLog(msg,'me'); box.value='';
     var btn=$('#aiSend'); btn.disabled=true; btn.textContent='思考中…';
-    srvRequest('/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        message:msg,
-        context:{goals:STATE.goals.map(function(g){ return {
-          id:g['目标ID'],name:g['目标名称'],unit:g['单位'],total:g['目标总量'],
-          done:g['已完成量'],end:g['截止日期'],subject:g['领域'],dailyCap:g['每日上限']}; })}})})
+    function done(){ btn.disabled=false; btn.textContent='发送'; }
+    srvEnsure()
+      .then(function(){
+        return srvRequest('/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            message:msg,
+            context:{goals:STATE.goals.map(function(g){ return {
+              id:g['目标ID'],name:g['目标名称'],unit:g['单位'],total:g['目标总量'],
+              done:g['已完成量'],end:g['截止日期'],subject:g['领域'],dailyCap:g['每日上限']}; })}})});
+      })
       .then(function(r){
-        btn.disabled=false; btn.textContent='发送';
+        done();
         var applied=aiDescribe(r&&r.applied);
         aiLog((r&&r.reply)||'（没有可执行的修改）','ai',applied);
         if(r&&r.applied&&r.applied.length) return loadAll();
       })
-      .catch(function(e){ btn.disabled=false; btn.textContent='发送'; aiLog('请求失败：'+(e&&e.message?e.message:''),'ai'); });
+      .catch(function(e){
+        done();
+        var m=(e&&e.message)?e.message:'请求失败';
+        aiLog(m+(/登录/.test(m)?'——去主站登录后回到本页，再点一次发送即可':''),'ai');
+      });
+  }
+
+  function retrySrvQuietly(){
+    if(SRV._retrying) return;
+    SRV._retrying=true;
+    srvEnsure().then(function(){
+      if(typeof render==='function') render();
+    }).catch(function(){ /* 仍未登录：保持提示条 */ })
+      .then(function(){ SRV._retrying=false; });
   }
 
   function bindEvents(){
@@ -1448,6 +1469,21 @@
       if(del){ UI.wizard.draft.stages.splice(parseInt(del.getAttribute('data-delstage'),10),1); renderWizard(); return; }
     });
     $('#btnNewGoal').addEventListener('click',openWizard);
+    // 重连按钮：主站登录后回到本页，点一下即可接上（也支持直接发消息自动重连）
+    var retry=$('#btnRetrySrv');
+    if(retry) retry.addEventListener('click',function(){
+      retry.disabled=true; retry.textContent='连接中…';
+      srvEnsure().then(function(){
+        retry.textContent='已连接 ✓'; setTimeout(function(){ $('#loginBox').hidden=true; }, 600);
+      }).catch(function(e){
+        retry.disabled=false; retry.textContent='我已登录，重新连接';
+        toast((e&&e.message)?e.message:'仍未连接上');
+      });
+    });
+    // 从主站登录后切回本页：可见性恢复时自动重连一次
+    document.addEventListener('visibilitychange',function(){
+      if(!document.hidden && !SRV.ready && srvDetect()) retrySrvQuietly();
+    });
     var aiIn=$('#aiInput'), aiBtn=$('#aiSend');
     if(aiBtn) aiBtn.addEventListener('click',aiSend);
     if(aiIn){
@@ -1482,19 +1518,58 @@
     return !/workbuddy\.(cn|link)$/.test(location.hostname);
   }
   // 复用主站登录态：本页不再单独登录，只检测会话；未登录则提示去主站登录。
+  // 注意：服务端 /api/auth/status 返回字段是 authenticated（未登录时同时给 401 + body），
+  // 这里两种字段名都认，避免因字段名不一致被误判成"未登录"。
   function srvSession(){
-    return fetch('/api/auth/status',{credentials:'same-origin'}).then(function(r){
-      if(!r.ok) return {logged_in:false};
-      return r.json().catch(function(){ return {logged_in:false}; });
-    });
+    return fetch('/api/auth/status',{credentials:'same-origin',cache:'no-store'})
+      .then(function(r){
+        return r.json().catch(function(){ return {}; })
+          .then(function(d){
+            var ok = !!(d && (d.authenticated===true || d.logged_in===true || d.ok===true));
+            return {ok:ok, authenticated:d&&d.authenticated, logged_in:d&&d.logged_in};
+          });
+      })
+      .catch(function(){ return {ok:false}; });
   }
-  function srvRequest(path,opts){
+  function srvRequest(path,opts,o){
     return fetch('/api/goals'+path,Object.assign({credentials:'same-origin'},opts||{}))
       .then(function(r){
-        if(r.status===401) throw new Error('未登录');
+        if(r.status===401){
+          SRV.ready=false; showLoginBox('会话已失效，请回到主站重新登录后再试');
+          var e=new Error('未登录'); e.unauth=true; throw e;
+        }
         if(!r.ok) throw new Error('HTTP '+r.status);
         return r.json();
+      })
+      .catch(function(e){
+        // 401 且允许重试：重新确认一次会话（可能刚在主站登录完），成功后重放请求
+        if(e&&e.unauth&&o&&o.retry!==false){
+          return srvSession().then(function(st){
+            if(st.ok){ SRV.ready=true; $('#loginBox').hidden=true;
+              return srvRequest(path,opts,Object.assign({},o,{retry:false})); }
+            throw e;
+          });
+        }
+        throw e;
       });
+  }
+  function showLoginBox(msg){
+    var box=$('#loginBox'); if(!box) return;
+    box.hidden=false;
+    if(msg){ var p=box.querySelector('.lmsg'); if(p) p.textContent=msg; }
+  }
+  // 确保已连接：AI 发送 / 载入示例等动作前调用，未登录则尝试重新确认会话
+  function srvEnsure(){
+    if(SRV.ready) return Promise.resolve(true);
+    return srvSession().then(function(st){
+      if(st.ok){
+        SRV.ready=true; $('#loginBox').hidden=true;
+        return loadAll().then(function(){ return true; });
+      }
+      SRV.ready=false;
+      showLoginBox();
+      throw new Error('尚未登录：请先在主站登录，本页会沿用同一登录态');
+    });
   }
   var SRV_API={
     load: function(){
@@ -1616,14 +1691,14 @@
       var tip=el('div','card empty','正在连接服务器数据…');
       $('#todayList').innerHTML=''; $('#todayList').appendChild(tip);
       srvSession().then(function(st){
-        if(st&&st.logged_in){
+        if(st&&st.ok){
           SRV.ready=true;
           $('#loginBox').hidden=true;
           return loadAll().then(function(){ toast('已连接服务器数据（多端同步）'); });
         }
         SRV.ready=false;
-        $('#loginBox').hidden=false;
-        var msg=el('div','card empty','请先在主站登录后再使用本页（沿用平台统一登录，不需要单独登录）');
+        showLoginBox();
+        var msg=el('div','card empty','请先在主站登录后再使用本页（沿用平台统一登录，不需要单独登录）。登录完回到本页，点「我已登录，重新连接」或直接发一句话就会自动接上。');
         $('#todayList').innerHTML=''; $('#todayList').appendChild(msg);
       }).catch(function(e){
         SRV.ready=false;
