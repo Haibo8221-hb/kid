@@ -2680,5 +2680,312 @@ def goals_stage():
     return resp
 
 
+
+
+# ── 目标台 · 示例数据播种 + AI 自然语言改单（2026-10-20）───────────────
+# 1) seed：目标表为空时写入 data-seed/goals_seed.json（Diya 目标清单），
+#    非空绝不覆盖——孩子的真实数据优先。
+# 2) ai：前端把「自然语言改版建议 + 当前目标快照」提交上来，服务端调用已配置的 LLM，
+#    要求模型只返回 JSON 操作指令，解析后按白名单落库，再把结果回传前端实时回显。
+
+_GOAL_WRITE_FIELDS = (
+    '目标名称', '单位', '目标总量', '已完成量', '开始日期', '截止日期', '状态',
+    '休息日', '休息额度', '拆解计划', '障碍预案', '领域', '模板', '颜色',
+    '每日上限', '今日建议量', '连续天数', '投入分钟', '节奏提示', '收口方式',
+)
+_GOAL_OPS = ('create_goal', 'update_goal', 'delete_goal', 'create_stage', 'create_checkin')
+
+
+def _seed_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data-seed', 'goals_seed.json')
+
+
+@app.route('/api/goals/seed', methods=['POST', 'OPTIONS'])
+def goals_seed():
+    """空表时灌入示例目标；已有数据时拒绝（保护真实数据）。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+    data = _read_goals()
+    if data['goals'] and not (request.get_json(force=True, silent=True) or {}).get('keep'):
+        resp = jsonify({'ok': False, 'reason': 'already_has_goals', 'count': len(data['goals'])})
+        _set_cors(resp)
+        return resp
+    sp = _seed_path()
+    if not os.path.exists(sp):
+        resp = jsonify({'ok': False, 'error': 'seed file missing'})
+        _set_cors(resp)
+        return resp, 500
+    with open(sp, 'r', encoding='utf-8') as f:
+        seed = json.load(f)
+    data['goals'] = seed.get('goals', [])
+    data['stages'] = seed.get('stages', [])
+    data.setdefault('checks', [])
+    _write_goals(data)
+    resp = jsonify({'ok': True, 'goals': len(data['goals']), 'stages': len(data['stages'])})
+    _set_cors(resp)
+    return resp
+
+
+def _goal_brief(g):
+    """给 LLM 的紧凑目标描述（避免把整表塞进 prompt）。"""
+    return {
+        'id': g.get('目标ID'),
+        'name': g.get('目标名称'),
+        'unit': g.get('单位'),
+        'total': g.get('目标总量'),
+        'done': g.get('已完成量'),
+        'end': str(g.get('截止日期') or '')[:10],
+        'status': g.get('状态'),
+        'subject': g.get('领域'),
+        'dailyCap': g.get('每日上限'),
+    }
+
+
+def _ai_prompt(goals, stages, message):
+    today = datetime.now().strftime('%Y-%m-%d')
+    schema = (
+        '{"reply":"给用户看的中文回复（1-3 句，说明你做了什么）",'
+        '"operations":[{"op":"create_goal","goal":{...}},'
+        '{"op":"update_goal","target":"目标ID 或 目标名称关键词","patch":{"领域":"化学"}},'
+        '{"op":"delete_goal","target":"目标名称关键词"},'
+        '{"op":"create_stage","target":"目标名称关键词","stage":{"阶段名称":"第 1 段","阶段目标量":24}},'
+        '{"op":"create_checkin","target":"目标名称关键词","check":{"本次完成量":8}}]}'
+    )
+    fields = '、'.join(_GOAL_WRITE_FIELDS)
+    return f"""你是「学习目标工作台」的改单助手。今天是 {today}。
+
+用户会提出关于学习目标的管理建议（例如：按学科重新分类、增加一个每日复习任务、把某个目标的截止日推迟、把每日上限调到 20）。
+你必须把建议翻译成对目标数据的具体修改。
+
+当前目标列表（JSON）：
+{json.dumps([_goal_brief(g) for g in goals], ensure_ascii=False)}
+
+当前阶段列表：
+{json.dumps([{'id': s.get('阶段ID'), 'goal': s.get('目标ID'), 'name': s.get('阶段名称'), 'qty': s.get('阶段目标量')} for s in stages], ensure_ascii=False)}
+
+可写字段（只能用这些）：{fields}
+状态可选：待开始 / 进行中 / 受阻 / 已完成 / 已放弃；领域可选：英语 / 数学 / 阅读 / 编程 / 科学 / 运动 / 综合 / 其他
+
+严格只输出一个 JSON 对象，不要任何解释文字、不要 Markdown 代码块：
+{schema}
+
+规则：
+1. operations 里 op 只能是 create_goal / update_goal / delete_goal / create_stage / create_checkin
+2. update_goal 的 patch 只放要改的字段；没提到的一律不动
+3. 「按学科分类」这类建议 → 用 update_goal 给每个目标设置 patch.领域（英语/数学/阅读/编程/科学/运动/综合）
+4. 「增加每日复习任务」→ 用 create_goal（单位=条 或 次，总量按合理默认值，如 30，截止日建议今天+30 天）
+5. 不确定的不要改，reply 里说明需要澄清什么
+6. 所有日期用 YYYY-MM-DD 字符串"""
+
+
+def _parse_ai_json(text):
+    """从模型输出里抽出 JSON（容忍 ```json 包裹与前后废话）。"""
+    if not text:
+        return None
+    s = text.strip()
+    if s.startswith('```'):
+        s = s.split('```')[1]
+        if s.lower().startswith('json'):
+            s = s[4:]
+    s = s.strip().strip('`').strip()
+    start, end = s.find('{'), s.rfind('}')
+    if start < 0 or end <= start:
+        return None
+    try:
+        return json.loads(s[start:end + 1])
+    except Exception:
+        return None
+
+
+def _match_goal(goals, target):
+    """按目标ID 或名称关键词定位目标。"""
+    if not target:
+        return None
+    t = str(target).strip()
+    for g in goals:
+        if g.get('目标ID') == t or g.get('record_id') == t:
+            return g
+    for g in goals:
+        if t and t in str(g.get('目标名称', '')):
+            return g
+    return None
+
+
+@app.route('/api/goals/ai', methods=['POST', 'OPTIONS'])
+def goals_ai():
+    """自然语言改单：前端提交 message + 当前数据快照，服务端调用 LLM 解析并落库。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+    body = request.get_json(force=True, silent=True) or {}
+    message = (body.get('message') or '').strip()
+    if not message:
+        resp = jsonify({'ok': False, 'error': 'empty message'})
+        _set_cors(resp)
+        return resp, 400
+    if len(message) > 2000:
+        message = message[:2000]
+
+    data = _read_goals()
+    goals, stages = data['goals'], data['stages']
+    cfg = _load_config()
+    if not cfg.get('api_key'):
+        resp = jsonify({'ok': False, 'error': 'llm_not_configured',
+                        'reply': '服务器还没配置 LLM（平台侧栏「⚙️ LLM 设置」填好端点与 Key 后即可用）'})
+        _set_cors(resp)
+        return resp, 200
+
+    try:
+        with httpx.Client(timeout=60.0) as client:
+            r = client.post(
+                f"{cfg['base_url']}/chat/completions",
+                headers={'Authorization': f"Bearer {cfg['api_key']}", 'Content-Type': 'application/json'},
+                json={'model': cfg['model'], 'temperature': 0.2, 'max_tokens': 1200,
+                      'messages': [
+                          {'role': 'system', 'content': _ai_prompt(goals, stages, message)},
+                          {'role': 'user', 'content': message}]})
+            text = r.json()['choices'][0]['message']['content'] if r.status_code == 200 else ''
+            if r.status_code != 200:
+                resp = jsonify({'ok': False, 'error': f'llm_{r.status_code}',
+                                'reply': f'模型调用失败（{r.status_code}），请稍后再试'})
+                _set_cors(resp)
+                return resp, 200
+    except Exception as e:
+        resp = jsonify({'ok': False, 'error': 'llm_network', 'reply': f'模型调用异常：{str(e)[:80]}'})
+        _set_cors(resp)
+        return resp, 200
+
+    plan = _parse_ai_json(text)
+    if not isinstance(plan, dict):
+        resp = jsonify({'ok': False, 'error': 'bad_llm_output',
+                        'reply': '模型没有返回可解析的指令，本次没有修改任何数据。可以换个说法再试一次。'})
+        _set_cors(resp)
+        return resp, 200
+
+    applied = []
+
+    def _mk(gid=None):
+        return {'record_id': uuid.uuid4().hex[:12], '目标ID': gid or ('g-' + uuid.uuid4().hex[:8])}
+
+    for op in (plan.get('operations') or []):
+        if not isinstance(op, dict):
+            continue
+        kind = op.get('op')
+        if kind not in _GOAL_OPS:
+            continue
+        try:
+            if kind == 'create_goal':
+                gsrc = op.get('goal') or {}
+                g = _mk(gsrc.get('目标ID'))
+                g['目标名称'] = str(gsrc.get('目标名称') or gsrc.get('name') or '新目标')[:60]
+                g['单位'] = str(gsrc.get('单位') or gsrc.get('unit') or '次')[:12]
+                g['目标总量'] = float(gsrc.get('目标总量') or gsrc.get('total') or 1)
+                g['已完成量'] = float(gsrc.get('已完成量') or 0)
+                g['开始日期'] = str(gsrc.get('开始日期') or datetime.now().strftime('%Y-%m-%d'))[:10]
+                g['截止日期'] = str(gsrc.get('截止日期') or (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d'))[:10]
+                g['状态'] = gsrc.get('状态') or '进行中'
+                g['休息日'] = gsrc.get('休息日') or '周日'
+                g['休息额度'] = int(float(gsrc.get('休息额度') or 1))
+                g['领域'] = gsrc.get('领域') or '其他'
+                g['模板'] = gsrc.get('模板') or '自定义'
+                g['每日上限'] = float(gsrc.get('每日上限') or g['目标总量'])
+                g['今日建议量'] = float(gsrc.get('今日建议量') or max(1, round(g['目标总量'] / 30)))
+                g['连续天数'] = 0
+                g['投入分钟'] = 0
+                g['拆解计划'] = str(gsrc.get('拆解计划') or '')[:500]
+                g['障碍预案'] = str(gsrc.get('障碍预案') or '')[:500]
+                g['颜色'] = gsrc.get('颜色') or '#5b6cff'
+                g['节奏提示'] = ''
+                g['收口方式'] = '无'
+                g['创建时间'] = datetime.now().isoformat()
+                g['最近更新'] = datetime.now().isoformat()
+                goals.append(g)
+                applied.append({'op': 'create_goal', 'name': g['目标名称'], 'id': g['目标ID']})
+
+            elif kind == 'update_goal':
+                g = _match_goal(goals, op.get('target') or op.get('目标ID') or op.get('目标名称'))
+                if not g:
+                    continue
+                patch = op.get('patch') or {}
+                changed = []
+                for k, v in patch.items():
+                    if k in _GOAL_WRITE_FIELDS:
+                        g[k] = v
+                        changed.append(k)
+                if changed:
+                    g['最近更新'] = datetime.now().isoformat()
+                    applied.append({'op': 'update_goal', 'name': g.get('目标名称'), 'fields': changed})
+
+            elif kind == 'delete_goal':
+                g = _match_goal(goals, op.get('target') or op.get('目标名称'))
+                if not g:
+                    continue
+                gid = g.get('目标ID')
+                goals[:] = [x for x in goals if x.get('目标ID') != gid]
+                stages[:] = [s for s in stages if s.get('目标ID') != gid]
+                applied.append({'op': 'delete_goal', 'name': g.get('目标名称')})
+
+            elif kind == 'create_stage':
+                g = _match_goal(goals, op.get('target') or op.get('目标名称'))
+                if not g:
+                    continue
+                s = op.get('stage') or {}
+                stages.append({
+                    'record_id': uuid.uuid4().hex[:12],
+                    '阶段ID': 's-' + uuid.uuid4().hex[:8],
+                    '目标ID': g['目标ID'],
+                    '阶段名称': str(s.get('阶段名称') or '新阶段')[:40],
+                    '阶段目标量': float(s.get('阶段目标量') or 1),
+                    '阶段截止日': str(s.get('阶段截止日') or g.get('截止日期') or '')[:10],
+                    '阶段状态': s.get('阶段状态') or '未开始',
+                    '阶段顺序': len([x for x in stages if x.get('目标ID') == g['目标ID']]) + 1,
+                })
+                applied.append({'op': 'create_stage', 'name': g.get('目标名称'), 'stage': s.get('阶段名称')})
+
+            elif kind == 'create_checkin':
+                g = _match_goal(goals, op.get('target') or op.get('目标名称'))
+                if not g:
+                    continue
+                c = op.get('check') or {}
+                amt = float(c.get('本次完成量') or 0)
+                new_done = float(g.get('已完成量') or 0) + amt
+                total = float(g.get('目标总量') or 0)
+                if total > 0:
+                    new_done = min(new_done, total)
+                date_s = str(c.get('打卡日期') or datetime.now().strftime('%Y-%m-%d'))[:10]
+                data['checks'].append({
+                    'record_id': uuid.uuid4().hex[:12],
+                    '记录ID': 'c-' + uuid.uuid4().hex[:8],
+                    '目标ID': g['目标ID'],
+                    '打卡日期': date_s,
+                    '本次完成量': amt,
+                    '累计完成量': new_done,
+                    '用时分钟': float(c.get('用时分钟') or 0),
+                    '打卡类型': '正常',
+                    '当时状态': '顺利',
+                    '备注': 'AI 助手代记',
+                    '提交时间': datetime.now().isoformat(),
+                })
+                g['已完成量'] = new_done
+                g['最近更新'] = datetime.now().isoformat()
+                applied.append({'op': 'create_checkin', 'name': g.get('目标名称'), 'amount': amt})
+        except Exception:
+            continue
+
+    if applied:
+        _write_goals(data)
+    resp = jsonify({'ok': True, 'reply': str(plan.get('reply') or '已处理。')[:800],
+                    'applied': applied, 'goals': len(goals)})
+    _set_cors(resp)
+    return resp
+
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=int(os.environ.get('PORT', 5000)), debug=False)

@@ -286,6 +286,104 @@ check(d.get('twp_total') == 2 and d.get('twp_done') == 1,
 ac.post('/api/tasks', json={'user': 'diya', 'tasks': {}})
 
 
+A._json_cache.clear()
+print('== 目标台 API（seed / ai 端点）==')
+ac2 = Authed(A._make_token())
+r = ac2.get('/api/goals')
+check(r.status_code == 200 and 'goals' in (r.get_json() or {}), 'GET /api/goals 返回三段结构')
+r = ac2.post('/api/goals/seed', json={})
+_d = r.get_json() or {}
+check(r.status_code == 200 and _d.get('ok') is True and _d.get('goals', 0) >= 8,
+      f"POST /api/goals/seed 注入示例目标（{_d.get('goals')} 个）")
+r = ac2.post('/api/goals/seed', json={})
+_d2 = r.get_json() or {}
+check(_d2.get('ok') is False and _d2.get('reason') == 'already_has_goals',
+      'seed 幂等保护：已有目标时拒绝覆盖')
+_goals = (ac2.get('/api/goals').get_json() or {}).get('goals') or []
+check(len(_goals) >= 8 and _goals[0].get('目标名称'), f"seed 后目标可读（{len(_goals)} 个）")
+_g0 = _goals[0]
+check(all(k in _g0 for k in ('目标ID', '目标名称', '单位', '目标总量', '截止日期', '状态', '休息日')),
+      'seed 目标含页面渲染所需字段')
+
+
+def _make_client(content):
+    """构造只返回固定模型输出的假 httpx.Client（避免测试走真实网络）。"""
+    class _R:
+        status_code = 200
+        def json(self):
+            return {'choices': [{'message': {'content': content}}]}
+    class _C:
+        def __init__(self, *a, **k):
+            pass
+        def __enter__(self):
+            return self
+        def __exit__(self, *a):
+            return False
+        def post(self, *a, **k):
+            return _R()
+    return _C
+
+
+_cfg_backup = A._load_config
+_httpx_backup = A.httpx.Client
+_name0 = _g0.get('目标名称')
+try:
+    A._load_config = lambda: {'api_key': 'test-key', 'base_url': 'https://example.invalid/v1',
+                               'model': 'test-model', 'temperature': 0.2}
+    # ① 正常路径：模型返回 Markdown 包裹的 JSON，含 update_goal + create_goal
+    A.httpx.Client = _make_client(
+        '好的，我按学科重新分类并加了一个每日复习：\n```json\n'
+        '{"reply":"已按学科分类，并新增每日复习目标。","operations":['
+        '{"op":"update_goal","target":"' + _name0 + '","patch":{"领域":"数学","每日上限":15}},'
+        '{"op":"create_goal","goal":{"目标名称":"每日复习 20 个单词","单位":"个","目标总量":600,'
+        '"截止日期":"2026-12-20","领域":"英语"}}]}'
+        '\n```')
+    _before = len(_goals)
+    r = ac2.post('/api/goals/ai', json={'message': '把学习目标改成按学科分类，再加一个每日复习任务'})
+    d = r.get_json() or {}
+    check(r.status_code == 200 and d.get('ok') is True, 'AI 端点成功解析模型指令')
+    check('已按学科分类' in str(d.get('reply') or ''), 'AI 回显模型 reply')
+    _applied = d.get('applied') or []
+    check(any(a.get('op') == 'update_goal' for a in _applied), 'AI 产出 update_goal 操作')
+    check(any(a.get('op') == 'create_goal' for a in _applied), 'AI 产出 create_goal 操作')
+    _after = (ac2.get('/api/goals').get_json() or {}).get('goals') or []
+    check(len(_after) == _before + 1, f'AI 新建目标已落库（{_before} → {len(_after)}）')
+    _hit = [g for g in _after if g.get('目标名称') == '每日复习 20 个单词']
+    check(bool(_hit) and _hit[0].get('领域') == '英语', 'AI 新建目标的字段正确')
+    _t = [g for g in _after if g.get('目标名称') == _name0]
+    check(bool(_t) and str(_t[0].get('每日上限')) in ('15', '15.0'), 'AI 修改字段已落库（每日上限=15）')
+    check(bool(_t) and _t[0].get('领域') == '数学', 'AI 按学科分类已落库（领域=数学）')
+    # ② 白名单：非法字段被忽略，合法字段照常生效
+    A.httpx.Client = _make_client(
+        '{"reply":"x","operations":[{"op":"update_goal","target":"' + _name0 +
+        '","patch":{"未知字段":"v","领域":"物理"}}]}')
+    ac2.post('/api/goals/ai', json={'message': '改个字段'})
+    _t2 = [g for g in (ac2.get('/api/goals').get_json() or {}).get('goals') or []
+           if g.get('目标名称') == _name0]
+    check(bool(_t2) and '未知字段' not in _t2[0], 'AI 白名单：非法字段被忽略')
+    check(bool(_t2) and _t2[0].get('领域') == '物理', 'AI 白名单内的字段正常生效')
+    # ③ 模型返回非 JSON → 不改数据
+    A.httpx.Client = _make_client('我看了一下，建议你先休息')
+    _cnt = len((ac2.get('/api/goals').get_json() or {}).get('goals') or [])
+    r = ac2.post('/api/goals/ai', json={'message': '随便聊聊'})
+    d3 = r.get_json() or {}
+    check(d3.get('ok') is False and d3.get('error') == 'bad_llm_output', 'AI 遇到非 JSON 回复时不误改数据')
+    check(len((ac2.get('/api/goals').get_json() or {}).get('goals') or []) == _cnt, '非 JSON 回复后目标数不变')
+finally:
+    A._load_config = _cfg_backup
+    A.httpx.Client = _httpx_backup
+
+r = ac2.post('/api/goals/ai', json={'message': '  '})
+check(r.status_code == 400, 'AI 端点拒绝空消息')
+check(A._parse_ai_json('```json\n{"reply":"ok","operations":[]}\n```') is not None,
+      'AI 解析器容忍 ```json 代码块')
+check(A._parse_ai_json('好的，已处理：{"reply":"x","operations":[]}') is not None,
+      'AI 解析器从夹带文字中抽取 JSON')
+check(A._parse_ai_json('完全不是 JSON') is None, 'AI 解析器对不可解析内容返回 None（不误改数据）')
+r = app.test_client().post('/api/goals/ai', json={'message': 'x'})
+check(r.status_code == 401, '目标台 API 复用平台鉴权（未登录 401）')
+
+
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
 if FAILS:
     import sys as _sys

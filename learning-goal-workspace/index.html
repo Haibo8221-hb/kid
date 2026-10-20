@@ -162,6 +162,31 @@
   .loading{text-align:center;color:var(--muted);font-size:13px;padding:26px 10px}
   .banner{background:var(--amber-soft);color:#8a5a00;border-radius:12px;padding:9px 13px;font-size:12.5px;margin:10px 0;display:flex;gap:8px;align-items:center}
 
+  /* AI 改单条（页面最上方） */
+  .aibar{background:linear-gradient(135deg,#eef0ff,#f7f0ff);border:1px solid #dfe3ff;border-radius:18px;padding:14px;margin:14px 0 4px}
+  .aibar-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .aibar-head .ai-ic{width:28px;height:28px;border-radius:9px;background:#fff;display:grid;place-items:center;font-size:15px;box-shadow:var(--sh)}
+  .aibar-head b{font-size:14px}
+  .aibar-head .hintline{margin:0}
+  .airow{display:flex;gap:8px;align-items:flex-end}
+  .airow textarea{flex:1;min-height:46px;max-height:140px;padding:11px 13px;border:1px solid #d8dcf5;border-radius:14px;font:inherit;font-size:14px;background:#fff;color:var(--ink);resize:vertical;line-height:1.55}
+  .airow button{flex:none;height:46px;padding:0 18px;border-radius:14px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:14px}
+  .airow button[disabled]{opacity:.55}
+  .aihint{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+  .aihint button{border:1px dashed #c9ceff;background:#fff;border-radius:999px;padding:4px 11px;font-size:12px;color:#4a54b8}
+  .ailog{margin-top:10px;display:flex;flex-direction:column;gap:8px;max-height:230px;overflow:auto}
+  .aimsg{border-radius:13px;padding:9px 12px;font-size:13px;line-height:1.65;white-space:pre-wrap}
+  .aimsg.me{align-self:flex-end;background:var(--ink);color:#fff;max-width:86%}
+  .aimsg.ai{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+  .aiapply{margin-top:6px;font-size:12px;color:#0b6b4b;background:var(--green-soft);border-radius:9px;padding:6px 9px;display:inline-block}
+  .ailog:empty{display:none}
+  .loginbox{background:var(--amber-soft);border:1px solid #f2ddb2;border-radius:14px;padding:14px;margin:14px 0;font-size:13.5px;color:#7a5200;line-height:1.7}
+  .loginbox a{color:#3b47a8;font-weight:700}
+  .emptystate{text-align:center;padding:30px 18px}
+  .emptystate .e{font-size:34px}
+  .emptystate h3{font-size:16px;margin:8px 0 6px}
+  .emptystate p{color:var(--ink2);font-size:13.5px;margin:0 auto 14px;max-width:420px;line-height:1.75}
+
   @media (max-width:760px){
     .board{grid-template-columns:1fr 1fr}
     .kpis{width:100%;margin-left:0;order:3}
@@ -203,6 +228,32 @@
   </nav>
 
   <div id="syncBanner" class="banner" hidden>📡 有 <b id="outboxCount">0</b> 条记录没传上去，恢复网络后会自动补传。</div>
+
+  <div id="loginBox" class="loginbox" hidden>
+    🔒 本页是学习平台的一部分，请先在主站登录后再进入（不需要单独登录）。
+    <a href="/app.html">去主站登录 →</a>
+  </div>
+
+  <!-- AI 改单：用一句话说想怎么改，AI 直接改数据并回显 -->
+  <div class="aibar" id="aiBar">
+    <div class="aibar-head">
+      <span class="ai-ic">✨</span>
+      <div>
+        <b>用一句话改目标</b>
+        <div class="hintline">例：「把目标按学科分类」「加一个每天背 20 个单词的任务」「化学目标截止日推迟一周」</div>
+      </div>
+    </div>
+    <div class="airow">
+      <textarea id="aiInput" rows="1" placeholder="说说你想怎么改，例如：把学习目标改成按学科分类"></textarea>
+      <button type="button" id="aiSend">发送</button>
+    </div>
+    <div class="aihint" id="aiHints">
+      <button type="button" data-ai="把现有目标按学科分类">按学科分类</button>
+      <button type="button" data-ai="增加一个每天复习的任务">加每日复习任务</button>
+      <button type="button" data-ai="帮我看看现在的目标有没有问题">检查目标</button>
+    </div>
+    <div class="ailog" id="aiLog"></div>
+  </div>
 
   <!-- 今日 -->
   <section id="view-today">
@@ -627,7 +678,18 @@
     });
     var list=$('#todayList'); list.innerHTML='';
     if(!act.length){
-      list.appendChild(el('div','card empty','还没有进行中的目标 —— 点右上角「+ 新目标」，自己定一个有终点的事'));
+      var es=el('div','card emptystate');
+      es.appendChild(el('div','e','🎯'));
+      es.appendChild(el('h3',null,'这里还是空的'));
+      es.appendChild(el('p',null,'目标要有终点和总量才值得追（例如「背完 2000 个单词」「读完 440 页」）。你可以一键载入示例数据先看看结构，也可以直接说给上面那个 AI 听，让它帮你建。'));
+      var row=el('div'); row.style.cssText='display:flex;gap:8px;justify-content:center;flex-wrap:wrap';
+      var seedBtn=el('button','btn primary','载入示例数据');
+      seedBtn.type='button'; seedBtn.setAttribute('data-act','seed');
+      var newBtn=el('button','btn','自己新建一个');
+      newBtn.type='button'; newBtn.setAttribute('data-act','newgoal');
+      row.appendChild(seedBtn); row.appendChild(newBtn);
+      es.appendChild(row);
+      list.appendChild(es);
       return;
     }
     act.forEach(function(g){ list.appendChild(todayCard(g)); });
@@ -1020,82 +1082,95 @@
   }
   /* 新建目标向导 */
   var TPL=[{e:'🔤',t:'背单词',unit:'个',total:2000,icon:'🔤'},{e:'📖',t:'读书',unit:'页',total:440,icon:'📖'},{e:'🎬',t:'课程',unit:'节',total:40,icon:'🎬'},{e:'🏃',t:'运动',unit:'分钟',total:600,icon:'🏃'},{e:'✏️',t:'练习',unit:'题',total:200,icon:'✏️'},{e:'🎯',t:'自定义',unit:'',total:0,icon:'🎯'}];
+  /* 新建目标：单页表单（4 个核心字段 + 可折叠更多设置），取代原三步向导 */
   function openWizard(){
-    UI.wizard={step:1,draft:{tpl:0,name:'',unit:'',total:0,field:'fldOther',start:today(),end:addDays(today(),30),dailyCap:0,restDay:'restSun',restQuota:1,plan:'',contingency:'',color:'#5b6cff',stages:[]}};
+    UI.wizard={step:1,draft:{tpl:0,name:'',unit:'',total:0,field:'fldOther',
+      start:today(),end:addDays(today(),30),dailyCap:0,restDay:'restSun',restQuota:1,
+      plan:'',contingency:'',color:'#5b6cff',stages:[]}};
     renderWizard();
   }
   function renderWizard(){
-    var w=UI.wizard, d=w.draft, body=el('div');
-    var steps=el('div','steps');
-    for(var i=1;i<=3;i++){ var s=el('i'); if(i<=w.step) s.className='on'; steps.appendChild(s); }
-    body.appendChild(steps);
-    if(w.step===1){
-      body.appendChild(el('div','hintline','先挑一个像你的目标 —— 有终点、有总量，才追得动。'));
-      var grid=el('div','tplgrid');
-      TPL.forEach(function(t,i){
-        var b=el('button','tpl'+(i===d.tpl?' on':''));
-        b.type='button'; b.setAttribute('data-tpl',String(i));
-        b.appendChild(el('span','e',t.e)); b.appendChild(el('span',null,t.t));
-        grid.appendChild(b);
-      });
-      body.appendChild(frow('模板',grid));
-      body.appendChild(frow('目标名称',input('name',d.name,'text','例如：背完 2000 个单词')));
-      body.appendChild(frow('单位（用什么数）',input('unit',d.unit,'text','个 / 页 / 节 / 分钟…')));
-      body.appendChild(frow('总量（要做多少）',input('total',d.total,'number','例如 2000')));
-      body.appendChild(frow('领域',selectBox(DB_GOALS,'领域',d.field)));
-    }else if(w.step===2){
-      body.appendChild(frow('开始日期',input('start',d.start,'date')));
-      body.appendChild(frow('截止日期',input('end',d.end,'date')));
-      var cap=input('dailyCap',d.dailyCap,'number','留空 = 由系统按剩余天数算');
-      body.appendChild(frow('你每天大概能做多少？',cap,'诚实一点，系统会用它算建议量，不会让你硬撑。'));
-      var calc=el('div','hint info');
-      calc.appendChild(el('span','hi','🧮'));
-      var cd=el('div');
-      cd.appendChild(el('span',null,'按现在的计划，系统建议每天做 '));
-      cd.appendChild(el('b',null,draftSuggest(d)+' '+(d.unit||'次')));
-      cd.appendChild(el('span',null,'。太夸张的话，改总量或截止日期。'));
-      calc.appendChild(cd);
-      body.appendChild(calc);
-    }else{
-      body.appendChild(el('div','hintline','把它分成几段，每段多少 —— 台阶比大山好爬。'));
-      var list=el('div');
-      (d.stages.length?d.stages:[{name:'',qty:0}]).forEach(function(s,idx){
-        var row=el('div','msedit');
-        var n=input('stage-name',s.name,'text','第 '+(idx+1)+' 段');
-        var q=input('stage-qty',s.qty,'number','数量');
-        var x=el('button','x','×'); x.type='button'; x.setAttribute('data-delstage',String(idx));
-        row.appendChild(n); row.appendChild(q); row.appendChild(x);
-        list.appendChild(row);
-      });
-      body.appendChild(frow('我的拆解（阶段）',list));
-      var addb=el('button','btn sm','+ 再加一段'); addb.type='button'; addb.setAttribute('data-addstage','1');
-      body.appendChild(addb);
-      body.appendChild(frow('每周休息日',selectBox(DB_GOALS,'休息日',d.restDay)));
-      body.appendChild(frow('每周休几天',input('restQuota',d.restQuota,'number','1 天即可，别排太满')));
-      body.appendChild(frow('卡住时怎么办？（可写多行）',textareaBox('contingency',d.contingency,'例如：一躺下就想刷手机 → 把书放枕头上，先读 2 页再看手机',3)));
-      body.appendChild(frow('今天想先做什么？（可留空，可写多行）',textareaBox('plan',d.plan,'例如：今晚先背 20 个；明天把周三要默写的实验描述写一遍',2)));
+    var d=UI.wizard.draft, body=el('div');
+    body.appendChild(el('div','hintline','三件事就够：叫什么、要做多少、什么时候做完。其余随时可改。'));
+
+    var tplGrid=el('div','tplgrid');
+    TPL.forEach(function(t,i){
+      var b=el('button','tpl'+(i===d.tpl?' on':''));
+      b.type='button'; b.setAttribute('data-tpl',String(i));
+      b.appendChild(el('span','e',t.e)); b.appendChild(el('span',null,t.t));
+      tplGrid.appendChild(b);
+    });
+    body.appendChild(frow('① 挑个模板（自动填好单位与参考量）',tplGrid));
+
+    var name=input('name',d.name,'text','例如：背完 2000 个单词');
+    body.appendChild(frow('② 叫什么',name));
+
+    var f2=el('div','f2');
+    var un=input('unit',d.unit,'text','个 / 页 / 节 / 分钟');
+    var tt=input('total',d.total,'number','2000');
+    f2.appendChild(frow('单位',un));
+    f2.appendChild(frow('要做多少',tt));
+    body.appendChild(frow('③ 怎么算完成',f2));
+
+    var end=input('end',d.end,'date');
+    var cap=input('dailyCap',d.dailyCap,'number','留空=按剩余天数自动算');
+    var f3=el('div','f2');
+    f3.appendChild(frow('④ 什么时候做完',end));
+    f3.appendChild(frow('每天大概能做多少（可选）',cap));
+    body.appendChild(frow('',f3));
+
+    var calc=el('div','hint info');
+    calc.appendChild(el('span','hi','🧮'));
+    var cd=el('div');
+    cd.appendChild(el('span',null,'照这个量，系统每天会建议做 '));
+    cd.appendChild(el('b',null,draftSuggest(d)+' '+(d.unit||'次')));
+    if(num(tt.value)>0&&num(cap.value)>0&&draftSuggest(d)>=num(cap.value)){
+      cd.appendChild(el('span',null,'。总量偏大，可以调小或把截止日放晚一点。'));
     }
+    calc.appendChild(cd);
+    body.appendChild(calc);
+    [name,un,tt,end,cap].forEach(function(el2){ el2.addEventListener('input',function(){ collectWizard(); renderWizard(); }); });
+
+    var more=el('div');
+    more.style.cssText='margin-top:6px;border-top:1px dashed var(--line);padding-top:10px';
+    var tog=el('button','btn sm','更多设置（学科 / 休息日 / 拆解 / 预案）');
+    tog.type='button'; tog.setAttribute('data-toggle','more');
+    more.appendChild(tog);
+    var box=el('div'); box.hidden=true;
+    box.style.cssText='margin-top:10px';
+    var f4=el('div','f2');
+    var fd=selectBox(DB_GOALS,'领域',d.field);
+    var rd=selectBox(DB_GOALS,'休息日',d.restDay);
+    var rq=input('restQuota',d.restQuota,'number','1');
+    var stt=input('start',d.start,'date');
+    f4.appendChild(frow('学科分类',fd));
+    f4.appendChild(frow('每周休息日',rd));
+    f4.appendChild(frow('每周休几天',rq));
+    f4.appendChild(frow('开始日期',stt));
+    box.appendChild(f4);
+    box.appendChild(frow('我的拆解（可留空，以后再补）',textareaBox('plan',d.plan,'例如：每天 20 个：先背 10 个新词，再复习 10 个旧的',2)));
+    box.appendChild(frow('卡住时的预案（可留空）',textareaBox('contingency',d.contingency,'例如：一躺下就想刷手机 → 把书放枕头上，先读 2 页',2)));
+    more.appendChild(box);
+    body.appendChild(more);
+
     cacheFields(body,'wizard');
-    openSheet(w.step===1?'新目标 · 第 1 步：我想要什么':(w.step===2?'新目标 · 第 2 步：做到什么时候':'新目标 · 第 3 步：怎么拆、怎么兜底'),
-      w.step===1?'目标由你自己定，系统只帮你算节奏。':(w.step===2?'选一个你真的能坚持到的日子。':'有计划、有预案，掉链子也不慌。'),
-      body,function(){
-        collectWizard();
-        if(w.step<3){ w.step++; renderWizard(); return false; }
-        saveGoal();
-        return true;
-      }, w.step===3?'创建目标':'下一步');
+    openSheet('新建目标','一次填完，以后随时能改。',body,function(){
+      collectWizard();
+      saveGoal();
+      return true;
+    },'创建目标');
+    var t2=$('#sheetBody [data-toggle="more"]');
+    if(t2) t2.addEventListener('click',function(){ var b2=$('#sheetBody').querySelector('div[hidden]'); if(b2) b2.hidden=!b2.hidden; });
   }
   function collectWizard(){
-    var w=UI.wizard,d=w.draft,body=$('#sheetBody');
+    var d=UI.wizard.draft, body=$('#sheetBody');
     function val(n){ var e=body.querySelector('[name="'+n+'"]'); return e?e.value:''; }
-    if(w.step===1){ d.name=val('name'); d.unit=val('unit'); d.total=num(val('total')); var f=body.querySelector('[name="领域"]'); d.field=f?f.value:''; }
-    else if(w.step===2){ d.start=val('start')||today(); d.end=val('end')||addDays(today(),30); d.dailyCap=num(val('dailyCap')); }
-    else {
-      var names=$$('[name="stage-name"]',body), qtys=$$('[name="stage-qty"]',body);
-      d.stages=[]; names.forEach(function(n,i){ d.stages.push({name:n.value,qty:num(qtys[i]?qtys[i].value:0)}); });
-      d.restQuota=num(val('restQuota')); var rd=body.querySelector('[name="休息日"]'); d.restDay=rd?rd.value:'restSun';
-      d.contingency=val('contingency'); d.plan=val('plan');
-    }
+    d.name=val('name'); d.unit=val('unit'); d.total=num(val('total'));
+    d.end=val('end')||d.end; d.start=val('start')||d.start; d.dailyCap=num(val('dailyCap'));
+    d.plan=val('plan'); d.contingency=val('contingency');
+    d.restQuota=num(val('restQuota'))||1;
+    var f=body.querySelector('[name="领域"]'); if(f) d.field=f.value;
+    var r=body.querySelector('[name="休息日"]'); if(r) d.restDay=r.value;
     clearCache('wizard');
   }
   function draftSuggest(d){
@@ -1140,10 +1215,17 @@
       '创建时间':new Date().toISOString(),
       '最近更新':new Date().toISOString()
     };
-    addGoalRecord(props,(SRV.ready&&d.stages.length)?d.stages.map(function(s,i){
-      return {'阶段ID':uid(),'目标ID':gid,'阶段名称':s.name||('第 '+(i+1)+' 段'),'阶段目标量':s.qty||0,
-              '阶段截止日':stageDeadline(d,i,Math.max(1,d.stages.length)),'阶段状态':i===0?'进行中':'未开始','阶段顺序':i+1};
-    }):null).then(function(r){
+    // 阶段：优先用孩子填的；没填就按总量自动均分（两条数据通路共用同一份）
+    var stgAuto=d.stages.filter(function(x){ return x.name; });
+    if(!stgAuto.length&&d.total){
+      var segN=Math.min(4,Math.max(2,Math.round(d.total/100)));
+      for(var si=0;si<segN;si++) stgAuto.push({name:'第 '+(si+1)+' 段',qty:Math.round(d.total/segN)});
+    }
+    var stagePayload=stgAuto.map(function(x,i){
+      return {'阶段ID':uid(),'目标ID':gid,'阶段名称':x.name||('第 '+(i+1)+' 段'),'阶段目标量':x.qty||0,
+              '阶段截止日':stageDeadline(d,i,Math.max(1,stgAuto.length)),'阶段状态':i===0?'进行中':'未开始','阶段顺序':i+1};
+    });
+    addGoalRecord(props,SRV.ready?stagePayload:null).then(function(r){
       var recId=r&&(r.id||r.record_id);
       var g={}; for(var k in props) g[k]=props[k];
       g.record_id=recId; g['目标名称']=d.name; g['目标总量']=d.total; g['已完成量']=0; g['单位']=d.unit||'次';
@@ -1151,17 +1233,12 @@
       g['今日建议量']=draftSuggest(d); g['连续天数']=0; g['投入分钟']=0; g['节奏提示']=''; g['拆解计划']=d.plan; g['障碍预案']=d.contingency;
       g['模板']=props['模板']; g['领域']=d.field; g['每日上限']=d.dailyCap||0;
       STATE.goals.push(g);
-      var stg=d.stages.filter(function(s){ return s.name; });
-      if(!stg.length&&d.total){
-        var seg=Math.min(4,Math.max(2,Math.round(d.total/100)));
-        for(var i=0;i<seg;i++){ stg.push({name:'第 '+(i+1)+' 段',qty:Math.round(d.total/seg)}); }
-      }
       if(SRV.ready) return render();
-      stg.forEach(function(s,i){
+      stagePayload.forEach(function(s,i){
         addStageRecord({
           '阶段ID':uid(),'目标ID':gid,'阶段名称':s.name||('第 '+(i+1)+' 段'),
           '阶段目标量':s.qty||0,
-          '阶段截止日':new Date(stageDeadline(d,i,stg.length)+'T00:00:00').toISOString(),
+          '阶段截止日':new Date(stageDeadline(d,i,stagePayload.length)+'T00:00:00').toISOString(),
           '阶段状态':optId(DB_STAGES,'阶段状态',i===0?'进行中':'未开始'),
           '阶段顺序':i+1
         }).then(function(r2){
@@ -1271,6 +1348,8 @@
       case 'closeDone': if(g) doClose(g,'done'); break;
       case 'closeDrop': if(g) doClose(g,'drop'); break;
       case 'edit': if(g) openEdit(g); break;
+      case 'newgoal': openWizard(); break;
+      case 'seed': seedDemo(); break;
       case 'stages': if(g) setView('progress'); break;
       case 'move':
         if(g){
@@ -1288,6 +1367,60 @@
       default: break;
     }
   }
+  /* 一键载入示例数据（服务端接口；已有数据时服务端会拒绝） */
+  function seedDemo(){
+    var box=$('#todayList');
+    var tip=el('div','card empty','正在载入示例数据…');
+    box.innerHTML=''; box.appendChild(tip);
+    srvRequest('/seed',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+      .then(function(r){
+        if(r&&r.ok===false&&r.reason==='already_has_goals'){ toast('已有目标，未载入示例'); return loadAll(); }
+        toast('示例数据已载入');
+        return loadAll();
+      })
+      .catch(function(){ toast('载入失败（仅服务器版支持）'); });
+  }
+
+  /* ── AI 改单：提交「对话 + 当前目标快照」，服务端解析后落库并回显 ── */
+  function aiLog(msg,cls,applyText){
+    var log=$('#aiLog'); if(!log) return;
+    var b=el('div','aimsg '+(cls||'ai'),msg);
+    if(applyText){ var ap=el('div','aiapply','已应用：'+applyText); b.appendChild(ap); }
+    log.appendChild(b); log.scrollTop=log.scrollHeight;
+  }
+  function aiDescribe(applied){
+    if(!applied||!applied.length) return '';
+    var parts=applied.map(function(a){
+      if(a.op==='create_goal') return '新增目标「'+(a.name||'')+'」';
+      if(a.op==='update_goal') return '修改「'+(a.name||'')+'」的 '+(a.fields||[]).join('、');
+      if(a.op==='delete_goal') return '删除「'+(a.name||'')+'」';
+      if(a.op==='create_stage') return '给「'+(a.name||'')+'」加阶段「'+(a.stage||'')+'」';
+      if(a.op==='create_checkin') return '给「'+(a.name||'')+'」记一笔 +'+(a.amount||0);
+      return a.op;
+    });
+    return parts.join('；');
+  }
+  function aiSend(){
+    var box=$('#aiInput'); var msg=(box.value||'').trim();
+    if(!msg){ toast('先说一句你想怎么改'); return; }
+    if(!SRV.ready){ toast('本页需先在主站登录并连接服务器'); return; }
+    aiLog(msg,'me'); box.value='';
+    var btn=$('#aiSend'); btn.disabled=true; btn.textContent='思考中…';
+    srvRequest('/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        message:msg,
+        context:{goals:STATE.goals.map(function(g){ return {
+          id:g['目标ID'],name:g['目标名称'],unit:g['单位'],total:g['目标总量'],
+          done:g['已完成量'],end:g['截止日期'],subject:g['领域'],dailyCap:g['每日上限']}; })}})})
+      .then(function(r){
+        btn.disabled=false; btn.textContent='发送';
+        var applied=aiDescribe(r&&r.applied);
+        aiLog((r&&r.reply)||'（没有可执行的修改）','ai',applied);
+        if(r&&r.applied&&r.applied.length) return loadAll();
+      })
+      .catch(function(e){ btn.disabled=false; btn.textContent='发送'; aiLog('请求失败：'+(e&&e.message?e.message:''),'ai'); });
+  }
+
   function bindEvents(){
     document.addEventListener('click',function(e){
       var t=e.target;
@@ -1303,7 +1436,8 @@
         var idx=parseInt(tpl.getAttribute('data-tpl'),10);
         var d=UI.wizard.draft; d.tpl=idx;
         var tp=TPL[idx];
-        if(tp){ if(!d.unit) d.unit=tp.unit; if(!d.total) d.total=tp.total; }
+        // 模板负责填「单位 + 参考量」，不覆盖孩子已填的名称
+        if(tp){ d.unit=tp.unit; if(!d.total) d.total=tp.total; }
         renderWizard(); return;
       }
       if(t.getAttribute&&t.getAttribute('data-close')){ closeSheet(); return; }
@@ -1314,6 +1448,15 @@
       if(del){ UI.wizard.draft.stages.splice(parseInt(del.getAttribute('data-delstage'),10),1); renderWizard(); return; }
     });
     $('#btnNewGoal').addEventListener('click',openWizard);
+    var aiIn=$('#aiInput'), aiBtn=$('#aiSend');
+    if(aiBtn) aiBtn.addEventListener('click',aiSend);
+    if(aiIn){
+      aiIn.addEventListener('keydown',function(e){ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); aiSend(); } });
+      aiIn.addEventListener('input',function(){ aiIn.style.height='auto'; aiIn.style.height=Math.min(140,aiIn.scrollHeight)+'px'; });
+    }
+    $$('#aiHints [data-ai]').forEach(function(b){
+      b.addEventListener('click',function(){ var i=$('#aiInput'); i.value=b.getAttribute('data-ai'); aiSend(); });
+    });
     $('#btnNewGoal2').addEventListener('click',openWizard);
     $('#sheetOk').addEventListener('click',function(){
       if(!UI.sheet||!UI.sheet.onOk) return;
@@ -1338,14 +1481,11 @@
     // 页面自身挂在服务器上但不在资料库域 → 服务器形态
     return !/workbuddy\.(cn|link)$/.test(location.hostname);
   }
-  function srvLogin(){
+  // 复用主站登录态：本页不再单独登录，只检测会话；未登录则提示去主站登录。
+  function srvSession(){
     return fetch('/api/auth/status',{credentials:'same-origin'}).then(function(r){
-      if(r.ok) return r.json();
-      var pwd=window.prompt('请输入访问密码（与学习台相同）');
-      if(!pwd) return Promise.reject(new Error('未登录'));
-      return fetch('/api/auth/login',{method:'POST',credentials:'same-origin',
-        headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pwd})})
-        .then(function(r2){ if(!r2.ok) throw new Error('密码错误'); return r2.json(); });
+      if(!r.ok) return {logged_in:false};
+      return r.json().catch(function(){ return {logged_in:false}; });
     });
   }
   function srvRequest(path,opts){
@@ -1475,14 +1615,20 @@
     if(srvDetect()){                          // ② 服务器独立目录：同源 API（真实存储）
       var tip=el('div','card empty','正在连接服务器数据…');
       $('#todayList').innerHTML=''; $('#todayList').appendChild(tip);
-      srvLogin().then(function(){
-        SRV.ready=true;
-        return loadAll();
-      }).then(function(){
-        toast('已连接服务器数据（多端同步）');
+      srvSession().then(function(st){
+        if(st&&st.logged_in){
+          SRV.ready=true;
+          $('#loginBox').hidden=true;
+          return loadAll().then(function(){ toast('已连接服务器数据（多端同步）'); });
+        }
+        SRV.ready=false;
+        $('#loginBox').hidden=false;
+        var msg=el('div','card empty','请先在主站登录后再使用本页（沿用平台统一登录，不需要单独登录）');
+        $('#todayList').innerHTML=''; $('#todayList').appendChild(msg);
       }).catch(function(e){
         SRV.ready=false;
-        var msg=el('div','card empty','未能连接服务器数据：'+(e&&e.message?e.message:'登录失败')+'。请确认访问密码，或改用资料库版本打开。');
+        $('#loginBox').hidden=false;
+        var msg=el('div','card empty','无法连接服务器数据：'+(e&&e.message?e.message:'网络异常'));
         $('#todayList').innerHTML=''; $('#todayList').appendChild(msg);
       });
       return;
