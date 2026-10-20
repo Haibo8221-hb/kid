@@ -35,6 +35,12 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 .header-bar .admin-info{font-size:12px;color:var(--text2)}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
+/* 内嵌页面容器（目标台 / 物理奥赛）：撑满右侧内容区，随窗口自适应 */
+.embed-wrap{display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:520px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.embed-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2);flex:none}
+.embed-bar .btn{font-size:11px;padding:5px 12px;text-decoration:none;line-height:1.6}
+.embed-tip{font-size:11px;color:var(--text2);margin-left:auto}
+.embed-frame{flex:1;width:100%;border:none;display:block;background:#fff}
 
 /* Profile Card */
 .profile-card{padding:12px 16px;margin:8px 12px;margin-top:auto;background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:12px;text-align:center;cursor:default}
@@ -505,6 +511,7 @@ canvas.radar{width:240px!important;height:240px!important}
 </div>
 <ul class="sidebar-nav">
 <li><a href="#" data-tab="dashboard" class="active" onclick="switchTab('dashboard');return false">🏠 Dashboard</a></li>
+<li><a href="#" data-tab="goals" onclick="switchTab('goals');return false">🎯 目标台 Goal Desk</a></li>
 <li><a href="#" data-tab="route-compare" onclick="switchTab('route-compare');return false">🗺️ Route Compare</a></li>
 <li><a href="#" data-tab="resources" onclick="switchTab('resources');return false">📦 Learning Resources</a></li>
 <li><a href="#" data-tab="planner" onclick="switchTab('planner');return false">📅 Weekly Plan</a></li>
@@ -514,7 +521,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <li><a href="#" data-tab="upload" onclick="switchTab('upload');return false">📤 Upload</a></li>
 <li><a href="#" data-tab="weekly-review" onclick="switchTab('weekly-review');return false">📋 Weekly Review</a></li>
 <li><a href="#" data-tab="chat" onclick="switchTab('chat');return false">💬 AI Chat</a></li>
-<li><a href="/bpho_resources.html" target="_blank" onclick="this.blur()">⚛️ Physics Olympiad</a></li>
+<li><a href="#" data-tab="bpho" onclick="switchTab('bpho');return false">⚛️ Physics Olympiad</a></li>
 </ul>
 <div class="profile-card" id="profile-card">
  <div class="profile-avatar" id="profile-avatar" onclick="showAvatarPicker()" title="Change Avatar"></div>
@@ -1002,6 +1009,32 @@ ERROR BOOK
   <button class="btn btn-sm" onclick="refreshUploadList()">刷新</button>
 </div>
 <div id="upload-list"><div class="error-empty">Loading...</div></div>
+</div>
+
+<!-- 目标台（Goal Desk）：内嵌 goals.html，登录态与主站共享（同一 cookie） -->
+<div id="tab-goals" class="tab-panel">
+<div class="panel-title">🎯 目标台 Goal Desk · Diya</div>
+<div class="embed-wrap">
+ <div class="embed-bar">
+  <a class="btn" href="/goals.html" target="_blank">↗ 新窗口打开</a>
+  <button class="btn" type="button" onclick="reloadEmbed('goalsFrame')">↻ 刷新</button>
+  <span class="embed-tip">登录状态与主站共享，无需再次登录</span>
+ </div>
+ <iframe id="goalsFrame" class="embed-frame" src="/goals.html" title="目标台" loading="lazy"></iframe>
+</div>
+</div>
+
+<!-- 物理奥赛资源：原为新开窗口，现改为页内右侧显示 -->
+<div id="tab-bpho" class="tab-panel">
+<div class="panel-title"> ⚛️ Physics Olympiad · 资源与备赛</div>
+<div class="embed-wrap">
+ <div class="embed-bar">
+  <a class="btn" href="/bpho_resources.html" target="_blank">↗ 新窗口打开</a>
+  <button class="btn" type="button" onclick="reloadEmbed('bphoFrame')">↻ 刷新</button>
+  <span class="embed-tip">已改为页内显示，切换侧栏即可返回其他模块</span>
+ </div>
+ <iframe id="bphoFrame" class="embed-frame" src="/bpho_resources.html" title="Physics Olympiad" loading="lazy"></iframe>
+</div>
 </div>
 
 <!--
@@ -1910,6 +1943,10 @@ function filterResources(cat){
 }
 
 // Tab Navigation 
+function reloadEmbed(frameId){
+ const f=document.getElementById(frameId);
+ if(f && f.src){ f.src=f.src; }
+}
 function switchTab(tab){
  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));
@@ -1927,6 +1964,7 @@ function switchTab(tab){
  if(tab==='notes') loadNotes();
  if(tab==='errors') loadErrorBook();
  if(tab==='subject-analysis') loadSubjectAnalysis();
+ // 内嵌页：src 一旦被设过就保持不变，切走再切回不重载（保留孩子的滚动位置与输入）
 }
 
 // Dashboard 
@@ -2992,12 +3030,21 @@ async function loadSubjectAnalysis(){
  const errors = Array.isArray(data)?data:(data.errors||data.entries||[]);
  const bySubject = {};
  const byCause = {};
+ // 历史错题数据里 tags 可能是数组（['maths','gcse']），也可能是逗号分隔字符串；
+ // 旧代码只按字符串 .split() 处理，遇到数组直接抛 TypeError → 整页显示 "Load failed"。
+ const tagList = t=>{
+ if(!t) return [];
+ if(Array.isArray(t)) return t.map(x=>String(x).trim()).filter(Boolean);
+ return String(t).split(',').map(x=>x.trim()).filter(Boolean);
+ };
  errors.forEach(e=>{
- if(!bySubject[e.subject]) bySubject[e.subject] = {count:0,types:{},tags:{}};
- bySubject[e.subject].count++;
- if(e.type) bySubject[e.subject].types[e.type] = (bySubject[e.subject].types[e.type]||0)+1;
+ if(!e || typeof e!=='object') return;
+ const subj = e.subject || 'Other';
+ if(!bySubject[subj]) bySubject[subj] = {count:0,types:{},tags:{}};
+ bySubject[subj].count++;
+ if(e.type) bySubject[subj].types[e.type] = (bySubject[subj].types[e.type]||0)+1;
  if(e.cause) byCause[e.cause] = (byCause[e.cause]||0)+1;   // R7-b
- if(e.tags) e.tags.split(',').forEach(t=>{ const tt=t.trim(); if(tt) bySubject[e.subject].tags[tt]=(bySubject[e.subject].tags[tt]||0)+1; });
+ tagList(e.tags).forEach(tt=>{ bySubject[subj].tags[tt]=(bySubject[subj].tags[tt]||0)+1; });
  });
  // R7-b：全局错因分布条（放在学科卡之前）
  const causeTotal=Object.values(byCause).reduce((a,b)=>a+b,0);
@@ -3027,7 +3074,19 @@ async function loadSubjectAnalysis(){
  <div class="sa-top-issue">Tags: ${Object.entries(data.tags).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([t,n])=>`${t}(${n})`).join(', ')||'none'}</div>
  </div>`;
  }).join('');
- }catch(e){ container.innerHTML='<div class="error-empty">Load failed</div>'; }
+ }catch(e){
+ console.error('[subject-analysis]',e);
+ // 不再只写一句 "Load failed"：说明原因 + 可操作的下一步，便于自助排查
+ const why = (e&&e.message)?String(e.message).slice(0,180):'未知错误';
+ container.innerHTML = `<div class="error-empty">
+ <div style="font-size:14px;margin-bottom:6px">⚠️ 学科分析加载失败</div>
+ <div style="font-size:12px;color:var(--text2);line-height:1.7">
+ 原因：<code style="word-break:break-all">${why.replace(/</g,'&lt;')}</code><br>
+ 可尝试：① 刷新页面重试；② 确认已登录主站；③ 若持续失败，请把上面的原因文字发给管理员。
+ </div>
+ <div style="margin-top:10px"><button class="btn" onclick="loadSubjectAnalysis()">重试</button></div>
+ </div>`;
+ }
 }
 
 // Profile 

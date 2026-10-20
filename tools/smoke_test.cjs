@@ -422,6 +422,79 @@ function runPage(page) {
               if (tm2 && tm2.hidden) pass.push('R7：退出自测后列表视图还原');
               else fail.push('R7：endQuizMode 未还原列表视图');
             } catch (e) { fail.push('R7：断言抛错 ' + e.message); }
+
+            // ── R8：目标台内嵌 + 物理奥赛页内化 + Subject Analysis 数据形状兼容 ──
+            try {
+              // ① 侧栏：Dashboard 正下方是「目标台 Goal Desk」
+              const navLis = [...doc.querySelectorAll('.sidebar-nav li')].map(li => li.textContent.trim());
+              const dashIdx = navLis.findIndex(t => /Dashboard/.test(t));
+              const goalIdx = navLis.findIndex(t => /目标台/.test(t));
+              if (dashIdx >= 0 && goalIdx === dashIdx + 1)
+                pass.push('R8：侧栏「目标台」紧跟在 Dashboard 下方（第 ' + (goalIdx + 1) + ' 项）');
+              else fail.push('R8：侧栏顺序不对 dashboard=' + dashIdx + ' goals=' + goalIdx + ' → ' + navLis.slice(0, 4).join(' / '));
+
+              // ② Physics Olympiad 改为页内 tab，不再是新开窗口
+              const bphoLink = doc.querySelector('.sidebar-nav a[href="/bpho_resources.html"][target="_blank"]');
+              const bphoTab = doc.querySelector('.sidebar-nav a[data-tab="bpho"]');
+              if (!bphoLink && bphoTab) pass.push('R8：Physics Olympiad 已改为页内 tab（不再是新开窗口）');
+              else fail.push('R8：Physics Olympiad 仍是新窗口链接，或缺少 data-tab="bpho"');
+
+              // ③ 两个嵌入面板存在且 iframe 指向正确地址
+              const gf = doc.getElementById('goalsFrame');
+              const bf = doc.getElementById('bphoFrame');
+              if (gf && /\/goals\.html$/.test(gf.getAttribute('src') || '')) pass.push('R8：目标台 iframe 指向 /goals.html');
+              else fail.push('R8：目标台 iframe 缺失或 src 错误：' + (gf && gf.getAttribute('src')));
+              if (bf && /\/bpho_resources\.html$/.test(bf.getAttribute('src') || '')) pass.push('R8：物理奥赛 iframe 指向 /bpho_resources.html');
+              else fail.push('R8：物理奥赛 iframe 缺失或 src 错误：' + (bf && bf.getAttribute('src')));
+
+              // ④ 切换 tab 能激活对应面板（与其它模块一致）
+              window.switchTab('bpho');
+              const bp = doc.getElementById('tab-bpho');
+              const gp = doc.getElementById('tab-goals');
+              if (bp && bp.classList.contains('active') && !(gp && gp.classList.contains('active')))
+                pass.push('R8：switchTab("bpho") 正确激活页内面板');
+              else fail.push('R8：switchTab("bpho") 未激活 tab-bpho');
+              window.switchTab('goals');
+              if (gp && gp.classList.contains('active')) pass.push('R8：switchTab("goals") 正确激活目标台面板');
+              else fail.push('R8：switchTab("goals") 未激活 tab-goals');
+              if (typeof window.reloadEmbed === 'function') pass.push('R8：reloadEmbed 已提供（嵌入页可手动刷新）');
+              else fail.push('R8：缺少 reloadEmbed');
+
+              // ⑤ Subject Analysis：真实数据里 tags 是**数组**，旧代码 .split() 会抛错 → "Load failed"
+              //    这里用数组 tags + 字符串 tags 两种形状都必须能渲染
+              const shapes = [
+                { label: '数组 tags', errors: [{ subject: 'Chemistry', type: 'concept', tags: ['chem', 'aqa'], cause: 'concept' }] },
+                { label: '字符串 tags', errors: [{ subject: 'Physics', type: 'calc', tags: 'phy, unit', cause: 'careless' }] },
+                { label: '缺失字段', errors: [{ subject: 'Maths' }, {}, null] },
+              ];
+              const wait = ms => new Promise(r => setTimeout(r, ms));
+              shapes.reduce((chain, sh) => chain.then(() => {
+                window.fetch = () => Promise.resolve({
+                  ok: true, status: 200,
+                  json: () => Promise.resolve({ child: 'diya', total: sh.errors.length, errors: sh.errors }),
+                });
+                window.loadSubjectAnalysis();
+                return wait(60).then(() => {
+                  const txt = doc.getElementById('sa-grid').textContent || '';
+                  if (!/加载失败|Load failed/.test(txt)) pass.push('R8：Subject Analysis 兼容' + sh.label + '（正常渲染）');
+                  else fail.push('R8：Subject Analysis 在' + sh.label + '下报错：' + txt.replace(/\s+/g, ' ').slice(0, 90));
+                });
+              }), Promise.resolve())
+              .then(() => {
+                // ⑥ 真实失败时必须显示原因与重试入口，而不是只写一句 Load failed
+                window.fetch = () => Promise.resolve({ ok: false, status: 500, json: () => Promise.reject(new Error('boom')) });
+                window.loadSubjectAnalysis();
+                return wait(60);
+              })
+              .then(() => {
+                const failTxt = doc.getElementById('sa-grid').textContent || '';
+                if (/加载失败/.test(failTxt) && /原因/.test(failTxt) && doc.querySelector('#sa-grid button'))
+                  pass.push('R8：Subject Analysis 失败时给出原因 + 重试按钮（可自助排查）');
+                else fail.push('R8：Subject Analysis 失败态信息不足：' + failTxt.replace(/\s+/g, ' ').slice(0, 90));
+              })
+              .then(() => { resolve({ pass, fail }); });
+              return;
+            } catch (e) { fail.push('R8：断言抛错 ' + e.message); }
             resolve({ pass, fail });
           });
           return;   // resolve 移入上方 then（loadErrorBook 微任务内完成，早于任何宏任务汇总）
