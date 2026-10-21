@@ -55,6 +55,12 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 .header-bar h2{font-size:18px;font-weight:700}
 .header-bar .admin-info{font-size:14px;color:var(--text2)}
 .tab-panel{display:none}
+/* 内嵌页面容器（Goal Desk）：撑满右侧内容区 */
+.embed-wrap{display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:520px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.embed-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2);flex:none}
+.embed-bar .btn{font-size:11px;padding:5px 12px;text-decoration:none;line-height:1.6}
+.embed-tip{font-size:11px;color:var(--text2);margin-left:auto}
+.embed-frame{flex:1;width:100%;border:none;display:block;background:#fff}
 .tab-panel.active{display:block}
 
 /* Shared */
@@ -383,6 +389,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 </div>
 <ul class="sidebar-nav">
 <li><a href="#" data-tab="today" class="active" onclick="switchTab('today');return false">🏠 Today</a></li>
+<li><a href="#" data-tab="goals" onclick="switchTab('goals');return false">🎯 Goal Desk</a></li>
 <li><a href="#" data-tab="plan" onclick="switchTab('plan');return false">📅 My Plan</a></li>
 <li><a href="#" data-tab="stuff" onclick="switchTab('stuff');return false">📦 My Stuff</a></li>
 <li><a href="#" data-tab="errors" onclick="switchTab('errors');return false">📗 Error Book</a></li>
@@ -830,6 +837,19 @@ PS portfolio + academic reading notes
 </div>
 
 <!-- ERROR BOOK -->
+<!-- Goal Desk：复用与 Diya 完全相同的 goals.html，仅 URL 上带 ?child=jemma 做数据隔离 -->
+<div id="tab-goals" class="tab-panel">
+<div class="panel-title">🎯 Goal Desk · Jemma</div>
+<div class="embed-wrap">
+ <div class="embed-bar">
+  <a class="btn" href="/goals.html?child=jemma" target="_blank">↗ Open in new window</a>
+  <button class="btn" type="button" onclick="reloadEmbed('goalsFrame')">↻ Refresh</button>
+  <span class="embed-tip">Sign-in is shared with the main site — no separate login</span>
+ </div>
+ <iframe id="goalsFrame" class="embed-frame" src="/goals.html?child=jemma" title="Goal Desk" loading="lazy"></iframe>
+</div>
+</div>
+
 <div id="tab-errors" class="tab-panel">
 <div class="panel-title">📗 Error Book · 错题本</div>
 <div class="filter-bar" id="error-filter-bar">
@@ -1622,6 +1642,10 @@ function filterResources(f){
 }
 
 // Tab Navigation（低龄化重构后：Today / My Plan / My Stuff / Error Book / Ask AI 五个 tab）
+function reloadEmbed(frameId){
+ const f=document.getElementById(frameId);
+ if(f && f.src){ f.src=f.src; }
+}
 function switchTab(tab){
  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));

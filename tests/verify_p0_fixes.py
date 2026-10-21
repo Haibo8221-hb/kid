@@ -384,6 +384,99 @@ r = app.test_client().post('/api/goals/ai', json={'message': 'x'})
 check(r.status_code == 401, '目标台 API 复用平台鉴权（未登录 401）')
 
 
+A._json_cache.clear()
+print('== 目标台 child 隔离（Diya / Jemma 各自数据）==')
+_ac = Authed(A._make_token())
+# jemma 建一个、diya 建一个
+r = _ac.post('/api/goals/goal', json={'child': 'jemma', 'goal': {'目标ID': 'jj1', '目标名称': 'ZZJMARKZZ'}})
+check(r.status_code == 200, 'jemma 建目标成功')
+r = _ac.post('/api/goals/goal', json={'child': 'diya', 'goal': {'目标ID': 'dd1', '目标名称': 'ZZDMARKZZ'}})
+check(r.status_code == 200, 'diya 建目标成功')
+_j = (_ac.get('/api/goals?child=jemma').get_json() or {})
+_d = (_ac.get('/api/goals?child=diya').get_json() or {})
+_jn = [g.get('目标名称') for g in (_j.get('goals') or [])]
+_dn = [g.get('目标名称') for g in (_d.get('goals') or [])]
+check('ZZJMARKZZ' in _jn and 'ZZDMARKZZ' not in _jn, f'jemma 只看到自己的目标（{_jn}）')
+check('ZZDMARKZZ' in _dn and 'ZZJMARKZZ' not in _dn, f'diya 只看到自己的目标（{_dn}）')
+# 不传 child 时默认 diya（向后兼容）
+_anon = [g.get('目标名称') for g in (_ac.get('/api/goals').get_json() or {}).get('goals') or []]
+check('ZZDMARKZZ' in _anon and 'ZZJMARKZZ' not in _anon, f'不传 child 等同 diya（{_anon}）')
+# 非法 child 回落 diya（防越权读取）
+_bad = [g.get('目标名称') for g in (_ac.get('/api/goals?child=hacker').get_json() or {}).get('goals') or []]
+check('ZZDMARKZZ' in _bad and 'ZZJMARKZZ' not in _bad, '非法 child 回落 diya，不泄露 jemma 数据')
+# checkin 隔离
+_ac.post('/api/goals/checkin', json={'child': 'jemma', 'check': {'记录ID': 'ck-j1', '目标ID': 'jj1',
+                                                          '打卡日期': '2026-10-21', '本次完成量': 5},
+                                     'goal_patch': {'已完成量': 5}})
+_jc = len((_ac.get('/api/goals?child=jemma').get_json() or {}).get('checks') or [])
+_dc = len((_ac.get('/api/goals?child=diya').get_json() or {}).get('checks') or [])
+check(_jc == 1 and _dc == 0, f'打卡按 child 隔离（jemma={_jc} diya={_dc}）')
+# PUT 隔离：jemma 不能改 diya 的目标
+r = _ac.put('/api/goals/goal/dd1', json={'child': 'jemma', '目标总量': 999})
+check(r.status_code == 404, f'jemma 不能修改 diya 的目标（返回 {r.status_code}）')
+_dd = [g for g in ((_ac.get('/api/goals?child=diya').get_json() or {}).get('goals') or [])
+       if g.get('目标ID') == 'dd1']
+check(_dd and _dd[0].get('目标总量') != 999, 'diya 目标未被越权修改')
+# seed 隔离：给 jemma 播种不影响 diya
+_before_d = len((_ac.get('/api/goals?child=diya').get_json() or {}).get('goals') or [])
+_ac.post('/api/goals/seed', json={'child': 'jemma', 'keep': True})
+_after_d = len((_ac.get('/api/goals?child=diya').get_json() or {}).get('goals') or [])
+_j2 = len((_ac.get('/api/goals?child=jemma').get_json() or {}).get('goals') or [])
+check(_after_d == _before_d, f'给 jemma 播种不影响 diya 数据（{_before_d} → {_after_d}）')
+check(_j2 >= 8, f'jemma 播种成功（{_j2} 个目标）')
+# AI 端点隔离
+_seen = {}
+
+
+def _spy_client(content):
+    class _R:
+        status_code = 200
+
+        def json(self):
+            _seen['prompt_goals'] = content
+            return {'choices': [{'message': {'content': content}}]}
+
+    class _C:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def post(self, url, *a, **k):
+            # 记录真实发给模型的 messages（隔离验证要看的就是 prompt 里有哪些目标）
+            body = k.get('json')
+            if body is None and a:
+                body = a[0]
+            if isinstance(body, dict) and body.get('messages'):
+                _seen['messages'] = str(body['messages'])
+            elif isinstance(body, str):
+                _seen['messages'] = body
+            return _R()
+    return _C
+
+
+_cfg2 = A._load_config
+_hx2 = A.httpx.Client
+try:
+    A._load_config = lambda: {'api_key': 'k', 'base_url': 'https://example.invalid/v1',
+                               'model': 'm', 'temperature': 0.2}
+    # 前面的 seed(keep=True) 会整体替换该孩子的目标，所以这里先重建两个标记目标
+    _ac.post('/api/goals/goal', json={'child': 'jemma', 'goal': {'目标ID': 'jj1', '目标名称': 'ZZJMARKZZ'}})
+    _ac.post('/api/goals/goal', json={'child': 'diya', 'goal': {'目标ID': 'dd1', '目标名称': 'ZZDMARKZZ'}})
+    A.httpx.Client = _spy_client('{"reply":"ok","operations":[]}')
+    _ac.post('/api/goals/ai', json={'child': 'jemma', 'message': 'check my goals'})
+    _pj = str(_seen.get('messages', ''))
+    check('ZZJMARKZZ' in _pj and 'ZZDMARKZZ' not in _pj,
+          'AI 端点只看到该孩子的目标（不把对方的发给模型）')
+finally:
+    A._load_config = _cfg2
+    A.httpx.Client = _hx2
+
+
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
 if FAILS:
     import sys as _sys

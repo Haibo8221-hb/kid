@@ -2539,9 +2539,32 @@ def api_homework_update(entry_id):
 
 _GOALS_FILE = 'goals.json'
 
+# Diya 与 Jemma 共用一个 goals.json，但数据必须隔离（两个孩子不能看到对方的目标）。
+# 维度取自请求：?child=jemma 或请求体 child 字段；未传时默认 diya（保持既有行为不变）。
+DEFAULT_GOAL_CHILD = 'diya'
+_VALID_GOAL_CHILDREN = ('diya', 'jemma')
+
 
 def _goals_path():
     return os.path.join(DATA_DIR, _GOALS_FILE)
+
+
+def _goal_child(payload=None):
+    """判定本次请求属于哪个孩子。优先级：请求体 > query > 默认 diya。"""
+    raw = ''
+    if isinstance(payload, dict):
+        raw = str(payload.get('child') or '').strip().lower()
+    if not raw:
+        raw = str(request.args.get('child') or '').strip().lower()
+    return raw if raw in _VALID_GOAL_CHILDREN else DEFAULT_GOAL_CHILD
+
+
+def _goal_belongs(rec, child):
+    """记录的归属判定：新数据一律带 child 字段；历史无 child 的数据归属 diya（不丢数据）。"""
+    owner = str(rec.get('child') or '').strip().lower()
+    if not owner:
+        owner = DEFAULT_GOAL_CHILD
+    return owner == child
 
 
 def _read_goals():
@@ -2552,6 +2575,16 @@ def _read_goals():
     data.setdefault('checks', [])
     data.setdefault('stages', [])
     return data
+
+
+def _goals_of(data, child):
+    """按孩子过滤出 goals / checks / stages 三段（前端拿到的结构与原来完全一致）。"""
+    return {
+        'child': child,
+        'goals': [g for g in data['goals'] if _goal_belongs(g, child)],
+        'checks': [c for c in data['checks'] if _goal_belongs(c, child)],
+        'stages': [st for st in data['stages'] if _goal_belongs(st, child)],
+    }
 
 
 def _write_goals(data):
@@ -2570,8 +2603,9 @@ def goals_api():
         resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return resp
     data = _read_goals()
-    _set_cors(jsonify(data))
-    return jsonify(data)
+    payload = _goals_of(data, _goal_child())
+    _set_cors(jsonify(payload))
+    return jsonify(payload)
 
 
 @app.route('/api/goals/goal', methods=['POST', 'OPTIONS'])
@@ -2590,10 +2624,13 @@ def goals_create():
         _set_cors(resp)
         return resp, 400
     data = _read_goals()
+    child = _goal_child(body)
     goal.setdefault('record_id', uuid.uuid4().hex[:12])
+    goal['child'] = child
     data['goals'].append(goal)
     for st in (body.get('stages') or []):
         st.setdefault('record_id', uuid.uuid4().hex[:12])
+        st['child'] = child
         data['stages'].append(st)
     _write_goals(data)
     resp = jsonify({'ok': True, 'id': goal['record_id'], 'stages': len(body.get('stages') or [])})
@@ -2611,9 +2648,12 @@ def goals_update(gid):
         resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return resp
     patch = request.get_json(force=True, silent=True) or {}
+    child = _goal_child(patch)
     data = _read_goals()
     hit = None
     for g in data['goals']:
+        if not _goal_belongs(g, child):
+            continue
         if g.get('record_id') == gid or g.get('目标ID') == gid:
             for k, v in patch.items():
                 g[k] = v
@@ -2646,10 +2686,14 @@ def goals_checkin():
         _set_cors(resp)
         return resp, 400
     data = _read_goals()
+    child = _goal_child(body)
     check.setdefault('record_id', uuid.uuid4().hex[:12])
+    check['child'] = child
     data['checks'].append(check)
     gid = check.get('目标ID')
     for g in data['goals']:
+        if not _goal_belongs(g, child):
+            continue
         if g.get('目标ID') == gid or g.get('record_id') == gid:
             for k, v in patch.items():
                 g[k] = v
@@ -2671,8 +2715,10 @@ def goals_stage():
         return resp
     body = request.get_json(force=True) or {}
     st = body.get('stage') or body
+    child = _goal_child(body)
     data = _read_goals()
     st.setdefault('record_id', uuid.uuid4().hex[:12])
+    st['child'] = child
     data['stages'].append(st)
     _write_goals(data)
     resp = jsonify({'ok': True, 'id': st['record_id']})
@@ -2709,9 +2755,12 @@ def goals_seed():
         resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
         resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return resp
+    body = request.get_json(force=True, silent=True) or {}
+    child = _goal_child(body)
     data = _read_goals()
-    if data['goals'] and not (request.get_json(force=True, silent=True) or {}).get('keep'):
-        resp = jsonify({'ok': False, 'reason': 'already_has_goals', 'count': len(data['goals'])})
+    mine = _goals_of(data, child)
+    if mine['goals'] and not body.get('keep'):
+        resp = jsonify({'ok': False, 'reason': 'already_has_goals', 'count': len(mine['goals'])})
         _set_cors(resp)
         return resp
     sp = _seed_path()
@@ -2721,11 +2770,20 @@ def goals_seed():
         return resp, 500
     with open(sp, 'r', encoding='utf-8') as f:
         seed = json.load(f)
-    data['goals'] = seed.get('goals', [])
-    data['stages'] = seed.get('stages', [])
+    # 播种只覆盖**该孩子**自己的记录，另一位孩子的数据原样保留
+    other = [g for g in data['goals'] if not _goal_belongs(g, child)]
+    other_st = [st for st in data['stages'] if not _goal_belongs(st, child)]
+    new_goals = seed.get('goals', [])
+    new_stages = seed.get('stages', [])
+    for g in new_goals:
+        g.setdefault('child', child)
+    for st in new_stages:
+        st.setdefault('child', child)
+    data['goals'] = other + new_goals
+    data['stages'] = other_st + new_stages
     data.setdefault('checks', [])
     _write_goals(data)
-    resp = jsonify({'ok': True, 'goals': len(data['goals']), 'stages': len(data['stages'])})
+    resp = jsonify({'ok': True, 'goals': len(new_goals), 'stages': len(new_stages)})
     _set_cors(resp)
     return resp
 
@@ -2833,8 +2891,10 @@ def goals_ai():
     if len(message) > 2000:
         message = message[:2000]
 
+    child = _goal_child(body)
     data = _read_goals()
-    goals, stages = data['goals'], data['stages']
+    mine = _goals_of(data, child)
+    goals, stages, checks = mine['goals'], mine['stages'], mine['checks']
     cfg = _load_config()
     if not cfg.get('api_key'):
         resp = jsonify({'ok': False, 'error': 'llm_not_configured',
@@ -2906,6 +2966,7 @@ def goals_ai():
                 g['收口方式'] = '无'
                 g['创建时间'] = datetime.now().isoformat()
                 g['最近更新'] = datetime.now().isoformat()
+                g['child'] = child
                 goals.append(g)
                 applied.append({'op': 'create_goal', 'name': g['目标名称'], 'id': g['目标ID']})
 
@@ -2941,7 +3002,8 @@ def goals_ai():
                     'record_id': uuid.uuid4().hex[:12],
                     '阶段ID': 's-' + uuid.uuid4().hex[:8],
                     '目标ID': g['目标ID'],
-                    '阶段名称': str(s.get('阶段名称') or '新阶段')[:40],
+                    'child': child,
+                    '阶段名称': str(s.get('阶段名称') or 'New stage')[:40],
                     '阶段目标量': float(s.get('阶段目标量') or 1),
                     '阶段截止日': str(s.get('阶段截止日') or g.get('截止日期') or '')[:10],
                     '阶段状态': s.get('阶段状态') or '未开始',
@@ -2960,10 +3022,11 @@ def goals_ai():
                 if total > 0:
                     new_done = min(new_done, total)
                 date_s = str(c.get('打卡日期') or datetime.now().strftime('%Y-%m-%d'))[:10]
-                data['checks'].append({
+                checks.append({
                     'record_id': uuid.uuid4().hex[:12],
                     '记录ID': 'c-' + uuid.uuid4().hex[:8],
                     '目标ID': g['目标ID'],
+                    'child': child,
                     '打卡日期': date_s,
                     '本次完成量': amt,
                     '累计完成量': new_done,
@@ -2980,8 +3043,18 @@ def goals_ai():
             continue
 
     if applied:
+        # goals/stages/checks 是按孩子过滤出的新列表，必须合并写回，
+        # 否则会整段覆盖掉另一个孩子的数据。
+        others = {
+            'goals': [g for g in data['goals'] if not _goal_belongs(g, child)],
+            'stages': [st for st in data['stages'] if not _goal_belongs(st, child)],
+            'checks': [c for c in data['checks'] if not _goal_belongs(c, child)],
+        }
+        data['goals'] = others['goals'] + goals
+        data['stages'] = others['stages'] + stages
+        data['checks'] = others['checks'] + checks
         _write_goals(data)
-    resp = jsonify({'ok': True, 'reply': str(plan.get('reply') or '已处理。')[:800],
+    resp = jsonify({'ok': True, 'reply': str(plan.get('reply') or 'Done.')[:800],
                     'applied': applied, 'goals': len(goals)})
     _set_cors(resp)
     return resp

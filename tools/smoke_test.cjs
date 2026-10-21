@@ -499,7 +499,30 @@ function runPage(page) {
           });
           return;   // resolve 移入上方 then（loadErrorBook 微任务内完成，早于任何宏任务汇总）
         }
-        resolve({ pass, fail });
+                    // ── R9：Jemma 页的 Goal Desk 入口（复用同一份 goals.html，仅 URL 带 child 参数）──
+            try {
+              const navJ = [...doc.querySelectorAll('.sidebar-nav li')].map(li => li.textContent.trim());
+              const todayIdx = navJ.findIndex(t => /Today/.test(t));
+              const goalIdx = navJ.findIndex(t => /Goal Desk/.test(t));
+              if (todayIdx >= 0 && goalIdx === todayIdx + 1)
+                pass.push('R9：Jemma 侧栏 Goal Desk 紧跟 Today（导航第 ' + (goalIdx + 1) + ' 项）');
+              else fail.push('R9：Jemma 侧栏顺序不对 today=' + todayIdx + ' goals=' + goalIdx);
+
+              const jf = doc.getElementById('goalsFrame');
+              if (jf && /\/goals\.html\?child=jemma$/.test(jf.getAttribute('src') || ''))
+                pass.push('R9：Jemma 的 Goal Desk iframe 带 ?child=jemma（数据隔离）');
+              else fail.push('R9：Jemma iframe src 错误：' + (jf && jf.getAttribute('src')));
+              if (doc.getElementById('tab-goals')) pass.push('R9：Jemma 存在 tab-goals 面板');
+              else fail.push('R9：Jemma 缺少 tab-goals 面板');
+              if (typeof window.reloadEmbed === 'function') pass.push('R9：Jemma 提供 reloadEmbed');
+              else fail.push('R9：Jemma 缺少 reloadEmbed');
+              window.switchTab('goals');
+              const jp = doc.getElementById('tab-goals');
+              if (jp && jp.classList.contains('active')) pass.push('R9：Jemma switchTab("goals") 正常激活');
+              else fail.push('R9：Jemma switchTab("goals") 未激活');
+            } catch (e) { fail.push('R9：断言抛错 ' + e.message); }
+
+            resolve({ pass, fail });
       }, 150);
     }, 700);
   });
