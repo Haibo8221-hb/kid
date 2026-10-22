@@ -499,7 +499,49 @@ function runPage(page) {
           });
           return;   // resolve 移入上方 then（loadErrorBook 微任务内完成，早于任何宏任务汇总）
         }
-                    // ── R9：Jemma 页的 Goal Desk 入口（复用同一份 goals.html，仅 URL 带 child 参数）──
+                    // ── R10：Jemma 页浅色主题 + 全面英文化 ──────────────────────
+            try {
+              const raw = fs.readFileSync(page.file, 'utf-8');
+              // ① 主题变量必须与 Diya 首页完全一致（浅色系）
+              const rootVars = (raw.match(/:root\{[^}]*\}/) || [''])[0];
+              const appRaw = fs.readFileSync(path.resolve(__dirname, '..', 'app.html'), 'utf-8');
+              const appVars = (appRaw.match(/:root\{[^}]*\}/) || [''])[0];
+              if (rootVars && appVars && rootVars === appVars)
+                pass.push('R10：Jemma 主题变量与 Diya 首页完全一致（浅色系）');
+              else fail.push('R10：Jemma 主题变量与 Diya 首页不一致\n    jemma: ' + rootVars.slice(0, 120) + '\n    app:   ' + appVars.slice(0, 120));
+              // ② 背景必须是浅色
+              const bg = (rootVars.match(/--bg:(#[0-9a-fA-F]+)/) || [])[1];
+              if (bg && ['#f8f9fa', '#ffffff', '#f0f2f5'].includes(bg.toLowerCase()))
+                pass.push('R10：Jemma 背景为浅色（--bg:' + bg + '）');
+              else fail.push('R10：Jemma 背景不是浅色：--bg:' + bg);
+              // ③ 文字必须是深色
+              const tx = (rootVars.match(/--text:(#[0-9a-fA-F]+)/) || [])[1];
+              if (tx && ['#1a1d28', '#000000'].includes(tx.toLowerCase()))
+                pass.push('R10：Jemma 正文为深色（--text:' + tx + '）');
+              else fail.push('R10：Jemma 正文色不是深色：--text:' + tx);
+              // ④ 不得残留深色系硬编码
+              const darkHard = raw.match(/background:#(?:0f1117|1a1d28|1e2232|232736|2a2f42)/gi);
+              if (!darkHard) pass.push('R10：无深色系硬编码背景残留');
+              else fail.push('R10：仍有深色硬编码：' + darkHard.slice(0, 3).join(', '));
+              // ⑤ 半透明白（深色底专用）应已改为半透明黑
+              if (!/rgba\(255,\s*255,\s*255,\s*0\.(06|08|1)\)/.test(raw.replace(/\.msg\.user \.bubble[^}]*}/g, '')))
+                pass.push('R10：深色底的半透明白已清理（仅保留在深色气泡内）');
+              else fail.push('R10：仍有深色底专用的半透明白');
+              // ⑥ 可见区与 script 字符串都不得有中文
+              const visOnly = raw.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
+              const visZh = (visOnly.match(/[^\n]*[\u4e00-\u9fff][^\n]*/g) || [])
+                .filter(l => !/^\s*<!--/.test(l.trim()));
+              if (visZh.length === 0) pass.push('R10：Jemma 可见区零中文残留');
+              else fail.push('R10：可见区仍有中文 ' + visZh.length + ' 处：' + (visZh[0] || '').trim().slice(0, 80));
+              const scripts = (raw.match(/<script[^>]*>[\s\S]*?<\/script>/g) || []).join('\n');
+              const strZh = new Set();
+              (scripts.match(/'[^'\n]*[\u4e00-\u9fff][^'\n]*'/g) || []).forEach(x => strZh.add(x));
+              (scripts.match(/"[^"\n]*[\u4e00-\u9fff][^"\n]*"/g) || []).forEach(x => strZh.add(x));
+              if (strZh.size === 0) pass.push('R10：Jemma script 内字符串零中文残留');
+              else fail.push('R10：script 内仍有中文串 ' + strZh.size + ' 处：' + Array.from(strZh)[0].slice(0, 70));
+            } catch (e) { fail.push('R10：断言抛错 ' + e.message); }
+
+            // ── R9：Jemma 页的 Goal Desk 入口（复用同一份 goals.html，仅 URL 带 child 参数）──
             try {
               const navJ = [...doc.querySelectorAll('.sidebar-nav li')].map(li => li.textContent.trim());
               const todayIdx = navJ.findIndex(t => /Today/.test(t));
