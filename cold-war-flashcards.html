@@ -180,6 +180,44 @@ let flipped = false;
 let seenCards = new Set();
 let currentFilter = 'all';
 
+// ── PERSISTENCE ────────────────────────────────────────────────
+// P1-1: progress survives refresh (filter + position + seen dots)
+const FC_KEY = 'cw-fc-progress-v1';
+function saveFcProgress() {
+  try {
+    localStorage.setItem(FC_KEY, JSON.stringify({
+      f: currentFilter, i: currentIndex, s: [...seenCards]
+    }));
+  } catch (e) { /* storage unavailable: silently skip */ }
+}
+function loadFcProgress() {
+  try {
+    const raw = localStorage.getItem(FC_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    return (d && typeof d === 'object') ? d : null;
+  } catch (e) { return null; }
+}
+function applySavedProgress() {
+  const saved = loadFcProgress();
+  if (!saved) return;
+  if (['all', 'origins', 'crises', 'end'].indexOf(saved.f) === -1) return;
+  currentFilter = saved.f;
+  filteredCards = (currentFilter === 'all') ? [...cards] : cards.filter(c => c.topic === currentFilter);
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === currentFilter);
+  });
+  document.getElementById('filter-count').textContent = `${filteredCards.length} cards`;
+  if (typeof saved.i === 'number' && saved.i >= 0 && saved.i < filteredCards.length) {
+    currentIndex = saved.i;
+  }
+  if (Array.isArray(saved.s)) {
+    saved.s.forEach(n => {
+      if (typeof n === 'number' && n >= 0 && n < filteredCards.length) seenCards.add(n);
+    });
+  }
+}
+
 // ── RENDER ─────────────────────────────────────────────────────
 function renderCard() {
   const card = filteredCards[currentIndex];
@@ -212,6 +250,7 @@ function renderCard() {
 
   // Track as seen
   seenCards.add(currentIndex);
+  saveFcProgress();
   updateDots();
 
   // Unflip
@@ -319,6 +358,7 @@ document.getElementById('card-inner').addEventListener('touchend', function(e) {
 });
 
 // ── INIT ───────────────────────────────────────────────────────
+applySavedProgress();
 renderCard();
 </script>
 </body>

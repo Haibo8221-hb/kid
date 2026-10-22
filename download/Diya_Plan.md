@@ -89,7 +89,7 @@ Miss Dalgleish 邮件摘要：
 ### 1.5 时间线总览 (Timeline Overview)
 
 ```
-现在 (Y10) ──────────────────────────────────→ June 2027 (GCSE)
+现在 (Y11) ──────────────────────────────────→ May 2027 (GCSE exams start)
     │                                                    │
     │  ├ 确认 Art 方向                                   │  ├ GCSE 考试
     │  ├ 启动 English 突破计划                           │  ├ A-level 选科确认

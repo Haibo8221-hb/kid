@@ -507,11 +507,11 @@ canvas.radar{width:240px!important;height:240px!important}
   <polyline points="18.5,21 21,23.5 25.5,19" fill="none" stroke="var(--accent2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
  </svg>
  <h1>Diya's Study Space</h1>
- <p>Year 11 · 只属于我的学习台</p>
+ <p>Year 11 · My Own Study Desk</p>
 </div>
 <ul class="sidebar-nav">
 <li><a href="#" data-tab="dashboard" class="active" onclick="switchTab('dashboard');return false">🏠 Dashboard</a></li>
-<li><a href="#" data-tab="goals" onclick="switchTab('goals');return false">🎯 目标台 Goal Desk</a></li>
+<li><a href="#" data-tab="goals" onclick="switchTab('goals');return false">🎯 Goal Desk</a></li>
 <li><a href="#" data-tab="route-compare" onclick="switchTab('route-compare');return false">🗺️ Route Compare</a></li>
 <li><a href="#" data-tab="resources" onclick="switchTab('resources');return false">📦 Learning Resources</a></li>
 <li><a href="#" data-tab="planner" onclick="switchTab('planner');return false">📅 Weekly Plan</a></li>
@@ -541,7 +541,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <a href="/inspector_calls_flashcards.html" target="_blank">Inspector Calls Flashcards</a>
 <a href="/Diya_Plan.html" target="_blank">My Full Plan</a>
 <a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">My Summer Guide</a>
-<a href="#" id="llm-settings-btn" title="配置 LLM 端点 / API Key / 模型" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM模块未加载(版本 20261014-1745-domfix)。很可能是浏览器或代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或改用带版本号的地址：app.html?v=20261014-1745-domfix');}}catch(e){alert('LLM设置打开失败: '+((e&&e.message)||e));} return false;">⚙️ LLM 设置</a>
+<a href="#" id="llm-settings-btn" title="Configure LLM endpoint / API Key / model" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM module not loaded — version 20261014-1745-domfix. Your browser or proxy is probably caching an old app.html. Please hard-refresh Ctrl+Shift+R, or use the versioned address: app.html?v=20261014-1745-domfix');}}catch(e){alert('Could not open LLM settings: '+((e&&e.message)||e));} return false;">⚙️ LLM Settings</a>
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
@@ -561,12 +561,12 @@ canvas.radar{width:240px!important;height:240px!important}
 <!-- 我的身份卡：这个页面是什么、只属于谁 -->
 <div class="kid-who-card">
   <div class="kid-who-name">Diya</div>
-  <div class="kid-who-meta">Year 11 · GCSE 2027 年 5 月 · Headington</div>
-  <p class="kid-who-msg">这是<b>只属于你一个人</b>的学习台。你的成绩、错题、计划、笔记都只存在这里——妹妹看不到，爸爸妈妈也可以陪你一起看，但内容都是你的。</p>
+  <div class="kid-who-meta">Year 11 · GCSE May 2027 · Headington</div>
+  <p class="kid-who-msg">This is <b>your own private</b> study desk. Your grades, mistakes, plans and notes all live here — it is your private space. Mum and Dad can look at it with you, but the content belongs to you.</p>
   <div class="kid-who-todo">
     <span class="kid-ask-card">
-      <strong>今天先做哪一件？</strong>
-      <span class="kid-hint">在下面「今天三件事」里挑一件，勾掉它就够了。不用一次做完所有事。</span>
+      <strong>Which one first today?</strong>
+      <span class="kid-hint">Pick one from "Today's 3" below and tick it off — that is enough. You don't have to do everything at once.</span>
     </span>
   </div>
 </div>
@@ -575,29 +575,29 @@ canvas.radar{width:240px!important;height:240px!important}
 <div id="countdown-strip" class="countdown-strip"></div>
 
 <!-- 今日任务全部完成后的「停止提示」：完成就收工，不过度学习（与 Jemma 同款交互） -->
-<div id="today-stop" class="kid-stop-hint" hidden>🎉 今天三件事都完成啦！今天到此为止，去休息吧～</div>
+<div id="today-stop" class="kid-stop-hint" hidden>🎉 All three done for today! That is it for today — go and rest.</div>
 
 <!-- 今天三件事（R3）：当前周三条日粒度行动，勾选即打卡并同步服务端（twp-* 单源） -->
 <div class="section" style="border-left:4px solid var(--accent)">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
- <div class="section-title" style="margin:0"> ✅ 今天三件事 · Today's 3</div>
+ <div class="section-title" style="margin:0"> ✅ Today's 3</div>
 </div>
 <div id="diya-today-3" style="display:grid;gap:10px"></div>
-<div id="today-progress" data-kid-label="今天完成了几件" style="margin:12px 0 0"></div>
+<div id="today-progress" data-kid-label="How many done today" style="margin:12px 0 0"></div>
 <!-- R8：本周反思（问题池按周轮换，保持新鲜感） -->
 <div class="kid-ask-card" style="margin-top:14px"
-     data-placeholder="写两句就行，写给自己看的。"
-     data-question-pool='["本周哪件事最卡？卡在哪一步？","这周有没有一件小事让你自豪？","下周最想改进的一点是什么？","哪一科让你最累？为什么？"]'>
-  <strong>本周反思</strong>
-  <span class="kid-hint">点开写两句就行——每周换一个问题。</span>
+     data-placeholder="A sentence or two is enough — just write it for yourself."
+     data-question-pool='["What are you most stuck on this week? Which step?","Is there one small thing that made you proud this week?","What is the ONE thing you want to improve next week?","Which subject tires you most? Why?"]'>
+  <strong>Weekly Reflection</strong>
+  <span class="kid-hint">Open it and write a sentence or two — the question changes each week.</span>
 </div>
 </div>
 
 <!-- 本周复盘提醒（R6）：距上次 Weekly Review ≥7 天时显示，可当周关闭 -->
 <div id="review-due-hint" class="section" hidden style="border-left:4px solid var(--orange);padding:12px 16px;font-size:14px;line-height:1.8;margin-bottom:10px">
-  <b>📋 本周复盘还没做</b> · 7 个问题约 3 分钟，把这一周变成下一周的计划。
-  <button class="btn" onclick="switchTab('weekly-review')" style="margin-left:8px;padding:4px 12px;font-size:12px">去做复盘 →</button>
-  <button class="btn-sm" onclick="dismissReviewHint()" style="border:1px solid var(--border);background:none;color:var(--text2);padding:4px 10px;font-size:12px;margin-left:6px">本周不再提醒</button>
+  <b>📋 Weekly review not done yet</b> · 7 questions, about 3 minutes — turn this week into next week's plan.
+  <button class="btn" onclick="switchTab('weekly-review')" style="margin-left:8px;padding:4px 12px;font-size:12px">Do the review →</button>
+  <button class="btn-sm" onclick="dismissReviewHint()" style="border:1px solid var(--border);background:none;color:var(--text2);padding:4px 10px;font-size:12px;margin-left:6px">Don't remind me this week</button>
 </div>
 
 <!-- Next 3 Weeks Plan（靠前展示 · R5：数据来自 /api/twp/diya，到期自动提示） -->
@@ -611,20 +611,20 @@ canvas.radar{width:240px!important;height:240px!important}
 
 <!-- 需要你自己决定：家长不替你选 -->
 <div class="section kid-decide-card kid-has-stamp" data-decide-id="diya-call" data-decide-once="true">
- <div class="section-title"> 需要你自己决定 · Your Call</div>
- <p class="kid-lead">下面这几件事，最后拍板的是你。选完记下来就行——之后如果想改，随时能改。</p>
- <div class="kid-h">今天先做哪一门？</div>
+ <div class="section-title"> Your Call · You Decide</div>
+ <p class="kid-lead">For these few things, the final call is yours. Just record your choice — and you can change it any time.</p>
+ <div class="kid-h">Which subject first today?</div>
  <div class="kid-choices" data-group-id="subject">
-  <button class="kid-choice" data-choice="maths">先数学</button>
-  <button class="kid-choice" data-choice="english">先英语</button>
-  <button class="kid-choice" data-choice="errors">先清错题</button>
-  <button class="kid-choice" data-choice="competition">先竞赛题</button>
+  <button class="kid-choice" data-choice="maths">Maths first</button>
+  <button class="kid-choice" data-choice="english">English first</button>
+  <button class="kid-choice" data-choice="errors">Clear mistakes first</button>
+  <button class="kid-choice" data-choice="competition">Competition questions first</button>
  </div>
- <div class="kid-h" style="margin-top:14px">遇到不会的题，打算怎么处理？</div>
+ <div class="kid-h" style="margin-top:14px">When you hit a hard question, what will you do?</div>
  <div class="kid-choices" data-group-id="stuck">
-  <button class="kid-choice" data-choice="think10">先自己想 10 分钟</button>
-  <button class="kid-choice" data-choice="askteacher">去问老师</button>
-  <button class="kid-choice" data-choice="skip">先跳过，最后回头做</button>
+  <button class="kid-choice" data-choice="think10">Try on my own for 10 min first</button>
+  <button class="kid-choice" data-choice="askteacher">Ask the teacher</button>
+  <button class="kid-choice" data-choice="skip">Skip for now, come back later</button>
  </div>
 </div>
 
@@ -662,42 +662,43 @@ canvas.radar{width:240px!important;height:240px!important}
 </div>
 </div>
 <div class="section kid-focus-card">
-<div class="section-title"> 需要重点关注 · My Watch List</div>
+<div class="section-title"> My Upgrade List</div>
 <div style="font-size:15px;line-height:2;color:var(--text2)">
- <div class="kid-focus-item" data-goal="chem7"><b>化学</b> — Oct26 等级 6（6/7 月 mock 44% → 明显回升），冲 7 还差一级<span class="goal-progress" id="gp-chem7" style="color:var(--accent2);font-weight:600"></span></div>
- <div class="kid-focus-item" data-goal="petal"><b>英语分析深度</b> — 词汇量还要往上加<span class="goal-progress" id="gp-petal" style="color:var(--accent2);font-weight:600"></span></div>
- <div class="kid-focus-item" data-goal="practical"><b>物理必做实验</b> — 方法描述要背下来<span class="goal-progress" id="gp-practical" style="color:var(--accent2);font-weight:600"></span></div>
- <div class="kid-focus-item" data-goal="chem-alevel"><b>化学 A-level 还在考虑中</b> — 看 GCSE 结果再定（不进我的主线，只当备用）<span class="goal-progress" id="gp-chem-alevel" style="color:var(--accent2);font-weight:600"></span></div>
- <div class="kid-focus-item" data-goal="hist16"><b>历史长答题</b> — 16 分题的答题步骤丢分<span class="goal-progress" id="gp-hist16" style="color:var(--accent2);font-weight:600"></span></div>
- <div class="kid-focus-item" data-goal="smc"><b>SMC 模考 70/125</b> — 数论和代数推理有断档（Q9-13 全塌）<span class="goal-progress" id="gp-smc" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="chem7"><b>Chemistry</b> — Level 6 in Oct (44% in the Jun/Jul mocks → clearly recovering). Next step: one more level to 7.<span class="goal-progress" id="gp-chem7" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="petal"><b>English analysis depth</b> — vocabulary keeps growing. Next step: add words that go deeper.<span class="goal-progress" id="gp-petal" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="practical"><b>Physics required practicals</b> — Next step: learn the method descriptions by heart.<span class="goal-progress" id="gp-practical" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="chem-alevel"><b>Chemistry A-level</b> — still deciding after the GCSE results (not on my main path — just a backup).<span class="goal-progress" id="gp-chem-alevel" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="hist16"><b>History 16-markers</b> — Next step: practise the answer steps for 16-mark questions.<span class="goal-progress" id="gp-hist16" style="color:var(--accent2);font-weight:600"></span></div>
+ <div class="kid-focus-item" data-goal="smc"><b>SMC mock 70/125</b> — number theory and algebra reasoning have gaps (Q9-13 not scored yet). Next step: drill those question types.<span class="goal-progress" id="gp-smc" style="color:var(--accent2);font-weight:600"></span></div>
 </div>
 </div>
 </div>
 
-<!-- Risk Heatmap + Core Judgment -->
-<div class="section" style="background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%)">
-<div class="section-title"> Risk Heatmap</div>
+<!-- Risk Heatmap + Core Assessment：成人分析语域，折叠收起，不占孩子每日视野 -->
+<details class="section" style="background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%)">
+<summary style="cursor:pointer;font-weight:600;color:var(--text2);user-select:none">Grown-up notes: risk &amp; strategy (for parents/teachers)</summary>
+<div class="section-title" style="margin-top:10px"> Risk Heatmap</div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
 <div style="padding:14px 16px;min-height:80px;background:rgba(255,107,107,0.1);border-radius:10px;border-left:4px solid var(--red);font-size:14px;line-height:1.7">
 <div style="font-weight:700;color:var(--red);margin-bottom:4px">HIGH RISK</div>
-Chemistry — A-level 决策存疑：≥7 才评估，GCSE 结果后定
+Chemistry — A-level decision pending: only evaluated at ≥7, decided after GCSE results
 </div>
 <div style="padding:14px 16px;min-height:80px;background:rgba(255,169,77,0.1);border-radius:10px;border-left:4px solid var(--orange);font-size:14px;line-height:1.7">
 <div style="font-weight:700;color:var(--orange);margin-bottom:4px">MEDIUM RISK</div>
-English · History — 分析深度与 16-marker 步骤，4-6 周可训练
+English · History — analysis depth and 16-marker steps, trainable in 4–6 weeks
 </div>
 <div style="padding:14px 16px;min-height:80px;background:rgba(56,217,169,0.1);border-radius:10px;border-left:4px solid var(--accent2);font-size:14px;line-height:1.7">
 <div style="font-weight:700;color:var(--accent2);margin-bottom:4px">LOW / CONFIRMED</div>
-Maths · Physics · English ⬆️ — 优势已确认；Drama 68% 惊喜项，维持即可
+Maths · Physics · English ⬆️ — strengths confirmed; Drama 68% a pleasant surprise, maintain
 </div>
 </div>
 <div style="margin-top:12px;font-size:14px;color:var(--text2);line-height:1.8">
 <div style="color:var(--accent2);font-weight:600;margin-bottom:4px">Diya Core Assessment:</div>
-<b>Year 11 = GCSE Year.</b> Exams start 12 May 2027 — about 7 months out. English must hold 5/6；<b>Chemistry 不进 Plan A</b>，仅若需补第三门（FMaths 失效时）才评估，需 ≥7。<br>
-Maths+Physics are strong but not a free pass — A-level is 3-4× harder than GCSE.<br>
-<b style="color:var(--accent2)">Strategy:</b> <b>English priority</b>（Chemistry 转条件待定，不进 Plan A）· past-paper cycle every subject · maintain Maths/Physics advantage · all subjects 7+.
+<b>Year 11 = GCSE Year.</b> Exams start 12 May 2027 — about 7 months out. English must hold 5/6; <b>Chemistry is NOT in Plan A</b> — only evaluated if a third subject is needed (if FMaths fails), needs ≥7.<br>
+Maths+Physics are strong but not a free pass — A-level is 3–4× harder than GCSE.<br>
+<b style="color:var(--accent2)">Strategy:</b> <b>English priority</b> (Chemistry conditional, not in Plan A) · past-paper cycle every subject · maintain Maths/Physics advantage · all subjects 7+.
 </div>
-</div>
+</details>
 
 <!-- SMC Progress -->
 <div class="section" style="border-left:4px solid var(--orange)">
@@ -743,13 +744,13 @@ Maths+Physics are strong but not a free pass — A-level is 3-4× harder than GC
 <div id="diya-tasks"><div class="empty-state">Loading...</div></div>
 <div class="flex-row" style="margin-top:10px">
 <select id="diya-task-goal" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface2);color:var(--text)">
-<option value="">🎯 关联目标（可选）</option>
-<option value="chem7">化学冲 7</option>
-<option value="petal">英语分析深度</option>
-<option value="practical">物理必做实验</option>
-<option value="chem-alevel">化学 A-level 取舍</option>
-<option value="hist16">历史 16-marker</option>
-<option value="smc">SMC 补漏</option>
+<option value="">🎯 Linked goal (optional)</option>
+<option value="chem7">Chemistry push for 7</option>
+<option value="petal">English analysis depth</option>
+<option value="practical">Physics required practicals</option>
+<option value="chem-alevel">Chemistry A-level decision</option>
+<option value="hist16">History 16-marker</option>
+<option value="smc">SMC gap-filling</option>
 </select>
 <input type="text" id="diya-task-input" placeholder="Add new task..." style="flex:1">
 <button class="btn" onclick="addTask('diya')">+</button>
@@ -800,7 +801,7 @@ After GCSE: A-level bridging start
 GCSE target 887776+<br>
 SMC sat Oct — review when result lands<br>
 BPhO IPC entry (Feb-Mar 2027)<br>
-Chemistry ≥7 decides 4th A-level（该第四门须为 DAAD List A 科目，若走German 线）<br>
+Chemistry ≥7 decides 4th A-level (the 4th subject must be a DAAD List A subject if taking the German route)<br>
 English hold 5/6
 </div>
 <div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent2)">
@@ -852,11 +853,11 @@ Hong Kong parallel: HKUST+PolyU
 <!-- 规划整合区：当前主计划 + 规划文档导航 -->
 <div class="section" style="border-left:4px solid var(--accent2)">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
- <div class="section-title" style="margin:0"> 📌 当前主计划 · Next 3 Weeks（15 Oct → 4 Nov）</div>
+ <div class="section-title" style="margin:0"> 📌 Current Main Plan · Next 3 Weeks (15 Oct → 4 Nov)</div>
 </div>
-<div style="font-size:13px;color:var(--text2);line-height:1.7">📌 本周三周计划见 <a href="#" onclick="switchTab('dashboard');return false" style="color:var(--accent)">Dashboard → 当前主计划</a>（同一计划只保留 Dashboard 一份，避免两处各改）</div>
+<div style="font-size:13px;color:var(--text2);line-height:1.7">📌 This week's 3-week plan: see <a href="#" onclick="switchTab('dashboard');return false" style="color:var(--accent)">Dashboard → Current Main Plan</a> (one plan lives only on Dashboard — no editing in two places)</div>
 <div style="margin-top:10px;font-size:11px;color:var(--text2)">
- 其他规划文档（Diya Plan v7 · Route Overview · Summer Guide · A-Level Analysis）见 <a href="#" onclick="switchTab('resources');return false" style="color:var(--accent)">Learning Resources → Planning Docs</a>
+ Other planning docs (Diya Plan v7 · Route Overview · Summer Guide · A-Level Analysis): see <a href="#" onclick="switchTab('resources');return false" style="color:var(--accent)">Learning Resources → Planning Docs</a>
 </div>
 </div>
 
@@ -889,9 +890,9 @@ Hong Kong parallel: HKUST+PolyU
 <div id="tab-planner" class="tab-panel">
 <div class="panel-title"> Weekly Plan</div>
 <div class="planner-controls" style="margin-bottom:12px">
-<button class="btn-sm" onclick="changeWeek('diya',-1)" title="上一周">‹</button>
+<button class="btn-sm" onclick="changeWeek('diya',-1)" title="Previous week">‹</button>
 <span id="planner-sync-label" style="font-size:13px;font-weight:600">--</span>
-<button class="btn-sm" onclick="changeWeek('diya',1)" title="下一周">›</button>
+<button class="btn-sm" onclick="changeWeek('diya',1)" title="Next week">›</button>
 <button class="btn" onclick="savePlanner('diya')" style="margin-left:auto"> Save</button>
 <button class="btn-sm" onclick="downloadWeekPlan()" style="margin-left:4px"> Download</button>
 </div>
@@ -990,48 +991,48 @@ ERROR BOOK
  UPLOAD
 -->
 <div id="tab-upload" class="tab-panel">
-<div class="panel-title">📤 上传作业 / 报告 <span id="upload-child-badge" style="font-size:11px;color:var(--accent2);margin-left:8px">Diya</span></div>
+<div class="panel-title">📤 Upload Work / Reports <span id="upload-child-badge" style="font-size:11px;color:var(--accent2);margin-left:8px">Diya</span></div>
 <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">
-  支持截图（PNG/JPG/WEBP ≤10MB）与 PDF（≤30MB、≤20 页）。上传后自动 OCR 识别 → 结构化抽取（科目/分数/错题），可一键存入错题本。
+  Screenshots (PNG/JPG/WEBP ≤10MB) and PDFs (≤30MB, ≤20 pages) are supported. After upload: auto OCR → structured extraction (subject / score / mistakes), and one tap to save into the Error Book.
 </div>
 
 <div id="upload-drop" style="border:2px dashed var(--border);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s">
   <div style="font-size:32px;margin-bottom:8px">📄</div>
-  <div style="font-size:14px;font-weight:600;margin-bottom:4px">拖拽文件到此处，或点击选择</div>
-  <div style="font-size:11px;color:var(--text2)">可多选批量上传 · 逐文件独立识别</div>
+  <div style="font-size:14px;font-weight:600;margin-bottom:4px">Drag files here, or click to choose</div>
+  <div style="font-size:11px;color:var(--text2)">Multi-select batch upload · each file recognised on its own</div>
   <input type="file" id="upload-input" multiple accept=".png,.jpg,.jpeg,.webp,.pdf" style="display:none">
 </div>
 
 <div id="upload-queue" style="margin-top:16px"></div>
 
 <div style="display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px">
-  <div class="section-title" style="margin-bottom:0">历史记录</div>
-  <button class="btn btn-sm" onclick="refreshUploadList()">刷新</button>
+  <div class="section-title" style="margin-bottom:0">History</div>
+  <button class="btn btn-sm" onclick="refreshUploadList()">Refresh</button>
 </div>
 <div id="upload-list"><div class="error-empty">Loading...</div></div>
 </div>
 
 <!-- 目标台（Goal Desk）：内嵌 goals.html，登录态与主站共享（同一 cookie） -->
 <div id="tab-goals" class="tab-panel">
-<div class="panel-title">🎯 目标台 Goal Desk · Diya</div>
+<div class="panel-title">🎯 Goal Desk · Diya</div>
 <div class="embed-wrap">
  <div class="embed-bar">
-  <a class="btn" href="/goals.html" target="_blank">↗ 新窗口打开</a>
-  <button class="btn" type="button" onclick="reloadEmbed('goalsFrame')">↻ 刷新</button>
-  <span class="embed-tip">登录状态与主站共享，无需再次登录</span>
+  <a class="btn" href="/goals.html" target="_blank">↗ Open in New Window</a>
+  <button class="btn" type="button" onclick="reloadEmbed('goalsFrame')">↻ Refresh</button>
+  <span class="embed-tip">Login state is shared with the main site — no need to sign in again</span>
  </div>
- <iframe id="goalsFrame" class="embed-frame" src="/goals.html" title="目标台" loading="lazy"></iframe>
+ <iframe id="goalsFrame" class="embed-frame" src="/goals.html" title="Goal Desk" loading="lazy"></iframe>
 </div>
 </div>
 
 <!-- 物理奥赛资源：原为新开窗口，现改为页内右侧显示 -->
 <div id="tab-bpho" class="tab-panel">
-<div class="panel-title"> ⚛️ Physics Olympiad · 资源与备赛</div>
+<div class="panel-title"> ⚛️ Physics Olympiad · Resources & Prep</div>
 <div class="embed-wrap">
  <div class="embed-bar">
-  <a class="btn" href="/bpho_resources.html" target="_blank">↗ 新窗口打开</a>
-  <button class="btn" type="button" onclick="reloadEmbed('bphoFrame')">↻ 刷新</button>
-  <span class="embed-tip">已改为页内显示，切换侧栏即可返回其他模块</span>
+  <a class="btn" href="/bpho_resources.html" target="_blank">↗ Open in New Window</a>
+  <button class="btn" type="button" onclick="reloadEmbed('bphoFrame')">↻ Refresh</button>
+  <span class="embed-tip">Now shown in-page — use the sidebar to switch to other modules</span>
  </div>
  <iframe id="bphoFrame" class="embed-frame" src="/bpho_resources.html" title="Physics Olympiad" loading="lazy"></iframe>
 </div>
@@ -1092,12 +1093,12 @@ ERROR BOOK
 <input type="text" id="error-tags-input" placeholder="e.g. SMC, algebra, AQA_Paper1">
 </div>
 <div class="form-group">
-<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">错因（R7：粗心 / 没懂 / 没时间）</label>
+<label style="font-size:11px;color:var(--text2);margin-bottom:4px;display:block">Cause (R7: careless / didn't get it / no time)</label>
 <select id="error-cause-input" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)">
-<option value="">先不分类</option>
-<option value="careless">⚡ 粗心</option>
-<option value="concept">🧩 没懂</option>
-<option value="time">⏱ 没时间</option>
+<option value="">Not categorised yet</option>
+<option value="careless">⚡ Careless</option>
+<option value="concept">🧩 Didn't get it</option>
+<option value="time">⏱ No time</option>
 </select>
 </div>
 <div class="modal-actions">
@@ -1123,10 +1124,10 @@ ERROR BOOK
 <!-- Upload Detail Modal -->
 <div class="modal-overlay" id="upload-detail-modal">
 <div class="modal" style="width:720px;max-width:94vw">
-<h3 id="upload-detail-title" style="display:flex;justify-content:space-between;align-items:center">上传详情</h3>
+<h3 id="upload-detail-title" style="display:flex;justify-content:space-between;align-items:center">Upload Details</h3>
 <div id="upload-detail-body" style="font-size:13px"></div>
 <div class="modal-actions">
-  <button class="btn" onclick="closeUploadDetail()">关闭</button>
+  <button class="btn" onclick="closeUploadDetail()">Close</button>
 </div>
 </div>
 </div>
@@ -1134,30 +1135,30 @@ ERROR BOOK
 <!-- LLM Settings Modal -->
 <div class="modal-overlay" id="llm-settings-modal">
 <div class="modal" style="width:520px">
-<h3>⚙️ LLM 设置（OpenAI 兼容）</h3>
+<h3>⚙️ LLM Settings (OpenAI-compatible)</h3>
 
 <div class="llmset-row">
-  <label>API Endpoint（兼容 OpenAI 的 Base URL）</label>
-  <input type="text" id="llm-endpoint" placeholder="https://api.deepseek.com 或 https://api.openai.com/v1">
-  <div class="hint">留末尾不要带 /chat/completions，系统会自动拼接。</div>
+  <label>API Endpoint (OpenAI-compatible Base URL)</label>
+  <input type="text" id="llm-endpoint" placeholder="https://api.deepseek.com or https://api.openai.com/v1">
+  <div class="hint">Don't append /chat/completions at the end — it is added automatically.</div>
 </div>
 
 <div class="llmset-row">
   <label>API Key</label>
   <div class="llmset-keywrap">
     <input type="password" id="llm-apikey" placeholder="sk-..." autocomplete="off">
-    <button type="button" class="llmset-eye" onclick="llmToggleKey()">显示</button>
+    <button type="button" class="llmset-eye" onclick="llmToggleKey()">Show</button>
   </div>
-  <div class="hint" id="llm-keyhint">未配置时聊天与错题解析将无法使用。</div>
+  <div class="hint" id="llm-keyhint">Without it, chat and mistake analysis will not work.</div>
 </div>
 
 <div class="llmset-row">
-  <label>Model（模型名）</label>
+  <label>Model</label>
   <input type="text" id="llm-model" placeholder="deepseek-chat / gpt-4o / claude-... ">
 </div>
 
 <div class="llmset-row">
-  <label>Temperature（创作温度）</label>
+  <label>Temperature</label>
   <div class="llmset-range">
     <input type="range" id="llm-temp" min="0" max="1" step="0.1" value="0.7" oninput="document.getElementById('llm-temp-val').textContent=this.value">
     <span class="val" id="llm-temp-val">0.7</span>
@@ -1165,19 +1166,19 @@ ERROR BOOK
 </div>
 
 <div class="llmset-row">
-  <label>OpenRouter API Key（可选，用于图片 OCR 识别）</label>
+  <label>OpenRouter API Key (optional, for image OCR)</label>
   <div class="llmset-keywrap">
     <input type="password" id="llm-openrouter" placeholder="sk-or-..." autocomplete="off">
-    <button type="button" class="llmset-eye" onclick="llmToggleKey('llm-openrouter',this)">显示</button>
+    <button type="button" class="llmset-eye" onclick="llmToggleKey('llm-openrouter',this)">Show</button>
   </div>
 </div>
 
 <div class="llmset-status" id="llm-status"></div>
 
 <div class="modal-actions">
-  <button class="btn btn-sm" onclick="llmTestSettings()">测试连接</button>
-  <button class="btn" onclick="closeLLMSettings()">取消</button>
-  <button class="btn" onclick="llmSaveSettings()">保存</button>
+  <button class="btn btn-sm" onclick="llmTestSettings()">Test Connection</button>
+  <button class="btn" onclick="closeLLMSettings()">Cancel</button>
+  <button class="btn" onclick="llmSaveSettings()">Save</button>
 </div>
 </div>
 </div>
@@ -1224,7 +1225,7 @@ ERROR BOOK
 window.addEventListener('error', function(e){
   try{
     var t=document.getElementById('toast');
-    if(t){ t.textContent='JS错误: '+((e&&e.message)||(e&&e.error)||'unknown')+(e&&e.lineno?(' @'+e.lineno):''); t.style.background='#e11d48'; t.classList.add('show'); setTimeout(function(){t.classList.remove('show'); t.style.background='';}, 8000); }
+    if(t){ t.textContent='JS error: '+((e&&e.message)||(e&&e.error)||'unknown')+(e&&e.lineno?(' @'+e.lineno):''); t.style.background='#e11d48'; t.classList.add('show'); setTimeout(function(){t.classList.remove('show'); t.style.background='';}, 8000); }
   }catch(_){}
 });
 // ── LLM 设置按钮绑定：放在脚本最前面注册，不依赖后续代码是否执行完毕 ──
@@ -1242,7 +1243,7 @@ window.addEventListener('error', function(e){
       var m=document.getElementById('llm-settings-modal');
       // 仅在真的打不开时打扰用户（正常打开则完全静默）
       if(err||!m||!m.classList.contains('open')){
-        alert('LLM设置未能打开：'+(err?(err.message||err):'弹窗未显示，请硬刷新页面 Ctrl+Shift+R'));
+        alert('Could not open LLM settings: '+(err?(err.message||err):'The popup did not appear — please hard-refresh the page Ctrl+Shift+R'));
         if(window.console) console.error('openLLMSettings failed', err);
       }
     });
@@ -1451,7 +1452,7 @@ function deleteNote(id, subject){
 
 // Child Tabs
 // R9：Watch List 目标注册表（id 与 Watch List 卡 data-goal 一一对应）
-const GOAL_LABELS={'chem7':'化学冲7','petal':'英语深度','practical':'物理实验','chem-alevel':'化学取舍','hist16':'历史16分','smc':'SMC补漏'};
+const GOAL_LABELS={'chem7':'Chemistry push for 7','petal':'English analysis depth','practical':'Physics required practicals','chem-alevel':'Chemistry A-level decision','hist16':'History 16-marker','smc':'SMC gap-filling'};
 async function addTask(child){
  const input=document.getElementById(child+'-task-input');
  if(!input) return;
@@ -1686,7 +1687,7 @@ async function loadRoutes(){
     <tr><td>English</td><td>Throughout PS/interview/academic writing</td><td>IELTS Only</td></tr>
     <tr><td>Offer</td><td>Issued conditional, must meet conditions</td><td>Mostly unconditional</td></tr>
     <tr><td>IELTS</td><td>6.5-7.0</td><td>6.0</td></tr>
-    <tr><td>extra Exam</td><td>ESAT（剑桥数学线另需 TMUA+STEP）</td><td>None</td></tr>
+    <tr><td>extra Exam</td><td>ESAT (Cambridge maths route also needs TMUA+STEP)</td><td>None</td></tr>
    </table>
    <p style="margin-top:6px;font-size:10px;color:var(--accent)">Core Principle: Dual Track — UK and HK are fully independent applications, no conflict. I don't need to decide now.</p>
   `},
@@ -1711,7 +1712,7 @@ async function loadRoutes(){
    <p style="margin-top:6px;font-size:12px;color:var(--accent2);font-weight:600">Conclusion: Target Imperial Engineering → Maths+FMaths+Physics is Hard Requirement.</p>
   `},
   {id:'framework',title:'Decision Framework · Timeline',body:`
-   <p style="font-size:11px;color:var(--accent2);margin-bottom:6px"><strong>Decision Confirmed (2026-05-22 v2):</strong> Art/Architecture dropped（<b>待 2027-08 复核，因 FMaths 准入风险可能回滚</b>）· Imperial Engineering Top Choice · FMaths 入学门槛待确认（文件写 GCSE 7+，存档基准 8-9，当前预测 6/5）</p>
+   <p style="font-size:11px;color:var(--accent2);margin-bottom:6px"><strong>Decision Confirmed (2026-05-22 v2):</strong> Art/Architecture dropped (<b>re-check 2027-08 — may roll back due to FMaths entry risk</b>) · Imperial Engineering top choice · FMaths entry threshold unconfirmed (file says GCSE 7+, archive benchmark 8-9, current prediction 6/5)</p>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
     <div>
      <div style="font-weight:600;font-size:12px;margin-bottom:4px">A-Level Combo</div>
@@ -1723,7 +1724,7 @@ async function loadRoutes(){
     <div>
      <div style="font-weight:600;font-size:12px;margin-bottom:4px">University Targets</div>
      <div style="font-size:10px;line-height:1.5"><span style="color:var(--accent)">UK</span> Imperial Engineering (ESAT: Maths1+Maths2+Physics3)<br>+ Imperial Design Eng / Cambridge MDes / UCL E&A</div>
-     <div style="font-size:10px;line-height:1.5;margin-top:4px"><span style="color:var(--accent2)">HK</span> HKUST Engineering — 需要 A*A*A</div>
+     <div style="font-size:10px;line-height:1.5;margin-top:4px"><span style="color:var(--accent2)">HK</span> HKUST Engineering — needs A*A*A</div>
     </div>
    </div>
    <div style="margin-top:12px;font-weight:600;font-size:12px">Key Dates</div>
@@ -1808,8 +1809,8 @@ async function loadResources(){
     <a href="/resources/books/They_Say_I_Say_4th_Edition.pdf" class="rcat-link">They Say / I Say — Graff (academic writing) <span class="rcat-badge">927 KB</span></a>
     <a href="/resources/books/Shakespeare_World_as_a_Stage.pdf" class="rcat-link">Shakespeare — Bryson (English Reading) <span class="rcat-badge">1.8 MB</span></a>
     <!-- TODO(#5)：本地 PDF 缺失（原 /books/*.pdf 无此文件），暂指向官方站点；拿到 PDF 后放回 /resources/books/ -->
-    <a href="https://corbettmaths.com/" target="_blank" rel="noopener" class="rcat-link">Corbettmaths Algebra (Grade 9) <span class="rcat-badge">外部站点</span></a>
-    <a href="https://simonsingh.net/" target="_blank" rel="noopener" class="rcat-link">The Code Book — Simon Singh (Cryptography) <span class="rcat-badge">外部站点</span></a>
+    <a href="https://corbettmaths.com/" target="_blank" rel="noopener" class="rcat-link">Corbettmaths Algebra (Grade 9) <span class="rcat-badge">external site</span></a>
+    <a href="https://simonsingh.net/" target="_blank" rel="noopener" class="rcat-link">The Code Book — Simon Singh (Cryptography) <span class="rcat-badge">external site</span></a>
    </div>
   </div>
   <div class="rcat-section">
@@ -1977,7 +1978,7 @@ async function loadDashboard(){
  const ctaEl = document.getElementById('dash-diya-cta');
  const ringEl = document.getElementById('task-ring-fg');
  if(pctEl) pctEl.textContent=dp+'%';
- if(subEl) subEl.textContent=`${dj.tasks_done||0}/${dj.tasks_total||0} tasks`+((dj.twp_total||0)>0?` · 三周计划 ${dj.twp_done||0}/${dj.twp_total}`:'');
+ if(subEl) subEl.textContent=`${dj.tasks_done||0}/${dj.tasks_total||0} tasks`+((dj.twp_total||0)>0?` · 3-week plan ${dj.twp_done||0}/${dj.twp_total}`:'');
  if(ringEl){const c=125.6;ringEl.setAttribute('stroke-dashoffset',c-(dp/100)*c);}
  if(ctaEl){
   if(dp===100) ctaEl.textContent='All done!';
@@ -2184,15 +2185,15 @@ function loadStreak(bump){
 // Diya Grades (Jemma-style subject cards) 
 function initDiyaGrades(){
 const subjects=[
-{name:'Maths', grade:'Oct26 · 7', status:'above', trend:'Effort Meeting (Mrs O\'Flaherty) · 7月卷面75% → 等级7稳定，冲8/9', bar:70, tag:'Push to 8/9', tagClass:'green'},
-{name:'FMaths', grade:'Oct26 · 未出分', status:'risk', trend:'Mr Channer · Effort Meeting · 首个评估未出分；入学资格须在11月mock出分后确认（门槛GCSE 7+/存档基准8-9）', bar:0, tag:'Awaiting 1st grade', tagClass:'yellow'},
-{name:'Physics', grade:'Oct26 · 7', status:'above', trend:'全科唯一 Effort Above Standard（Mrs Streule）· BPhO IPC 路线正轨', bar:70, tag:'Strongest Effort', tagClass:'green'},
-{name:'Chemistry', grade:'Oct26 · 6', status:'risk', trend:'7月mock 44% → 等级6，明显回升；但A-level化学门槛=7，还差1级（Mrs Rossington）', bar:60, tag:'PUSH TO 7', tagClass:'yellow'},
-{name:'History', grade:'Oct26 · 5', status:'meeting', trend:'GCSE后弃科，保持及格即可（Mrs Compton）', bar:50, tag:'Drop after GCSE', tagClass:'yellow'},
-{name:'Drama', grade:'Oct26 · 8/7', status:'above', trend:'全科最高等级（Mr Rogers）', bar:80, tag:'Top Grade', tagClass:'green'},
-{name:'Art', grade:'Oct26 · 6/5', status:'meeting', trend:'7月等级4 → 6，显著回升（Mrs Dalgleish）', bar:60, tag:'Recovered', tagClass:'green'},
-{name:'Eng Lang', grade:'Oct26 · 6', status:'meeting', trend:'稳定6，LD支持继续（Dr Westwood）· 满足Imperial工程语言要求线以上', bar:60, tag:'Steady', tagClass:'green'},
-{name:'Eng Lit', grade:'Oct26 · 5', status:'meeting', trend:'Y11目标冲6（Dr Westwood）', bar:50, tag:'Building', tagClass:'yellow'}
+{name:'Maths', grade:'Oct26 · 7', status:'above', trend:'Effort Meeting (Mrs O\'Flaherty) · July paper 75% → Grade 7 steady, pushing for 8/9', bar:70, tag:'Push to 8/9', tagClass:'green'},
+{name:'FMaths', grade:'Oct26 · not graded yet', status:'risk', trend:'Mr Channer · Effort Meeting · first assessment not graded yet; entry confirmed after the Nov mock (threshold GCSE 7+ / archive benchmark 8-9)', bar:0, tag:'Awaiting 1st grade', tagClass:'yellow'},
+{name:'Physics', grade:'Oct26 · 7', status:'above', trend:'Only subject with Effort Above Standard (Mrs Streule) · BPhO IPC route on track', bar:70, tag:'Strongest Effort', tagClass:'green'},
+{name:'Chemistry', grade:'Oct26 · 6', status:'risk', trend:'July mock 44% → Grade 6, clear recovery; but A-level Chemistry needs 7 — one grade to go (Mrs Rossington)', bar:60, tag:'PUSH TO 7', tagClass:'yellow'},
+{name:'History', grade:'Oct26 · 5', status:'meeting', trend:'Dropped after GCSE — a pass is enough (Mrs Compton)', bar:50, tag:'Drop after GCSE', tagClass:'yellow'},
+{name:'Drama', grade:'Oct26 · 8/7', status:'above', trend:'Highest grade of all subjects (Mr Rogers)', bar:80, tag:'Top Grade', tagClass:'green'},
+{name:'Art', grade:'Oct26 · 6/5', status:'meeting', trend:'July Grade 4 → 6, strong recovery (Mrs Dalgleish)', bar:60, tag:'Recovered', tagClass:'green'},
+{name:'Eng Lang', grade:'Oct26 · 6', status:'meeting', trend:'Steady 6, LD support continues (Dr Westwood) · meets the Imperial Engineering language line', bar:60, tag:'Steady', tagClass:'green'},
+{name:'Eng Lit', grade:'Oct26 · 5', status:'meeting', trend:'Y11 target: push for 6 (Dr Westwood)', bar:50, tag:'Building', tagClass:'yellow'}
 ];
  const grid=document.getElementById('subject-grid');
  if(!grid) return;
@@ -2349,7 +2350,7 @@ async function sendChatMsg(){
  // 建一个空的 AI 气泡用于流式填充
  const aiDiv=document.createElement('div'); aiDiv.className='msg assistant';
  const aiBubble=document.createElement('div'); aiBubble.className='bubble';
- aiBubble.innerHTML='<span style="opacity:.5">思考中…</span>';
+ aiBubble.innerHTML='<span style="opacity:.5">Thinking…</span>';
  aiDiv.appendChild(aiBubble); container.appendChild(aiDiv);
  const scroll=()=>{container.scrollTop=container.scrollHeight;};
  const stripThink=s=>s.replace(/<think>[\s\S]*?<\/think>/g,'').trim();
@@ -2357,7 +2358,7 @@ async function sendChatMsg(){
  try{
  const r=await fetch('/api/chat/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,user:currentChatChild})});
  if(r.status!==200){
- let msg='请求失败 ('+r.status+')';
+ let msg='Request failed ('+r.status+')';
  try{ const d=await r.json(); if(d.error) msg=d.error; }catch(e){}
  aiBubble.innerHTML='<span style="color:var(--red)">Error: '+msg+'</span>';
  return;
@@ -2385,9 +2386,9 @@ async function sendChatMsg(){
  const d=await r2.json();
  if(d.reply) aiBubble.innerHTML=markdownToHtml(stripThink(d.reply));
  else if(d.error) aiBubble.innerHTML='<span style="color:var(--red)">Error: '+d.error+'</span>';
- else aiBubble.innerHTML='<span style="color:var(--red)">Error: 未知响应</span>';
+ else aiBubble.innerHTML='<span style="color:var(--red)">Error: unknown response</span>';
  }catch(e2){
- aiBubble.innerHTML='<span style="color:var(--red)">网络错误，请重试</span>';
+ aiBubble.innerHTML='<span style="color:var(--red)">Network error — please try again</span>';
  }
  }finally{
  btn.disabled=false; scroll();
@@ -2460,7 +2461,7 @@ function renderReviewStep(){
  if(q.type==='number'){
   // R10：完成率题预填系统统计值（可修改），placeholder 说明来源
   const prefill=(q.id==='completion'&&reviewAnswers[q.id]===undefined&&reviewSysCompletion!=null)?reviewSysCompletion:'';
-  const hint2=(q.id==='completion'&&reviewSysCompletion!=null)?`（系统统计：${reviewSysCompletion}%，可改）`:'';
+  const hint2=(q.id==='completion'&&reviewSysCompletion!=null)?` (system stats: ${reviewSysCompletion}%, editable)`:'';
   stepHTML+=`<input type="number" id="rw-input" value="${prefill}" placeholder="${q.hint}${hint2}" min="${q.id==='rating'?1:0}" max="${q.id==='rating'?10:100}" onchange="reviewAnswers['${q.id}']=this.value">`;
  } else {
   stepHTML+=`<textarea id="rw-input" rows="3" placeholder="${q.hint}" oninput="reviewAnswers['${q.id}']=this.value">${reviewAnswers[q.id]||''}</textarea>`;
@@ -2524,7 +2525,7 @@ async function reviewSubmit(){
    const key='general-review-priority-'+reviewWeekKey();
    if(!tasksData['diya']) tasksData['diya']={};
    if(!tasksData['diya'][key]){
-    tasksData['diya'][key]={done:false,name:'下周优先：'+review.priority.slice(0,40),goal:''};
+    tasksData['diya'][key]={done:false,name:'Next week priority: '+review.priority.slice(0,40),goal:''};
     await saveTasks('diya');
     review.task_created=true;
    }
@@ -2552,10 +2553,10 @@ function renderReviews(container,reviews){
    <span class="rh-date">Week of ${r.date||'Unknown'}</span>
    <div class="rh-stats">
     <span class="rh-stat ${(r.completion||0)>=80?'good':(r.completion||0)>=50?'ok':'bad'}">Completion: ${r.completion||0}%</span>
-    ${r.sys_completion!==''&&r.sys_completion!=null?`<span class="rh-stat" style="color:var(--text2)">系统: ${r.sys_completion}%</span>`:''}
-    ${r.sys_tasks_done!=null?`<span class="rh-stat" style="color:var(--text2)">本周实际完成 ${r.sys_tasks_done} 件${r.sys_avg_days!=null?' · 平均拖延 '+r.sys_avg_days+' 天':''}</span>`:''}
+    ${r.sys_completion!==''&&r.sys_completion!=null?`<span class="rh-stat" style="color:var(--text2)">System: ${r.sys_completion}%</span>`:''}
+    ${r.sys_tasks_done!=null?`<span class="rh-stat" style="color:var(--text2)">Actually completed ${r.sys_tasks_done} this week${r.sys_avg_days!=null?' · avg delay '+r.sys_avg_days+' days':''}</span>`:''}
     <span class="rh-stat ${(r.rating||0)>=8?'good':(r.rating||0)>=5?'ok':'bad'}">Rating: ${r.rating||0}/10</span>
-    ${r.task_created?'<span class="rh-stat good">✅ 优先级已转任务</span>':''}
+    ${r.task_created?'<span class="rh-stat good">✅ Priority turned into a task</span>':''}
    </div>
   </div>
   <div class="rh-body">
@@ -2779,6 +2780,7 @@ async function refreshErrorStats(){
 async function loadErrorBook(){
  await fetchErrorsPage(1, false);
  refreshErrorStats();
+ restoreTestMeIfAny();   // P1-1: resume an interrupted Test me round after refresh
 }
 function markMastered(id){
  const err = errorsData.find(e=>e.id===id);
@@ -2799,8 +2801,47 @@ function markMastered(id){
 // ── R7-a：错题再测「Test me」——遮挡自评模式 ─────────────────────
 // 随机抽 5 题（优先未 mastered），只显示题面隐藏答案；「我看会了」/「还是不会」
 // 自评；仍错必须选错因（R7-b：粗心/没懂/没时间）并自动去掉 mastered。
-const CAUSE_LABELS={'careless':'⚡ 粗心','concept':'🧩 没懂','time':'⏱ 没时间'};
+const CAUSE_LABELS={'careless':'⚡ Careless','concept':"🧩 Didn't get it",'time':'⏱ No time'};
 let quiz = null;   // {queue, idx, right, wrong, wrongList:[]}
+
+// ── P1-1：Test me 进度持久化（刷新不丢）────────────────────────────
+// 队列只存 error id，恢复时按 id 从 errorsData 重挂；错题被删/不存在则过滤
+const TESTME_KEY = 'diya-testme-progress-v1';
+function saveTestMeState(){
+ if(!quiz) return;
+ try{
+  localStorage.setItem(TESTME_KEY, JSON.stringify({
+   ids: quiz.queue.map(e=>e&&e.id).filter(Boolean),
+   idx: quiz.idx, right: quiz.right, wrong: quiz.wrong,
+   wrongIds: (quiz.wrongList||[]).map(e=>e&&e.id).filter(Boolean)
+  }));
+ }catch(e){ /* storage unavailable: silently skip */ }
+}
+function restoreTestMeState(){
+ try{
+  const raw=localStorage.getItem(TESTME_KEY);
+  if(!raw) return null;
+  const d=JSON.parse(raw);
+  if(!d||!Array.isArray(d.ids)||!d.ids.length) return null;
+  const byId={}; errorsData.forEach(e=>{ if(e&&e.id) byId[e.id]=e; });
+  const queue=d.ids.map(id=>byId[id]).filter(Boolean);
+  if(!queue.length) return null;
+  return {
+   queue,
+   idx: Math.min(Math.max(0, parseInt(d.idx)||0), queue.length),
+   right: parseInt(d.right)||0,
+   wrong: parseInt(d.wrong)||0,
+   wrongList: (d.wrongIds||[]).map(id=>byId[id]).filter(Boolean)
+  };
+ }catch(e){ return null; }
+}
+function restoreTestMeIfAny(){
+ if(quiz) return;
+ const saved=restoreTestMeState();
+ if(!saved) return;
+ quiz=saved;
+ renderQuiz();
+}
 
 function _shuffle(arr){
  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
@@ -2812,7 +2853,7 @@ function startQuizMode(){
  const picked=pool.slice();
  while(picked.length<5 && rest.length) picked.push(rest.shift());
  picked.length=Math.min(picked.length,5);
- if(!picked.length){ toast('错题本还是空的，先记一道错题吧'); return; }
+ if(!picked.length){ toast('The Error Book is still empty — log one mistake first'); return; }
  quiz={queue:picked,idx:0,right:0,wrong:0,wrongList:[]};
  renderQuiz();
 }
@@ -2828,7 +2869,7 @@ function _quizToggle(show){
 }
 function quizQuestionText(e){
  if(typeof e.question==='string') return e.question;
- return (e.question&&(e.question.question||e.question.original_question))||e.original_question||'（此题无文字题面，凭图片回忆）';
+ return (e.question&&(e.question.question||e.question.original_question))||e.original_question||'(no text for this question — recall it from the image)';
 }
 function renderQuiz(){
  _quizToggle(true);
@@ -2839,30 +2880,31 @@ function renderQuiz(){
  panel.innerHTML=`
  <div class="section" style="border-left:4px solid var(--accent2)">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-   <div class="section-title" style="margin:0">🎯 Test me · 第 ${quiz.idx+1} / ${quiz.queue.length} 题</div>
+   <div class="section-title" style="margin:0">🎯 Test me · Question ${quiz.idx+1} / ${quiz.queue.length}</div>
    <span class="ec-subject">${e.subject||'?'}</span>
-   <button class="btn-sm" onclick="endQuizMode()" style="margin-left:auto">退出</button>
+   <button class="btn-sm" onclick="endQuizMode()" style="margin-left:auto">Exit</button>
   </div>
-  <p style="font-size:12px;color:var(--text2);margin-bottom:10px">先遮住答案，自己说一遍做法，再翻面对照。答案在下面（先别看！点完评价再看）。</p>
+  <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Cover the answer first, say the method out loud, then flip to compare. The answer is below (no peeking! Rate yourself first, then look).</p>
   <div style="background:var(--surface2);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.8;white-space:pre-wrap">${escHtml(quizQuestionText(e))}</div>
   <div id="quiz-cause-row" hidden style="margin-top:12px">
-   <div style="font-size:13px;color:var(--orange);font-weight:700;margin-bottom:8px">这题为什么没做对？（选一个）</div>
+   <div style="font-size:13px;color:var(--orange);font-weight:700;margin-bottom:8px">Why did this one go wrong? (pick one)</div>
    <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn" onclick="pickQuizCause('careless')" style="background:var(--yellow);color:#1a1206">⚡ 粗心</button>
-    <button class="btn" onclick="pickQuizCause('concept')" style="background:var(--red)">🧩 没懂</button>
-    <button class="btn" onclick="pickQuizCause('time')" style="background:var(--accent)">⏱ 没时间</button>
+    <button class="btn" onclick="pickQuizCause('careless')" style="background:var(--yellow);color:#1a1206">⚡ Careless</button>
+    <button class="btn" onclick="pickQuizCause('concept')" style="background:var(--red)">🧩 Didn't get it</button>
+    <button class="btn" onclick="pickQuizCause('time')" style="background:var(--accent)">⏱ No time</button>
    </div>
   </div>
   <div id="quiz-answer-reveal" hidden style="margin-top:12px;background:var(--surface2);border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.8">
-   <div style="color:var(--accent2);font-weight:700;margin-bottom:6px">正确答案 / 解法</div>
-   <div style="white-space:pre-wrap">${escHtml((typeof e.solution==='string'?e.solution:(e.solution_display||(e.solution&&e.solution.explanation)||e.correct_solution||''))||'（此题未录入解法，翻 Error Book 对照）')}</div>
+   <div style="color:var(--accent2);font-weight:700;margin-bottom:6px">Correct answer / solution</div>
+   <div style="white-space:pre-wrap">${escHtml((typeof e.solution==='string'?e.solution:(e.solution_display||(e.solution&&e.solution.explanation)||e.correct_solution||''))||'(no solution recorded — check the Error Book)')}</div>
   </div>
   <div id="quiz-btn-row" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-   <button class="btn" onclick="quizReveal()" style="background:none;border:1px solid var(--border);color:var(--text2)">👁 翻面对照</button>
-   <button class="btn" onclick="quizRight()" style="background:var(--accent2)">✓ 我看会了</button>
-   <button class="btn" onclick="quizWrong()" style="background:var(--red)">✗ 还是不会</button>
+   <button class="btn" onclick="quizReveal()" style="background:none;border:1px solid var(--border);color:var(--text2)">👁 Flip to compare</button>
+   <button class="btn" onclick="quizRight()" style="background:var(--accent2)">✓ I've got it now</button>
+   <button class="btn" onclick="quizWrong()" style="background:var(--red)">✗ Still don't get it</button>
   </div>
  </div>`;
+ saveTestMeState();   // P1-1: persist Test me progress (survives refresh)
 }
 function quizReveal(){
  const r=document.getElementById('quiz-answer-reveal');
@@ -2911,24 +2953,25 @@ function renderQuizResult(){
  const panel=document.getElementById('test-mode-panel');
  if(!panel||!quiz) return;
  const pct=quiz.queue.length?Math.round(quiz.right/quiz.queue.length*100):0;
- const msg=pct>=80?'太棒了，这几题真的会了！':pct>=50?'过半会了，剩下的错因已经记下来了。':'没关系，错因都记下来了，下次再战。';
+ const msg=pct>=80?'Brilliant — you really know these now!':pct>=50?'More than half right, and the rest are logged with their cause.':"No worries — the causes are all logged. Next round, you've got this.";
  panel.innerHTML=`
  <div class="section" style="border-left:4px solid var(--accent2)">
-  <div class="section-title">🎯 本轮结果</div>
+  <div class="section-title">🎯 This round's result</div>
   <div style="font-size:15px;line-height:2">
-   ✓ 我看会了：<b style="color:var(--accent2)">${quiz.right}</b> 题<br>
-   ✗ 还是不会：<b style="color:var(--red)">${quiz.wrong}</b> 题（错因已记回 Error Book，自动去掉 mastered）
+   ✓ Got it now: <b style="color:var(--accent2)">${quiz.right}</b><br>
+   ✗ Still don't get it: <b style="color:var(--red)">${quiz.wrong}</b> (cause logged back to the Error Book, mastered flag removed)
   </div>
-  ${quiz.wrongList.length?`<div style="margin-top:10px;font-size:13px;color:var(--text2)">仍错的科目：${[...new Set(quiz.wrongList.map(e=>e.subject||'?'))].join('、')}</div>`:''}
+  ${quiz.wrongList.length?`<div style="margin-top:10px;font-size:13px;color:var(--text2)">Subjects still wrong: ${[...new Set(quiz.wrongList.map(e=>e.subject||'?'))].join(', ')}</div>`:''}
   <div style="margin-top:8px;font-size:14px;color:var(--accent2);font-weight:700">${msg}</div>
   <div style="margin-top:14px;display:flex;gap:10px">
-   <button class="btn" onclick="endQuizMode()" style="background:var(--accent2)">返回错题本</button>
-   <button class="btn" onclick="startQuizMode()" style="background:none;border:1px solid var(--border);color:var(--text2)">再来一轮</button>
+   <button class="btn" onclick="endQuizMode()" style="background:var(--accent2)">Back to Error Book</button>
+   <button class="btn" onclick="startQuizMode()" style="background:none;border:1px solid var(--border);color:var(--text2)">Another round</button>
   </div>
  </div>`;
 }
 function endQuizMode(){
  quiz=null;
+ try{ localStorage.removeItem(TESTME_KEY); }catch(e){ /* ignore */ }
  _quizToggle(false);
  loadErrorBook();   // 还原列表（含 mastered/错因的最新状态）
 }
@@ -3002,7 +3045,7 @@ async function saveError(){
  if(!body.subject||!body.question){ toast('Please fill in subject and question'); return; }
  try{
   const r = await fetch('/api/errors/diya',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok){ toast('❌ 保存失败 '+(r.status)); return; }   // 不再无条件报成功
+  if(!r.ok){ toast('❌ Save failed '+(r.status)); return; }   // 不再无条件报成功
   closeErrorModal();
   await loadErrorBook();
   toast('Saved ');
@@ -3015,7 +3058,7 @@ async function deleteError(id){
  if(!confirm(`Delete "${label}"?\nThis cannot be undone.`)) return;
  try{
   const r = await fetch('/api/errors/diya/'+id,{method:'DELETE'});
-  if(!r.ok){ toast('❌ 删除失败 '+(r.status)); return; }
+  if(!r.ok){ toast('❌ Delete failed '+(r.status)); return; }
   await loadErrorBook(); toast('Deleted');
  }catch(e){ toast('Delete failed'); }
 }
@@ -3050,7 +3093,7 @@ async function loadSubjectAnalysis(){
  const causeTotal=Object.values(byCause).reduce((a,b)=>a+b,0);
  const causeBar=causeTotal?`
  <div class="section" style="margin-bottom:14px;border-left:4px solid var(--orange)">
- <div class="section-title">🧭 错因分布 · Why mistakes happen</div>
+ <div class="section-title">🧭 Why mistakes happen</div>
  ${Object.entries(byCause).sort((a,b)=>b[1]-a[1]).map(([c,n])=>{
  const pct=Math.round(n/causeTotal*100);
  return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px">
@@ -3058,9 +3101,9 @@ async function loadSubjectAnalysis(){
  <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
  <div style="height:100%;width:${pct}%;background:${c==='concept'?'var(--red)':c==='careless'?'var(--yellow)':'var(--accent)'};border-radius:4px"></div>
  </div>
- <div style="width:56px;text-align:right;color:var(--text2)">${n} 题 · ${pct}%</div>
+ <div style="width:56px;text-align:right;color:var(--text2)">${n} · ${pct}%</div>
  </div>`;}).join('')}
- <div style="font-size:12px;color:var(--text2);margin-top:8px">🧩 没懂占比高 → 回到概念重学；⚡ 粗心多 → 做题放慢 + 写步骤；⏱ 没时间多 → 限时练习找节奏。</div>
+ <div style="font-size:12px;color:var(--text2);margin-top:8px">🧩 Mostly "didn't get it" → relearn the concept; ⚡ lots of carelessness → slow down and write out the steps; ⏱ lots of "no time" → timed practice to find your pace.</div>
  </div>`:'';
  const sorted = Object.entries(bySubject).sort((a,b)=>b[1].count-a[1].count);
  if(!sorted.length){ container.innerHTML='<div class="error-empty">No data yet. Add errors to see analysis.</div>'; return; }
@@ -3077,14 +3120,14 @@ async function loadSubjectAnalysis(){
  }catch(e){
  console.error('[subject-analysis]',e);
  // 不再只写一句 "Load failed"：说明原因 + 可操作的下一步，便于自助排查
- const why = (e&&e.message)?String(e.message).slice(0,180):'未知错误';
+ const why = (e&&e.message)?String(e.message).slice(0,180):'Unknown error';
  container.innerHTML = `<div class="error-empty">
- <div style="font-size:14px;margin-bottom:6px">⚠️ 学科分析加载失败</div>
+ <div style="font-size:14px;margin-bottom:6px">⚠️ Subject analysis failed to load</div>
  <div style="font-size:12px;color:var(--text2);line-height:1.7">
- 原因：<code style="word-break:break-all">${why.replace(/</g,'&lt;')}</code><br>
- 可尝试：① 刷新页面重试；② 确认已登录主站；③ 若持续失败，请把上面的原因文字发给管理员。
+ Reason: <code style="word-break:break-all">${why.replace(/</g,'&lt;')}</code><br>
+ Try: ① refresh and retry; ② make sure you are signed in on the main site; ③ if it keeps failing, send the reason text above to the admin.
  </div>
- <div style="margin-top:10px"><button class="btn" onclick="loadSubjectAnalysis()">重试</button></div>
+ <div style="margin-top:10px"><button class="btn" onclick="loadSubjectAnalysis()">Retry</button></div>
  </div>`;
  }
 }
@@ -3136,8 +3179,8 @@ function openLLMSettings(){
       setv('llm-apikey',''); setv('llm-openrouter','');
       const kh=document.getElementById('llm-keyhint');
       if(kh) kh.textContent = d.has_key
-        ? ('当前已配置 Key：'+(d.key_masked||'****')+'（如要更换请在上方填写新 Key，留空则保留）')
-        : '未配置 Key：聊天与错题解析将无法使用，请在上方填写。';
+        ? ('Key currently set: '+(d.key_masked||'****')+' (to replace it, enter a new Key above; leave blank to keep the current one)')
+        : 'No Key set: chat and mistake analysis will not work — please fill one in above.';
     }).catch(()=>{});
   }catch(e){ /* 弹窗已打开，忽略填充异常 */ }
 }
@@ -3150,8 +3193,8 @@ function closeLLMSettings(){
 function llmToggleKey(id, btn){
   id = id || 'llm-apikey';
   const el = document.getElementById(id);
-  if(el.type==='password'){ el.type='text'; if(btn) btn.textContent='隐藏'; }
-  else { el.type='password'; if(btn) btn.textContent='显示'; }
+  if(el.type==='password'){ el.type='text'; if(btn) btn.textContent='Hide'; }
+  else { el.type='password'; if(btn) btn.textContent='Show'; }
 }
 
 function llmSaveSettings(){
@@ -3166,10 +3209,10 @@ function llmSaveSettings(){
   fetch('/api/settings/llm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
     .then(r=>r.json())
     .then(d=>{
-      if(d.ok){ st.textContent='✅ 已保存'; st.className='llmset-status ok'; toast('LLM 设置已保存'); setTimeout(closeLLMSettings,700); }
-      else { st.textContent='❌ '+(d.error||'保存失败'); st.className='llmset-status err'; }
+      if(d.ok){ st.textContent='✅ Saved'; st.className='llmset-status ok'; toast('LLM settings saved'); setTimeout(closeLLMSettings,700); }
+      else { st.textContent='❌ '+(d.error||'Save failed'); st.className='llmset-status err'; }
     })
-    .catch(e=>{ st.textContent='❌ 网络错误：'+e.message; st.className='llmset-status err'; });
+    .catch(e=>{ st.textContent='❌ Network error: '+e.message; st.className='llmset-status err'; });
 }
 
 function llmTestSettings(){
@@ -3179,14 +3222,14 @@ function llmTestSettings(){
     model: document.getElementById('llm-model').value.trim(),
   };
   const st = document.getElementById('llm-status');
-  st.textContent='测试中…'; st.className='llmset-status';
+  st.textContent='Testing…'; st.className='llmset-status';
   fetch('/api/settings/llm/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
     .then(r=>r.json())
     .then(d=>{
-      if(d.ok){ st.textContent='✅ 连接成功（'+(d.model||'')+'）'; st.className='llmset-status ok'; }
-      else { st.textContent='❌ '+(d.error||'测试失败'); st.className='llmset-status err'; }
+      if(d.ok){ st.textContent='✅ Connected ('+(d.model||'')+')'; st.className='llmset-status ok'; }
+      else { st.textContent='❌ '+(d.error||'Test failed'); st.className='llmset-status err'; }
     })
-    .catch(e=>{ st.textContent='❌ 网络错误：'+e.message; st.className='llmset-status err'; });
+    .catch(e=>{ st.textContent='❌ Network error: '+e.message; st.className='llmset-status err'; });
 }
 
 // Toast 
@@ -3227,7 +3270,8 @@ function renderTasks(child){
   });
   Object.keys(GOAL_LABELS).forEach(g=>{
    const el=document.getElementById('gp-'+g);
-   if(el) el.textContent=gAgg[g]?` · 🎯 ${gAgg[g].done}/${gAgg[g].total}`:'';
+   // R9 修订（红队 P0-4）：只显示正向进度，不把弱点与 0/N 欠账视觉绑定
+   if(el) el.textContent=(gAgg[g]&&gAgg[g].done>0)?` · ⭐ ${gAgg[g].done} step${gAgg[g].done>1?'s':''} done`:'';
   });
  }catch(_){}
  let html='';
@@ -3319,18 +3363,18 @@ async function handleUploadFiles(files){
       const r = await fetch(`/api/upload/${UPLOAD_CHILD}`, {method:'POST', body:fd});
       const d = await r.json().catch(()=>({}));
       if(r.status === 409 && d.duplicate_of){
-        updateUploadQueueItem(uid, {status:'failed', error:'重复上传（内容相同）', dupId:d.duplicate_of});
-        toast(`⚠️ ${f.name} 已上传过`);
+        updateUploadQueueItem(uid, {status:'failed', error:'Duplicate upload (same content)', dupId:d.duplicate_of});
+        toast(`⚠️ ${f.name} has already been uploaded`);
       }else if(!r.ok){
         updateUploadQueueItem(uid, {status:'failed', error:d.error || ('HTTP '+r.status)});
-        toast(`❌ ${f.name}: ${d.error||'上传失败'}`);
+        toast(`❌ ${f.name}: ${d.error||'Upload failed'}`);
       }else{
         updateUploadQueueItem(uid, {id:d.id, status:'queued'});
-        toast(`✅ ${f.name} 已上传，开始识别`);
+        toast(`✅ ${f.name} uploaded — recognition started`);
         pollUploadStatus(d.id);
       }
     }catch(e){
-      updateUploadQueueItem(uid, {status:'failed', error:'网络错误：'+e.message});
+      updateUploadQueueItem(uid, {status:'failed', error:'Network error: '+e.message});
     }
   }
   setTimeout(refreshUploadList, 1500);
@@ -3355,14 +3399,14 @@ function uploadItemInner(it){
     <div style="flex:1;min-width:0">
       <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(it.original_name||'')}</div>
       <div style="font-size:10px;color:var(--text2);margin-top:2px">
-        ${sizeKb}KB ${it.page_count ? '· '+it.page_count+' 页' : ''} ${it.ocr_done!=null && it.status==='ocr' ? '· 识别 '+it.ocr_done+'/'+(it.page_count||'?')+' 页' : ''}
+        ${sizeKb}KB ${it.page_count ? '· '+it.page_count+' pages' : ''} ${it.ocr_done!=null && it.status==='ocr' ? '· Recognised '+it.ocr_done+'/'+(it.page_count||'?')+' pages' : ''}
         ${it.error ? '<span style="color:var(--red)">· '+escHtml(String(it.error).slice(0,80))+'</span>' : ''}
       </div>
       ${pct!=null ? `<div style="height:3px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent);transition:width .3s"></div></div>` : ''}
     </div>
     ${uploadStatusBadge(it.status)}
-    ${it.status==='done' ? `<button class="btn btn-sm" onclick="openUploadDetail('${it.id}')">查看</button>` : ''}
-    ${it.status==='failed' ? `<button class="btn btn-sm" onclick="retryUpload('${it.id}')">重试</button>` : ''}
+    ${it.status==='done' ? `<button class="btn btn-sm" onclick="openUploadDetail('${it.id}')">View</button>` : ''}
+    ${it.status==='failed' ? `<button class="btn btn-sm" onclick="retryUpload('${it.id}')">Retry</button>` : ''}
   `;
 }
 
@@ -3390,7 +3434,7 @@ function pollUploadStatus(uid){
       });
       if(m.status==='done' || m.status==='failed'){
         clearInterval(timer);
-        if(m.status==='done') toast(`✅ ${m.original_name} 识别完成`);
+        if(m.status==='done') toast(`✅ ${m.original_name} — recognition complete`);
         refreshUploadList();
       }
       if(Date.now()-t0 > 15*60*1000) clearInterval(timer);  // 15 分钟超时停止轮询
@@ -3404,9 +3448,9 @@ async function retryUpload(uid){
       method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'retry_ocr'})
     });
     const d = await r.json();
-    if(d.ok){ updateUploadQueueItem(uid, {status:'queued', error:null}); pollUploadStatus(uid); toast('已重新排队识别'); }
-    else toast('❌ '+(d.error||'重试失败'));
-  }catch(e){ toast('❌ 网络错误'); }
+    if(d.ok){ updateUploadQueueItem(uid, {status:'queued', error:null}); pollUploadStatus(uid); toast('Re-queued for recognition'); }
+    else toast('❌ '+(d.error||'Retry failed'));
+  }catch(e){ toast('❌ Network error'); }
 }
 
 async function refreshUploadList(){
@@ -3414,43 +3458,43 @@ async function refreshUploadList(){
   if(!box) return;
   try{
     const r = await fetch(`/api/uploads/${UPLOAD_CHILD}`);
-    if(!r.ok){ box.innerHTML = '<div class="error-empty">加载失败</div>'; return; }
+    if(!r.ok){ box.innerHTML = '<div class="error-empty">Load failed</div>'; return; }
     const list = await r.json();
-    if(!list.length){ box.innerHTML = '<div class="error-empty">还没有上传记录。拖一个文件到上方开始吧。</div>'; return; }
+    if(!list.length){ box.innerHTML = '<div class="error-empty">No uploads yet. Drag a file up here to start.</div>'; return; }
     box.innerHTML = list.map(e=>`
       <div class="task-item" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
         <span style="font-size:16px">${(e.original_name||'').toLowerCase().endsWith('.pdf')?'📕':'🖼️'}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(e.title||e.original_name||'')}</div>
           <div style="font-size:10px;color:var(--text2);margin-top:2px">
-            ${escHtml(e.subject||'—')} · ${escHtml(e.doc_type||'')} ${e.score&&e.score.total?`· ${e.score.got}/${e.score.total}`:''} ${e.page_count?'· '+e.page_count+'页':''} · ${(e.created||'').slice(0,10)}
+            ${escHtml(e.subject||'—')} · ${escHtml(e.doc_type||'')} ${e.score&&e.score.total?`· ${e.score.got}/${e.score.total}`:''} ${e.page_count?'· '+e.page_count+' pages':''} · ${(e.created||'').slice(0,10)}
           </div>
         </div>
         ${uploadStatusBadge(e.status)}
-        ${e.status==='done' ? `<button class="btn btn-sm" onclick="openUploadDetail('${e.id}')">查看</button>` : ''}
-        ${e.status==='failed' ? `<button class="btn btn-sm" onclick="retryUpload('${e.id}')">重试</button>` : ''}
-        <button class="btn btn-sm" style="color:var(--red)" onclick="deleteUpload('${e.id}','${escHtml(e.original_name||'')}')">删除</button>
+        ${e.status==='done' ? `<button class="btn btn-sm" onclick="openUploadDetail('${e.id}')">View</button>` : ''}
+        ${e.status==='failed' ? `<button class="btn btn-sm" onclick="retryUpload('${e.id}')">Retry</button>` : ''}
+        <button class="btn btn-sm" style="color:var(--red)" onclick="deleteUpload('${e.id}','${escHtml(e.original_name||'')}')">Delete</button>
       </div>
     `).join('');
-  }catch(e){ box.innerHTML = '<div class="error-empty">网络错误</div>'; }
+  }catch(e){ box.innerHTML = '<div class="error-empty">Network error</div>'; }
 }
 
 async function deleteUpload(uid, name){
-  if(!confirm(`确定删除「${name}」？原文件与识别结果将一并删除。`)) return;
+  if(!confirm(`Delete "${name}" for sure? The original file and its recognition results will be deleted too.`)) return;
   try{
     const r = await fetch(`/api/uploads/${UPLOAD_CHILD}/${uid}`, {method:'DELETE'});
-    if(r.ok){ toast('已删除'); refreshUploadList(); }
-    else toast('❌ 删除失败');
-  }catch(e){ toast('❌ 网络错误'); }
+    if(r.ok){ toast('Deleted'); refreshUploadList(); }
+    else toast('❌ Delete failed');
+  }catch(e){ toast('❌ Network error'); }
 }
 
 async function openUploadDetail(uid){
   let m;
   try{
     const r = await fetch(`/api/uploads/${UPLOAD_CHILD}/${uid}`);
-    if(!r.ok){ toast('加载失败'); return; }
+    if(!r.ok){ toast('Load failed'); return; }
     m = await r.json();
-  }catch(e){ toast('网络错误'); return; }
+  }catch(e){ toast('Network error'); return; }
   const e = m.extract || {};
   const mistakes = e.mistakes || [];
   const modal = document.getElementById('upload-detail-modal');
@@ -3458,37 +3502,37 @@ async function openUploadDetail(uid){
     <div style="margin-bottom:18px">
       <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase">Page ${p.no}</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
-        ${p.image ? `<img src="/api/uploads/${UPLOAD_CHILD}/${uid}/file/${p.image}" style="max-width:280px;border:1px solid var(--border);border-radius:8px">` : '<div style="color:var(--text2);font-size:11px">渲染失败</div>'}
+        ${p.image ? `<img src="/api/uploads/${UPLOAD_CHILD}/${uid}/file/${p.image}" style="max-width:280px;border:1px solid var(--border);border-radius:8px">` : '<div style="color:var(--text2);font-size:11px">Render failed</div>'}
         <div style="flex:1;min-width:220px">
-          <textarea readonly style="width:100%;min-height:130px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;padding:8px;line-height:1.5;resize:vertical;font-family:inherit">${escHtml(p.clean_text||p.ocr_error||'(无文本)')}</textarea>
+          <textarea readonly style="width:100%;min-height:130px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;padding:8px;line-height:1.5;resize:vertical;font-family:inherit">${escHtml(p.clean_text||p.ocr_error||'(no text)')}</textarea>
         </div>
       </div>
     </div>
   `).join('');
   document.getElementById('upload-detail-body').innerHTML = `
     <div style="margin-bottom:14px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;line-height:1.9">
-      <div><b>科目：</b>${escHtml(e.subject||'—')} · <b>类型：</b>${escHtml(e.doc_type||'—')} · <b>日期：</b>${escHtml(e.date||'—')} ${e.score&&e.score.total?`· <b>分数：</b>${e.score.got}/${e.score.total}`:''}</div>
-      <div><b>知识点：</b>${(e.topics||[]).map(escHtml).join('、')||'—'}</div>
-      ${e.weakness_summary?`<div><b>弱点：</b>${escHtml(e.weakness_summary)}</div>`:''}
+      <div><b>Subject:</b> ${escHtml(e.subject||'—')} · <b>Type:</b> ${escHtml(e.doc_type||'—')} · <b>Date:</b> ${escHtml(e.date||'—')} ${e.score&&e.score.total?`· <b>Score:</b> ${e.score.got}/${e.score.total}`:''}</div>
+      <div><b>Topics:</b> ${(e.topics||[]).map(escHtml).join(', ')||'—'}</div>
+      ${e.weakness_summary?`<div><b>Weakness:</b> ${escHtml(e.weakness_summary)}</div>`:''}
     </div>
     ${mistakes.length?`
       <div style="margin-bottom:14px">
-        <div style="font-size:12px;font-weight:700;margin-bottom:8px">识别出错题 ${mistakes.length} 道
-          <button class="btn btn-sm" style="margin-left:8px" onclick="uploadToErrors('${uid}')">📥 全部存入错题本</button>
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px">${mistakes.length} mistakes recognised
+          <button class="btn btn-sm" style="margin-left:8px" onclick="uploadToErrors('${uid}')">📥 Save all into Error Book</button>
         </div>
         ${mistakes.map((x,i)=>`
           <div style="padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;font-size:11px;line-height:1.7">
             <b>${escHtml(String(x.question_no||('Q'+(i+1))))}</b>
-            学生答案：<span style="color:var(--red)">${escHtml(String(x.wrong_answer||'—'))}</span>
-            正确：<span style="color:var(--accent2)">${escHtml(String(x.correct_answer||'—'))}</span>
-            ${x.reason?`<div style="color:var(--text2)">原因：${escHtml(String(x.reason))}</div>`:''}
+            Your answer: <span style="color:var(--red)">${escHtml(String(x.wrong_answer||'—'))}</span>
+            Correct: <span style="color:var(--accent2)">${escHtml(String(x.correct_answer||'—'))}</span>
+            ${x.reason?`<div style="color:var(--text2)">Reason: ${escHtml(String(x.reason))}</div>`:''}
           </div>
         `).join('')}
-      </div>`:'<div style="font-size:11px;color:var(--text2);margin-bottom:14px">未识别出错题（或抽取失败）</div>'}
-    ${m.extract_status==='failed'?`<button class="btn btn-sm" onclick="retryExtract('${uid}')" style="margin-bottom:14px">🔄 重新抽取字段</button>`:''}
+      </div>`:'<div style="font-size:11px;color:var(--text2);margin-bottom:14px">No mistakes recognised (or extraction failed)</div>'}
+    ${m.extract_status==='failed'?`<button class="btn btn-sm" onclick="retryExtract('${uid}')" style="margin-bottom:14px">🔄 Re-extract fields</button>`:''}
     <div style="max-height:340px;overflow-y:auto;padding-right:4px">${pagesHtml}</div>
   `;
-  document.getElementById('upload-detail-title').textContent = e.title || m.original_name || '上传详情';
+  document.getElementById('upload-detail-title').textContent = e.title || m.original_name || 'Upload details';
   modal.classList.add('open');
 }
 
@@ -3496,9 +3540,9 @@ async function uploadToErrors(uid){
   try{
     const r = await fetch(`/api/uploads/${UPLOAD_CHILD}/${uid}/to-errors`, {method:'POST'});
     const d = await r.json();
-    if(d.ok){ toast(`✅ 已导入 ${d.added} 道错题`); if(window.loadErrorBook) loadErrorBook(); }
-    else toast('❌ '+(d.error||'导入失败'));
-  }catch(e){ toast('❌ 网络错误'); }
+    if(d.ok){ toast(`✅ Imported ${d.added} mistakes`); if(window.loadErrorBook) loadErrorBook(); }
+    else toast('❌ '+(d.error||'Import failed'));
+  }catch(e){ toast('❌ Network error'); }
 }
 
 async function retryExtract(uid){
@@ -3507,9 +3551,9 @@ async function retryExtract(uid){
       method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'retry_extract'})
     });
     const d = await r.json();
-    if(d.ok){ toast('✅ 抽取成功'); openUploadDetail(uid); }
-    else toast('❌ '+(d.error||'抽取失败'));
-  }catch(e){ toast('❌ 网络错误'); }
+    if(d.ok){ toast('✅ Extraction complete'); openUploadDetail(uid); }
+    else toast('❌ '+(d.error||'Extraction failed'));
+  }catch(e){ toast('❌ Network error'); }
 }
 
 function logout(){
@@ -3532,12 +3576,12 @@ function renderThreeWeekPlan(elId){
   const today = new Date().toISOString().slice(0,10);
   el.innerHTML = THREE_WEEK_PLAN.weeks.map(w=>{
     const state = today > w.end ? 'past' : (today >= w.start ? 'current' : '');
-    const badge = state==='current' ? '<span class="tw-badge">本周</span>' : '';
+    const badge = state==='current' ? '<span class="tw-badge">This week</span>' : '';
     const actions = (w.actions||[]).map(a=>`
-      <div class="kid-task-card" data-task-id="diya-${a.id}" data-sync="server" data-task-label="${w.label} · ${a.label}" title="点一下就能勾掉" style="margin-top:6px">
+      <div class="kid-task-card" data-task-id="diya-${a.id}" data-sync="server" data-task-label="${w.label} · ${a.label}" title="One tap to tick it off" style="margin-top:6px">
         <span class="kid-task-label" style="font-size:13px">${a.label}${a.sub?` <span style="font-size:11px;color:var(--text2)">· ${a.sub}</span>`:''}</span>
       </div>`).join('');
-    const sumLabel = (w.actions&&w.actions.length) ? '本周小结：三件都做完了就勾一下' : `这周的「${w.goal}」做完了就勾一下`;
+    const sumLabel = (w.actions&&w.actions.length) ? 'Week summary: tick it when all three are done' : `Tick it when this week's "${w.goal}" is done`;
     return `<div class="twp-week ${state}">
      <div class="tw-label">${w.label}<span class="tw-range">${w.range||(w.start.slice(5).replace('-','/')+' – '+w.end.slice(5).replace('-','/'))}</span>${badge}</div>
      <div class="tw-goal">${w.goal}</div>
@@ -3564,10 +3608,10 @@ function renderToday3Diya(){
  const el=document.getElementById('diya-today-3');
  if(!el) return;
  const w=currentTwpWeekDiya();
- if(!w){ el.innerHTML='<div class="empty-state">计划加载中…</div>'; return; }
- el.innerHTML=`<div style="font-size:12px;color:var(--text2);margin-bottom:2px">${w.label} · 做完一件勾一件</div>`+
+ if(!w){ el.innerHTML='<div class="empty-state">Loading plan…</div>'; return; }
+ el.innerHTML=`<div style="font-size:12px;color:var(--text2);margin-bottom:2px">${w.label} · tick one as you finish it</div>`+
  (w.actions||[]).map(a=>`
-  <div class="kid-task-card" data-task-id="diya-${a.id}" data-sync="server" data-task-label="${w.label} · ${a.label}" title="点一下就能勾掉">
+  <div class="kid-task-card" data-task-id="diya-${a.id}" data-sync="server" data-task-label="${w.label} · ${a.label}" title="One tap to tick it off">
    <span class="kid-task-label">${a.label}</span>
    <span class="kid-sub" style="font-size:11px;color:var(--text2)">${a.sub||''}</span>
   </div>`).join('');
@@ -3581,8 +3625,8 @@ function showTwpCycleHint(nextCycleEnd){
     const today = new Date(); today.setHours(0,0,0,0);
     const end = new Date(nextCycleEnd + 'T00:00:00');
     const days = Math.ceil((end - today) / 86400000);
-    if(days < 0){ box.hidden = false; box.innerHTML = '📌 本期三周计划已于 ' + nextCycleEnd + ' 结束。请爸爸妈妈在计划里更新下一周期（改服务器计划即可，无需更新网页）。'; }
-    else if(days <= 7){ box.hidden = false; box.innerHTML = '📌 本期三周计划还有 ' + days + ' 天结束（' + nextCycleEnd + '）。爸爸妈妈可以准备下一周期了。'; }
+    if(days < 0){ box.hidden = false; box.innerHTML = '📌 This 3-week plan ended on ' + nextCycleEnd + '. Please update the next cycle in the plan (edit the server plan — no web update needed).'; }
+    else if(days <= 7){ box.hidden = false; box.innerHTML = '📌 This 3-week plan ends in ' + days + ' days (' + nextCycleEnd + '). Time to start preparing the next cycle.'; }
   }catch(_){}
 }
 async function loadThreeWeekPlan(){
@@ -3630,7 +3674,7 @@ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
    var _btn=document.getElementById('llm-settings-btn');
    if(_btn && typeof openLLMSettings!=='function'){
      var _t=document.getElementById('toast');
-     if(_t){ _t.textContent='⚠️ LLM 模块未加载(版本 '+APP_VERSION+')：很可能是浏览器/代理缓存了旧版 app.html。请硬刷新 Ctrl+Shift+R，或访问 https://112.74.40.8/app.html?v='+APP_VERSION; _t.style.background='#f59e0b'; _t.classList.add('show'); setTimeout(function(){_t.classList.remove('show');_t.style.background='';},15000); }
+     if(_t){ _t.textContent='⚠️ LLM module not loaded (version '+APP_VERSION+'): your browser or proxy is probably caching an old app.html. Please hard-refresh Ctrl+Shift+R, or open https://112.74.40.8/app.html?v='+APP_VERSION; _t.style.background='#f59e0b'; _t.classList.add('show'); setTimeout(function(){_t.classList.remove('show');_t.style.background='';},15000); }
    }
  }catch(_){}
  // 儿童互动组件：可勾选任务 / 提问卡 / 决策选择 / 完成进度 / 连续打卡 / 撒彩带

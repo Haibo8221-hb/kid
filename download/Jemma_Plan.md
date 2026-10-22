@@ -46,7 +46,7 @@
 
 ### 当前位置
 
-- **Jemma**: Year 8，Headington School
+- **Jemma**: Year 9，Headington School
 - **March 2026成绩单亮点**：
   - Mathematics: **Exceptional**（95%）🏆 — 🎯 理工种子
   - Chemistry: **Exceptional**（97%）🏆 — 🎯 科学潜力
@@ -97,7 +97,7 @@
 #### 英语学术写作（最高优先级，长期进行）
 ```
 这是中国学生在英国申请的最大短板
-Jemma现在Year 8开始，有充足时间系统性训练
+Jemma现在Year 9开始，有充足时间系统性训练
 目标：到Year 13时能够用英语流畅表达复杂学术思想
 
 校内资源：
@@ -565,7 +565,7 @@ UK 主攻线：
 ### 11.9 Year 8→13 德国路线关键里程碑
 
 ```
-Year 8 (现在):  German 保持 Above Standard，每周至少接触德语
+Year 9 (现在):  German 保持 Above Standard，每周至少接触德语
 Year 9:         Goethe B1 证书 / 德国暑期语言营体验
 Year 10:        Goethe B2 证书，开始了解德国大学
 Year 11:        德国大学开放日参观（暑假）+ 准备TestDaF

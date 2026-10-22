@@ -240,10 +240,10 @@ function updatePlannerLabel(child){
 
 function uploadStatusBadge(s){
   const map = {
-    queued:['排队中','var(--text2)'], rendering:['渲染中','var(--accent)'],
-    ocr:['识别中','var(--accent)'], extract:['抽取中','var(--accent)'],
-    done:['完成','var(--accent2)'], failed:['失败','var(--red)'],
+    queued:['Queued','var(--text2)'], rendering:['Rendering','var(--accent)'],
+    ocr:['Reading','var(--accent)'], extract:['Extracting','var(--accent)'],
+    done:['Done','var(--accent2)'], failed:['Failed','var(--red)'],
   };
-  const [txt,color] = map[s] || [s||'未知','var(--text2)'];
+  const [txt,color] = map[s] || [s||'Unknown','var(--text2)'];
   return `<span style="font-size:10px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.5px">${txt}</span>`;
 }

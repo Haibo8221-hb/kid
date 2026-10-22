@@ -2806,38 +2806,48 @@ def _goal_brief(g):
 def _ai_prompt(goals, stages, message):
     today = datetime.now().strftime('%Y-%m-%d')
     schema = (
-        '{"reply":"给用户看的中文回复（1-3 句，说明你做了什么）",'
-        '"operations":[{"op":"create_goal","goal":{...}},'
-        '{"op":"update_goal","target":"目标ID 或 目标名称关键词","patch":{"领域":"化学"}},'
-        '{"op":"delete_goal","target":"目标名称关键词"},'
-        '{"op":"create_stage","target":"目标名称关键词","stage":{"阶段名称":"第 1 段","阶段目标量":24}},'
-        '{"op":"create_checkin","target":"目标名称关键词","check":{"本次完成量":8}}]}'
+        '{"reply":"1-3 short English sentences telling the user what you did",'
+        '"operations":[{"op":"create_goal","goal":{"目标名称":"Daily English vocab","单位":"words","目标总量":300,"截止日期":"2026-11-30","每日上限":20,"领域":"fldEn","状态":"stDoing","休息日":"restSun"}},'
+        '{"op":"update_goal","target":"goal ID or name keyword","patch":{"每日上限":20}},'
+        '{"op":"create_stage","target":"goal name keyword","stage":{"阶段名称":"Stage 1","阶段目标量":24}},'
+        '{"op":"create_checkin","target":"goal name keyword","check":{"本次完成量":8}}]}'
     )
-    fields = '、'.join(_GOAL_WRITE_FIELDS)
-    return f"""你是「学习目标工作台」的改单助手。今天是 {today}。
+    return f"""You are the goal coach on a child's learning goal desk. Today is {today}.
 
-用户会提出关于学习目标的管理建议（例如：按学科重新分类、增加一个每日复习任务、把某个目标的截止日推迟、把每日上限调到 20）。
-你必须把建议翻译成对目标数据的具体修改。
+The user (a child) will ask for changes to their learning goals in natural language — for example: regroup goals by subject, add a daily review task, push a deadline back, raise a daily cap to 20.
+Translate the request into concrete changes to the goal data.
 
-当前目标列表（JSON）：
+Current goals (JSON):
 {json.dumps([_goal_brief(g) for g in goals], ensure_ascii=False)}
 
-当前阶段列表：
+Current stages:
 {json.dumps([{'id': s.get('阶段ID'), 'goal': s.get('目标ID'), 'name': s.get('阶段名称'), 'qty': s.get('阶段目标量')} for s in stages], ensure_ascii=False)}
 
-可写字段（只能用这些）：{fields}
-状态可选：待开始 / 进行中 / 受阻 / 已完成 / 已放弃；领域可选：英语 / 数学 / 阅读 / 编程 / 科学 / 运动 / 综合 / 其他
+Writable fields — these JSON keys are database identifiers and MUST be used exactly as written (never translate the keys):
+目标名称=name, 单位=unit, 目标总量=total amount, 已完成量=amount done, 开始日期=start date, 截止日期=deadline, 状态=status, 休息日=rest day, 休息额度=rest credits, 拆解计划=breakdown plan, 障碍预案=backup plan, 领域=subject, 模板=template, 颜色=color, 每日上限=daily cap, 今日建议量=today's suggested amount, 连续天数=streak days, 投入分钟=minutes invested, 节奏提示=rhythm hint, 收口方式=wrap-up style
 
-严格只输出一个 JSON 对象，不要任何解释文字、不要 Markdown 代码块：
+Select fields MUST use these stable ids (never the display words, never Chinese values):
+状态 status: stTodo(to start) / stDoing(in progress) / stBlock(blocked) / stDone(completed) / stGive(given up, archived)
+领域 subject: fldEn(English) / fldMa(Maths) / fldRead(Reading) / fldCode(Coding) / fldSci(Science) / fldSpo(Sport) / fldOther(Other)
+休息日 rest day: restMon / restTue / restWed / restThu / restFri / restSat / restSun / restNone
+模板 template: tplWord / tplBook / tplCourse / tplSport / tplDrill / tplCustom
+收口方式 wrap-up: endNone / endDone / endDelay / endDrop
+阶段状态 stage status: msTodo / msDoing / msDone
+打卡类型 check-in type: ckNormal / ckMakeup / ckRest
+当时状态 how it felt: stSmooth / stHard / stStuck
+
+Output ONLY one JSON object — no explanations, no Markdown code fences:
 {schema}
 
-规则：
-1. operations 里 op 只能是 create_goal / update_goal / delete_goal / create_stage / create_checkin
-2. update_goal 的 patch 只放要改的字段；没提到的一律不动
-3. 「按学科分类」这类建议 → 用 update_goal 给每个目标设置 patch.领域（英语/数学/阅读/编程/科学/运动/综合）
-4. 「增加每日复习任务」→ 用 create_goal（单位=条 或 次，总量按合理默认值，如 30，截止日建议今天+30 天）
-5. 不确定的不要改，reply 里说明需要澄清什么
-6. 所有日期用 YYYY-MM-DD 字符串"""
+Rules:
+1. operations[].op can only be create_goal / update_goal / create_stage / create_checkin. There is NO delete operation — never delete a goal; to retire one, use update_goal with 状态="stGive" (archive, keeps the data).
+2. update_goal: patch contains only the fields to change; leave everything else untouched.
+3. "Regroup by subject" → update_goal with patch.领域 for each goal.
+4. create_goal REQUIRES all of: 目标名称, 单位, 目标总量, 截止日期, 每日上限 (plus 领域 and 状态). If the user's message does not provide enough information to fill every required field, DO NOT create the goal — say in the reply what is still missing. Never invent defaults like "today+30 days" or "total/30".
+5. create_checkin: 本次完成量 must be greater than 0 and must not exceed that goal's 每日上限; if the user asks for more, log at most the daily cap and say so.
+6. If unsure, change nothing and explain in the reply what needs clarifying.
+7. All dates are YYYY-MM-DD strings.
+8. Reply in English, warm and brief — you are talking to a child. You help the child run THEIR goals: when creating a goal, base every value on what the child actually said, and list the values you chose so the child can correct them."""
 
 
 def _parse_ai_json(text):
@@ -2898,7 +2908,7 @@ def goals_ai():
     cfg = _load_config()
     if not cfg.get('api_key'):
         resp = jsonify({'ok': False, 'error': 'llm_not_configured',
-                        'reply': '服务器还没配置 LLM（平台侧栏「⚙️ LLM 设置」填好端点与 Key 后即可用）'})
+                        'reply': 'The server has no LLM configured yet — add the endpoint and key in Settings (LLM) on the site first.'})
         _set_cors(resp)
         return resp, 200
 
@@ -2914,22 +2924,23 @@ def goals_ai():
             text = r.json()['choices'][0]['message']['content'] if r.status_code == 200 else ''
             if r.status_code != 200:
                 resp = jsonify({'ok': False, 'error': f'llm_{r.status_code}',
-                                'reply': f'模型调用失败（{r.status_code}），请稍后再试'})
+                                'reply': f'Model call failed ({r.status_code}). Please try again later.'})
                 _set_cors(resp)
                 return resp, 200
     except Exception as e:
-        resp = jsonify({'ok': False, 'error': 'llm_network', 'reply': f'模型调用异常：{str(e)[:80]}'})
+        resp = jsonify({'ok': False, 'error': 'llm_network', 'reply': f'Model call error: {str(e)[:80]}'})
         _set_cors(resp)
         return resp, 200
 
     plan = _parse_ai_json(text)
     if not isinstance(plan, dict):
         resp = jsonify({'ok': False, 'error': 'bad_llm_output',
-                        'reply': '模型没有返回可解析的指令，本次没有修改任何数据。可以换个说法再试一次。'})
+                        'reply': 'The model did not return instructions I could read, so nothing was changed. Try saying it another way.'})
         _set_cors(resp)
         return resp, 200
 
     applied = []
+    notes = []
 
     def _mk(gid=None):
         return {'record_id': uuid.uuid4().hex[:12], '目标ID': gid or ('g-' + uuid.uuid4().hex[:8])}
@@ -2942,28 +2953,57 @@ def goals_ai():
             continue
         try:
             if kind == 'create_goal':
+                # 严格策略（红队 P0-2）：必填字段缺失即拒绝创建，禁用一切武断兜底值——
+                # 旧代码的 today+30 / 总量÷30 / 上限=总量 会把 AI 即兴值当成孩子自己的目标落库
                 gsrc = op.get('goal') or {}
+                _missing = []
+                _name = str(gsrc.get('目标名称') or gsrc.get('name') or '').strip()
+                _unit = str(gsrc.get('单位') or gsrc.get('unit') or '').strip()
+                try:
+                    _total = float(gsrc.get('目标总量') if gsrc.get('目标总量') is not None else gsrc.get('total'))
+                except (TypeError, ValueError):
+                    _total = 0
+                _deadline = str(gsrc.get('截止日期') or '').strip()
+                try:
+                    _cap = float(gsrc.get('每日上限'))
+                except (TypeError, ValueError):
+                    _cap = 0
+                if not _name:
+                    _missing.append('name')
+                if not _unit:
+                    _missing.append('unit')
+                if _total <= 0:
+                    _missing.append('total amount')
+                if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', _deadline) or _deadline < datetime.now().strftime('%Y-%m-%d'):
+                    _missing.append('deadline (YYYY-MM-DD, not in the past)')
+                if _cap <= 0:
+                    _missing.append('daily cap')
+                if _missing:
+                    notes.append('One goal was NOT created — still missing: ' + ', '.join(_missing) + '.')
+                    continue
                 g = _mk(gsrc.get('目标ID'))
-                g['目标名称'] = str(gsrc.get('目标名称') or gsrc.get('name') or '新目标')[:60]
-                g['单位'] = str(gsrc.get('单位') or gsrc.get('unit') or '次')[:12]
-                g['目标总量'] = float(gsrc.get('目标总量') or gsrc.get('total') or 1)
+                g['目标名称'] = _name[:60]
+                g['单位'] = _unit[:12]
+                g['目标总量'] = _total
                 g['已完成量'] = float(gsrc.get('已完成量') or 0)
                 g['开始日期'] = str(gsrc.get('开始日期') or datetime.now().strftime('%Y-%m-%d'))[:10]
-                g['截止日期'] = str(gsrc.get('截止日期') or (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d'))[:10]
-                g['状态'] = gsrc.get('状态') or '进行中'
-                g['休息日'] = gsrc.get('休息日') or '周日'
+                g['截止日期'] = _deadline
+                g['状态'] = gsrc.get('状态') or 'stDoing'
+                g['休息日'] = gsrc.get('休息日') or 'restSun'
                 g['休息额度'] = int(float(gsrc.get('休息额度') or 1))
-                g['领域'] = gsrc.get('领域') or '其他'
-                g['模板'] = gsrc.get('模板') or '自定义'
-                g['每日上限'] = float(gsrc.get('每日上限') or g['目标总量'])
-                g['今日建议量'] = float(gsrc.get('今日建议量') or max(1, round(g['目标总量'] / 30)))
+                g['领域'] = gsrc.get('领域') or 'fldOther'
+                g['模板'] = gsrc.get('模板') or 'tplCustom'
+                g['每日上限'] = _cap
+                # 今日建议量：LLM 未给时按「剩余天数均摊且不超每日上限」推导，而非总量÷30
+                _days = max(1, (datetime.strptime(_deadline, '%Y-%m-%d') - datetime.now()).days + 1)
+                g['今日建议量'] = float(gsrc.get('今日建议量') or min(_cap, max(1, round(_total / _days))))
                 g['连续天数'] = 0
                 g['投入分钟'] = 0
                 g['拆解计划'] = str(gsrc.get('拆解计划') or '')[:500]
                 g['障碍预案'] = str(gsrc.get('障碍预案') or '')[:500]
                 g['颜色'] = gsrc.get('颜色') or '#5b6cff'
                 g['节奏提示'] = ''
-                g['收口方式'] = '无'
+                g['收口方式'] = gsrc.get('收口方式') or 'endNone'
                 g['创建时间'] = datetime.now().isoformat()
                 g['最近更新'] = datetime.now().isoformat()
                 g['child'] = child
@@ -2985,13 +3025,14 @@ def goals_ai():
                     applied.append({'op': 'update_goal', 'name': g.get('目标名称'), 'fields': changed})
 
             elif kind == 'delete_goal':
+                # 红队 P0-2：AI 不得硬删除目标——一律转为归档（状态 stGive），数据保留可恢复
                 g = _match_goal(goals, op.get('target') or op.get('目标名称'))
                 if not g:
                     continue
                 gid = g.get('目标ID')
-                goals[:] = [x for x in goals if x.get('目标ID') != gid]
-                stages[:] = [s for s in stages if s.get('目标ID') != gid]
-                applied.append({'op': 'delete_goal', 'name': g.get('目标名称')})
+                g['状态'] = 'stGive'
+                g['最近更新'] = datetime.now().isoformat()
+                applied.append({'op': 'archive_goal', 'name': g.get('目标名称')})
 
             elif kind == 'create_stage':
                 g = _match_goal(goals, op.get('target') or op.get('目标名称'))
@@ -3016,7 +3057,18 @@ def goals_ai():
                 if not g:
                     continue
                 c = op.get('check') or {}
-                amt = float(c.get('本次完成量') or 0)
+                try:
+                    amt = float(c.get('本次完成量') or 0)
+                except (TypeError, ValueError):
+                    amt = 0
+                if amt <= 0:
+                    notes.append('One check-in was NOT logged — the amount must be greater than 0.')
+                    continue
+                cap = float(g.get('每日上限') or 0)
+                if cap > 0 and amt > cap:
+                    notes.append('Check-in for "' + str(g.get('目标名称') or '') + '" was capped at the daily limit of '
+                                 + str(int(cap)) + '.')
+                    amt = cap
                 new_done = float(g.get('已完成量') or 0) + amt
                 total = float(g.get('目标总量') or 0)
                 if total > 0:
@@ -3031,14 +3083,14 @@ def goals_ai():
                     '本次完成量': amt,
                     '累计完成量': new_done,
                     '用时分钟': float(c.get('用时分钟') or 0),
-                    '打卡类型': '正常',
-                    '当时状态': '顺利',
-                    '备注': 'AI 助手代记',
+                    '打卡类型': c.get('打卡类型') or 'ckNormal',
+                    '当时状态': c.get('当时状态') or 'stSmooth',
+                    '备注': 'AI helper logged',
                     '提交时间': datetime.now().isoformat(),
                 })
                 g['已完成量'] = new_done
                 g['最近更新'] = datetime.now().isoformat()
-                applied.append({'op': 'create_checkin', 'name': g.get('目标名称'), 'amount': amt})
+                applied.append({'op': 'create_checkin', 'name': g.get('目标名称'), 'amount': amt, 'by_ai': True})
         except Exception:
             continue
 
@@ -3054,7 +3106,11 @@ def goals_ai():
         data['stages'] = others['stages'] + stages
         data['checks'] = others['checks'] + checks
         _write_goals(data)
-    resp = jsonify({'ok': True, 'reply': str(plan.get('reply') or 'Done.')[:800],
+    reply = str(plan.get('reply') or 'Done.')[:800]
+    if notes:
+        # 服务端跳过的操作必须如实告知，不能只转述模型的 reply
+        reply = (reply + ' (' + ' '.join(notes) + ')')[:800]
+    resp = jsonify({'ok': True, 'reply': reply,
                     'applied': applied, 'goals': len(goals)})
     _set_cors(resp)
     return resp

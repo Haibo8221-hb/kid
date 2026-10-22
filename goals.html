@@ -603,7 +603,7 @@
       .catch(function(e){ enqueue({op:'add',table:'goals',properties:properties}); toast('Network unavailable — saved locally, will sync later'); return null; });
   }
   function addCheckRecord(properties,goalPatch){
-    if(SRV.ready){ return SRV_API.checkin(properties,goalPatch).then(function(r){ toast('已打卡 ✓'); return r; }); }
+    if(SRV.ready){ return SRV_API.checkin(properties,goalPatch).then(function(r){ toast('Logged ✓'); return r; }); }
     if(DEMO){ var row={record_id:'demo-'+Date.now()}; for(var k in properties) row[k]=properties[k]; DEMO.checks.push(row); demoSave(); toast('Logged ✓ (demo mode)'); return Promise.resolve({id:row.record_id}); }
     if(!db) return Promise.resolve(null);
     return db.addRecord({databaseId:'1e8NVpAwolZUlwpRmrui3v',properties:properties})
@@ -674,7 +674,7 @@
     document.title='Goal Desk · '+OWNER_LABEL;
     var hd=document.getElementById('deskOwner'); if(hd) hd.textContent=OWNER_LABEL;
     var d=new Date();
-    $('#todayDate').textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 · '+wkName(ymd(d));
+    $('#todayDate').textContent=wkName(ymd(d))+' · '+d.getDate()+' '+['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()]+' '+d.getFullYear();
     // 连接状态徽标：一眼看出页面是否已接入数据表
     var badge=$('#connBadge');
     if(badge){
@@ -699,7 +699,7 @@
     bind($('#kpiDone'),DB_CHECKS); $('#kpiDone').textContent=doneToday;
     bind($('#kpiTotal'),DB_GOALS); $('#kpiTotal').textContent=totalToday;
     bind($('#kpiMin'),DB_CHECKS); $('#kpiMin').textContent=minToday;
-    $('#todaySummary').textContent= totalToday? ('还剩 '+(totalToday-doneToday)+' goals have no log today') : 'No goals in progress yet';
+    $('#todaySummary').textContent= totalToday? ((totalToday-doneToday)+' goals still need a log today') : 'No goals in progress yet';
   }
   function hintCard(kind,icon,title,body,actions){
     var h=el('div','hint '+kind);
@@ -720,8 +720,8 @@
     act.forEach(function(g){
       var t=today();
       if(isRestDay(g,t)){
-        zone.appendChild(hintCard('good','☕','Today is your 休息日','Rest is part of the plan — 连续天数会保住，也可以只做一点点。',[
-          {label:'今天休息',act:'rest',id:g['目标ID']},{label:'Still do a little',act:'adjust',id:g['目标ID']}]));
+        zone.appendChild(hintCard('good','☕','Today is your rest day','Rest is part of the plan — your streak is safe, and doing just a little counts too.',[
+          {label:'Rest today',act:'rest',id:g['目标ID']},{label:'Still do a little',act:'adjust',id:g['目标ID']}]));
       }
       var miss=missedDays(g);
       if(miss===1){
@@ -731,11 +731,11 @@
         zone.appendChild(hintCard('warn','🔄','Two days without a log','Your daily amount was reduced automatically — getting back on rhythm matters more.',[
           {label:'Continue today',act:'quick',id:g['目标ID']},{label:'Re-plan',act:'replan',id:g['目标ID']}]));
       }else if(miss>=3){
-        zone.appendChild(hintCard('danger','🧭','断了 '+miss+' days — re-plan',"It's not failure, the plan just needs to change. Choose one: cut the total, push the deadline, or rest two days a week.",[
+        zone.appendChild(hintCard('danger','🧭',miss+' days missed — let us re-plan',"It's not failure, the plan just needs to change. Choose one: cut the total, push the deadline, or rest two days a week.",[
           {label:'Cut the total',act:'shrink',id:g['目标ID']},{label:'Push the deadline',act:'delay',id:g['目标ID']},{label:'rest 2 days a week',act:'restmore',id:g['目标ID']}]));
       }
       if(isOverdue(g)){
-        zone.appendChild(hintCard('warn','⏰','Deadline reached — nearly there','已经完成 '+done(g)+'/'+total(g)+'. You can close it at the actual amount, postpone, or give up (archiving is not failure).',[
+        zone.appendChild(hintCard('warn','⏰','Deadline reached — nearly there','Done '+done(g)+'/'+total(g)+'. You can close it at the actual amount, postpone, or give up (archiving is not failure).',[
           {label:'Close at actual amount',act:'closeDone',id:g['目标ID']},{label:'Push back a week',act:'delay',id:g['目标ID']},{label:'Give up',act:'closeDrop',id:g['目标ID']}]));
       }
       if(goalStatus(g)==='Blocked'&&contingency(g)){
@@ -785,9 +785,9 @@
       var doneToday=map[today()];
       sg.appendChild(el('span',null,'All done today '));
       var bb=el('b',null,(num(doneToday['本次完成量'])+' '+unit(g))); bind(bb,DB_CHECKS); sg.appendChild(bb);
-      if(doneToday['用时分钟']) sg.appendChild(el('span',null,'· 用时 '+doneToday['用时分钟']+' 分钟'));
+      if(doneToday['用时分钟']) sg.appendChild(el('span',null,'· '+doneToday['用时分钟']+' min'));
     }else{
-      sg.appendChild(el('span',null,'今天建议 '));
+      sg.appendChild(el('span',null,"Today's suggestion: "));
       var b2=el('b',null,'+'+sug+' '+unit(g)); bind(b2,DB_GOALS); sg.appendChild(b2);
     }
     c.appendChild(sg);
@@ -805,7 +805,7 @@
       var adj=el('button','btn','Adjust'); adj.type='button'; adj.setAttribute('data-act','adjust'); adj.setAttribute('data-id',g['目标ID']);
       act.appendChild(adj);
     }
-    var rest=el('button','btn ghost','今天休息'); rest.type='button'; rest.setAttribute('data-act','rest'); rest.setAttribute('data-id',g['目标ID']);
+    var rest=el('button','btn ghost','Rest today'); rest.type='button'; rest.setAttribute('data-act','rest'); rest.setAttribute('data-id',g['目标ID']);
     act.appendChild(rest);
     c.appendChild(act);
 
@@ -826,7 +826,7 @@
     var stg=stageList(g['目标ID']);
     if(stg.length){
       var line=el('div','tagline');
-      line.textContent='Stage: '+stg.map(function(s){ return s['阶段名称']+'（'+num(s['阶段目标量'])+' '+unit(g)+'）'; }).join(' → ');
+      line.textContent='Stage: '+stg.map(function(s){ return s['阶段名称']+' ('+num(s['阶段目标量'])+' '+unit(g)+')'; }).join(' → ');
       c.appendChild(line);
     }
     return c;
@@ -855,7 +855,7 @@
       items.forEach(function(g){
         var card=el('div','bcard');
         var nm=el('b',null,gname(g)); bind(nm,DB_GOALS); card.appendChild(nm);
-        var m=el('div','m'); m.textContent=done(g)+'/'+total(g)+' '+unit(g)+' · 剩 '+remain(g);
+        var m=el('div','m'); m.textContent=done(g)+'/'+total(g)+' '+unit(g)+' · '+remain(g)+' left';
         card.appendChild(m);
         var mv=el('div','mv');
         var prev=el('button',null,'◀'), next=el('button',null,'▶');
@@ -872,14 +872,14 @@
   }
   function renderProgress(){
     var box=$('#progressList'); box.innerHTML='';
-    if(!STATE.goals.length){ box.appendChild(el('div','card empty','还没有目标')); return; }
+    if(!STATE.goals.length){ box.appendChild(el('div','card empty','No goals yet')); return; }
     STATE.goals.forEach(function(g){
       var c=el('div','progcard');
       var head=el('div','gc-head');
       head.appendChild(el('span','gc-icon',iconOf(g)));
       var t=el('div','gc-title');
       var b=el('b',null,gname(g)); bind(b,DB_GOALS); t.appendChild(b);
-      t.appendChild(el('span','gc-meta',goalStatus(g)+' · '+(g['截止日期']?('截止 '+dateKey(g['截止日期'])):'无截止日')));
+      t.appendChild(el('span','gc-meta',goalStatus(g)+' · '+(g['截止日期']?('ends '+dateKey(g['截止日期'])):'no deadline')));
       head.appendChild(t);
       c.appendChild(head);
       var bar=el('div','bar'); var fill=el('i'); fill.style.width=(total(g)>0?Math.min(100,Math.round(done(g)/total(g)*100)):0)+'%'; bar.appendChild(fill); c.appendChild(bar);
@@ -889,9 +889,9 @@
         var vv=el('div','v',String(v)); bind(vv,dbId||DB_GOALS); d.appendChild(vv); grid.appendChild(d);
       }
       stat('Done / Total', done(g)+' / '+total(g), DB_GOALS);
-      stat('还剩', remain(g)+' '+unit(g), DB_GOALS);
-      stat('连续天数', streakOf(g)+' days', DB_CHECKS);
-      stat('Total time', num(g['投入分钟'])+' 分钟', DB_CHECKS);
+      stat('Left', remain(g)+' '+unit(g), DB_GOALS);
+      stat('Streak', streakOf(g)+' days', DB_CHECKS);
+      stat('Total time', num(g['投入分钟'])+' min', DB_CHECKS);
       var real=realDaily(g);
       stat('actual daily avg', real+' '+unit(g), DB_CHECKS);
       stat('suggested daily avg', suggest(g)+' '+unit(g), DB_GOALS);
@@ -928,7 +928,7 @@
       var i=el('i'); i.style.height=Math.max(2,Math.round(x.v/max*40))+'px';
       if(x.v>0) i.className='has';
       else if(x.r) i.className='rest';
-      i.title=x.d+(x.v?(' · '+x.v):(x.r?' · 休息':''));
+      i.title=x.d+(x.v?(' · '+x.v):(x.r?' · rest':''));
       sp.appendChild(i);
     });
     return sp;
@@ -942,17 +942,17 @@
       head.appendChild(el('span','gc-icon',iconOf(g)));
       var t=el('div','gc-title');
       var b=el('b',null,gname(g)); bind(b,DB_GOALS); t.appendChild(b);
-      t.appendChild(el('span','gc-meta',goalStatus(g)+' · '+done(g)+'/'+total(g)+' '+unit(g)+' · 剩 '+remain(g)));
+      t.appendChild(el('span','gc-meta',goalStatus(g)+' · '+done(g)+'/'+total(g)+' '+unit(g)+' · '+remain(g)+' left'));
       head.appendChild(t);
       c.appendChild(head);
       var bar=el('div','bar'); var fill=el('i'); fill.style.width=(total(g)>0?Math.min(100,Math.round(done(g)/total(g)*100)):0)+'%'; bar.appendChild(fill); c.appendChild(bar);
       var info=el('div','planbox');
-      info.appendChild(el('div',null,'开始 '+(dateKey(g['开始日期'])||'—')+' · 截止 '+(dateKey(g['截止日期'])||'—')+' · 休息日 '+(restWeekday(g)||'None')+'（每周 '+restQuota(g)+' 天）'));
+      info.appendChild(el('div',null,'Starts '+(dateKey(g['开始日期'])||'—')+' · ends '+(dateKey(g['截止日期'])||'—')+' · rest day '+(restWeekday(g)||'None')+' ('+restQuota(g)+' a week)'));
       if(planText(g)) info.appendChild(el('div',null,'📝 Breakdown: '+planText(g)));
       if(contingency(g)) info.appendChild(el('div',null,'🧩 Fallback: '+contingency(g)));
       c.appendChild(info);
       var row=el('div','grow');
-      [['edit','编辑'],['stages','See stages'],['closeDone','Close at actual amount'],['delay','Push back a week'],['closeDrop','Give up']].forEach(function(x){
+      [['edit','Edit'],['stages','See stages'],['closeDone','Close at actual amount'],['delay','Push back a week'],['closeDrop','Give up']].forEach(function(x){
         var btn=el('button','btn sm',x[1]); btn.type='button';
         btn.setAttribute('data-act',x[0]); btn.setAttribute('data-id',g['目标ID']);
         row.appendChild(btn);
@@ -1063,7 +1063,7 @@
   function doShrink(g){
     var nt=Math.max(done(g)+1, Math.ceil(total(g)*0.8));
     updateGoalRecord(goalRecId(g),{'目标总量':nt,'节奏提示':'','最近更新':new Date().toISOString()}).then(function(){
-      g['目标总量']=nt; g['节奏提示']=''; render(); toast('总量改成 '+nt+' '+unit(g));
+      g['目标总量']=nt; g['节奏提示']=''; render(); toast('Total changed to '+nt+' '+unit(g));
     });
   }
   function doDelay(g){
@@ -1130,7 +1130,7 @@
     for(var i=0;i<14;i++){
       var d=addDays(today(),-i); var o=el('option',null,d+'（'+wkName(d)+'）'); o.value=d; if(i===0&&!makeup)o.selected=true; ds.appendChild(o);
     }
-    box.appendChild(frow('Date (you can backfill up to 14 days)',ds,'补记不会破坏连续天数'));
+    box.appendChild(frow('Date (you can backfill up to 14 days)',ds,'Backfilling does not break your streak'));
     var ty=selectBox(DB_CHECKS,'打卡类型',optId(DB_CHECKS,'打卡类型',makeup?'Backfill':'Normal'));
     box.appendChild(frow('Type',ty));
     var st=selectBox(DB_CHECKS,'当时状态',optId(DB_CHECKS,'当时状态','Smooth'));
@@ -1145,7 +1145,7 @@
       recordCheckIn(g,a,min.value,d,type,optText(DB_CHECKS,'当时状态',st.value)||'Smooth',nt.value);
       clearCache('sheet');
       return true;
-    },'打卡');
+    },'Log it');
   }
   /* 新建目标向导 */
   var TPL=[{e:'🔤',t:'Learn words',unit:'words',total:2000,icon:'🔤'},{e:'📖',t:'Read a book',unit:'pages',total:440,icon:'📖'},{e:'🎬',t:'Course',unit:'lessons',total:40,icon:'🎬'},{e:'🏃',t:'Sport',unit:'min',total:600,icon:'🏃'},{e:'✏️',t:'Drill',unit:'questions',total:200,icon:'✏️'},{e:'🎯',t:'Custom',unit:'',total:0,icon:'🎯'}];
@@ -1175,7 +1175,7 @@
     var f2=el('div','f2');
     var un=input('unit',d.unit,'text','words / pages / chapters / min');
     var tt=input('total',d.total,'number','2000');
-    f2.appendChild(frow('单位',un));
+    f2.appendChild(frow('Unit',un));
     f2.appendChild(frow('Total amount',tt));
     body.appendChild(frow('③ How it counts as done',f2));
 
@@ -1213,7 +1213,7 @@
     f4.appendChild(frow('Subject',fd));
     f4.appendChild(frow('Weekly rest day',rd));
     f4.appendChild(frow('Rest days per week',rq));
-    f4.appendChild(frow('开始日期',stt));
+    f4.appendChild(frow('Start date',stt));
     box.appendChild(f4);
     box.appendChild(frow('My breakdown (optional — you can add it later)',textareaBox('plan',d.plan,'e.g. 20 a day: learn 10 new, then review 10 old',2)));
     box.appendChild(frow('If I get stuck (optional)',textareaBox('contingency',d.contingency,'e.g. want to scroll in bed → put the book on the pillow and read 2 pages',2)));
@@ -1286,10 +1286,10 @@
     var stgAuto=d.stages.filter(function(x){ return x.name; });
     if(!stgAuto.length&&d.total){
       var segN=Math.min(4,Math.max(2,Math.round(d.total/100)));
-      for(var si=0;si<segN;si++) stgAuto.push({name:'第 '+(si+1)+' 段',qty:Math.round(d.total/segN)});
+      for(var si=0;si<segN;si++) stgAuto.push({name:'Stage '+(si+1),qty:Math.round(d.total/segN)});
     }
     var stagePayload=stgAuto.map(function(x,i){
-      return {'阶段ID':uid(),'目标ID':gid,'阶段名称':x.name||('第 '+(i+1)+' 段'),'阶段目标量':x.qty||0,
+      return {'阶段ID':uid(),'目标ID':gid,'阶段名称':x.name||('Stage '+(i+1)),'阶段目标量':x.qty||0,
               '阶段截止日':stageDeadline(d,i,Math.max(1,stgAuto.length)),'阶段状态':i===0?'In progress':'Not started','阶段顺序':i+1};
     });
     addGoalRecord(props,SRV.ready?stagePayload:null).then(function(r){
@@ -1303,13 +1303,13 @@
       if(SRV.ready) return render();
       stagePayload.forEach(function(s,i){
         addStageRecord({
-          '阶段ID':uid(),'目标ID':gid,'阶段名称':s.name||('第 '+(i+1)+' 段'),
+          '阶段ID':uid(),'目标ID':gid,'阶段名称':s.name||('Stage '+(i+1)),
           '阶段目标量':s.qty||0,
           '阶段截止日':new Date(stageDeadline(d,i,stagePayload.length)+'T00:00:00').toISOString(),
           '阶段状态':optId(DB_STAGES,'阶段状态',i===0?'In progress':'Not started'),
           '阶段顺序':i+1
         }).then(function(r2){
-          STATE.stages.push({'阶段ID':uid(),'目标ID':gid,'阶段名称':s.name||('第 '+(i+1)+' 段'),'阶段目标量':s.qty||0,'阶段截止日':d.end,'阶段状态':i===0?'In progress':'Not started','阶段顺序':i+1});
+          STATE.stages.push({'阶段ID':uid(),'目标ID':gid,'阶段名称':s.name||('Stage '+(i+1)),'阶段目标量':s.qty||0,'阶段截止日':d.end,'阶段状态':i===0?'In progress':'Not started','阶段顺序':i+1});
         });
       });
       render(); toast('Goal created — start with stage 1!');
@@ -1318,14 +1318,14 @@
   /* 编辑目标 */
   function openEdit(g){
     var box=el('div');
-    var nm=input('name',gname(g),'text','目标名称');
-    box.appendChild(frow('目标名称',nm));
-    var tot=input('total',total(g),'number','总量');
-    box.appendChild(frow('总量',tot));
+    var nm=input('name',gname(g),'text','Goal name');
+    box.appendChild(frow('Name',nm));
+    var tot=input('total',total(g),'number','Total');
+    box.appendChild(frow('Total',tot));
     var end=input('end',dateKey(g['截止日期']),'date');
-    box.appendChild(frow('截止日期',end));
+    box.appendChild(frow('Deadline',end));
     var cap=input('dailyCap',num(g['每日上限']),'number','blank = no limit');
-    box.appendChild(frow('每日上限',cap));
+    box.appendChild(frow('Daily cap',cap));
     var plan=textareaBox('plan',planText(g),'e.g. 20 a day: learn 10 new, then review 10 old',4);
     box.appendChild(frow('My plan (multi-line)',plan));
     var cg=textareaBox('contingency',contingency(g),'e.g. want to scroll in bed → put the book on the pillow and read 2 pages',4);
@@ -1333,9 +1333,9 @@
     var rd=selectBox(DB_GOALS,'休息日',g['休息日']);
     box.appendChild(frow('Weekly rest day',rd));
     var rq=input('restQuota',restQuota(g),'number','Rest days per week');
-    box.appendChild(frow('休息额度',rq));
+    box.appendChild(frow('Rest credits',rq));
     var stt=selectBox(DB_GOALS,'状态',g['状态']);
-    box.appendChild(frow('状态',stt));
+    box.appendChild(frow('Status',stt));
     openSheet('Edit: '+gname(g),'Changes apply immediately.',box,function(){
       updateGoalRecord(goalRecId(g),{
         '目标名称':nm.value,'目标总量':num(tot.value),
@@ -1456,17 +1456,20 @@
     if(applyText){ var ap=el('div','aiapply','Applied: '+applyText); b.appendChild(ap); }
     log.appendChild(b); log.scrollTop=log.scrollHeight;
   }
+  // DB 字段键 → 英文显示名（AI 回显里不把中文键名甩给孩子）
+  var FIELD_LABEL={'目标名称':'name','单位':'unit','目标总量':'total','已完成量':'done','开始日期':'start date','截止日期':'deadline','状态':'status','休息日':'rest day','休息额度':'rest credits','拆解计划':'breakdown plan','障碍预案':'backup plan','领域':'subject','模板':'template','颜色':'color','每日上限':'daily cap','今日建议量':"today's amount",'连续天数':'streak','投入分钟':'minutes','节奏提示':'rhythm','收口方式':'wrap-up'};
   function aiDescribe(applied){
     if(!applied||!applied.length) return '';
     var parts=applied.map(function(a){
-      if(a.op==='create_goal') return 'Added goal "'+(a.name||'')+'」';
-      if(a.op==='update_goal') return 'Changed "'+(a.name||'')+'」的 '+(a.fields||[]).join('、');
-      if(a.op==='delete_goal') return 'Deleted "'+(a.name||'')+'」';
-      if(a.op==='create_stage') return '给「'+(a.name||'')+'" — added stage "'+(a.stage||'')+'」';
-      if(a.op==='create_checkin') return '给「'+(a.name||'')+'" — logged '+(a.amount||0);
+      var nm=a.name||'';
+      if(a.op==='create_goal') return 'Added goal "'+nm+'"';
+      if(a.op==='update_goal') return 'Changed "'+nm+'": '+((a.fields||[]).map(function(f){return FIELD_LABEL[f]||f;}).join(', '));
+      if(a.op==='delete_goal'||a.op==='archive_goal') return 'Archived "'+nm+'" (kept, not deleted)';
+      if(a.op==='create_stage') return 'Added stage "'+(a.stage||'')+'" to "'+nm+'"';
+      if(a.op==='create_checkin') return (a.by_ai?'AI helper logged':'Logged')+' "'+nm+'": +'+(a.amount||0);
       return a.op;
     });
-    return parts.join('；');
+    return parts.join('; ');
   }
   function aiSend(){
     var box=$('#aiInput'); var msg=(box.value||'').trim();
@@ -1497,7 +1500,7 @@
       .catch(function(e){
         done();
         var m=(e&&e.message)?e.message:'Request failed';
-        aiLog(m+(/登录/.test(m)?' — sign in on the main site, come back, then press Send again.':''),'ai');
+        aiLog(m+(/sign in|log in/i.test(m)?' — sign in on the main site, come back, then press Send again.':''),'ai');
       });
   }
 
@@ -1712,7 +1715,7 @@
     goal({'目标名称':'Intro to Python course','模板':'tplCourse','领域':'fldCode','单位':'lessons','目标总量':40,'_done':18,'状态':'stDoing','休息日':'restNone','休息额度':0,'拆解计划':'One lesson + 5 min practice each evening','障碍预案':'When stuck, go back to the previous lesson','颜色':'#10b981','今日建议量':2,'连续天数':3,'投入分钟':150,'节奏提示':'','收口方式':'endNone','每日上限':2,'_s':demoDate(-35),'_e':demoDate(14)});
     goal({'目标名称':'Finish "The Real Economy"','模板':'tplBook','领域':'fldRead','单位':'chapters','目标总量':11,'_done':5,'状态':'stDoing','休息日':'restSun','休息额度':1,'拆解计划':'1 chapter a day','障碍预案':'Reads slowly → 2 chapters a week still works','颜色':'#f59e0b','今日建议量':1,'连续天数':2,'投入分钟':60,'节奏提示':'','收口方式':'endNone','每日上限':2,'_s':demoDate(-10),'_e':demoDate(30)});
     goal({'目标名称':'Learn 1000 English phrases','模板':'tplWord','领域':'fldEn','单位':'words','目标总量':1000,'_done':0,'状态':'stTodo','休息日':'restSun','休息额度':1,'拆解计划':'Start after the words are done','障碍预案':'','颜色':'#06b6d4','今日建议量':0,'连续天数':0,'投入分钟':0,'节奏提示':'','收口方式':'endNone','每日上限':0,'_s':demoDate(21),'_e':demoDate(72)});
-    goal({'目标名称':'Finish "From the Soil"','模板':'tplBook','领域':'fldRead','单位':'pages','目标总量':180,'_done':180,'状态':'stDone','休息日':'restNone','休息额度':0,'拆解计划':'暑假读完','障碍预案':'','颜色':'#64748b','今日建议量':0,'连续天数':0,'投入分钟':240,'节奏提示':'','收口方式':'endDone','每日上限':0,'_s':demoDate(-80),'_e':demoDate(-20)});
+    goal({'目标名称':'Finish "From the Soil"','模板':'tplBook','领域':'fldRead','单位':'pages','目标总量':180,'_done':180,'状态':'stDone','休息日':'restNone','休息额度':0,'拆解计划':'Finish over the summer','障碍预案':'','颜色':'#64748b','今日建议量':0,'连续天数':0,'投入分钟':240,'节奏提示':'','收口方式':'endDone','每日上限':0,'_s':demoDate(-80),'_e':demoDate(-20)});
     function ck(gid,d,amt,cum,mins){
       C.push({'record_id':'demo-c-'+(C.length+1),'记录ID':'c-'+(C.length+1),'目标ID':gid,'打卡日期':demoDate(d),'本次完成量':amt,'累计完成量':cum,'用时分钟':mins,'打卡类型':'ckNormal','当时状态':amt>=20?'stSmooth':'stHard','Note':'','Submitted at':demoDate(d)+'T21:00:00'});
     }
@@ -1724,11 +1727,11 @@
     function st(gid,name,qty,order,state){
       S.push({'record_id':'demo-s-'+(S.length+1),'阶段ID':'s-'+(S.length+1),'目标ID':gid,'阶段名称':name,'阶段目标量':qty,'阶段截止日':demoDate(5+order*7),'阶段状态':state,'阶段顺序':order});
     }
-    st('g-1','第 1 段 · 500 个',500,1,'msDone'); st('g-1','第 2 段 · 600 个',600,2,'msDone');
-    st('g-1','第 3 段 · 500 个',500,3,'msDoing'); st('g-1','第 4 段 · 900 个',900,4,'msTodo');
-    st('g-2','第 1 段 · 150 页',150,1,'msDone'); st('g-2','第 2 段 · 150 页',150,2,'msDoing'); st('g-2','第 3 段 · 140 页',140,3,'msTodo');
-    st('g-3','第 1 段 · 10 节',10,1,'msDone'); st('g-3','第 2 段 · 10 节',10,2,'msDone'); st('g-3','第 3 段 · 10 节',10,3,'msDoing'); st('g-3','第 4 段 · 10 节',10,4,'msTodo');
-    st('g-4','第 1 段 · 6 章',6,1,'msDoing'); st('g-4','第 2 段 · 5 章',5,2,'msTodo');
+    st('g-1','Stage 1 · 500 words',500,1,'msDone'); st('g-1','Stage 2 · 600 words',600,2,'msDone');
+    st('g-1','Stage 3 · 500 words',500,3,'msDoing'); st('g-1','Stage 4 · 900 words',900,4,'msTodo');
+    st('g-2','Stage 1 · 150 pages',150,1,'msDone'); st('g-2','Stage 2 · 150 pages',150,2,'msDoing'); st('g-2','Stage 3 · 140 pages',140,3,'msTodo');
+    st('g-3','Stage 1 · 10 lessons',10,1,'msDone'); st('g-3','Stage 2 · 10 lessons',10,2,'msDone'); st('g-3','Stage 3 · 10 lessons',10,3,'msDoing'); st('g-3','Stage 4 · 10 lessons',10,4,'msTodo');
+    st('g-4','Stage 1 · 6 chapters',6,1,'msDoing'); st('g-4','Stage 2 · 5 chapters',5,2,'msTodo');
     st('g-6','180 pages total',180,1,'msDone');
     return {goals:G,checks:C,stages:S};
   }

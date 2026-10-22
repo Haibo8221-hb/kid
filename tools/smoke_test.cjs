@@ -305,13 +305,13 @@ function runPage(page) {
             if (allBack) pass.push('决定卡：重新 init（模拟 F5 刷新）后已选项全部恢复');
             else fail.push('决定卡：重新 init 后已选项丢失（刷新不持久）：' + lost.join('、'));
             var dstamp = dcard.querySelector('.kid-stamp');
-            if (dstamp && dstamp.textContent && dstamp.textContent.trim() !== '待你决定')
+            if (dstamp && dstamp.textContent && dstamp.textContent.trim() !== 'Your call')
               pass.push('决定卡：角标显示「' + dstamp.textContent.trim() + '」');
             else fail.push('决定卡：角标未反映已选状态');
             // R14：decide-once 卡已决归档条（全部问题已决 → 折叠 + 点开可改）
             if (dcard.dataset.decideOnce === 'true') {
               var dbar = dcard.querySelector('.kid-decided-bar');
-              if (dbar && dbar.textContent.indexOf('已决定') !== -1)
+              if (dbar && dbar.textContent.indexOf('Decided') !== -1)
                 pass.push('R14：已决归档条（' + dbar.textContent.trim() + '）');
               else fail.push('R14：归档条未出现（decide-once 未生效）');
               if (dbar) {
@@ -331,6 +331,40 @@ function runPage(page) {
         else fail.push('R8：问题池未应用（strong 为空或缺失）');
       } catch (e) { fail.push('R8：断言抛错 ' + e.message); }
 
+      // R8 回归（P0-5 修复）：答案 key 必须含 epoch 周序号——问题按周轮换，
+      // 修复前旧答案会错位显示在新问题下（V3 计划 M5 既定方案）
+      try {
+        var askCard = doc.querySelector('.kid-ask-card[data-question-pool]');
+        var ta = askCard && askCard.querySelector('.kid-ask-input');
+        var saveBtn = askCard && askCard.querySelector('.kid-ask-actions .kid-btn-primary');
+        if (askCard && ta && saveBtn) {
+          var wi = Math.floor(Date.now() / 604800000);
+          var pid = window.KID_CHILD || (doc.body && doc.body.dataset && doc.body.dataset.kidPage) || 'app';
+          // docIndex 是 1 基序号（跨页面稳定），key 必须与 kid.js 的算法一致
+          var idx = [...doc.querySelectorAll('.kid-ask-card')].indexOf(askCard) + 1;
+          var expectKey = 'kid-ask-' + pid + '-' + idx + '-' + wi;
+          ta.value = 'week-scoped answer';
+          saveBtn.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+          if (window.localStorage.getItem(expectKey) === 'week-scoped answer')
+            pass.push('R8 回归：KidAsk 答案按周存取（key=' + expectKey + '）');
+          else fail.push('R8 回归：答案未写入含周序号的 key（期望 ' + expectKey + '）');
+          // 切到下一周重新 init：问题应轮换，且旧答案不得回填到新问题下
+          // （jsdom 窗口有独立的 Date，必须同时覆盖 Node 侧与 window 侧）
+          var qOld = askCard.querySelector('strong').textContent;
+          var realNow = Date.now.bind(Date);
+          var realWNow = window.Date.now.bind(window.Date);
+          var shift = function () { return realNow() + 604800000; };
+          Date.now = shift;
+          window.Date.now = function () { return realWNow() + 604800000; };
+          try { window.KidAsk.init('body'); } finally { Date.now = realNow; window.Date.now = realWNow; }
+          var qNew = askCard.querySelector('strong').textContent;
+          var savedTxt = askCard.querySelector('.kid-ask-saved-text');
+          if (qNew !== qOld && savedTxt && savedTxt.textContent === '')
+            pass.push('R8 回归：跨周后问题轮换且旧答案不错位（新问题从空白开始）');
+          else fail.push('R8 回归：跨周后问题未轮换或旧答案仍回填');
+        }
+      } catch (e) { fail.push('R8 回归：断言抛错 ' + e.message); }
+
       // 8) 【R1 回归护栏 · 2026-10-19】连续打卡链路：侧栏徽章由 KidStreak 渲染；
       //    勾选任务卡 → kid-streak key 写入 + 天数 +1（Diya 历史上勾选与 streak 脱钩，此为其回归护栏）
       try {
@@ -339,7 +373,7 @@ function runPage(page) {
           window.localStorage.removeItem(skey);
           window.KidStreak.render('#profile-streak');
           var sBox = doc.getElementById('profile-streak');
-          if (sBox && /连打卡|开始/.test(sBox.textContent))
+          if (sBox && /streak/i.test(sBox.textContent))
             pass.push('Streak：侧栏徽章已由 KidStreak 渲染（' + sBox.textContent.trim() + '）');
           else if (sBox)
             fail.push('Streak：侧栏 #profile-streak 仍是旧文案「' + sBox.textContent.trim() + '」（未接入 KidStreak）');
@@ -428,7 +462,7 @@ function runPage(page) {
               // ① 侧栏：Dashboard 正下方是「目标台 Goal Desk」
               const navLis = [...doc.querySelectorAll('.sidebar-nav li')].map(li => li.textContent.trim());
               const dashIdx = navLis.findIndex(t => /Dashboard/.test(t));
-              const goalIdx = navLis.findIndex(t => /目标台/.test(t));
+              const goalIdx = navLis.findIndex(t => /Goal Desk/i.test(t));
               if (dashIdx >= 0 && goalIdx === dashIdx + 1)
                 pass.push('R8：侧栏「目标台」紧跟在 Dashboard 下方（第 ' + (goalIdx + 1) + ' 项）');
               else fail.push('R8：侧栏顺序不对 dashboard=' + dashIdx + ' goals=' + goalIdx + ' → ' + navLis.slice(0, 4).join(' / '));
@@ -488,7 +522,7 @@ function runPage(page) {
               })
               .then(() => {
                 const failTxt = doc.getElementById('sa-grid').textContent || '';
-                if (/加载失败/.test(failTxt) && /原因/.test(failTxt) && doc.querySelector('#sa-grid button'))
+                if (/failed to load/i.test(failTxt) && /Reason:/i.test(failTxt) && doc.querySelector('#sa-grid button'))
                   pass.push('R8：Subject Analysis 失败时给出原因 + 重试按钮（可自助排查）');
                 else fail.push('R8：Subject Analysis 失败态信息不足：' + failTxt.replace(/\s+/g, ' ').slice(0, 90));
               })
@@ -570,6 +604,74 @@ function runPage(page) {
   });
 }
 
+// ── P1-1：练习工具进度持久化回归（刷新不丢）────────────────────────
+// flashcards / quiz 均为自包含静态页（无外链脚本），直接建两个 JSDOM 窗口：
+// 窗口① 产生进度并落 localStorage；窗口② 预置同一份存档，验证恢复。
+async function runPracticePersistence() {
+  const pass = [], fail = [];
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const mkDom = (file, seed) => new JSDOM(fs.readFileSync(path.resolve(__dirname, '..', file), 'utf-8'), {
+    runScripts: 'dangerously',
+    url: 'http://localhost:5000/' + file,
+    pretendToBeVisual: true,
+    beforeParse(window) {
+      if (seed) {
+        Object.keys(seed).forEach((k) => {
+          try { window.localStorage.setItem(k, seed[k]); } catch (e) { /* ignore */ }
+        });
+      }
+    },
+  });
+
+  // ① flashcards：连翻 2 张 → 存档 → 新窗口恢复到第 3 张
+  try {
+    const d1 = mkDom('cold-war-flashcards.html');
+    await wait(150);
+    const w1 = d1.window;
+    w1.nextCard(); w1.nextCard();
+    const nav1 = w1.document.getElementById('nav-info').textContent.trim();
+    const saved = w1.localStorage.getItem('cw-fc-progress-v1');
+    if (!saved) fail.push('P1-1：flashcards 进度未写入 localStorage');
+    else {
+      const d = JSON.parse(saved);
+      if (d.i === 2 && Array.isArray(d.s)) pass.push('P1-1：flashcards 进度已存档（index=2，seen=' + d.s.length + '）');
+      else fail.push('P1-1：flashcards 存档内容异常 ' + saved.slice(0, 80));
+      const d2 = mkDom('cold-war-flashcards.html', { 'cw-fc-progress-v1': saved });
+      await wait(150);
+      const nav2 = d2.window.document.getElementById('nav-info').textContent.trim();
+      if (nav2 === nav1) pass.push('P1-1：flashcards 刷新后恢复到原位（' + nav2 + '）');
+      else fail.push('P1-1：flashcards 恢复位置不符（期望 ' + nav1 + '，实际 ' + nav2 + '）');
+    }
+  } catch (e) { fail.push('P1-1：flashcards 断言抛错 ' + e.message); }
+
+  // ② quiz：切到第 2 个 topic → 存档 → 新窗口渲染同一题面
+  try {
+    const d1 = mkDom('cold-war-quiz.html');
+    await wait(150);
+    const w1 = d1.window;
+    const tabs = w1.document.querySelectorAll('.topic-tab');
+    if (tabs.length >= 2) tabs[1].dispatchEvent(new w1.MouseEvent('click', { bubbles: true }));
+    await wait(80);
+    const saved = w1.localStorage.getItem('cw-quiz-progress-v1');
+    const qnum1 = w1.document.querySelector('.question-num');
+    const qtext1 = qnum1 ? qnum1.textContent.trim() : '';
+    if (!saved) fail.push('P1-1：quiz 进度未写入 localStorage');
+    else {
+      const d = JSON.parse(saved);
+      if (d.currentTopic === 1) pass.push('P1-1：quiz 进度已存档（topic=1）');
+      else fail.push('P1-1：quiz 存档内容异常 ' + saved.slice(0, 80));
+      const d2 = mkDom('cold-war-quiz.html', { 'cw-quiz-progress-v1': saved });
+      await wait(150);
+      const qnum2 = d2.window.document.querySelector('.question-num');
+      const qtext2 = qnum2 ? qnum2.textContent.trim() : '';
+      if (qtext2 && qtext2 === qtext1) pass.push('P1-1：quiz 刷新后恢复同一题（' + qtext2.slice(0, 40) + '）');
+      else fail.push('P1-1：quiz 恢复题面不符（期望「' + qtext1.slice(0, 40) + '」，实际「' + qtext2.slice(0, 40) + '」）');
+    }
+  } catch (e) { fail.push('P1-1：quiz 断言抛错 ' + e.message); }
+
+  return { pass, fail };
+}
+
 (async () => {
   console.log('\n===== 子女教育工作台 冒烟测试（双页回归）=====\n');
   let totalPass = 0, totalFail = 0;
@@ -584,6 +686,16 @@ function runPage(page) {
       console.log(`失败 ${fail.length} 项：`);
       fail.forEach((f) => console.log('  ❌ ' + f));
     }
+  }
+  const pp = await runPracticePersistence();
+  totalPass += pp.pass.length;
+  totalFail += pp.fail.length;
+  console.log('---- 练习工具进度持久化（P1-1）----');
+  console.log(`通过 ${pp.pass.length} 项：`);
+  pp.pass.forEach((p) => console.log('  ✅ ' + p));
+  if (pp.fail.length) {
+    console.log(`失败 ${pp.fail.length} 项：`);
+    pp.fail.forEach((f) => console.log('  ❌ ' + f));
   }
   console.log('\n-----------------------------------');
   console.log(totalFail === 0 ? `RESULT: ALL PASS ✅ (${totalPass} 项)` : `RESULT: FAILED ❌ (${totalFail} 项失败)`);

@@ -1079,6 +1079,47 @@ let state = {
   selectedMatch: null
 };
 
+// ── PERSISTENCE ─────────────────────────────────────────────────────
+// P1-1: quiz progress survives refresh (position + score + answers + completed)
+const QUIZ_KEY = 'cw-quiz-progress-v1';
+function saveQuizState() {
+  try {
+    localStorage.setItem(QUIZ_KEY, JSON.stringify({
+      currentTopic: state.currentTopic,
+      currentRound: state.currentRound,
+      currentQuestion: state.currentQuestion,
+      score: state.score,
+      totalAnswered: state.totalAnswered,
+      answers: state.answers,
+      completed: state.completed,
+      matchState: state.matchState,
+      selectedMatch: state.selectedMatch
+    }));
+  } catch (e) { /* storage unavailable: silently skip */ }
+}
+function restoreQuizState() {
+  try {
+    const raw = localStorage.getItem(QUIZ_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (!d || typeof d !== 'object') return;
+    const nTopics = quizData.length;
+    if (typeof d.currentTopic !== 'number' || d.currentTopic < 0 || d.currentTopic >= nTopics) return;
+    if (typeof d.currentRound !== 'number' || d.currentRound < 0 || d.currentRound > 3) return;
+    const qLen = quizData[d.currentTopic].rounds[d.currentRound].length;
+    if (typeof d.currentQuestion !== 'number' || d.currentQuestion < 0 || d.currentQuestion >= qLen) return;
+    state.currentTopic = d.currentTopic;
+    state.currentRound = d.currentRound;
+    state.currentQuestion = d.currentQuestion;
+    if (typeof d.score === 'number' && d.score >= 0) state.score = d.score;
+    if (typeof d.totalAnswered === 'number' && d.totalAnswered >= 0) state.totalAnswered = d.totalAnswered;
+    if (d.answers && typeof d.answers === 'object') state.answers = d.answers;
+    if (d.completed && typeof d.completed === 'object') state.completed = d.completed;
+    if (d.matchState && typeof d.matchState === 'object') state.matchState = d.matchState;
+    state.selectedMatch = d.selectedMatch || null;
+  } catch (e) { /* corrupt data: start fresh */ }
+}
+
 // ── INIT ───────────────────────────────────────────────────────────
 function init() {
   renderQuestion();
@@ -1196,6 +1237,9 @@ function renderQuestion() {
   
   // Hide score summary
   document.getElementById('score-summary').classList.remove('show');
+
+  // P1-1: persist after every render (position / score / answers all land here)
+  saveQuizState();
 }
 
 function getRoundName(round) {
@@ -1641,6 +1685,7 @@ function restartQuiz() {
     matchState: null,
     selectedMatch: null
   };
+  try { localStorage.removeItem(QUIZ_KEY); } catch (e) { /* ignore */ }
   document.getElementById('score-summary').classList.remove('show');
   updateTabs();
   renderQuestion();
@@ -1649,6 +1694,7 @@ function restartQuiz() {
 }
 
 // ── START ──────────────────────────────────────────────────────────
+restoreQuizState();
 init();
 </script>
 

@@ -337,6 +337,25 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 .kid-details{margin:0 0 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
 .kid-details>summary{cursor:pointer;padding:12px 16px;font-size:14px;font-weight:700;color:var(--text);list-style:none;user-select:none}
 .kid-details>summary::-webkit-details-marker{display:none}
+/* Weekly Review wizard (parity with Diya) */
+.rw-progress{height:6px;background:var(--border);border-radius:3px;margin-bottom:16px;overflow:hidden}
+.rw-progress-fill{height:100%;background:var(--accent2);border-radius:3px;transition:width 0.3s}
+.rw-step{min-height:120px;margin-bottom:12px}
+.rw-step h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px}
+.rw-step textarea,.rw-step input{width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);font-family:inherit;resize:vertical;line-height:1.6;outline:none}
+.rw-step textarea:focus,.rw-step input:focus{border-color:var(--accent)}
+.rw-buttons{display:flex;gap:8px;justify-content:flex-end}
+.review-history-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.rh-header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rh-date{font-size:12px;font-weight:700;color:var(--text2)}
+.rh-stats{display:flex;flex-wrap:wrap;gap:6px}
+.rh-stat{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--surface2);color:var(--text2)}
+.rh-stat.good{background:rgba(34,197,94,0.12);color:#15803d}
+.rh-stat.ok{background:rgba(245,158,11,0.12);color:#b45309}
+.rh-stat.bad{background:rgba(239,68,68,0.12);color:#b91c1c}
+.rh-body{font-size:13px;line-height:1.8;color:var(--text2)}
+.rh-body p{margin:2px 0}
+.rh-body strong{color:var(--text)}
 .kid-details>summary::before{content:'▸ ';color:var(--accent)}
 .kid-details[open]>summary::before{content:'▾ '}
 .kid-details>*:not(summary){padding:0 16px 14px}
@@ -710,10 +729,22 @@ English confidence takes time — it is a "do I dare speak up" question, not a "
 </details>
 
 <!-- Weekly Review -->
-<details class="kid-details">
+<details class="kid-details" id="weekly-review-details">
 <summary>📋 Weekly Review</summary>
-<div style="font-size:12px;color:var(--text2);margin:8px 0">Auto-generated summary from this week&apos;s learning activities</div>
-<div id="weekly-review-content"><div class="empty-state">Coming soon -- weekly AI review will appear here</div></div>
+<div style="font-size:12px;color:var(--text2);margin:8px 0">Seven quick questions, about 3 minutes — turn this week into next week&apos;s plan.</div>
+<div id="review-wizard">
+<div class="rw-progress" id="rw-progress"></div>
+<div class="rw-step" id="rw-step"></div>
+<div class="rw-buttons">
+<button class="btn-sm" id="rw-prev" onclick="reviewPrev()" disabled>Previous</button>
+<button class="btn" id="rw-next" onclick="reviewNext()">Next</button>
+<button class="btn" id="rw-submit" onclick="reviewSubmit()" style="display:none;background:var(--accent2)">Submit Review</button>
+</div>
+</div>
+<div style="margin-top:16px">
+<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Review History</div>
+<div id="review-history"><div class="empty-state">No reviews yet. Start your first weekly review!</div></div>
+</div>
 </details>
 </div>
 
@@ -1495,9 +1526,9 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
  {
  id:'jemma-g5', icon:'', title:' G5 Sprint Route · Engineering/Maths/CS',
  content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
-<p><b>Jemma now:</b> Year 9 · Maths 88% (13pts above median) · Computing Distinction · UK Bebras Distinction（校内前 25%；Gold 为全国前 10%，是否达 Gold 未提供）</p>
+<p><b>Jemma now:</b> Year 9 · Maths 88% (13pts above median) · Computing Distinction · UK Bebras Distinction (top 25% in school; Gold = top 10% nationally — whether Gold was reached is not provided)</p>
 <p><b>Target:</b> Oxford / Cambridge / Imperial — Engineering / Maths / CS</p>
-<p><b>Time window:</b> 6 yrs (Y9→Y13) · 2031 年 9 月入学</p>
+<p><b>Time window:</b> 6 yrs (Y9→Y13) · Sept 2031 university entry</p>
 <br>
 <table class="compare-table">
 <tr><th>Tier</th><th>University</th><th>Direction</th><th>Notes</th></tr>
@@ -1505,13 +1536,13 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
 <tr><td><b>Primary Tier</b></td><td>Edinburgh · UCL · Manchester · KCL</td><td>Engineering/CS</td><td>Expansion options, higher acceptance rate</td></tr>
 <tr><td><b>Safety Tier</b></td><td>Durham · Warwick · Bristol · Southampton</td><td>Engineering</td><td>Strong engineering school reputations</td></tr>
 </table>
-<p style="margin-top:8px"><b>Recommended A-level combo:</b> Maths + Physics + Latin (3) · FMaths 追加决策点 2029-09（Y12 开学时），不早于 Y12 以免与 GCSE 冲刺叠加</p>
+<p style="margin-top:8px"><b>Recommended A-level combo:</b> Maths + Physics + Latin (3) · FMaths add-on decision point 2029-09 (start of Y12) — not earlier than Y12, to avoid overlapping with the GCSE push</p>
 <div style="margin-top:10px;padding:10px 12px;background:rgba(255,212,59,0.08);border:1px solid var(--yellow);border-radius:8px;border-left:4px solid var(--yellow)">
-<b style="color:#b45309">⚠️ 选科要记住的one事 · 德国线</b><br>
-<span style="font-size:13px;line-height:1.7">如果你以后想留着「德国工程大学」这条路，第四门 A-level 必须是 <b>DAAD List A 科目</b>：Latin / Biology / Chemistry / 第二门语言（French / German / Spanish / Greek）。<br>
-<b>选错组合不会只是「扣分」，是这条路直接作废——而且要到申请那年才会发现。</b><br>
-⚠️ Headington 2026/27 的招生文件和课程表<b>都没有列 A-level CS</b>（两份官方文件对不上，还要去问学校）。所以校内真正能选的安全备份是 <b>Latin / Biology / Chemistry / 第二门语言</b>，每一科都要拿到 <b>GCSE ≥7</b>。<br>
-<b>这不是现在就定的事</b>——你现在 Y9，还有时间慢慢试。等 Y10 选课前再认真想也来得及。</span>
+<b style="color:#b45309">⚠️ The ONE thing to remember about subject choices · Germany route</b><br>
+<span style="font-size:13px;line-height:1.7">If you want to keep the "German engineering universities" route open, the 4th A-level must be a <b>DAAD List A subject</b>: Latin / Biology / Chemistry / a second language (French / German / Spanish / Greek).<br>
+<b>Picking the wrong combo is not just "lost marks" — this route is voided entirely, and you only find out in application year.</b><br>
+⚠️ Headington's 2026/27 admissions documents and course list <b>do not list A-level CS</b> (the two official files disagree — ask the school). So the safe backup subjects actually available in school are <b>Latin / Biology / Chemistry / a second language</b>, each needing <b>GCSE ≥7</b>.<br>
+<b>This is not a decision for now</b> — you are in Y9, there is time to try things slowly. Thinking it through properly before Y10 options is soon enough.</span>
 </div>
 <p style="color:var(--accent2)"><b>My strengths:</b> Maths 88% · Bebras Distinction · clear 6-yr runway</p>
 </div>`
@@ -1521,11 +1552,11 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
  content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
 <table class="compare-table">
 <tr><th>Phase</th><th>Years</th><th>Core Target</th><th>Key Actions</th></tr>
-<tr><td><b>Exploration Phase</b></td><td>Y9<span style="font-size:11px;color:var(--text2)">（至 2027-08）</span></td><td>Discover subject passion + start English</td><td>UKMT IMC · Academic Reading · Club leadership</td></tr>
-<tr><td><b>Build Phase</b></td><td>Y10-11<span style="font-size:11px;color:var(--text2)">（2027-09~2029-07）</span></td><td>High GCSEs + competition system</td><td>UKMT SMC（ESAT/TMUA 基线）· BPhO/UKChO · Summer School</td></tr>
-<tr><td><b>Sprint Phase</b></td><td>Y12-13<span style="font-size:11px;color:var(--text2)">（2029-09~2031-07）</span></td><td>A-levels + admissions tests + UCAS</td><td>TMUA（CS/数学主线）· ESAT（如转工程）· PS · Interview · 2030 season</td></tr>
+<tr><td><b>Exploration Phase</b></td><td>Y9<span style="font-size:11px;color:var(--text2)"> (to 2027-08)</span></td><td>Discover subject passion + start English</td><td>UKMT IMC · Academic Reading · Club leadership</td></tr>
+<tr><td><b>Build Phase</b></td><td>Y10-11<span style="font-size:11px;color:var(--text2)"> (2027-09~2029-07)</span></td><td>High GCSEs + competition system</td><td>UKMT SMC (ESAT/TMUA baseline) · BPhO/UKChO · Summer School</td></tr>
+<tr><td><b>Sprint Phase</b></td><td>Y12-13<span style="font-size:11px;color:var(--text2)"> (2029-09~2031-07)</span></td><td>A-levels + admissions tests + UCAS</td><td>TMUA (CS/Maths main route) · ESAT (if switching to Engineering) · PS · Interview · 2030 season</td></tr>
 </table>
-<p style="margin-top:8px;color:var(--accent2)"><b>Key:</b> 现在是 Y9，2031 年 9 月入学 — 6 年很长，每一步都来得及</p>
+<p style="margin-top:8px;color:var(--accent2)"><b>Key:</b> You are in Y9 now, entering university in Sept 2031 — 6 years is a long time; there is time for every step</p>
 </div>`
  },
  {
@@ -1539,13 +1570,13 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
 <tr><td>Focus</td><td>Interest Discovery + Basic Skills</td></tr>
 </table>
 <p style="margin-top:8px"><b>Summer strategy:</b> start with what she enjoys (Maths / Coding / Science / Art), gently push English analysis + confident expression</p>
-<p style="color:var(--accent2)"><b>Core principles:</b> 暑假还是小时候 — 每天学 3-4 小时 + 至少 1 小时户外运动 + 每周 2 天完全自由</p>
+<p style="color:var(--accent2)"><b>Core principles:</b> Summer is still childhood — 3-4 hours of study a day + at least 1 hour outdoors + 2 completely free days a week</p>
 </div>`
  },
  {
  id:'jemma-resources', icon:'', title:' Recommended Resources',
  content:`<div style="font-size:14px;color:var(--text2);line-height:1.8">
-<p><b>Maths competitions:</b> UKMT official IMC past papers（你现在 Y9，JMC 只给 Y8 及以下，所以该考 IMC）| AoPS | Sparx Maths (school-assigned)</p>
+<p><b>Maths competitions:</b> UKMT official IMC past papers (you are in Y9 now; JMC is for Y8 and below, so IMC is the right one)| AoPS | Sparx Maths (school-assigned)</p>
 <p><b>Coding/CS:</b> Tinkercad 3D modelling | Scratch | UK Bebras Challenge</p>
 <p><b>Science:</b> BBC Bitesize | Isaac Physics (Cambridge, free) | MEL Science</p>
 <p><b>English:</b> Free reading of English novels | Reading journal writing | Khan Academy English</p>
@@ -1567,11 +1598,11 @@ ${intel.sections.filter(s=>!s.title.includes('Diya')).map(s=>`
 </table>
 <p style="margin-top:8px"><b>Language Timeline (5yr window):</b></p>
 <p>Year 9 (now): German 28/30 · Year 10: Goethe B1 · Year 11: Goethe B2 · Year 12: TestDaF 4×4 (C1)</p>
-<p style="margin-top:6px"><b>⏰ 语言考试时点约束</b>：德国线 WS 本科申请集中在<b>入学年当年 5-7 月</b>（RWTH NC 5/1–7/15、TU Berlin NC 6/1–7/15、TUM 5/15–7/15），故语言考试必须<b>早于入学年</b>完成，不能等到最后一年才开始。<b>备考终点：2029-08（Y13 开学前）出 TestDaF 4×4 或 Goethe C1</b>；若APS 审核要求存在，流程需数周至 2 个月，须再前移至 2029 春季完成 APS。<br>
-<b>解耦原则（重要）</b>：2028-07 方向闸门若通过，德语学习计划<b>自动启动</b>，与最终是否走德国线解耦——理由：学德语对 UK 主线没有任何负面影响，而语言考试有硬时点、不能后置。This is "Start early without committing early"。<br>
-<b>本窗口（2026-10→2027-01）内不设德语考试目标</b>：Jemma 仍处 Y9→Y10，诊断建议"German: no exam target for now, keep it at school level and push B1 to Year 10"维持不变；上方 2029-08 终点仅为长期方向锚点，<b>不构成当期加压依据</b>，不得据此在 Y9 增加德语负荷。</p>
-<p><b>Entry Requirements (DAAD):</b> 3 A-Levels min C · List A 中 Mathematics/Further Maths/Pure Maths 同属「数学」学科组、组内不独立（语言除外）· 需 <b>3 门独立 + List A ≥2</b>：用 List B 科目（Psychology / Religious Studies / History of Art / Art / Music）会使List A 计数掉到 1 → <b>德国线静默失效（不是降权）</b> · <b>第四门须为 DAAD List A 科目</b>：Latin / Biology / Chemistry / 第二门语言（French / German / Spanish / Greek）—— <b>⚠️ Headington 2026/27 招生 PDF 与 Sixth Form 课程表均未列 A-level CS（两版官方文件冲突，待直询）；政策层面 DAAD 接受 CS，但校内供给未确认 → 校内真实可用备份 = Latin / Biology / Chemistry / 第二门语言，四类均在 List A 且在课程表内，每科须达 GCSE ≥7</b> · 12yr schooling ✅</p>
-<p style="color:var(--accent2)"><b>Recommendation:</b> UK 主线 + 德国备选 — 两条一起准备。<b>但注意两个截止日不在同一年</b>：UCAS 是 10 月（我这一轮是 2030 season），而德国本科申请在<b>入学年当年 5 月开放、NC 类科目最晚 7 月 15 日截止</b>（RWTH / TU Berlin / TUM）—— 所以德国的 uni-assist 截止日<b>不是</b>入学年 1 月。German 继续学下去，这条备选就真的可用。</p>
+<p style="margin-top:6px"><b>⏰ Language exam timing constraint:</b> Germany-route WS undergraduate applications cluster in <b>May–July of the entry year</b> (RWTH NC 5/1–7/15, TU Berlin NC 6/1–7/15, TUM 5/15–7/15), so language exams must be finished <b>before the entry year</b> — you cannot leave it to the final year. <b>Prep deadline: TestDaF 4×4 or Goethe C1 by 2029-08 (before Y13 starts)</b>; if APS review is required, the process takes weeks to 2 months, so APS must move earlier to spring 2029.<br>
+<b>Decoupling principle (important):</b> if the 2028-07 direction gate is passed, the German study plan <b>starts automatically</b>, decoupled from whether the Germany route is finally taken — the reason: learning German has no negative impact on the UK main route, and language exams have hard deadlines that cannot be postponed. This is "start early without committing early".<br>
+<b>No German exam target is set for this window (2026-10→2027-01):</b> Jemma is still in Y9→Y10, and the diagnostic advice "German: no exam target for now, keep it at school level and push B1 to Year 10" stands; the 2029-08 deadline above is only a long-term direction anchor, <b>not a reason to add pressure now</b>, and must not be used to increase German workload in Y9.</p>
+<p><b>Entry Requirements (DAAD):</b> 3 A-Levels min C · In List A, Mathematics/Further Maths/Pure Maths belong to the same "Maths" subject group and do not count independently (languages excepted) · You need <b>3 independent subjects + List A ≥2</b>: using List B subjects (Psychology / Religious Studies / History of Art / Art / Music) drops the List A count to 1 → <b>the Germany route silently fails (not just downweighted)</b> · <b>The 4th subject must be a DAAD List A subject</b>: Latin / Biology / Chemistry / a second language (French / German / Spanish / Greek) — <b>⚠️ Headington's 2026/27 admissions PDF and Sixth Form course list both omit A-level CS (the two official files conflict — to be confirmed directly); at policy level DAAD accepts CS, but in-school supply is unconfirmed → the real in-school backups = Latin / Biology / Chemistry / a second language, all four in List A and on the course list, each needing GCSE ≥7</b> · 12yr schooling ✅</p>
+<p style="color:var(--accent2)"><b>Recommendation:</b> UK main route + Germany backup — prepare both together. <b>But note the two deadlines are not in the same year:</b> UCAS is in October (my round is the 2030 season), while German undergraduate applications <b>open in May of the entry year, with NC subjects closing as late as 15 July</b> (RWTH / TU Berlin / TUM) — so Germany's uni-assist deadline is <b>not</b> January of the entry year. Keep learning German and this backup stays genuinely usable.</p>
 <p style="margin-top:8px;font-size:11px;color:var(--text2)">Source: DAAD GCE page · uni-assist.de</p>
 </div>`
  }
@@ -1744,7 +1775,7 @@ function renderTipCard(el){
  const now = t.now || t.action || '';
 
  el.innerHTML = `
- <div class="tips-header"> Today's tip <span class="tips-refresh">· 还能换 ${rem} 次</span></div>
+ <div class="tips-header"> Today's tip <span class="tips-refresh">· ${rem} refreshes left</span></div>
  <div class="tip-single-card">
   <span class="tip-cat-badge ${t.cat}">${t.cat.toUpperCase()}</span>
   <div class="tip-single-head">${t.head}</div>
@@ -1752,9 +1783,9 @@ function renderTipCard(el){
   <div class="tip-single-row"><span class="tip-single-icon">✅</span><span>${now}</span></div>
  </div>
  <div class="tip-nav">
-  <button onclick="prevTip()" id="tip-prev-btn"${isFirst?' disabled':''}>◀ 上一张</button>
+  <button onclick="prevTip()" id="tip-prev-btn"${isFirst?' disabled':''}>◀ Previous</button>
   <span class="tip-counter">Tip ${currentTipIndex + 1} / ${todayTips.length}</span>
-  <button onclick="nextTip()" id="tip-next-btn"${isLast?' disabled':''}>下一张 ▶</button>
+  <button onclick="nextTip()" id="tip-next-btn"${isLast?' disabled':''}>Next ▶</button>
  </div>`;
 }
 
@@ -2223,7 +2254,7 @@ async function refreshUploadList(){
         ${uploadStatusBadge(e.status)}
         ${e.status==='done'?`<button class="btn-sm" onclick="openUploadDetail('${e.id}')">View</button>`:''}
         ${e.status==='failed'?`<button class="btn-sm" onclick="retryUpload('${e.id}')">Retry</button>`:''}
-        <button class="btn-sm" style="color:var(--red)" onclick="deleteUpload('${e.id}','${escHtmlJ(e.original_name||'')}')">删除</button>
+        <button class="btn-sm" style="color:var(--red)" onclick="deleteUpload('${e.id}','${escHtmlJ(e.original_name||'')}')">Delete</button>
       </div>
     `).join('');
   }catch(e){ box.innerHTML='<div class="error-empty">Network error</div>'; }
@@ -2259,21 +2290,21 @@ async function openUploadDetail(uid){
   `).join('');
   document.getElementById('upload-detail-body').innerHTML = `
     <div style="margin-bottom:14px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;line-height:1.9">
-      <div><b>科目：</b>${escHtmlJ(e.subject||'—')} · <b>Type: </b>${escHtmlJ(e.doc_type||'—')} · <b>Date: </b>${escHtmlJ(e.date||'—')} ${e.score&&e.score.total?`· <b>Score: </b>${e.score.got}/${e.score.total}`:''}</div>
-      <div><b>知识点：</b>${(e.topics||[]).map(escHtmlJ).join('、')||'—'}</div>
-      ${e.weakness_summary?`<div><b>弱点：</b>${escHtmlJ(e.weakness_summary)}</div>`:''}
+      <div><b>Subject:</b> ${escHtmlJ(e.subject||'—')} · <b>Type: </b>${escHtmlJ(e.doc_type||'—')} · <b>Date: </b>${escHtmlJ(e.date||'—')} ${e.score&&e.score.total?`· <b>Score: </b>${e.score.got}/${e.score.total}`:''}</div>
+      <div><b>Topics:</b> ${(e.topics||[]).map(escHtmlJ).join(', ')||'—'}</div>
+      ${e.weakness_summary?`<div><b>Weakness:</b> ${escHtmlJ(e.weakness_summary)}</div>`:''}
     </div>
     ${mistakes.length?`
       <div style="margin-bottom:14px">
-        <div style="font-size:12px;font-weight:700;margin-bottom:8px">识别出错题 ${mistakes.length} 道
-          <button class="btn-sm" style="margin-left:8px" onclick="uploadToErrors('${uid}')">📥 全部存入错题本</button>
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px">${mistakes.length} mistakes recognised
+          <button class="btn-sm" style="margin-left:8px" onclick="uploadToErrors('${uid}')">📥 Save all into Error Book</button>
         </div>
         ${mistakes.map((x,i)=>`
           <div style="padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;font-size:11px;line-height:1.7">
             <b>${escHtmlJ(String(x.question_no||('Q'+(i+1))))}</b>
-            学生答案：<span style="color:var(--red)">${escHtmlJ(String(x.wrong_answer||'—'))}</span>
-            正确：<span style="color:var(--accent2)">${escHtmlJ(String(x.correct_answer||'—'))}</span>
-            ${x.reason?`<div style="color:var(--text2)">原因：${escHtmlJ(String(x.reason))}</div>`:''}
+            Your answer: <span style="color:var(--red)">${escHtmlJ(String(x.wrong_answer||'—'))}</span>
+            Correct: <span style="color:var(--accent2)">${escHtmlJ(String(x.correct_answer||'—'))}</span>
+            ${x.reason?`<div style="color:var(--text2)">Reason: ${escHtmlJ(String(x.reason))}</div>`:''}
           </div>
         `).join('')}
       </div>`:'<div style="font-size:11px;color:var(--text2);margin-bottom:14px">No errors recognised (or extraction failed)</div>'}
@@ -2347,10 +2378,10 @@ function renderCountdown(){
   <div style="display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px">
    <div style="font-size:40px">${e.emoji}</div>
    <div style="flex:1;min-width:0">
-    <div style="font-size:13px;color:var(--text2)">下一个 · ${e.label}</div>
+    <div style="font-size:13px;color:var(--text2)">Next · ${e.label}</div>
     <div style="font-size:28px;font-weight:800;color:${e.color};line-height:1.2">${text}</div>
    </div>
-   <div style="font-size:12px;color:var(--text2);text-align:right">结果是反馈<br>不是判决</div>
+   <div style="font-size:12px;color:var(--text2);text-align:right">Results are feedback<br>not a verdict</div>
   </div>`;
  }
 }
@@ -2400,7 +2431,7 @@ function renderToday3(){
  if(!el) return;
  const w=currentTwpWeek();
  if(!w){ el.innerHTML='<div class="empty-state">Loading the plan…</div>'; return; }
- el.innerHTML=`<div style="font-size:12px;color:var(--text2);margin-bottom:2px">${w.label} · 做完one勾one</div>`+
+ el.innerHTML=`<div style="font-size:12px;color:var(--text2);margin-bottom:2px">${w.label} · tick one as you finish it</div>`+
  (w.actions||[]).map(a=>`
   <div class="kid-task-card" data-task-id="${a.id}" data-sync="server" data-task-label="${w.taskLabel||w.label} · ${a.label}" title="Tap to tick it off">
    <span class="kid-task-label">${a.label}</span>
@@ -2470,6 +2501,175 @@ async function loadTwpJemma(){
     }
   }catch(_){ /* 断网：保持缓存渲染 */ }
 }
+
+// ── R6：Weekly Review 向导（与 Diya 同构，英文题池）────────────────
+let reviewStep=0;
+let reviewAnswers={};
+let reviewSysCompletion=null;
+const reviewQuestions=[
+ {id:'completion',q:'1. Completion Rate',hint:'What % of your planned tasks did you complete this week? (0-100)',type:'number'},
+ {id:'rating',q:'2. Overall Rating',hint:'How would you rate this week overall? (1-10)',type:'number'},
+ {id:'wentwell',q:'3. What went well?',hint:'Which subjects or tasks felt smooth? What did you enjoy?',type:'textarea'},
+ {id:'hard',q:'4. What was hard?',hint:'Where did you get stuck? What tripped you up?',type:'textarea'},
+ {id:'improve',q:'5. ONE thing to improve',hint:'Just one small change for next week',type:'textarea'},
+ {id:'priority',q:"6. Next week's top priority",hint:'e.g. Finish 2 IMC past papers / Read one chapter',type:'textarea'},
+ {id:'proud',q:'7. What made you proud?',hint:"Anything! Doesn't have to be academic. A small win, a kind moment, something that made you smile.",type:'textarea'}
+];
+function reviewWeekKey(){
+ const d=new Date(); const day=(d.getDay()+6)%7;   // 周一为一周起点
+ d.setDate(d.getDate()-day);
+ return d.toISOString().slice(0,10);
+}
+async function loadReviewWizard(){
+ reviewStep=0;reviewAnswers={};
+ try{
+  const dj=await fetch('/api/dashboard/jemma').then(r=>r.json());
+  const t=dj.tasks_total||0;
+  reviewSysCompletion=t?Math.round((dj.tasks_done||0)/t*100):0;
+ }catch(_){ reviewSysCompletion=null; }
+ renderReviewStep();
+ loadReviewHistory();
+}
+function renderReviewStep(){
+ const total=reviewQuestions.length;
+ const q=reviewQuestions[reviewStep];
+ const pct=Math.round((reviewStep+1)/total*100);
+ const isLast=reviewStep===total-1;
+ document.getElementById('rw-progress').innerHTML=`<div class="rw-progress-fill" style="width:${pct}%"></div><div style="text-align:center;font-size:11px;color:var(--text2);margin-top:4px">Step ${reviewStep+1} of ${total}</div>`;
+ let stepHTML=`<h3>${q.q}</h3>`;
+ if(q.type==='number'){
+  // 完成率题预填系统统计值（可修改），placeholder 说明来源
+  const prefill=(q.id==='completion'&&reviewAnswers[q.id]===undefined&&reviewSysCompletion!=null)?reviewSysCompletion:'';
+  const hint2=(q.id==='completion'&&reviewSysCompletion!=null)?` (system stats: ${reviewSysCompletion}%, editable)`:'';
+  stepHTML+=`<input type="number" id="rw-input" value="${prefill}" placeholder="${q.hint}${hint2}" min="${q.id==='rating'?1:0}" max="${q.id==='rating'?10:100}" onchange="reviewAnswers['${q.id}']=this.value">`;
+ } else {
+  stepHTML+=`<textarea id="rw-input" rows="3" placeholder="${q.hint}" oninput="reviewAnswers['${q.id}']=this.value">${reviewAnswers[q.id]||''}</textarea>`;
+ }
+ document.getElementById('rw-step').innerHTML=stepHTML;
+ document.getElementById('rw-prev').disabled=reviewStep===0;
+ if(isLast){
+  document.getElementById('rw-next').style.display='none';
+  document.getElementById('rw-submit').style.display='inline-block';
+ } else {
+  document.getElementById('rw-next').style.display='inline-block';
+  document.getElementById('rw-submit').style.display='none';
+ }
+}
+function reviewNext(){
+ if(reviewStep<reviewQuestions.length-1){
+  const inp=document.getElementById('rw-input');if(inp) reviewAnswers[reviewQuestions[reviewStep].id]=inp.value||'';
+  reviewStep++;renderReviewStep();
+ }
+}
+function reviewPrev(){
+ if(reviewStep>0){
+  const inp=document.getElementById('rw-input');if(inp) reviewAnswers[reviewQuestions[reviewStep].id]=inp.value||'';
+  reviewStep--;renderReviewStep();
+ }
+}
+async function reviewSubmit(){
+ const inp=document.getElementById('rw-input');if(inp) reviewAnswers[reviewQuestions[reviewStep].id]=inp.value||'';
+ const review={
+  completion:parseInt(reviewAnswers.completion)||0,
+  rating:parseInt(reviewAnswers.rating)||0,
+  wentwell:reviewAnswers.wentwell||'',
+  hard:reviewAnswers.hard||'',
+  improve:reviewAnswers.improve||'',
+  priority:reviewAnswers.priority||'',
+  proud:reviewAnswers.proud||'',
+  sys_completion:(reviewSysCompletion!=null?reviewSysCompletion:''),
+  date:new Date().toISOString().split('T')[0]
+ };
+ if(!review.wentwell&&!review.hard&&!review.proud){toast('Please fill in at least one section');return;}
+ // R11：执行轨迹——本周实际完成 N 件 + 平均拖延 X 天（completed_at - created_at）
+ try{
+  const wkAgo=Date.now()-7*86400000;
+  let doneN=0, delaySum=0, delayN=0;
+  Object.values(tasksData['jemma']||{}).forEach(v=>{
+   if(!v||typeof v!=='object'||!v.done||!v.completed_at) return;
+   const ct=Date.parse(v.completed_at);
+   if(isNaN(ct)||ct<wkAgo) return;
+   doneN++;
+   if(v.created_at){
+    const dd=(ct-Date.parse(v.created_at))/86400000;
+    if(!isNaN(dd)&&dd>=0){ delaySum+=dd; delayN++; }
+   }
+  });
+  review.sys_tasks_done=doneN;
+  if(delayN) review.sys_avg_days=Math.round(delaySum/delayN*10)/10;
+ }catch(_){}
+ // R12：下周 top priority 自动转为任务（每 ISO 周幂等，防重复提交重复建）
+ try{
+  if(review.priority){
+   const key='general-review-priority-'+reviewWeekKey();
+   if(!tasksData['jemma']) tasksData['jemma']={};
+   if(!tasksData['jemma'][key]){
+    tasksData['jemma'][key]={done:false,name:'Next week priority: '+review.priority.slice(0,40),created_at:new Date().toISOString()};
+    await saveTasks('jemma');
+    review.task_created=true;
+   }
+  }
+ }catch(_){ /* 转任务失败不阻断复盘保存 */ }
+ try{
+  await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:'jemma',review})});
+  toast('Review saved!');
+ }catch(e){
+  const key='reviews_jemma';
+  const existing=JSON.parse(localStorage.getItem(key)||'[]');
+  existing.unshift(review);localStorage.setItem(key,JSON.stringify(existing));
+  toast('Saved locally');
+ }
+ reviewStep=0;reviewAnswers={};renderReviewStep();loadReviewHistory();
+}
+function renderReviews(container,reviews){
+ if(!reviews||!reviews.length){
+  container.innerHTML='<div class="empty-state">No reviews yet. Start your first weekly review!</div>';
+  return;
+ }
+ container.innerHTML=reviews.map(r=>`
+ <div class="review-history-card">
+  <div class="rh-header">
+   <span class="rh-date">Week of ${r.date||'Unknown'}</span>
+   <div class="rh-stats">
+    <span class="rh-stat ${(r.completion||0)>=80?'good':(r.completion||0)>=50?'ok':'bad'}">Completion: ${r.completion||0}%</span>
+    ${r.sys_completion!==''&&r.sys_completion!=null?`<span class="rh-stat" style="color:var(--text2)">System: ${r.sys_completion}%</span>`:''}
+    ${r.sys_tasks_done!=null?`<span class="rh-stat" style="color:var(--text2)">Actually completed ${r.sys_tasks_done} this week${r.sys_avg_days!=null?' · avg delay '+r.sys_avg_days+' days':''}</span>`:''}
+    <span class="rh-stat ${(r.rating||0)>=8?'good':(r.rating||0)>=5?'ok':'bad'}">Rating: ${r.rating||0}/10</span>
+    ${r.task_created?'<span class="rh-stat good">✅ Priority turned into a task</span>':''}
+   </div>
+  </div>
+  <div class="rh-body">
+   ${r.wentwell?`<p><strong>Went well:</strong> ${escHtmlJ(r.wentwell)}</p>`:''}
+   ${r.hard?`<p><strong>Hard / Stuck:</strong> ${escHtmlJ(r.hard)}</p>`:''}
+   ${r.improve?`<p><strong>Improve next week:</strong> ${escHtmlJ(r.improve)}</p>`:''}
+   ${r.priority?`<p><strong>Top priority:</strong> ${escHtmlJ(r.priority)}</p>`:''}
+   ${r.proud?`<p><strong style="color:var(--accent2)">Proud of:</strong> ${escHtmlJ(r.proud)}</p>`:''}
+  </div>
+ </div>
+ `).join('');
+}
+async function loadReviewHistory(){
+ const container=document.getElementById('review-history');
+ if(!container) return;
+ try{
+  const r=await fetch('/api/review?user=jemma');
+  const reviews=await r.json();
+  renderReviews(container,reviews);
+ }catch(e){
+  const key='reviews_jemma';
+  const reviews=JSON.parse(localStorage.getItem(key)||'[]');
+  renderReviews(container,reviews);
+ }
+}
+// 懒加载：首次展开 Weekly Review 时拉数据（与 Diya 的 tab 切换加载对等）
+(function(){
+ const el=document.getElementById('weekly-review-details');
+ if(!el) return;
+ let loaded=false;
+ el.addEventListener('toggle',function(){
+  if(el.open&&!loaded){ loaded=true; loadReviewWizard(); }
+ });
+})();
 
 // Init
 // 儿童互动层：可勾选任务 / 提问卡 / 决策选择 / 完成进度 / 连续打卡 / 撒彩带

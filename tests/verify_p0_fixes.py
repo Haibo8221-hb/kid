@@ -330,38 +330,65 @@ _name0 = _g0.get('目标名称')
 try:
     A._load_config = lambda: {'api_key': 'test-key', 'base_url': 'https://example.invalid/v1',
                                'model': 'test-model', 'temperature': 0.2}
-    # ① 正常路径：模型返回 Markdown 包裹的 JSON，含 update_goal + create_goal
+    # ① 正常路径：模型返回 Markdown 包裹的 JSON，含 update_goal + create_goal（必填字段齐全）
+    _deadline = (A.datetime.now() + A.timedelta(days=45)).strftime('%Y-%m-%d')
     A.httpx.Client = _make_client(
-        '好的，我按学科重新分类并加了一个每日复习：\n```json\n'
-        '{"reply":"已按学科分类，并新增每日复习目标。","operations":['
-        '{"op":"update_goal","target":"' + _name0 + '","patch":{"领域":"数学","每日上限":15}},'
+        'Regrouped by subject and added a daily review:\n```json\n'
+        '{"reply":"Regrouped by subject and added a daily review goal.","operations":['
+        '{"op":"update_goal","target":"' + _name0 + '","patch":{"领域":"fldMa","每日上限":15}},'
         '{"op":"create_goal","goal":{"目标名称":"每日复习 20 个单词","单位":"个","目标总量":600,'
-        '"截止日期":"2026-12-20","领域":"英语"}}]}'
+        '"截止日期":"' + _deadline + '","每日上限":20,"领域":"fldEn","状态":"stDoing"}}]}'
         '\n```')
     _before = len(_goals)
     r = ac2.post('/api/goals/ai', json={'message': '把学习目标改成按学科分类，再加一个每日复习任务'})
     d = r.get_json() or {}
     check(r.status_code == 200 and d.get('ok') is True, 'AI 端点成功解析模型指令')
-    check('已按学科分类' in str(d.get('reply') or ''), 'AI 回显模型 reply')
+    check('Regrouped by subject' in str(d.get('reply') or ''), 'AI 回显模型 reply')
     _applied = d.get('applied') or []
     check(any(a.get('op') == 'update_goal' for a in _applied), 'AI 产出 update_goal 操作')
     check(any(a.get('op') == 'create_goal' for a in _applied), 'AI 产出 create_goal 操作')
     _after = (ac2.get('/api/goals').get_json() or {}).get('goals') or []
     check(len(_after) == _before + 1, f'AI 新建目标已落库（{_before} → {len(_after)}）')
     _hit = [g for g in _after if g.get('目标名称') == '每日复习 20 个单词']
-    check(bool(_hit) and _hit[0].get('领域') == '英语', 'AI 新建目标的字段正确')
+    check(bool(_hit) and _hit[0].get('领域') == 'fldEn', 'AI 新建目标使用稳定选项 id（fldEn）')
+    check(bool(_hit) and str(_hit[0].get('每日上限')) in ('20', '20.0'), 'AI 新建目标落库每日上限=20')
+    check(bool(_hit) and _hit[0].get('状态') == 'stDoing', 'AI 新建目标状态用稳定 id（stDoing）')
     _t = [g for g in _after if g.get('目标名称') == _name0]
     check(bool(_t) and str(_t[0].get('每日上限')) in ('15', '15.0'), 'AI 修改字段已落库（每日上限=15）')
-    check(bool(_t) and _t[0].get('领域') == '数学', 'AI 按学科分类已落库（领域=数学）')
+    check(bool(_t) and _t[0].get('领域') == 'fldMa', 'AI 按学科分类已落库（领域=fldMa）')
     # ② 白名单：非法字段被忽略，合法字段照常生效
     A.httpx.Client = _make_client(
         '{"reply":"x","operations":[{"op":"update_goal","target":"' + _name0 +
-        '","patch":{"未知字段":"v","领域":"物理"}}]}')
+        '","patch":{"未知字段":"v","领域":"fldSci"}}]}')
     ac2.post('/api/goals/ai', json={'message': '改个字段'})
     _t2 = [g for g in (ac2.get('/api/goals').get_json() or {}).get('goals') or []
            if g.get('目标名称') == _name0]
     check(bool(_t2) and '未知字段' not in _t2[0], 'AI 白名单：非法字段被忽略')
-    check(bool(_t2) and _t2[0].get('领域') == '物理', 'AI 白名单内的字段正常生效')
+    check(bool(_t2) and _t2[0].get('领域') == 'fldSci', 'AI 白名单内的字段正常生效')
+    # ②b 严格策略（红队 P0-2）：create_goal 必填字段缺失 → 不创建 + reply 如实说明
+    A.httpx.Client = _make_client(
+        '{"reply":"Added a review goal.","operations":['
+        '{"op":"create_goal","goal":{"目标名称":"缺字段目标","单位":"个","目标总量":100}}]}')
+    _cnt2 = len((ac2.get('/api/goals').get_json() or {}).get('goals') or [])
+    r = ac2.post('/api/goals/ai', json={'message': '加个目标'})
+    d = r.get_json() or {}
+    check(r.status_code == 200 and d.get('ok') is True, 'AI 缺字段请求仍正常返回')
+    check('create_goal' not in [a.get('op') for a in (d.get('applied') or [])],
+          'AI 缺必填字段时拒绝创建（无 create_goal 落库）')
+    check('NOT created' in str(d.get('reply') or ''), 'AI 缺字段时 reply 如实说明未创建')
+    check(len((ac2.get('/api/goals').get_json() or {}).get('goals') or []) == _cnt2, '缺字段时目标数不变')
+    # ②d delete_goal → 归档（数据保留），不得硬删除
+    A.httpx.Client = _make_client(
+        '{"reply":"Archived it.","operations":['
+        '{"op":"delete_goal","target":"' + _name0 + '"}]}')
+    r = ac2.post('/api/goals/ai', json={'message': '删掉这个目标'})
+    d = r.get_json() or {}
+    check('archive_goal' in [a.get('op') for a in (d.get('applied') or [])],
+          'AI 删除请求转为归档（archive_goal）')
+    _after2 = (ac2.get('/api/goals').get_json() or {}).get('goals') or []
+    check(any(g.get('目标名称') == _name0 for g in _after2), '归档后目标数据仍保留（未硬删除）')
+    _t3 = [g for g in _after2 if g.get('目标名称') == _name0]
+    check(bool(_t3) and _t3[0].get('状态') == 'stGive', '归档目标状态=stGive')
     # ③ 模型返回非 JSON → 不改数据
     A.httpx.Client = _make_client('我看了一下，建议你先休息')
     _cnt = len((ac2.get('/api/goals').get_json() or {}).get('goals') or [])
@@ -472,6 +499,29 @@ try:
     _pj = str(_seen.get('messages', ''))
     check('ZZJMARKZZ' in _pj and 'ZZDMARKZZ' not in _pj,
           'AI 端点只看到该孩子的目标（不把对方的发给模型）')
+finally:
+    A._load_config = _cfg2
+    A.httpx.Client = _hx2
+
+
+print('== AI 代打卡上限与归档（置于隔离计数断言之后，避免污染计数）==')
+_cap_goal = '每日复习 20 个单词'
+try:
+    A._load_config = lambda: {'api_key': 'k', 'base_url': 'https://example.invalid/v1',
+                               'model': 'm', 'temperature': 0.2}
+    A.httpx.Client = _make_client(
+        '{"reply":"Logged 50.","operations":['
+        '{"op":"create_checkin","target":"' + _cap_goal + '","check":{"本次完成量":50}}]}')
+    r = ac2.post('/api/goals/ai', json={'message': '今天做了 50'})
+    d = r.get_json() or {}
+    _ck = [a for a in (d.get('applied') or []) if a.get('op') == 'create_checkin']
+    check(bool(_ck) and str(_ck[0].get('amount')) in ('20', '20.0'), 'AI 代打卡被每日上限截断（50→20）')
+    check(bool(_ck) and _ck[0].get('by_ai') is True, 'AI 代打卡带 by_ai 标记（前端可见）')
+    check('capped' in str(d.get('reply') or ''), 'AI 代打卡截断时 reply 如实说明')
+    _ckrows = (ac2.get('/api/goals').get_json() or {}).get('checks') or []
+    check(any(c.get('备注') == 'AI helper logged' for c in _ckrows), 'AI 代打卡备注为英文可见标记')
+    check(any(c.get('打卡类型') == 'ckNormal' and c.get('当时状态') == 'stSmooth' for c in _ckrows),
+          'AI 代打卡选项字段用稳定 id（ckNormal/stSmooth）')
 finally:
     A._load_config = _cfg2
     A.httpx.Client = _hx2

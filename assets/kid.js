@@ -176,26 +176,32 @@
   /* ================================================================== KidAsk */
   /* 把 .kid-ask-card 变成可展开问答卡：
      点击展开 textarea（placeholder 取 data-placeholder）；
-     失焦或点「保存」写入 localStorage，key = kid-ask-<页面标识>-<卡片序号>；
+     失焦或点「保存」写入 localStorage，key = kid-ask-<页面标识>-<卡片序号>[-<周序号>]；
+     带轮换题池的卡 key 含 epoch 周序号（问题按周轮换，答案必须与问题同周对应，
+     否则第 2 周起旧答案会错位显示在新问题下）；无题池的卡问题固定，key 不含周序号；
      再打开时回填；「清除」可清空；已存内容以只读方式再显示一次。 */
   var KidAsk = {
     init: function (rootSelector) {
       var root = resolveRoot(rootSelector);
       $$(root, '.kid-ask-card').forEach(function (card) {
         var idx = docIndex(card, '.kid-ask-card');
-        var key = 'kid-ask-' + pageId() + '-' + idx;
         // R8：周轮换问题池——data-question-pool 为 JSON 数组，按自然周（epoch 周）轮换，
         // 同一周内问题固定；无池或不合法时保持页面原文案
+        var wi = Math.floor(Date.now() / 604800000);
+        var hasPool = false;
         if (card.dataset.questionPool) {
           try {
             var pool = JSON.parse(card.dataset.questionPool);
             if (pool && pool.length) {
-              var wi = Math.floor(Date.now() / 604800000);
+              hasPool = true;
               var qEl = card.querySelector('strong');
               if (qEl) qEl.textContent = pool[wi % pool.length];
             }
           } catch (e) { /* 池格式错误：保持原文案 */ }
         }
+        // R8 修复（V3 计划 M5 既定方案）：轮换问题的答案 key 必须含周序号，
+        // 旧格式 key 的数据保留不迁移——避免跨周错配
+        var key = 'kid-ask-' + pageId() + '-' + idx + (hasPool ? '-' + wi : '');
         if (!claim(card)) { KidAsk._sync(card, key); return; }
 
         /* 问题本体：没有 .kid-ask-q 就把原有内容收进去，保证斜体样式与点击区都在 */
@@ -214,20 +220,20 @@
 
         var ta = el('textarea', 'kid-ask-input');
         ta.rows = 4;
-        ta.placeholder = card.dataset.placeholder || '写下你的想法…';
-        ta.setAttribute('aria-label', q.textContent.trim().slice(0, 60) || '写下你的想法');
+        ta.placeholder = card.dataset.placeholder || 'Write your thoughts…';
+        ta.setAttribute('aria-label', q.textContent.trim().slice(0, 60) || 'Write your thoughts');
 
         var actions = el('div', 'kid-ask-actions');
-        var saveBtn = el('button', 'kid-btn kid-btn-primary', '保存');
+        var saveBtn = el('button', 'kid-btn kid-btn-primary', 'Save');
         saveBtn.type = 'button';
-        var clearBtn = el('button', 'kid-btn kid-btn-ghost', '清除');
+        var clearBtn = el('button', 'kid-btn kid-btn-ghost', 'Clear');
         clearBtn.type = 'button';
         actions.appendChild(saveBtn);
         actions.appendChild(clearBtn);
 
         var saved = el('div', 'kid-ask-saved');
         saved.hidden = true;
-        var savedLabel = el('span', 'kid-ask-saved-label', '你之前写的');
+        var savedLabel = el('span', 'kid-ask-saved-label', 'You wrote before');
         var savedText = el('p', 'kid-ask-saved-text');
         saved.appendChild(savedLabel);
         saved.appendChild(savedText);
@@ -240,8 +246,8 @@
         var save = function () {
           store(key, ta.value);
           KidAsk._sync(card, key);
-          saveBtn.textContent = '已保存';
-          setTimeout(function () { saveBtn.textContent = '保存'; }, 1400);
+          saveBtn.textContent = 'Saved';
+          setTimeout(function () { saveBtn.textContent = 'Save'; }, 1400);
         };
 
         var toggle = function () {
@@ -273,8 +279,8 @@
           store(key, null);
           saved.hidden = true;
           savedText.textContent = '';
-          saveBtn.textContent = '已清除';
-          setTimeout(function () { saveBtn.textContent = '保存'; }, 1400);
+          saveBtn.textContent = 'Cleared';
+          setTimeout(function () { saveBtn.textContent = 'Save'; }, 1400);
           ta.focus();
         });
 
@@ -344,8 +350,8 @@
       box.classList.add('kid-progress');
       box.innerHTML = '';
       var top = el('div', 'kid-progress-top');
-      var label = el('span', 'kid-progress-label', box.dataset.kidLabel || '任务进度');
-      var text = el('span', 'kid-progress-text', '已完成 0 / 0');
+      var label = el('span', 'kid-progress-label', box.dataset.kidLabel || 'Task progress');
+      var text = el('span', 'kid-progress-text', 'Done 0 / 0');
       top.appendChild(label);
       top.appendChild(text);
       var bar = el('div', 'kid-progress-bar');
@@ -363,7 +369,7 @@
       Array.prototype.forEach.call(cards, function (c) { if (c.classList.contains('checked')) done++; });
       var text = box.querySelector('.kid-progress-text');
       var fill = box.querySelector('.kid-progress-fill');
-      if (text) text.textContent = '已完成 ' + done + ' / ' + total;
+      if (text) text.textContent = 'Done ' + done + ' / ' + total;
       if (fill) fill.style.width = (total ? Math.round(done / total * 100) : 0) + '%';
       box.dataset.state = (!total || done === total) ? 'done' : 'active';
       return { done: done, total: total };
@@ -402,7 +408,7 @@ var KidStamp = {
       var cardId = card.dataset.decideId || String(cardIdx);
       /* 角标（幂等：卡片 DOM 被重建后重新 init 会补上） */
       if (!card.querySelector('.kid-stamp')) {
-        card.appendChild(el('span', 'kid-stamp', '待你决定'));
+        card.appendChild(el('span', 'kid-stamp', 'Your call'));
       }
       card.classList.add('kid-has-stamp');
       var legacyKey = 'kid-stamp-' + pageId() + '-' + cardIdx; /* 旧版整卡一个 key */
@@ -476,12 +482,12 @@ var KidStamp = {
     });
     card.classList.toggle('kid-has-pick', picked > 0);
     var stamp = card.querySelector('.kid-stamp');
-    if (!picked) { if (stamp) stamp.textContent = '待你决定'; return; }
-    if (groups.length > 1) { if (stamp) stamp.textContent = '已决定 ' + picked + '/' + groups.length; }
+    if (!picked) { if (stamp) stamp.textContent = 'Your call'; return; }
+    if (groups.length > 1) { if (stamp) stamp.textContent = 'Decided ' + picked + '/' + groups.length; }
     else {
       var label0 = firstLabel || '';
       if (label0.length > 12) label0 = label0.slice(0, 12) + '…';
-      if (stamp) stamp.textContent = '你的选择：' + label0;
+      if (stamp) stamp.textContent = 'Your pick: ' + label0;
     }
     // R14：data-decide-once 卡——全部问题已决时折叠为归档条（点开可改选）
     if (card.dataset.decideOnce === 'true') {
@@ -502,7 +508,7 @@ var KidStamp = {
         var at = '';
         try { at = load(groups[0].dataset.kidStampKey + '__at') || ''; } catch (e) {}
         var dstr = at ? '（' + at.slice(0, 10) + '）' : '';
-        bar.textContent = '✅ 已决定：' + (firstLabel || '') + dstr + ' · 点开可改';
+        bar.textContent = '✅ Decided: ' + (firstLabel || '') + dstr + ' · tap to change';
       } else {
         card.classList.remove('kid-decided');
         card.classList.remove('kid-expanded');
@@ -641,7 +647,7 @@ var KidStamp = {
     /** 里程碑 toast：3/7/14/30/50/100 天 */
     _milestone: function (n) {
       if ([3, 7, 14, 30, 50, 100].indexOf(n) === -1) return;
-      var box = el('div', 'kid-streak-toast', '🔥 连打卡 ' + n + ' 天！给自己鼓个掌 👏');
+      var box = el('div', 'kid-streak-toast', '🔥 ' + n + '-day streak! Give yourself a hand 👏');
       document.body.appendChild(box);
       setTimeout(function () { box.classList.add('show'); }, 16);
       setTimeout(function () {
@@ -662,9 +668,9 @@ var KidStamp = {
         box.innerHTML = '';
         box.appendChild(el('span', 'kid-streak-fire', '🔥'));
         box.appendChild(el('span', 'kid-streak-text',
-          st.lastDate === today ? '连打卡 ' + st.count + ' 天' :
-          st.count > 0 ? '连打卡 ' + st.count + ' 天 · 今天还没打卡' :
-          '今天完成一件事，就开始连打卡'));
+          st.lastDate === today ? st.count + '-day streak' :
+          st.count > 0 ? st.count + '-day streak · not logged in today' :
+          'Finish one thing today to start a streak'));
       });
     },
 
