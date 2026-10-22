@@ -29,7 +29,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 .profile-card{padding:12px 16px;margin:8px 12px;background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:12px;text-align:center;cursor:default}
 .profile-avatar{font-size:40px;cursor:pointer;transition:transform 0.2s;display:inline-block;line-height:1.2}
 .profile-avatar:hover{transform:scale(1.15) rotate(5deg)}
-.profile-name{font-size:14px;font-weight:700;margin-top:4px;cursor:text;border:none;background:transparent;color:var(--text);text-align:center;width:100%;outline:none;border-bottom:1px dashed transparent;transition:border-color 0.2s}
+.profile-name{font-size:16px;font-weight:700;margin-top:4px;cursor:text;border:none;background:transparent;color:var(--text);text-align:center;width:100%;outline:none;border-bottom:1px dashed transparent;transition:border-color 0.2s}
 .profile-name:focus{border-bottom-color:var(--accent)}
 .profile-xp{margin-top:6px;font-size:10px;color:var(--text2)}
 .profile-xp-bar{height:4px;background:var(--bg);border-radius:2px;margin-top:3px;overflow:hidden}
@@ -53,6 +53,12 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 .main{margin-left:220px;padding:28px 36px;max-width:1400px;min-height:100vh}
 .header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
 .header-bar h2{font-size:18px;font-weight:700}
+
+/* 手机适配（2026-10-22）：侧栏 off-canvas + 汉堡按钮 + 遮罩 */
+.hamburger{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:20px;line-height:1;padding:8px 13px;cursor:pointer}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+.sidebar-backdrop.open{display:block}
+#routes-list{overflow-x:auto}
 .header-bar .admin-info{font-size:14px;color:var(--text2)}
 .tab-panel{display:none}
 /* 内嵌页面容器（Goal Desk）：撑满右侧内容区 */
@@ -379,6 +385,11 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <!-- 移动端适配：本页原有布局无媒体查询，窄屏下压缩间距与字号 -->
 <style>
 @media (max-width:768px){
+  .hamburger{display:inline-block}
+  .sidebar{transform:translateX(-100%);transition:transform .2s ease}
+  .sidebar.open{transform:translateX(0);box-shadow:0 0 48px rgba(0,0,0,.3)}
+  .main{margin-left:0;padding:16px 14px 48px}
+  .grid-2,.grid-3{grid-template-columns:1fr}
   .twp-grid{grid-template-columns:1fr !important}
   .countdown-strip{gap:8px}
   .section{padding:12px !important}
@@ -423,10 +434,12 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
 
 <!-- Main -->
 <main class="main">
 <div class="header-bar">
+<button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
 <h2>Jemma's Study Space</h2>
 <div class="admin-info" style="font-size:12px;color:var(--text2)">Your call, your rules</div>
 </div>
@@ -2687,6 +2700,23 @@ function initKidLayer(){
    KidCheer.onAllDone('#today-stop', '#today-3');   // 今日全勾：撒彩带 + 「今天到此为止」（只看 Today 三件）
  }catch(_){}
 }
+// 手机适配（2026-10-22）：侧栏 off-canvas 开关（点汉堡/遮罩开合，点导航自动收起）
+function toggleSidebar(force){
+  var sb=document.querySelector('.sidebar');
+  if(!sb) return;
+  var open=(force===undefined)?!sb.classList.contains('open'):!!force;
+  sb.classList.toggle('open',open);
+  var bd=document.getElementById('sidebar-backdrop');
+  if(bd) bd.classList.toggle('open',open);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  try{
+    document.querySelectorAll('.sidebar-nav a,.sidebar-bottom a').forEach(function(a){
+      a.addEventListener('click',function(){toggleSidebar(false);});
+    });
+  }catch(_){}
+});
+
 document.addEventListener('DOMContentLoaded',()=>{
  loadProfile();
  loadDashboard();

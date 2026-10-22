@@ -33,6 +33,19 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 .header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
 .header-bar h2{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.5px}
 .header-bar .admin-info{font-size:12px;color:var(--text2)}
+
+/* 手机适配（2026-10-22）：侧栏 off-canvas + 汉堡按钮 + 遮罩 */
+.hamburger{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:20px;line-height:1;padding:8px 13px;cursor:pointer}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+.sidebar-backdrop.open{display:block}
+#routes-list{overflow-x:auto}
+@media (max-width:768px){
+  .hamburger{display:inline-block}
+  .sidebar{transform:translateX(-100%);transition:transform .2s ease}
+  .sidebar.open{transform:translateX(0);box-shadow:0 0 48px rgba(0,0,0,.3)}
+  .main{margin-left:0;padding:16px 14px 48px}
+  .header-bar h2{font-size:22px}
+}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 /* 内嵌页面容器（目标台 / 物理奥赛）：撑满右侧内容区，随窗口自适应 */
@@ -46,7 +59,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 .profile-card{padding:12px 16px;margin:8px 12px;margin-top:auto;background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:12px;text-align:center;cursor:default}
 .profile-avatar{font-size:40px;cursor:pointer;transition:transform 0.2s;display:inline-block;line-height:1.2}
 .profile-avatar:hover{transform:scale(1.15) rotate(5deg)}
-.profile-name{font-size:14px;font-weight:700;margin-top:4px;cursor:text;border:none;background:transparent;color:var(--text);text-align:center;width:100%;outline:none;border-bottom:1px dashed transparent;transition:border-color 0.2s}
+.profile-name{font-size:16px;font-weight:700;margin-top:4px;cursor:text;border:none;background:transparent;color:var(--text);text-align:center;width:100%;outline:none;border-bottom:1px dashed transparent;transition:border-color .2s}
 .profile-name:focus{border-bottom-color:var(--accent)}
 .profile-streak{font-size:11px;color:var(--orange);margin-top:6px;font-weight:600}
 .theme-dots{display:flex;gap:6px;justify-content:center;margin-top:8px}
@@ -72,7 +85,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 /* Subject Grid */
 .subject-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
 @media(max-width:900px){.subject-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:600px){.subject-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.subject-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}.ec-answer-section{grid-template-columns:1fr}}
 .subject-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;transition:all 0.2s}
 .subject-card.risk{border-color:rgba(255,107,107,0.4);background:rgba(255,107,107,0.06)}
 .subject-card.excellent{border-color:rgba(56,217,169,0.4);background:rgba(56,217,169,0.06)}
@@ -545,10 +558,12 @@ canvas.radar{width:240px!important;height:240px!important}
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
 
 <!-- Main -->
 <main class="main">
 <div class="header-bar">
+<button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
 <h2>Focus and try your best</h2>
 <div class="admin-info"><a href="#" onclick="logout();return false" style="color:var(--red)">Logout</a></div>
 </div>
@@ -3656,6 +3671,23 @@ async function loadThreeWeekPlan(){
     }
   }catch(_){ /* 断网：保持缓存渲染 */ }
 }
+
+// 手机适配（2026-10-22）：侧栏 off-canvas 开关（点汉堡/遮罩开合，点导航自动收起）
+function toggleSidebar(force){
+  var sb=document.querySelector('.sidebar');
+  if(!sb) return;
+  var open=(force===undefined)?!sb.classList.contains('open'):!!force;
+  sb.classList.toggle('open',open);
+  var bd=document.getElementById('sidebar-backdrop');
+  if(bd) bd.classList.toggle('open',open);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  try{
+    document.querySelectorAll('.sidebar-nav a,.sidebar-bottom a').forEach(function(a){
+      a.addEventListener('click',function(){toggleSidebar(false);});
+    });
+  }catch(_){}
+});
 
 // Init 
 document.addEventListener('DOMContentLoaded',()=>{

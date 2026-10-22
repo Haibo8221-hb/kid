@@ -672,6 +672,34 @@ async function runPracticePersistence() {
   return { pass, fail };
 }
 
+// ── M1：手机适配回归（2026-10-22 off-canvas 侧栏 + P1 窄屏降级）─────────
+// 源码级断言：jsdom 无布局引擎，媒体查询本身不可执行，
+// 但「基础设施是否在位」必须防回归——侧栏曾长期无任何窄屏适配（390px 下内容仅 ~98px）。
+function runMobileAdaptation() {
+  const pass = [], fail = [];
+  const pages = ['app.html', 'jemma.html'];
+  for (const f of pages) {
+    const src = fs.readFileSync(path.resolve(__dirname, '..', f), 'utf8');
+    const label = f === 'app.html' ? 'Diya' : 'Jemma';
+    if (src.includes('class="hamburger"')) pass.push(`M1：${label} 页有汉堡按钮`);
+    else fail.push(`M1：${label} 页缺汉堡按钮`);
+    if (src.includes('id="sidebar-backdrop"')) pass.push(`M1：${label} 页有侧栏遮罩`);
+    else fail.push(`M1：${label} 页缺侧栏遮罩`);
+    if (src.includes('function toggleSidebar')) pass.push(`M1：${label} 页定义 toggleSidebar`);
+    else fail.push(`M1：${label} 页未定义 toggleSidebar`);
+    if (src.includes('.sidebar{transform:translateX(-100%)')) pass.push(`M1：${label} 窄屏侧栏 off-canvas 规则在位`);
+    else fail.push(`M1：${label} 缺 off-canvas 规则（手机侧栏将常驻占屏）`);
+    if (src.includes('.main{margin-left:0')) pass.push(`M1：${label} 窄屏主区零左边距`);
+    else fail.push(`M1：${label} 窄屏主区仍带 220px 左边距`);
+    if (src.includes('#routes-list{overflow-x:auto')) pass.push(`M1：${label} 路线对比表有横向滚动包裹`);
+    else fail.push(`M1：${label} 路线对比表缺横向滚动包裹`);
+  }
+  const login = fs.readFileSync(path.resolve(__dirname, '..', 'login.html'), 'utf8');
+  if (/input\{[^}]*font-size:16px/.test(login)) pass.push('M1：登录页输入框 16px（防 iOS focus 自动缩放）');
+  else fail.push('M1：登录页输入框仍 <16px（iOS 会自动放大页面）');
+  return { pass, fail };
+}
+
 (async () => {
   console.log('\n===== 子女教育工作台 冒烟测试（双页回归）=====\n');
   let totalPass = 0, totalFail = 0;
@@ -696,6 +724,16 @@ async function runPracticePersistence() {
   if (pp.fail.length) {
     console.log(`失败 ${pp.fail.length} 项：`);
     pp.fail.forEach((f) => console.log('  ❌ ' + f));
+  }
+  const m1 = runMobileAdaptation();
+  totalPass += m1.pass.length;
+  totalFail += m1.fail.length;
+  console.log('---- 手机适配回归（M1）----');
+  console.log(`通过 ${m1.pass.length} 项：`);
+  m1.pass.forEach((p) => console.log('  ✅ ' + p));
+  if (m1.fail.length) {
+    console.log(`失败 ${m1.fail.length} 项：`);
+    m1.fail.forEach((f) => console.log('  ❌ ' + f));
   }
   console.log('\n-----------------------------------');
   console.log(totalFail === 0 ? `RESULT: ALL PASS ✅ (${totalPass} 项)` : `RESULT: FAILED ❌ (${totalFail} 项失败)`);
