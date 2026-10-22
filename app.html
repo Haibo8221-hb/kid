@@ -491,7 +491,7 @@ canvas.radar{width:240px!important;height:240px!important}
 .twp-week .tw-focus b{color:var(--orange)}
 </style>
 <!-- 儿童友好高亮与互动组件层（与 Jemma 页面共用同一套，保证高亮逻辑一致） -->
-<link rel="stylesheet" href="/assets/kid.css?v=202610191">
+<link rel="stylesheet" href="/assets/kid.css?v=20261022">
 </head>
 <body data-kid-page="diya">
 
@@ -541,7 +541,7 @@ canvas.radar{width:240px!important;height:240px!important}
 <a href="/inspector_calls_flashcards.html" target="_blank">Inspector Calls Flashcards</a>
 <a href="/Diya_Plan.html" target="_blank">My Full Plan</a>
 <a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">My Summer Guide</a>
-<a href="#" id="llm-settings-btn" title="Configure LLM endpoint / API Key / model" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM module not loaded — version 20261014-1745-domfix. Your browser or proxy is probably caching an old app.html. Please hard-refresh Ctrl+Shift+R, or use the versioned address: app.html?v=20261014-1745-domfix');}}catch(e){alert('Could not open LLM settings: '+((e&&e.message)||e));} return false;">⚙️ LLM Settings</a>
+<a href="#" id="llm-settings-btn" title="Configure LLM endpoint / API Key / model" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM module not loaded — version 20261022. Your browser or proxy is probably caching an old app.html. Please hard-refresh Ctrl+Shift+R, or use the versioned address: app.html?v=20261022');}}catch(e){alert('Could not open LLM settings: '+((e&&e.message)||e));} return false;">⚙️ LLM Settings</a>
 <a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
 </div>
 </aside>
@@ -1189,7 +1189,7 @@ ERROR BOOK
 <div id="ver-badge" style="position:fixed;left:6px;bottom:6px;z-index:400;font-size:10px;color:var(--text2);opacity:0.5;pointer-events:none;font-family:monospace"></div>
 
 <script>window.KID_CHILD='diya';</script>
-<script src="assets/kid-common.js?v=20261019"></script>
+<script src="assets/kid-common.js?v=20261022"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -1252,7 +1252,7 @@ window.addEventListener('error', function(e){
 // State 
 let currentChild = 'diya';
 // 版本号（构建标识）；用于诊断“缓存了旧版 app.html”——页面左下角徽标会显示它
-const APP_VERSION = '20261014-1745-domfix';
+const APP_VERSION = '20261022';
 try{ const vb=document.getElementById('ver-badge'); if(vb) vb.textContent='build '+APP_VERSION; }catch(_){}
 let plannerWeeks = {diya:0};
 let plannerData = {diya:{}};
@@ -3688,6 +3688,6 @@ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
  }catch(_){}
 });
 </script>
-<script src="/assets/kid.js?v=202610191"></script>
+<script src="/assets/kid.js?v=20261022"></script>
 </body>
 </html>

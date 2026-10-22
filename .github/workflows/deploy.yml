@@ -27,6 +27,18 @@ jobs:
       - name: Resource link health check
         run: python tests/check_links.py
 
+      # V3 Phase C2：前端冒烟（jsdom 双页 166 断言）进 CI 门禁——
+      # 历史上多个"点击无反应"bug 只有 smoke 能抓到（悬空 onclick 等）。
+      - name: Setup Node (frontend smoke)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Frontend smoke tests (jsdom · dual-page)
+        run: |
+          npm i jsdom --no-save
+          JSDOM_PATH="$PWD/node_modules/jsdom" node tools/smoke_test.cjs
+
       # 注：需要完整测试输出时，手动跑 "Test only (debug harness)" 工作流（会推送日志到 ci-testlog 分支）
 
   deploy:
