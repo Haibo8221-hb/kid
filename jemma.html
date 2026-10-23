@@ -861,6 +861,7 @@ English confidence takes time — it is a "do I dare speak up" question, not a "
 <button class="filter-btn" data-filter="maths" onclick="filterResources('maths')">Maths</button>
 <button class="filter-btn" data-filter="computing" onclick="filterResources('computing')">Computing</button>
 <button class="filter-btn" data-filter="jemma" onclick="filterResources('jemma')">Jemma</button>
+<button class="filter-btn" data-filter="languages" onclick="filterResources('languages')">Languages</button>
 </div>
 <div id="resource-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px"></div>
 </details>
@@ -1651,6 +1652,13 @@ async function loadResources(){
  {name:'Raspberry Pi Projects', desc:'Free structured Python project path (ages 10-13)', category:'computing', file:'https://projects.raspberrypi.org/en/pathways/python-intro', size:'Web'},
  {name:'Tinkercad', desc:'Free browser 3D modelling + circuits simulator', category:'computing', file:'https://www.tinkercad.com', size:'Web'},
  {name:'micro:bit', desc:'Code a real micro:bit — simulator + projects', category:'computing', file:'https://microbit.org/projects/', size:'Web'},
+ {name:'NLC 训练资料库 (GCHQ)', desc:'National Language Competition 11月16-20日 · 官方样题3套+答案讲解+UKLO语言学奥赛真题16份+3周训练计划', category:'languages', file:'/downloads/NLC/', size:'NEW'},
+ {name:'NLC Sample Pack 1', desc:'GCHQ 官方样题第1套（先做这套）', category:'languages', file:'/downloads/NLC/NLCChallenge1.pdf', size:'PDF'},
+ {name:'NLC Sample Pack 2', desc:'GCHQ 官方样题第2套', category:'languages', file:'/downloads/NLC/NLCChallenge2.pdf', size:'PDF'},
+ {name:'NLC Sample Pack 3', desc:'GCHQ 官方样题第3套', category:'languages', file:'/downloads/NLC/NLCChallenge3.pdf', size:'PDF'},
+ {name:'NLC Walkthroughs (答案)', desc:'三套样题的完整讲解+答案 — 做完再看！', category:'languages', file:'/downloads/NLC/', size:'PDF'},
+ {name:'NLC Official Site', desc:'GCHQ NLC 官网 — 规则/平台/历年冠军', category:'languages', file:'https://www.gchq.gov.uk/information/national-language-competition', size:'Web'},
+ {name:'UKLO Past Papers', desc:'UK Linguistics Olympiad 全部真题(251份) — NLC 同类型进阶训练', category:'languages', file:'https://www.uklo.org/past-exam-papers/', size:'Web'},
  ];
  allResources=resources;
  renderResources();
