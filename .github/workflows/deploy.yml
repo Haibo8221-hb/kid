@@ -120,9 +120,18 @@ jobs:
             printf '%s' '${{ secrets.HRD_API_TOKEN }}' > /www/wwwroot/kid/data/hrd_token.txt
             chown www:www /www/wwwroot/kid/data/hrd_token.txt
             chmod 600 /www/wwwroot/kid/data/hrd_token.txt
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 http://127.0.0.1/api/hrd/state || true)
-            echo "hrd token chars: $(wc -c < /www/wwwroot/kid/data/hrd_token.txt) · /api/hrd/state -> $code (401=端点已生效且已上锁)"
-            if [ -z "${{ secrets.HRD_API_TOKEN }}" ]; then echo "::warning::HRD_API_TOKEN secret 未配置，/api/hrd/* 将全部返回 401"; fi
+            echo "hrd token chars: $(wc -c < /www/wwwroot/kid/data/hrd_token.txt)"
+            echo "== 部署的代码是否含新路由:"
+            grep -c "hrd_state" "${{ secrets.SITE_ROOT }}/api_server.py" || echo "  !! api_server.py 无 hrd_state（代码未部署上）"
+            echo "== plan-api 状态:"
+            systemctl is-active plan-api || true
+            echo "== 端点探测（404=路由不可达 / 401=已生效且上锁 / 200=放行）:"
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 http://127.0.0.1/api/hrd/state || true); echo "  127.0.0.1 默认 Host -> $code"
+            for h in grow-consultant.com xgrow.me; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 -H "Host: $h" http://127.0.0.1/api/hrd/state || true); echo "  Host: $h -> $code"
+            done
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 http://127.0.0.1:5000/api/hrd/state || true); echo "  直连 gunicorn :5000 -> $code"
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 http://127.0.0.1/api/goals || true); echo "  对照组 /api/goals -> $code"
 
       # ── /v3 预览子树：与主站同源，供孩子体验新版；主站内容不受影响 ──
       # 页面内 /api/* 与 /assets/* 均为绝对路径，/v3 复用主站后端与静态资源，
