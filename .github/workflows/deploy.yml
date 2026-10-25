@@ -125,13 +125,10 @@ jobs:
             grep -c "hrd_state" "${{ secrets.SITE_ROOT }}/api_server.py" || echo "  !! api_server.py 无 hrd_state（代码未部署上）"
             echo "== plan-api 状态:"
             systemctl is-active plan-api || true
-            echo "== 端点探测（404=路由不可达 / 401=已生效且上锁 / 200=放行）:"
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 http://127.0.0.1/api/hrd/state || true); echo "  127.0.0.1 默认 Host -> $code"
-            for h in grow-consultant.com xgrow.me; do
-              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 -H "Host: $h" http://127.0.0.1/api/hrd/state || true); echo "  Host: $h -> $code"
-            done
+            echo "== 端点探测（401=已生效且上锁 / 200=放行 / 404=vhost 未代理 / 502=后端未起）:"
             code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 http://127.0.0.1:5000/api/hrd/state || true); echo "  直连 gunicorn :5000 -> $code"
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 http://127.0.0.1/api/goals || true); echo "  对照组 /api/goals -> $code"
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://112.74.40.8/api/hrd/state || true); echo "  公网 IP（用户真实路径） -> $code"
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://112.74.40.8/api/goals || true); echo "  对照组 /api/goals -> $code"
 
       # ── /v3 预览子树：与主站同源，供孩子体验新版；主站内容不受影响 ──
       # 页面内 /api/* 与 /assets/* 均为绝对路径，/v3 复用主站后端与静态资源，
