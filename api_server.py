@@ -131,9 +131,17 @@ def _is_public_api_path():
 
 @app.before_request
 def _auth_gate():
-    """统一入口拦截：所有 /api/* 需要有效会话（静态页面由前端 401 跳转兜底）"""
+    """统一入口拦截：/api/* 需要有效会话（静态页面由前端 401 跳转兜底）；
+    /api/hrd/* 是例外——工作台页面无登录态，改用 X-HRD-Token 头校验
+    （令牌文件由部署 workflow 写入 data/hrd_token.txt，见文件末 HRD 区块）。"""
     if not request.path.startswith('/api/'):
         return None
+    if request.path.startswith('/api/hrd/'):
+        if request.method == 'OPTIONS':
+            return None                      # CORS 预检放行，凭据在正式请求里校验
+        if _hrd_token_valid():
+            return None
+        return _hrd_unauthorized()
     if _is_public_api_path():
         return None
     if _verify_token(_auth_token_from_request()):
@@ -3114,6 +3122,138 @@ def goals_ai():
                     'applied': applied, 'goals': len(goals)})
     _set_cors(resp)
     return resp
+
+
+# ── HRD 管理工作台 · 服务器数据同步（2026-10-25）────────────────────────
+# 背景：工作台是纯静态单文件应用（ECS /hrd/ 与本地 file:// 双入口），
+#   UI 数据原先只存各自浏览器的 localStorage——按 origin 隔离，多端各是一份，
+#   新增/删除墓碑互不可见（用户实测：PC 新增的待办 ECS 看不到、删掉的还在）。
+#   本组端点把数据收到服务器成为唯一真源：页面 boot 时 GET 全覆盖本地缓存，
+#   保存时 PUT（防抖合并）；断网静默降级纯本地，恢复后续传。
+# 数据形状：{app, ver, stamp, data:{tasks,notes,skills,knowledge},
+#            tombs:{key:{指纹:时间戳}}}——墓碑与 _touched/_fp 原样随行传输，
+#   合并语义全部留在页面端，服务端只做存储不做业务解释。
+# 鉴权：/api/* 默认走 _auth_gate 会话校验，本组改用 X-HRD-Token 头比对
+#   data/hrd_token.txt（部署 workflow 从 GitHub secret 写入，chmod 600，
+#   永不入库）。令牌文件缺失/为空 -> 一律 401（fail closed），拒绝裸奔。
+# 写入：atomic_write + 换留 .bak（PUT 是整盖语义，脏数据覆盖时留还原点）。
+
+_HRD_FILE = 'hrd.json'
+_HRD_TOKEN_FILE = 'hrd_token.txt'
+_HRD_MAX_BODY = 8 * 1024 * 1024          # 8MB 足够（4 模块 + 墓碑），超限 413
+_HRD_KEYS = ('tasks', 'notes', 'skills', 'knowledge')
+
+
+def _hrd_path():
+    return os.path.join(DATA_DIR, _HRD_FILE)
+
+
+def _hrd_token_path():
+    return os.path.join(DATA_DIR, _HRD_TOKEN_FILE)
+
+
+def _hrd_token_valid():
+    """服务端令牌比对（恒定时间）。令牌文件缺失/为空 -> 拒绝（fail closed）。"""
+    try:
+        with open(_hrd_token_path(), 'r', encoding='utf-8') as f:
+            expect = f.read().strip()
+    except OSError:
+        return False
+    if not expect:
+        return False
+    got = (request.headers.get('X-HRD-Token', '') or '').strip()
+    return hmac.compare_digest(expect, got)
+
+
+def _hrd_cors(resp):
+    """宽松 CORS：file://（origin=null）与 http(s) 双入口都要能用。
+    主站的 _set_cors 是白名单式（ALLOWED_ORIGINS），不适用于本组。"""
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
+    resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-HRD-Token'
+    return resp
+
+
+def _hrd_unauthorized():
+    resp = jsonify({'error': 'unauthorized', 'hint': 'X-HRD-Token 无效，或服务端未配置令牌文件'})
+    _hrd_cors(resp)
+    return resp, 401
+
+
+def _read_hrd():
+    data = _cached_json_read(_hrd_path(), ttl=3)
+    if not isinstance(data, dict):
+        return {'app': 'hrd-workbench', 'ver': 1, 'stamp': '', 'data': {}, 'tombs': {}}
+    data.setdefault('app', 'hrd-workbench')
+    data.setdefault('ver', 1)
+    data.setdefault('stamp', '')
+    data.setdefault('data', {})
+    data.setdefault('tombs', {})
+    return data
+
+
+def _write_hrd(payload):
+    p = _hrd_path()
+    # 换留一份 .bak：PUT 是整盖语义，误传脏数据时留还原点
+    try:
+        if os.path.exists(p):
+            with open(p, 'rb') as f:
+                prev = f.read()
+            with open(p + '.bak', 'wb') as f:
+                f.write(prev)
+    except OSError:
+        pass
+    atomic_write(p, payload, ensure_ascii=False, indent=None)
+    _json_cache.pop(p, None)
+
+
+def _hrd_payload_valid(body):
+    if not isinstance(body, dict):
+        return False
+    d, t = body.get('data'), body.get('tombs')
+    if not isinstance(d, dict) or not isinstance(t, dict):
+        return False
+    for k in _HRD_KEYS:
+        if not isinstance(d.get(k, []), list):
+            return False
+        if not isinstance(t.get(k, {}), dict):
+            return False
+    return True
+
+
+@app.route('/api/hrd/state', methods=['GET', 'OPTIONS'])
+def hrd_state_get():
+    """拉取全量状态（四模块数据 + 墓碑）。空库返回空 data/tombs。"""
+    if request.method == 'OPTIONS':
+        return _hrd_cors(jsonify({}))
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    return _hrd_cors(jsonify(_read_hrd()))
+
+
+@app.route('/api/hrd/state', methods=['PUT', 'OPTIONS'])
+def hrd_state_put():
+    """整量写入（页面防抖后调用）。校验形状 + 体积，原子落盘 + 换留 .bak。"""
+    if request.method == 'OPTIONS':
+        return _hrd_cors(jsonify({}))
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    if request.content_length and request.content_length > _HRD_MAX_BODY:
+        resp = jsonify({'ok': False, 'error': 'body too large'})
+        _hrd_cors(resp)
+        return resp, 413
+    body = request.get_json(force=True, silent=True)
+    if not _hrd_payload_valid(body):
+        resp = jsonify({'ok': False, 'error': 'payload 形状不正确（需 data/tombs，四键须为 list/dict）'})
+        _hrd_cors(resp)
+        return resp, 400
+    stamp = datetime.now().isoformat(timespec='seconds')
+    out = {'app': 'hrd-workbench', 'ver': 1, 'stamp': stamp,
+           'data': {k: body['data'].get(k, []) for k in _HRD_KEYS},
+           'tombs': {k: body['tombs'].get(k, {}) for k in _HRD_KEYS}}
+    _write_hrd(out)
+    return _hrd_cors(jsonify({'ok': True, 'stamp': stamp,
+                              'counts': {k: len(out['data'][k]) for k in _HRD_KEYS}}))
 
 
 if __name__ == '__main__':

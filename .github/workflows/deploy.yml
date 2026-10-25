@@ -27,6 +27,10 @@ jobs:
       - name: Resource link health check
         run: python tests/check_links.py
 
+      # HRD 工作台同步 API（/api/hrd/state）：鉴权/形状/体积/CORS/墓碑 round-trip
+      - name: HRD sync API regression
+        run: python tests/test_hrd_api.py
+
       # V3 Phase C2：前端冒烟（jsdom 双页 166 断言）进 CI 门禁——
       # 历史上多个"点击无反应"bug 只有 smoke 能抓到（悬空 onclick 等）。
       - name: Setup Node (frontend smoke)
@@ -98,6 +102,27 @@ jobs:
             chown -R www:www "${{ secrets.SITE_ROOT }}"
             systemctl restart plan-api
             echo "==> deploy done"
+
+      # ── HRD 工作台 API 令牌（2026-10-25）────────────────────────────
+      # 工作台页面（/hrd/ 与本地 file://）无登录态，/api/hrd/* 改用 X-HRD-Token
+      # 头校验。令牌由 GitHub secret 落到服务器 data/ 目录（rsync exclude data/，
+      # 永不入库、不被部署覆盖）。secret 未配置时写空文件 → 端点 fail closed 401。
+      - name: Write HRD API token file
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            set -e
+            install -d /www/wwwroot/kid/data
+            printf '%s' '${{ secrets.HRD_API_TOKEN }}' > /www/wwwroot/kid/data/hrd_token.txt
+            chown www:www /www/wwwroot/kid/data/hrd_token.txt
+            chmod 600 /www/wwwroot/kid/data/hrd_token.txt
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 http://127.0.0.1/api/hrd/state || true)
+            echo "hrd token chars: $(wc -c < /www/wwwroot/kid/data/hrd_token.txt) · /api/hrd/state -> $code (401=端点已生效且已上锁)"
+            if [ -z "${{ secrets.HRD_API_TOKEN }}" ]; then echo "::warning::HRD_API_TOKEN secret 未配置，/api/hrd/* 将全部返回 401"; fi
 
       # ── /v3 预览子树：与主站同源，供孩子体验新版；主站内容不受影响 ──
       # 页面内 /api/* 与 /assets/* 均为绝对路径，/v3 复用主站后端与静态资源，
