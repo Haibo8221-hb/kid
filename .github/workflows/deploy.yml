@@ -103,24 +103,32 @@ jobs:
             systemctl restart plan-api
             echo "==> deploy done"
 
-      # ── HRD 工作台 API 令牌（2026-10-25）────────────────────────────
+      # ── HRD 工作台 API 令牌（2026-10-25；2026-10-26 改密码派生）──────────
       # 工作台页面（/hrd/ 与本地 file://）无登录态，/api/hrd/* 改用 X-HRD-Token
-      # 头校验。令牌由 GitHub secret 落到服务器 data/ 目录（rsync exclude data/，
-      # 永不入库、不被部署覆盖）。secret 未配置时写空文件 → 端点 fail closed 401。
-      - name: Write HRD API token file
+      # 头校验。用户只需记一个「同步密码」：GitHub secret HRD_API_TOKEN 存密码
+      # 原文，本步骤在服务器上派生 token = SHA256('hrd-workbench-sync-v1:'+密码)
+      # （与页面端 deriveToken() 同一算法）写入 data/hrd_token.txt（rsync
+      # exclude data/，永不入库、不被部署覆盖）。secret 未配置 → 空 → fail closed 401。
+      # 改密码：更新 secret 后重跑本 workflow（各设备重新登录一次即可）。
+      - name: Write HRD API token file (password -> derived token)
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          HRD_API_TOKEN: ${{ secrets.HRD_API_TOKEN }}
         with:
           host: ${{ secrets.ECS_HOST }}
           port: ${{ secrets.ECS_PORT }}
           username: ${{ secrets.ECS_USER }}
           key: ${{ secrets.ECS_SSH_KEY }}
+          envs: HRD_API_TOKEN
           script: |
             set -e
             install -d /www/wwwroot/kid/data
-            printf '%s' '${{ secrets.HRD_API_TOKEN }}' > /www/wwwroot/kid/data/hrd_token.txt
+            printf 'hrd-workbench-sync-v1:%s' "$HRD_API_TOKEN" | sha256sum | cut -d' ' -f1 | tr -d '\n' > /www/wwwroot/kid/data/hrd_token.txt
             chown www:www /www/wwwroot/kid/data/hrd_token.txt
             chmod 600 /www/wwwroot/kid/data/hrd_token.txt
-            echo "hrd token chars: $(wc -c < /www/wwwroot/kid/data/hrd_token.txt)"
+            TOK=$(cat /www/wwwroot/kid/data/hrd_token.txt)
+            echo "derived token chars: ${#TOK} (expect 64)"
+            if [ "${#TOK}" -ne 64 ]; then echo "FATAL: derived token length != 64"; exit 1; fi
             echo "== 部署的代码是否含新路由:"
             grep -c "hrd_state" "${{ secrets.SITE_ROOT }}/api_server.py" || echo "  !! api_server.py 无 hrd_state（代码未部署上）"
             echo "== plan-api 状态:"

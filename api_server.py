@@ -3134,8 +3134,11 @@ def goals_ai():
 #            tombs:{key:{指纹:时间戳}}}——墓碑与 _touched/_fp 原样随行传输，
 #   合并语义全部留在页面端，服务端只做存储不做业务解释。
 # 鉴权：/api/* 默认走 _auth_gate 会话校验，本组改用 X-HRD-Token 头比对
-#   data/hrd_token.txt（部署 workflow 从 GitHub secret 写入，chmod 600，
-#   永不入库）。令牌文件缺失/为空 -> 一律 401（fail closed），拒绝裸奔。
+#   data/hrd_token.txt（部署 workflow 写入，chmod 600，永不入库）。
+#   令牌文件缺失/为空 -> 一律 401（fail closed），拒绝裸奔。
+#   2026-10-26 起：用户只设一个「同步密码」，secret HRD_API_TOKEN 存密码原文，
+#   workflow 在服务器上派生 token = SHA256('hrd-workbench-sync-v1:'+密码)
+#   （与页面端 deriveToken() 同算法）后写入本文件；密码永不上网。
 # 写入：atomic_write + 换留 .bak（PUT 是整盖语义，脏数据覆盖时留还原点）。
 
 _HRD_FILE = 'hrd.json'
