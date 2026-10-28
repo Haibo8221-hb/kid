@@ -15,7 +15,7 @@
 
 用法：python tests/test_hrd_api.py   （退出码非 0 表示有失败）
 """
-import json, os, sys, tempfile
+import base64, json, os, re, sys, tempfile
 
 tmp = tempfile.mkdtemp(prefix='hrdapi_')
 os.environ['DATA_DIR'] = tmp
@@ -150,8 +150,126 @@ cl(TOKEN).put('/api/hrd/state', json=p)
 d3 = cl(TOKEN).get('/api/hrd/state').get_json()
 check(d3['data']['tasks'][0]['自定义字段'] == {'a': 1}, '记录内未知字段原样保留')
 
+# ── I 节：笔记配图端点 /api/hrd/img（2026-10-28）────────────────────
+print('== I 节 图片端点（上传/获取/删除/引用保护）==')
+
+JPEG = b'\xff\xd8\xff\xe0' + b'\x00' * 200 + b'\xff\xd9'      # 最小合法 JPEG（magic 判型）
+PNG = b'\x89PNG\r\n\x1a\n' + b'\x00' * 200                     # 最小合法 PNG
+GIF = b'GIF89a' + b'\x00' * 200                                # 最小合法 GIF
+BMP = b'BM' + b'\x00' * 200                                    # 不支持的格式
+
+
+def upload(name, data, token=TOKEN, as_dataurl=False):
+    b64 = base64.b64encode(data).decode()
+    if as_dataurl:
+        b64 = 'data:image/jpeg;base64,' + b64
+    return cl(token).post('/api/hrd/img', json={'name': name, 'data': b64})
+
+
+print('== I1 无令牌上传 -> 401（fail closed）==')
+r = cl().post('/api/hrd/img', json={'name': 'x.jpg', 'data': 'AAAA'})
+check(r.status_code == 401, f'无令牌 POST -> 401（实际 {r.status_code}）')
+
+print('== I2 三种格式上传 -> 200 + id/url；magic 判型不信文件名 ==')
+r = upload('photo.jpg', JPEG)
+check(r.status_code == 200, f'JPEG 上传 -> 200（实际 {r.status_code}）')
+b = r.get_json() or {}
+JPG_ID = b.get('id', '')
+check(bool(re.fullmatch(r'[0-9a-f]{64}', JPG_ID)), 'id 为 sha256 十六进制（64 位）')
+check(b.get('ext') == 'jpg' and b.get('url') == '/api/hrd/img/' + JPG_ID, '返回 ext + url')
+check(b.get('bytes') == len(JPEG), '返回字节数')
+r = upload('其实是png.txt', PNG)                               # 文件名撒谎，按内容判
+check((r.get_json() or {}).get('ext') == 'png', '假文件名也按 magic 判为 png')
+r = upload('anim.gif', GIF)
+check((r.get_json() or {}).get('ext') == 'gif', 'GIF 上传 -> ext=gif')
+
+print('== I3 非图片内容 -> 415（坏 magic / 不支持的格式）==')
+r = upload('假图.jpg', BMP)
+check(r.status_code == 415, f'BMP（不支持格式）-> 415（实际 {r.status_code}）')
+r = upload('坏图.jpg', b'not-an-image-at-all')
+check(r.status_code == 415, f'坏 magic -> 415（实际 {r.status_code}）')
+r = cl(TOKEN).post('/api/hrd/img', json={'name': 'x.jpg', 'data': '!!!not-base64!!!'})
+check(r.status_code in (400, 415), f'坏 base64 -> 400/415（实际 {r.status_code}）')
+r = cl(TOKEN).post('/api/hrd/img', json={'name': 'x.jpg'})
+check(r.status_code == 400, f'缺 data -> 400（实际 {r.status_code}）')
+
+print('== I4 体积超限 -> 413 ==')
+old_max = A._HRD_IMG_MAX_BYTES
+A._HRD_IMG_MAX_BYTES = 1024
+try:
+    r = upload('big.jpg', JPEG + b'\x00' * 4096)
+    check(r.status_code == 413, f'超过单图上限 -> 413（实际 {r.status_code}）')
+finally:
+    A._HRD_IMG_MAX_BYTES = old_max
+old_body = A._HRD_IMG_MAX_BODY
+A._HRD_IMG_MAX_BODY = 1024
+try:
+    r = upload('big.jpg', JPEG + b'\x00' * 4096)
+    check(r.status_code == 413, f'请求体超限 -> 413（实际 {r.status_code}）')
+finally:
+    A._HRD_IMG_MAX_BODY = old_body
+
+print('== I5 GET 图片：头令牌 / query 令牌 / 无令牌 ==')
+r = cl(TOKEN).get('/api/hrd/img/' + JPG_ID)
+check(r.status_code == 200, f'头令牌 GET -> 200（实际 {r.status_code}）')
+check(r.headers.get('Content-Type') == 'image/jpeg', f'Content-Type=image/jpeg（实际 {r.headers.get("Content-Type")!r}）')
+check('immutable' in (r.headers.get('Cache-Control') or ''), 'Cache-Control 带 immutable（内容寻址可长缓存）')
+check(r.data == JPEG, '字节保真 round-trip')
+r = cl().get('/api/hrd/img/' + JPG_ID + '?t=' + TOKEN)
+check(r.status_code == 200, f'query 令牌 GET -> 200（img 标签场景，实际 {r.status_code}）')
+r = cl().get('/api/hrd/img/' + JPG_ID)
+check(r.status_code == 401, f'无任何令牌 GET -> 401（实际 {r.status_code}）')
+r = cl(TOKEN).get('/api/hrd/img/' + '0' * 64)
+check(r.status_code == 404, f'不存在的 id -> 404（实际 {r.status_code}）')
+r = cl(TOKEN).get('/api/hrd/img/..%2F..%2Fetc%2Fpasswd')
+check(r.status_code == 404, f'路径穿越 id -> 404（正则拦截，实际 {r.status_code}）')
+
+print('== I6 data URL 前缀容忍（canvas toDataURL 直传）==')
+r = upload('dataurl.jpg', JPEG, as_dataurl=True)
+check(r.status_code == 200 and (r.get_json() or {}).get('id') == JPG_ID,
+      'data: 前缀上传成功且与裸 base64 同 id')
+
+print('== I7 内容寻址去重：同内容重复上传同 id，不翻倍 ==')
+before = len(os.listdir(os.path.join(tmp, 'hrd_imgs')))
+r = upload('again.jpg', JPEG)
+after = len(os.listdir(os.path.join(tmp, 'hrd_imgs')))
+check((r.get_json() or {}).get('id') == JPG_ID and before == after, '重复上传命中同 id，文件数不变')
+
+print('== I8 DELETE 未被引用 -> 200，再 GET -> 404 ==')
+r = upload('todelete.png', PNG)
+pid = (r.get_json() or {}).get('id', '')
+r = cl(TOKEN).delete('/api/hrd/img/' + pid)
+check(r.status_code == 200, f'无引用 DELETE -> 200（实际 {r.status_code}）')
+r = cl(TOKEN).get('/api/hrd/img/' + pid)
+check(r.status_code == 404, '删除后 GET -> 404')
+r = cl(TOKEN).delete('/api/hrd/img/' + pid)
+check(r.status_code == 404, f'重复 DELETE -> 404（幂等，实际 {r.status_code}）')
+
+print('== I9 DELETE 被引用 -> 409（先保存去引用、再删文件的时序保护）==')
+p2 = sample_payload()
+p2['data']['notes'] = [{'_id': 'n1', '标题': '带图笔记',
+                        '_imgs': [{'id': JPG_ID, 'name': 'photo.jpg', 'w': 100, 'h': 80}]}]
+cl(TOKEN).put('/api/hrd/state', json=p2)
+r = cl(TOKEN).delete('/api/hrd/img/' + JPG_ID)
+check(r.status_code == 409, f'被未删除记录引用 -> 409（实际 {r.status_code}）')
+check((r.get_json() or {}).get('referenced') is True, '409 体带 referenced 标记')
+p2['data']['notes'][0].pop('_imgs')
+cl(TOKEN).put('/api/hrd/state', json=p2)
+r = cl(TOKEN).delete('/api/hrd/img/' + JPG_ID)
+check(r.status_code == 200, f'移除引用后 DELETE -> 200（实际 {r.status_code}）')
+
+print('== I10 墓碑不占引用：已删除笔记的配图可删 ==')
+p3 = sample_payload()
+p3['data']['notes'] = [{'_id': 'n2', '标题': '已删笔记', '_deleted': '2026-10-28T00:00:00',
+                        '_imgs': [{'id': JPG_ID, 'name': 'photo.jpg'}]}]
+cl(TOKEN).put('/api/hrd/state', json=p3)
+r = upload('墓意图.jpg', JPEG)
+check(r.status_code == 200, '重新上传同内容 -> 200（去重命中）')
+r = cl(TOKEN).delete('/api/hrd/img/' + JPG_ID)
+check(r.status_code == 200, f'引用方已打墓碑 -> 允许删除（实际 {r.status_code}）')
+
 print()
 if FAILS:
     print(f'失败 {len(FAILS)} 项')
     sys.exit(1)
-print('全部通过（H1-H10）')
+print('全部通过（H1-H10 + I1-I10）')

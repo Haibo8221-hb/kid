@@ -3156,7 +3156,9 @@ def _hrd_token_path():
 
 
 def _hrd_token_valid():
-    """服务端令牌比对（恒定时间）。令牌文件缺失/为空 -> 拒绝（fail closed）。"""
+    """服务端令牌比对（恒定时间）。令牌文件缺失/为空 -> 拒绝（fail closed）。
+    令牌来源：X-HRD-Token 头（fetch 用），或 ?t= 查询参数（<img src> 发不出
+    自定义头，2026-10-28 图片端点起支持；令牌进 URL 会留访问日志，个人服务可接受）。"""
     try:
         with open(_hrd_token_path(), 'r', encoding='utf-8') as f:
             expect = f.read().strip()
@@ -3165,6 +3167,8 @@ def _hrd_token_valid():
     if not expect:
         return False
     got = (request.headers.get('X-HRD-Token', '') or '').strip()
+    if not got:
+        got = (request.args.get('t', '') or '').strip()
     return hmac.compare_digest(expect, got)
 
 
@@ -3172,7 +3176,7 @@ def _hrd_cors(resp):
     """宽松 CORS：file://（origin=null）与 http(s) 双入口都要能用。
     主站的 _set_cors 是白名单式（ALLOWED_ORIGINS），不适用于本组。"""
     resp.headers['Access-Control-Allow-Origin'] = '*'
-    resp.headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
+    resp.headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, DELETE, OPTIONS'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-HRD-Token'
     return resp
 
@@ -3257,6 +3261,200 @@ def hrd_state_put():
     _write_hrd(out)
     return _hrd_cors(jsonify({'ok': True, 'stamp': stamp,
                               'counts': {k: len(out['data'][k]) for k in _HRD_KEYS}}))
+
+
+# ── HRD 笔记配图 · 图片存储端点（2026-10-28）────────────────────────
+# 背景：笔记要支持配图（JPG/PNG/GIF）。关键决策：图片绝不进 hrd.json 快照——
+#   base64 会让 8MB 载荷上限爆炸、45s 轮询全量下载被拖死、浏览器 localStorage
+#   5MB 配额爆掉。改为「文件单独存、快照只存引用」：
+#     data/hrd_imgs/<sha256(内容)>.<ext>，笔记记录带 _imgs:[{id,name,w,h}]
+#   （内部字段，与 _ord/_touched 同性质，服务端同样只存不解释）。
+# 寻址：id = sha256(文件字节) 十六进制——内容寻址，重复上传天然去重，
+#   64 位十六进制不可枚举猜测；扩展名按 magic bytes 推导（不信客户端文件名）。
+# 鉴权：POST/DELETE 走 X-HRD-Token 头；GET 额外接受 ?t=<token> 查询参数
+#   （<img src> 发不出自定义头）。before_request 的 /api/hrd/* gate 已统一校验。
+# 删除保护：DELETE 前扫描 hrd.json 全量引用（跳过墓碑），仍被任何未删除记录
+#   引用 -> 409。防的是「先保存再去删」时序里，把别处仍引用的图打成裂图。
+# 限额：单图 5MB / 请求体 12MB / 图片目录总量 512MB，超限 413。
+
+_HRD_IMG_DIRNAME = 'hrd_imgs'
+_HRD_IMG_MAX_BYTES = 5 * 1024 * 1024        # 单图 5MB（页面端会先压缩到 1600px）
+_HRD_IMG_MAX_BODY = 12 * 1024 * 1024        # 请求体上限（base64 膨胀 33% + JSON 包裹）
+_HRD_IMG_QUOTA = 512 * 1024 * 1024          # 图片目录总量上限
+_HRD_IMG_MAGIC = (
+    (b'\xff\xd8\xff', 'jpg'),
+    (b'\x89PNG\r\n\x1a\n', 'png'),
+    (b'GIF87a', 'gif'),
+    (b'GIF89a', 'gif'),
+)
+_HRD_IMG_MIME = {'jpg': 'image/jpeg', 'png': 'image/png', 'gif': 'image/gif'}
+_HRD_IMG_ID_RE = re.compile(r'^[0-9a-f]{64}$')
+
+
+def _hrd_img_dir():
+    d = os.path.join(DATA_DIR, _HRD_IMG_DIRNAME)
+    try:
+        os.makedirs(d, exist_ok=True)
+    except OSError:
+        pass
+    return d
+
+
+def _hrd_img_sniff(data):
+    """按 magic bytes 判格式（不信客户端 filename / Content-Type）。"""
+    for magic, ext in _HRD_IMG_MAGIC:
+        if data.startswith(magic):
+            return ext
+    return None
+
+
+def _hrd_img_find(iid):
+    """按 id 找现存文件路径（内容寻址，同一 id 只有一个扩展名）。不存在返回 None。"""
+    if not iid or not _HRD_IMG_ID_RE.match(iid):
+        return None                                 # 同时挡掉路径穿越（../ 等）
+    for ext in _HRD_IMG_MIME:
+        p = os.path.join(_hrd_img_dir(), iid + '.' + ext)
+        if os.path.exists(p):
+            return p
+    return None
+
+
+def _hrd_img_referenced(iid):
+    """扫描 hrd.json：任何未删除记录引用该 id -> True（墓碑不占引用）。
+    读库异常时保守返回 True（拒绝删除），避免误删。"""
+    try:
+        data = (_read_hrd().get('data') or {})
+    except Exception:
+        return True
+    for k in _HRD_KEYS:
+        for row in data.get(k) or []:
+            if not isinstance(row, dict) or row.get('_deleted'):
+                continue
+            imgs = row.get('_imgs')
+            if isinstance(imgs, list):
+                for im in imgs:
+                    if isinstance(im, dict) and im.get('id') == iid:
+                        return True
+    return False
+
+
+def _hrd_img_used_bytes():
+    total = 0
+    try:
+        for name in os.listdir(_hrd_img_dir()):
+            fp = os.path.join(_hrd_img_dir(), name)
+            if os.path.isfile(fp):
+                try:
+                    total += os.path.getsize(fp)
+                except OSError:
+                    pass
+    except OSError:
+        pass
+    return total
+
+
+def _hrd_img_err(msg, code):
+    resp = jsonify({'ok': False, 'error': msg})
+    _hrd_cors(resp)
+    return resp, code
+
+
+@app.route('/api/hrd/img', methods=['POST', 'OPTIONS'])
+def hrd_img_upload():
+    """上传笔记配图。body: {name, data}，data 为 base64（可带 data URL 前缀）。
+    返回 {ok, id, ext, bytes, url}；id = sha256(内容)，重复上传去重（同 id 直接命中）。"""
+    if request.method == 'OPTIONS':
+        return _hrd_cors(jsonify({}))
+    if request.content_length and request.content_length > _HRD_IMG_MAX_BODY:
+        return _hrd_img_err('body too large', 413)
+    body = request.get_json(force=True, silent=True)
+    if not isinstance(body, dict):
+        return _hrd_img_err('body 需为 JSON 对象 {name, data}', 400)
+    raw = body.get('data')
+    if not isinstance(raw, str) or not raw.strip():
+        return _hrd_img_err('data 不能为空（base64 字符串，可带 data: 前缀）', 400)
+    b64 = raw.strip()
+    if b64.startswith('data:'):                    # 容忍 canvas toDataURL 形式
+        b64 = b64.split(',', 1)[1] if ',' in b64 else ''
+    try:
+        data = base64.b64decode(b64)
+    except Exception:
+        return _hrd_img_err('base64 解码失败', 400)
+    if not data:
+        return _hrd_img_err('解码结果为空', 400)
+    if len(data) > _HRD_IMG_MAX_BYTES:
+        return _hrd_img_err('单图超过 5MB 上限（页面端已压缩，仍超限请换图）', 413)
+    ext = _hrd_img_sniff(data)
+    if not ext:
+        return _hrd_img_err('仅支持 JPG / PNG / GIF（按文件内容 magic bytes 判别）', 415)
+    iid = hashlib.sha256(data).hexdigest()
+    path = os.path.join(_hrd_img_dir(), iid + '.' + ext)
+    if not os.path.exists(path):
+        if len(data) + _hrd_img_used_bytes() > _HRD_IMG_QUOTA:
+            return _hrd_img_err('图片空间配额已满（512MB），请先清理不用的配图', 413)
+        tmp = path + '.tmp-' + str(os.getpid())     # 原子落盘：先临时文件再 rename
+        try:
+            with open(tmp, 'wb') as f:
+                f.write(data)
+            os.replace(tmp, path)
+        except OSError:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            return _hrd_img_err('写入失败', 500)
+    resp = jsonify({'ok': True, 'id': iid, 'ext': ext, 'bytes': len(data),
+                    'url': '/api/hrd/img/' + iid})
+    _hrd_cors(resp)
+    return resp, 200
+
+
+@app.route('/api/hrd/img/<iid>', methods=['GET', 'OPTIONS'])
+def hrd_img_get(iid):
+    """提供图片字节。令牌走 X-HRD-Token 头或 ?t= 查询参数（img 标签用）。
+    内容寻址 + immutable 缓存：id 不变内容永不变，浏览器可长期缓存。"""
+    if request.method == 'OPTIONS':
+        return _hrd_cors(jsonify({}))
+    path = _hrd_img_find(iid)
+    if not path:
+        resp = jsonify({'error': 'not found'})
+        _hrd_cors(resp)
+        return resp, 404
+    ext = path.rsplit('.', 1)[-1]
+    try:
+        with open(path, 'rb') as f:
+            data = f.read()
+    except OSError:
+        resp = jsonify({'error': 'read failed'})
+        _hrd_cors(resp)
+        return resp, 500
+    resp = Response(data, mimetype=_HRD_IMG_MIME.get(ext, 'application/octet-stream'))
+    resp.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    _hrd_cors(resp)
+    return resp
+
+
+@app.route('/api/hrd/img/<iid>', methods=['DELETE', 'OPTIONS'])
+def hrd_img_delete(iid):
+    """删除图片。仍被任何未删除记录引用 -> 409（页面端「先保存去引用、再删文件」
+    的时序依赖此保护：PUT 失败时不会出现「文件没了但快照还引用」的裂图）。"""
+    if request.method == 'OPTIONS':
+        return _hrd_cors(jsonify({}))
+    path = _hrd_img_find(iid)
+    if not path:
+        return _hrd_img_err('not found', 404)
+    if _hrd_img_referenced(iid):
+        resp = jsonify({'ok': False, 'error': 'still referenced（仍有记录引用该图片，拒绝删除）',
+                        'referenced': True})
+        _hrd_cors(resp)
+        return resp, 409
+    try:
+        os.unlink(path)
+    except OSError:
+        return _hrd_img_err('delete failed', 500)
+    resp = jsonify({'ok': True, 'id': iid})
+    _hrd_cors(resp)
+    return resp
 
 
 if __name__ == '__main__':
