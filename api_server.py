@@ -3144,7 +3144,13 @@ def goals_ai():
 _HRD_FILE = 'hrd.json'
 _HRD_TOKEN_FILE = 'hrd_token.txt'
 _HRD_MAX_BODY = 8 * 1024 * 1024          # 8MB 足够（4 模块 + 墓碑），超限 413
-_HRD_KEYS = ('tasks', 'notes', 'skills', 'knowledge')
+_HRD_KEYS = ('tasks', 'notes', 'skills', 'knowledge', 'prompts')
+# 注意：_HRD_KEYS 必须与页面 BK_KEYS 完全一致（PC 与手机版都是 5 个）。
+# 2026-10-30 事故：prompts 模块上线时页面加了键、后端没加，导致
+#   ① PUT 时 prompts 被丢弃（提示词永远上不了云）；
+#   ② GET 永远不返回 prompts -> 页面 sameSnapshot 判定"有差异" ->
+#      每 45s 覆盖一次 + toast「已从其他设备同步 70 条记录」+ 整页重渲染，无限循环。
+# 以后新增模块：这里和两个 HTML 的 BK_KEYS 必须同步改。
 
 
 def _hrd_path():
@@ -3255,9 +3261,16 @@ def hrd_state_put():
         _hrd_cors(resp)
         return resp, 400
     stamp = datetime.now().isoformat(timespec='seconds')
+    # 缺键沿用服务器现值：旧版页面（缓存未刷新 / 只覆盖部分模块）PUT 时不带 prompts，
+    # 不能因此把云端已有的提示词清空。
+    prev = _read_hrd()
+    prev_data = prev.get('data') or {}
+    prev_tombs = prev.get('tombs') or {}
     out = {'app': 'hrd-workbench', 'ver': 1, 'stamp': stamp,
-           'data': {k: body['data'].get(k, []) for k in _HRD_KEYS},
-           'tombs': {k: body['tombs'].get(k, {}) for k in _HRD_KEYS}}
+           'data': {k: (body['data'][k] if k in body['data'] else prev_data.get(k, []))
+                    for k in _HRD_KEYS},
+           'tombs': {k: (body['tombs'][k] if k in body['tombs'] else prev_tombs.get(k, {}))
+                     for k in _HRD_KEYS}}
     _write_hrd(out)
     return _hrd_cors(jsonify({'ok': True, 'stamp': stamp,
                               'counts': {k: len(out['data'][k]) for k in _HRD_KEYS}}))
