@@ -12,6 +12,9 @@ DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(__file__), 'd
 os.makedirs(DATA_DIR, exist_ok=True)
 # P1-4: 聊天上下文窗口上限，避免历史无限增长导致 token 超限
 CHAT_MAX_HISTORY = int(os.environ.get('CHAT_MAX_HISTORY', '20'))
+# AI ask 输出上限：GLM 端点实测接受 16384；8192 对学习教练场景绰绰有余（2026-11-03 由 3000 上调，
+# 3000 在思考未关闭的极端情况下会被 reasoning 耗尽导致正文为空）
+CHAT_MAX_TOKENS = int(os.environ.get('CHAT_MAX_TOKENS', '8192'))
 
 # ── 应用层鉴权（P0：登录态从 nginx basic auth 上移到应用层）──────────────
 # 设计：
@@ -612,8 +615,9 @@ def _call_llm(conv, child, plan_info):
                 json={
                     'model': model,
                     'messages': messages,
-                    'max_tokens': 3000,
-                    'temperature': temperature
+                    'max_tokens': CHAT_MAX_TOKENS,
+                    'temperature': temperature,
+                    **_llm_extra_params(base_url)
                 }
             )
             if resp.status_code == 200:
@@ -624,6 +628,16 @@ def _call_llm(conv, child, plan_info):
                 return f'[LLM错误 {resp.status_code}]: {resp.text[:100]}'
     except Exception as e:
         return f'[网络错误]: {str(e)[:100]}'
+
+
+def _llm_extra_params(base_url):
+    """GLM/BigModel 端点专用参数：关闭深度思考。
+    GLM 5.x 系推理模型的 reasoning 会先消耗 max_tokens（实测作文点评题思考耗 2998/3000 → 正文 0 字），
+    关闭后正文正常输出。仅对 bigmodel / z.ai 域名注入，避免影响其他供应商。"""
+    u = (base_url or '').lower()
+    if 'bigmodel' in u or 'z.ai' in u:
+        return {'thinking': {'type': 'disabled'}}
+    return {}
 
 
 def _build_system_prompt(child, plan_info):
@@ -714,9 +728,10 @@ def chat_stream():
                     json={
                         'model': cfg['model'],
                         'messages': messages,
-                        'max_tokens': 3000,
+                        'max_tokens': CHAT_MAX_TOKENS,
                         'temperature': cfg.get('temperature', 0.7),
-                        'stream': True
+                        'stream': True,
+                        **_llm_extra_params(cfg['base_url'])
                     }
                 ) as resp:
                     if resp.status_code != 200:
@@ -738,6 +753,25 @@ def chat_stream():
                                 pass
         except Exception as e:
             yield _sse({'error': str(e)[:100]})
+
+        # 降级兜底：流式未解析出任何正文时（供应商流式格式变更/思考耗尽token等），改走非流式请求，
+        # 避免孩子看到空白回复（2026-11-03 Jemma 作业题 0 字回复事故）
+        if not full_reply.strip():
+            try:
+                with httpx.Client(timeout=90.0) as client:
+                    r2 = client.post(
+                        f"{cfg['base_url']}/chat/completions",
+                        headers={'Authorization': f"Bearer {cfg['api_key']}", 'Content-Type': 'application/json'},
+                        json={'model': cfg['model'], 'messages': messages, 'max_tokens': CHAT_MAX_TOKENS,
+                              'temperature': cfg.get('temperature', 0.7), **_llm_extra_params(cfg['base_url'])})
+                if r2.status_code == 200:
+                    full_reply = (r2.json().get('choices') or [{}])[0].get('message', {}).get('content', '') or ''
+                    if full_reply:
+                        yield _sse({'token': full_reply})
+                else:
+                    yield _sse({'error': f'LLM错误 {r2.status_code}'})
+            except Exception as e2:
+                yield _sse({'error': str(e2)[:100]})
 
         # Save conversation
         conv.append({'role': 'user', 'content': user_msg, 'time': datetime.now().isoformat()})
