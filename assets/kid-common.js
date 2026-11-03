@@ -83,6 +83,24 @@ function getWeekDates(child){
  return days;
 }
 
+// ── AI ask 时间戳（2026-11-03）：历史消息带 time 字段，展示为英国本地时间 ──
+// 服务器存的是无时区后缀的 ISO（服务器时区 Asia/Shanghai）；孩子在英国，转 Europe/London 显示。
+function fmtChatTime(iso){
+ try{
+  let s=String(iso||'');
+  if(!s) return '';
+  if(!/[Zz+]/.test(s.slice(10))) s+='+08:00'; // 无偏移后缀 = 服务器时间(CST)
+  s=s.replace(/(\.\d{3})\d+/,'$1');           // 微秒截成毫秒（JS Date 只认3位）
+  const d=new Date(s);
+  if(isNaN(d.getTime())) return '';
+  const opt={timeZone:'Europe/London'};
+  const day=x=>x.toLocaleDateString('en-GB',Object.assign({day:'numeric',month:'short'},opt));
+  const t=d.toLocaleTimeString('en-GB',Object.assign({hour:'2-digit',minute:'2-digit'},opt));
+  const now=new Date();
+  return day(d)===day(now)?t:(day(d)+' '+t);
+ }catch(e){ return ''; }
+}
+
 async function loadChatHistory(){
  const container=document.getElementById('chat-messages');
  if(!container) return;
@@ -91,7 +109,7 @@ async function loadChatHistory(){
  const data=await r.json();
  const msgs=Array.isArray(data)?data:(data.messages||[]);
  container.innerHTML='';
- msgs.forEach(m=>appendChatMsg(m.role,m.content));
+ msgs.forEach(m=>appendChatMsg(m.role,m.content,m.time));
  container.scrollTop=container.scrollHeight;
  }catch(e){
  container.innerHTML='<div style="color:var(--text2);padding:20px;text-align:center">Load failed</div>';

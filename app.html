@@ -379,6 +379,12 @@ canvas.radar{width:240px!important;height:240px!important}
 .bubble{max-width:75%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
 .msg.user .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px}
 .msg.ai .bubble{background:var(--surface2);color:var(--text);border-bottom-left-radius:4px}
+/* 历史消息 role=assistant（服务端存储），与 .msg.ai 同样式（2026-11-03 修复：此前历史气泡无样式） */
+.msg.assistant{align-items:flex-start}
+.msg.assistant .bubble{background:var(--surface2);color:var(--text);border-bottom-left-radius:4px}
+/* 消息时间戳（英国本地时间） */
+.msg-time{font-size:12px;color:var(--text2);margin:3px 8px 0}
+.msg.user .msg-time{text-align:right}
 .chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);background:var(--surface2)}
 .chat-input-row textarea{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;color:var(--text);resize:none;min-height:44px;max-height:120px}
 .chat-input-row textarea:focus{outline:none;border-color:var(--accent)}
@@ -1204,7 +1210,7 @@ ERROR BOOK
 <div id="ver-badge" style="position:fixed;left:6px;bottom:6px;z-index:400;font-size:10px;color:var(--text2);opacity:0.5;pointer-events:none;font-family:monospace"></div>
 
 <script>window.KID_CHILD='diya';</script>
-<script src="assets/kid-common.js?v=20261022"></script>
+<script src="assets/kid-common.js?v=20261103"></script>
 <script>
 // ── 应用层登录守卫：任何 /api 响应 401 时跳登录页（含页面加载探活）──
 (function(){
@@ -2340,7 +2346,7 @@ function markdownToHtml(md){
  html=html.replace(/<p><\/p>/g,'');
  return html;
 }
-function appendChatMsg(role,content){
+function appendChatMsg(role,content,time){
  const container=document.getElementById('chat-messages');
  const div=document.createElement('div');
  div.className='msg '+role;
@@ -2350,6 +2356,11 @@ function appendChatMsg(role,content){
  const clean=(content||'').replace(/<think>[\s\S]*?<\/think>/g,'').trim();
  bubble.innerHTML=markdownToHtml(clean);
  div.appendChild(bubble);
+ // 时间戳：历史消息用存储时间（转英国时区），实时消息用当前设备时间
+ const tsDiv=document.createElement('div');
+ tsDiv.className='msg-time';
+ tsDiv.textContent=fmtChatTime(time===undefined?new Date().toISOString():time);
+ if(tsDiv.textContent) div.appendChild(tsDiv);
  container.appendChild(div);
 }
 async function sendChatMsg(){
@@ -2406,7 +2417,9 @@ async function sendChatMsg(){
  aiBubble.innerHTML='<span style="color:var(--red)">Network error — please try again</span>';
  }
  }finally{
- btn.disabled=false; scroll();
+ btn.disabled=false;
+ try{ const ts=document.createElement('div'); ts.className='msg-time'; ts.textContent=fmtChatTime(new Date().toISOString()); aiDiv.appendChild(ts); }catch(e){}
+ scroll();
  }
 }
 async function clearChatHistory(){
