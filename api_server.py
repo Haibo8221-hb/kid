@@ -716,71 +716,89 @@ def chat_stream():
 
     def generate():
         full_reply = ''
+        client_gone = False
         try:
-            with httpx.Client(timeout=90.0) as client:
-                with client.stream(
-                    'POST',
-                    f"{cfg['base_url']}/chat/completions",
-                    headers={
-                        'Authorization': f"Bearer {cfg['api_key']}",
-                        'Content-Type': 'application/json'
-                    },
-                    json={
-                        'model': cfg['model'],
-                        'messages': messages,
-                        'max_tokens': CHAT_MAX_TOKENS,
-                        'temperature': cfg.get('temperature', 0.7),
-                        'stream': True,
-                        **_llm_extra_params(cfg['base_url'])
-                    }
-                ) as resp:
-                    if resp.status_code != 200:
-                        yield _sse({'error': f'LLM错误 {resp.status_code}'})
-                        return
-                    for line in resp.iter_lines():
-                        if line.startswith('data: '):
-                            chunk = line[6:]
-                            if chunk == '[DONE]':
-                                break
-                            try:
-                                import json as _json
-                                delta = _json.loads(chunk)
-                                content = delta.get('choices', [{}])[0].get('delta', {}).get('content', '')
-                                if content:
-                                    full_reply += content
-                                    yield _sse({'token': content})
-                            except Exception:
-                                pass
-        except Exception as e:
-            yield _sse({'error': str(e)[:100]})
-
-        # 降级兜底：流式未解析出任何正文时（供应商流式格式变更/思考耗尽token等），改走非流式请求，
-        # 避免孩子看到空白回复（2026-11-03 Jemma 作业题 0 字回复事故）
-        if not full_reply.strip():
             try:
                 with httpx.Client(timeout=90.0) as client:
-                    r2 = client.post(
+                    with client.stream(
+                        'POST',
                         f"{cfg['base_url']}/chat/completions",
-                        headers={'Authorization': f"Bearer {cfg['api_key']}", 'Content-Type': 'application/json'},
-                        json={'model': cfg['model'], 'messages': messages, 'max_tokens': CHAT_MAX_TOKENS,
-                              'temperature': cfg.get('temperature', 0.7), **_llm_extra_params(cfg['base_url'])})
-                if r2.status_code == 200:
-                    full_reply = (r2.json().get('choices') or [{}])[0].get('message', {}).get('content', '') or ''
-                    if full_reply:
-                        yield _sse({'token': full_reply})
-                else:
-                    yield _sse({'error': f'LLM错误 {r2.status_code}'})
-            except Exception as e2:
-                yield _sse({'error': str(e2)[:100]})
-
-        # Save conversation
-        conv.append({'role': 'user', 'content': user_msg, 'time': datetime.now().isoformat()})
-        conv.append({'role': 'assistant', 'content': full_reply, 'time': datetime.now().isoformat()})
-        atomic_write(conv_path, conv, ensure_ascii=False, indent=2)
-        try:
-            _sync_chat_to_md(child, conv)
-        except Exception as e:
-            print(f'[sync] MD sync failed: {e}')
+                        headers={
+                            'Authorization': f"Bearer {cfg['api_key']}",
+                            'Content-Type': 'application/json'
+                        },
+                        json={
+                            'model': cfg['model'],
+                            'messages': messages,
+                            'max_tokens': CHAT_MAX_TOKENS,
+                            'temperature': cfg.get('temperature', 0.7),
+                            'stream': True,
+                            **_llm_extra_params(cfg['base_url'])
+                        }
+                    ) as resp:
+                        if resp.status_code != 200:
+                            yield _sse({'error': f'LLM错误 {resp.status_code}'})
+                            return
+                        for line in resp.iter_lines():
+                            if line.startswith('data: '):
+                                chunk = line[6:]
+                                if chunk == '[DONE]':
+                                    break
+                                try:
+                                    import json as _json
+                                    delta = _json.loads(chunk)
+                                    content = delta.get('choices', [{}])[0].get('delta', {}).get('content', '')
+                                    if content:
+                                        full_reply += content
+                                        yield _sse({'token': content})
+                                except Exception:
+                                    pass
+            except GeneratorExit:
+                # 客户端中途断开（iPad锁屏/切标签页/网络抖动）：必须放行，但先记标记
+                client_gone = True
+                raise
+            except Exception as e:
+                try:
+                    yield _sse({'error': str(e)[:100]})
+                except GeneratorExit:
+                    client_gone = True
+                    raise
+        finally:
+            # 2026-11-03：持久化移入 finally —— 此前客户端中途断开(GeneratorExit)会整轮跳过保存，
+            # 孩子下一问就"失忆"。现在无论正常结束/异常/断开都入库：
+            # 断开时保留已收到的部分正文；正文为空且客户端还在则走非流式补答；补不到则只存问题不存空回答。
+            if not full_reply.strip() and not client_gone:
+                try:
+                    with httpx.Client(timeout=90.0) as client:
+                        r2 = client.post(
+                            f"{cfg['base_url']}/chat/completions",
+                            headers={'Authorization': f"Bearer {cfg['api_key']}", 'Content-Type': 'application/json'},
+                            json={'model': cfg['model'], 'messages': messages, 'max_tokens': CHAT_MAX_TOKENS,
+                                  'temperature': cfg.get('temperature', 0.7), **_llm_extra_params(cfg['base_url'])})
+                    if r2.status_code == 200:
+                        full_reply = (r2.json().get('choices') or [{}])[0].get('message', {}).get('content', '') or ''
+                        if full_reply:
+                            yield _sse({'token': full_reply})
+                    else:
+                        yield _sse({'error': f'LLM错误 {r2.status_code}'})
+                except GeneratorExit:
+                    raise
+                except Exception as e2:
+                    try:
+                        yield _sse({'error': str(e2)[:100]})
+                    except GeneratorExit:
+                        raise
+            try:
+                conv.append({'role': 'user', 'content': user_msg, 'time': datetime.now().isoformat()})
+                if full_reply.strip():
+                    conv.append({'role': 'assistant', 'content': full_reply, 'time': datetime.now().isoformat()})
+                atomic_write(conv_path, conv, ensure_ascii=False, indent=2)
+                try:
+                    _sync_chat_to_md(child, conv)
+                except Exception as e:
+                    print(f'[sync] MD sync failed for {child}: {e}')
+            except Exception as e:
+                print(f'[chat] save failed for {child}: {e}')
 
         yield _sse({'done': True})
 

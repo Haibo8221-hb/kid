@@ -105,7 +105,7 @@ async function loadChatHistory(){
  const container=document.getElementById('chat-messages');
  if(!container) return;
  try{
- const r=await fetch(`/api/chat/${KID_CHILD}?limit=50`);
+ const r=await fetch(`/api/chat/${KID_CHILD}?limit=60`);
  const data=await r.json();
  const msgs=Array.isArray(data)?data:(data.messages||[]);
  container.innerHTML='';
