@@ -431,6 +431,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <li><a href="#" data-tab="plan" onclick="switchTab('plan');return false">📅 My Plan</a></li>
 <li><a href="#" data-tab="stuff" onclick="switchTab('stuff');return false">📦 My Stuff</a></li>
 <li><a href="#" data-tab="errors" onclick="switchTab('errors');return false">📗 Error Book</a></li>
+<li><a href="#" data-tab="calibrate" onclick="switchTab('calibrate');return false">🎯 Predict & Check</a></li>
 <li><a href="#" data-tab="chat" onclick="switchTab('chat');return false">💬 Ask AI</a></li>
 </ul>
 <div class="sidebar-bottom">
@@ -876,6 +877,18 @@ English confidence takes time — it is a "do I dare speak up" question, not a "
 <!-- 
  CHAT
  -->
+<div id="tab-calibrate" class="tab-panel">
+<div class="panel-title">Predict & Check</div>
+<div class="section">
+<div class="section-title">This Week's Strategy</div>
+<div id="mc-strategy"><div class="empty-state">Loading…</div></div>
+</div>
+<div class="section" style="margin-top:16px">
+<div class="section-title">Score Calibration — predict before, check after</div>
+<div id="mc-predictions"><div class="empty-state">Loading…</div></div>
+</div>
+</div>
+
 <div id="tab-chat" class="tab-panel">
 <div class="panel-title">AI Chat</div>
 <div class="chat-wrap">
@@ -1720,6 +1733,7 @@ function switchTab(tab){
  if(tab==='today'){ loadDashboard(); initKidLayer(); }
  if(tab==='plan'){ loadPlannerView(); loadRoutes(); }
  if(tab==='stuff'){ loadResources(); }
+ if(tab==='calibrate') loadMetacog();
  if(tab==='chat') loadChatHistory();
  if(tab==='errors') loadErrorBook();
 }
@@ -2822,5 +2836,161 @@ document.addEventListener('DOMContentLoaded',()=>{
 </div>
 
 <script src="/assets/kid.js?v=20261022"></script>
+<script>
+// ═══ Metacognition trainer: weekly strategy + score calibration (2026-11-03) ═══
+// Storage: /api/metacog/<child> → payload {predictions:[], weekly:{ISOweek:{strategy,worked,didnt}}}
+// Design: predict BEFORE a test → fill real score after → the gap trains self-judgement (calibration);
+// set ONE strategy on Monday → review worked/didn't on Sunday (plan-monitor-evaluate loop).
+(function(){
+'use strict';
+var ESC=(typeof escHtml==='function')?escHtml:((typeof escHtmlJ==='function')?escHtmlJ:function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});});
+var DATA={predictions:[],weekly:{}};
+var CHILD=function(){return window.KID_CHILD||'diya';};
+
+function weekKey(d){
+  var dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  var day=dt.getUTCDay()||7; dt.setUTCDate(dt.getUTCDate()+4-day);
+  var y0=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  return dt.getUTCFullYear()+'-W'+Math.ceil((((dt-y0)/86400000)+1)/7);
+}
+window.loadMetacog=async function(){
+  try{
+    var r=await fetch('/api/metacog/'+CHILD());
+    var d=await r.json();
+    if(d&&d.payload&&typeof d.payload==='object')DATA=d.payload;
+  }catch(e){DATA={predictions:[],weekly:{}};}
+  if(!Array.isArray(DATA.predictions))DATA.predictions=[];
+  if(!DATA.weekly||typeof DATA.weekly!=='object')DATA.weekly={};
+  render();
+};
+async function save(){
+  try{
+    await fetch('/api/metacog/'+CHILD(),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({updatedAt:new Date().toISOString(),payload:DATA})});
+  }catch(e){}
+}
+var TA='width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);margin:6px 0;font-family:inherit;line-height:1.6';
+var INP='background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--text);width:100%;box-sizing:border-box;font-family:inherit';
+
+function render(){renderStrategy();renderPreds();}
+
+function renderStrategy(){
+  var el=document.getElementById('mc-strategy'); if(!el)return;
+  var wk=weekKey(new Date()); var cur=DATA.weekly[wk];
+  if(!cur||!cur.strategy){
+    el.innerHTML='<div style="font-size:13px;color:var(--text2);margin-bottom:4px">Week '+wk+' — set ONE main strategy (Monday ritual, 1 minute)</div>'
+      +'<textarea id="mc-strat" rows="2" style="'+TA+'" placeholder="e.g. Past papers first, then check every answer against the mark scheme"></textarea>'
+      +'<button class="btn-sm" onclick="mcSetStrategy()">Set this week&#39;s strategy</button>';
+    return;
+  }
+  var h='<div style="font-size:12px;color:var(--text2)">Week '+wk+' strategy</div>'
+    +'<div style="font-size:14px;font-weight:600;margin:4px 0 2px">'+ESC(cur.strategy)+'</div>';
+  if(cur.review_date){
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'
+      +'<div style="background:var(--surface2);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.6"><b style="color:var(--accent2)">Worked</b><br>'+ESC(cur.worked||'—')+'</div>'
+      +'<div style="background:var(--surface2);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.6"><b style="color:var(--red)">Didn&#39;t work</b><br>'+ESC(cur.didnt||'—')+'</div></div>';
+  }else{
+    h+='<textarea id="mc-worked" rows="2" style="'+TA+'" placeholder="What worked this week?">'+ESC(cur.worked||'')+'</textarea>'
+      +'<textarea id="mc-didnt" rows="2" style="'+TA+'" placeholder="What didn&#39;t work?">'+ESC(cur.didnt||'')+'</textarea>'
+      +'<button class="btn" style="background:var(--accent2)" onclick="mcSetReview()">Save week review</button>';
+  }
+  var past=Object.keys(DATA.weekly).filter(function(k){return k!==wk&&DATA.weekly[k].strategy;}).sort().reverse().slice(0,4);
+  if(past.length){
+    h+='<div style="margin-top:12px;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Past weeks</div>';
+    past.forEach(function(k){var w=DATA.weekly[k];
+      h+='<div style="border-left:3px solid var(--accent);padding:4px 10px;margin:6px 0;font-size:12px;line-height:1.6"><b>'+k+'</b> · '+ESC(w.strategy)+(w.review_date?' <span style="color:var(--accent2)">reviewed</span>':'')+'</div>';});
+  }
+  el.innerHTML=h;
+}
+window.mcSetStrategy=function(){
+  var v=(document.getElementById('mc-strat').value||'').trim(); if(!v)return;
+  var wk=weekKey(new Date());
+  DATA.weekly[wk]=Object.assign({},DATA.weekly[wk],{strategy:v,set_date:new Date().toISOString()});
+  save().then(render);
+};
+window.mcSetReview=function(){
+  var wk=weekKey(new Date());
+  var w=DATA.weekly[wk]||{};
+  w.worked=(document.getElementById('mc-worked').value||'').trim();
+  w.didnt=(document.getElementById('mc-didnt').value||'').trim();
+  w.review_date=new Date().toISOString();
+  DATA.weekly[wk]=w; save().then(render);
+};
+
+function renderPreds(){
+  var el=document.getElementById('mc-predictions'); if(!el)return;
+  var preds=DATA.predictions;
+  var done=preds.filter(function(p){return p.actual!==null&&p.actual!==undefined&&p.actual!=='';});
+  var h='';
+  if(done.length>=2){
+    var gaps=done.map(function(p){return (+p.predicted)-(+p.actual);});
+    var mae=gaps.reduce(function(a,b){return a+Math.abs(b);},0)/gaps.length;
+    var mean=gaps.reduce(function(a,b){return a+b;},0)/gaps.length;
+    var dir=mean>1.5?'Over-confident — you predict too high':(mean<-1.5?'Under-confident — you know more than you think':'Well calibrated');
+    var pts=done.slice(-10).map(function(p){var mx=+p.max||100;return Math.min(100,Math.abs(((+p.predicted)-(+p.actual))/mx*100));});
+    var W=220,H=34,maxV=Math.max.apply(null,[20].concat(pts));
+    var line=pts.map(function(v,i){return ((i/Math.max(pts.length-1,1))*(W-4)+2)+','+(H-3-(v/maxV)*(H-8));}).join(' ');
+    h+='<div style="display:flex;gap:16px;align-items:center;margin:8px 0;flex-wrap:wrap;background:var(--surface2);border-radius:10px;padding:10px 12px">'
+      +'<div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Avg gap</div><div style="font-size:20px;font-weight:700">'+mae.toFixed(1)+'<span style="font-size:11px;font-weight:400"> pts</span></div></div>'
+      +'<div style="flex:1;min-width:150px"><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Pattern · '+done.length+' scored</div><div style="font-size:12px;font-weight:600;line-height:1.5">'+dir+'</div></div>'
+      +'<svg width="'+W+'" height="'+H+'" aria-label="calibration gap trend"><polyline points="'+line+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg>'
+      +'</div>';
+  }
+  h+='<div style="display:grid;grid-template-columns:1.7fr .8fr .45fr .55fr auto;gap:6px;margin:8px 0;align-items:center">'
+    +'<input id="mc-p-title" placeholder="Test or quiz (e.g. Physics mock)" style="'+INP+'">'
+    +'<input id="mc-p-subj" placeholder="Subject" style="'+INP+'">'
+    +'<input id="mc-p-max" type="number" min="1" placeholder="Max" style="'+INP+'">'
+    +'<input id="mc-p-pred" type="number" min="0" placeholder="My score?" style="'+INP+'">'
+    +'<button class="btn-sm" onclick="mcAddPred()">Predict</button></div>'
+    +'<div style="font-size:11px;color:var(--text2);line-height:1.6">Predict <b>before</b> the test. Fill your real score after — the gap is the training.</div>';
+  if(!preds.length){
+    h+='<div class="empty-state">No predictions yet — add your next test above.</div>';
+  }else{
+    h+='<div style="margin-top:10px">';
+    preds.slice().reverse().forEach(function(p){
+      var hasA=p.actual!==null&&p.actual!==undefined&&p.actual!=='';
+      var actualCell=hasA
+        ?'<div style="font-weight:700">'+ESC(p.actual)+'</div>'
+        :'<div style="display:flex;gap:4px"><input id="mc-a-'+p.id+'" type="number" min="0" placeholder="real" style="'+INP+'"><button class="btn-sm" onclick="mcSetActual('+p.id+')">Set</button></div>';
+      var deltaH='';
+      if(hasA){
+        var gap=(+p.predicted)-(+p.actual); var mx=+p.max||100;
+        var pct=Math.abs(gap)/mx*100;
+        var col=pct<=5?'var(--accent2)':(pct<=15?'#f59e0b':'var(--red)');
+        deltaH='<span style="background:'+col+'22;color:'+col+';border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap">'+(gap>0?'+':'')+gap+'</span>';
+      }
+      h+='<div style="display:grid;grid-template-columns:1.7fr .7fr 1fr .6fr 24px;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px">'
+        +'<div><b>'+ESC(p.title||'Test')+'</b><div style="font-size:10px;color:var(--text2)">'+ESC(String(p.date||'').slice(0,10))+(p.subject?' · '+ESC(p.subject):'')+'</div></div>'
+        +'<div><span style="color:var(--text2)">predicted</span><br><b>'+ESC(p.predicted)+'</b><span style="color:var(--text2)">/'+ESC(p.max||'?')+'</span></div>'
+        +actualCell.replace('<div style="font-weight:700">','<div><span style="color:var(--text2)">actual</span><br><b>').replace('</div>','</b></div>',1)
+        +'<div>'+deltaH+'</div>'
+        +'<button class="btn-sm" style="padding:2px 7px" title="delete" onclick="mcDelPred('+p.id+')">✕</button>'
+        +'</div>';
+    });
+    h+='</div>';
+  }
+  el.innerHTML=h;
+}
+window.mcAddPred=function(){
+  var t=(document.getElementById('mc-p-title').value||'').trim()||'Test';
+  var s=(document.getElementById('mc-p-subj').value||'').trim();
+  var mx=parseFloat(document.getElementById('mc-p-max').value);
+  var pr=parseFloat(document.getElementById('mc-p-pred').value);
+  if(!(mx>0)||!(pr>=0)||pr>mx){alert('Fill max and your predicted score (0 to max) first.');return;}
+  DATA.predictions.push({id:Date.now(),date:new Date().toISOString(),title:t,subject:s,max:mx,predicted:pr,actual:null});
+  save().then(render);
+};
+window.mcSetActual=function(id){
+  var inp=document.getElementById('mc-a-'+id); if(!inp)return;
+  var v=parseFloat(inp.value); if(!(v>=0)){alert('Enter your real score.');return;}
+  DATA.predictions.forEach(function(p){if(p.id===id)p.actual=v;});
+  save().then(render);
+};
+window.mcDelPred=function(id){
+  if(!confirm('Delete this prediction entry?'))return;
+  DATA.predictions=DATA.predictions.filter(function(p){return p.id!==id;});
+  save().then(render);
+};
+})();
+</script>
 </body>
 </html>

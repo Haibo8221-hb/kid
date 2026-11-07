@@ -1758,6 +1758,53 @@ def notes_api(child):
     _set_cors(resp)
     return resp
 
+# ── Metacognition（预测分校准 + 周策略复盘，2026-11-03）────────────────
+# 与 Notes/Decide 同构：自由 payload + updatedAt，前端全量 PUT 幂等，服务端跨设备真源。
+# payload 形态（前端维护）：
+#   { 'predictions': [{id,date,title,subject,predicted,max,actual|null,note}],
+#     'weekly': {'2026-W44': {strategy,set_date,worked,didnt,review_date}} }
+def _metacog_path(child):
+    return os.path.join(DATA_DIR, f'metacog_{child}.json')
+
+@app.route('/api/metacog/<child>', methods=['GET', 'PUT', 'OPTIONS'])
+def metacog_api(child):
+    """元认知训练数据读写（校准记录 + 周策略）。data/metacog_<child>.json，不入 git。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+
+    child = _safe_child(child)
+    path = _metacog_path(child)
+
+    if request.method == 'GET':
+        data = _cached_json_read(path, ttl=10) or {}
+        if not isinstance(data, dict):
+            data = {}
+        resp = jsonify({
+            'child': child,
+            'updatedAt': data.get('updatedAt') or '',
+            'payload': data.get('payload') if isinstance(data.get('payload'), dict) else {},
+        })
+        _set_cors(resp)
+        return resp
+
+    body = request.get_json(force=True, silent=True) or {}
+    payload = body.get('payload')
+    if not isinstance(payload, dict):
+        resp = jsonify({'ok': False, 'error': 'payload 必须是对象'})
+        _set_cors(resp)
+        return resp, 400
+    updated_at = str(body.get('updatedAt') or datetime.now().isoformat())
+    atomic_write(path, {'updatedAt': updated_at, 'payload': payload},
+                 ensure_ascii=False, indent=2)
+    _json_cache.pop(path, None)
+    resp = jsonify({'ok': True, 'updatedAt': updated_at})
+    _set_cors(resp)
+    return resp
+
 # ── Decide（孩子的自主决定：Latin 要不要继续学等）───────────────────────
 # 与 Notes 同构：自由 payload（{前端 localStorage key: choice}）+ updatedAt，
 # 前端本地即时渲染、服务端做跨设备真源。data/decide_<child>.json 运行时生成，
