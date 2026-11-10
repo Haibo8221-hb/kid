@@ -2081,7 +2081,8 @@ async function sendChatMsg(){
  html=html.replace(/\\n/g,'<br>');
  bubble.innerHTML=html;
  container.scrollTop=container.scrollHeight;
- }else if(data.error){
+ }else if(data.meta&&data.meta.searched){ div.insertAdjacentHTML('afterbegin','<div style="font-size:11px;color:var(--accent);margin-bottom:4px;font-weight:600">Searched the web</div>'); }
+ else if(data.error){
  bubble.innerHTML='<span style="color:var(--red)"> '+data.error+'</span>';
  }
  }catch(e){}

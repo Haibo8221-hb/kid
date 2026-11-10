@@ -2409,6 +2409,7 @@ async function sendChatMsg(){
  if(!line) continue;
  let payload; try{ payload=JSON.parse(line.slice(6)); }catch(e){ continue; }
  if(payload.token){ full+=payload.token; aiBubble.innerHTML=markdownToHtml(stripThink(full)); scroll(); }
+ else if(payload.meta&&payload.meta.searched){ aiDiv.insertAdjacentHTML('afterbegin','<div style="font-size:11px;color:var(--accent);margin-bottom:4px;font-weight:600">Searched the web</div>'); }
  else if(payload.error){ aiBubble.innerHTML='<span style="color:var(--red)">Error: '+payload.error+'</span>'; full=''; }
  }
  }

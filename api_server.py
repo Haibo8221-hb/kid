@@ -594,6 +594,12 @@ def _call_llm(conv, child, plan_info):
         content = _strip(msg.get('content', ''))
         messages.append({'role': msg['role'], 'content': content})
 
+    # 联网增强（非流式路径同样生效）：时效性问题注入搜索结果
+    if conv and _needs_search(conv[-1].get('content', '')):
+        block = _search_context_block(conv[-1].get('content', ''))
+        if block:
+            messages[0]['content'] += block
+
     # Load config
     cfg = _load_config()
     api_key = cfg['api_key']
@@ -638,6 +644,72 @@ def _llm_extra_params(base_url):
     if 'bigmodel' in u or 'z.ai' in u:
         return {'thinking': {'type': 'disabled'}}
     return {}
+
+
+# ── AI ask 联网搜索（百炼 EnhancedSearch MCP，2026-11-10）──────────────
+# 无状态 JSON-RPC（Streamable HTTP），key 来自 /etc/plan-api.env 的 QWEN_MCP_KEY。
+# 设计原则：搜索是增强不是依赖 —— 任何失败都静默降级为普通直答，绝不阻塞/中断对话。
+QWEN_MCP_KEY = os.environ.get('QWEN_MCP_KEY', '')
+MCP_SEARCH_URL = 'https://dashscope.aliyuncs.com/api/v1/mcps/EnhancedSearch/mcp'
+_search_cache = {}  # {query: (timestamp, text)}，10分钟去重，避免同问题反复烧配额
+
+# 时效性/事实性问题启发词（命中才联网；命中不了的问题直答零延迟损失）
+_SEARCH_TRIGGERS = re.compile(
+    r'(20[2-3]\d|requir|deadline|ucasa?|entry|admission|apply|application|latest|recent|'
+    r'today|this (week|month|year)|cut[- ]?off|grade boundar|date|when is|scholarship|tuition|'
+    r'fees|ranking|league table|policy|chang|updat|news|open day|clearing|2027|2028|'
+    r'最新|要求|截止|时间|政策|排名|学费|申请|变化|更新|新闻|分数线)', re.I)
+
+def _needs_search(msg):
+    if not QWEN_MCP_KEY:
+        return False
+    return bool(_SEARCH_TRIGGERS.search(msg or ''))
+
+def _mcp_search(query, timeout=25.0, limit=4000):
+    """调百炼联网搜索增强版。返回拼接文本（失败返回 ''，绝不抛异常）。"""
+    query = (query or '').strip()[:200]
+    if not query:
+        return ''
+    now = time.time()
+    hit = _search_cache.get(query)
+    if hit and now - hit[0] < 600:
+        return hit[1]
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            r = client.post(MCP_SEARCH_URL, headers={
+                'Authorization': f'Bearer {QWEN_MCP_KEY}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json, text/event-stream',
+            }, json={'jsonrpc': '2.0', 'id': 1, 'method': 'tools/call',
+                     'params': {'name': 'search_pro', 'arguments': {'query': query}}})
+        if r.status_code != 200:
+            return ''
+        txt = r.text
+        if 'data:' in txt[:40]:
+            for line in txt.split('\n'):
+                if line.startswith('data:'):
+                    txt = line[5:].strip()
+                    break
+        d = json.loads(txt)
+        blocks = d.get('result', {}).get('content', [])
+        text = ' '.join(b.get('text', '') for b in blocks if isinstance(b, dict))
+        if len(_search_cache) > 20:
+            _search_cache.clear()
+        _search_cache[query] = (now, text[:limit])
+        return text[:limit]
+    except Exception as e:
+        print(f'[mcp_search] failed (degraded to direct answer): {str(e)[:100]}')
+        return ''
+
+def _search_context_block(msg):
+    """生成注入 system 的搜索结果块；未命中/失败返回 ''。"""
+    text = _mcp_search(msg)
+    if not text:
+        return ''
+    return ('\n\n[WEB RESEARCH — live search results for this question. '
+            'Use them for time-sensitive facts; cite the source name when relying on them; '
+            'if they conflict with your knowledge, prefer the newer information and say so.]\n'
+            + text)
 
 
 def _build_system_prompt(child, plan_info):
@@ -708,6 +780,14 @@ def chat_stream():
         messages.append({'role': msg['role'], 'content': content})
     messages.append({'role': 'user', 'content': user_msg})
 
+    # 联网增强：时效性问题先搜索，结果注入 system（任何失败静默降级为直答）
+    searched = False
+    if _needs_search(user_msg):
+        block = _search_context_block(user_msg)
+        if block:
+            messages[0]['content'] += block
+            searched = True
+
     cfg = _load_config()
     if not cfg['api_key']:
         # 503 = 服务未配置（区别于 5xx 内部错误），前端可据此提示去「⚙️ LLM 设置」填写
@@ -717,6 +797,8 @@ def chat_stream():
     def generate():
         full_reply = ''
         client_gone = False
+        if searched:
+            yield _sse({'meta': {'searched': True}})
         try:
             try:
                 with httpx.Client(timeout=90.0) as client:
