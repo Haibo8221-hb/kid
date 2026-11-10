@@ -860,6 +860,12 @@ English confidence takes time — it is a "do I dare speak up" question, not a "
 </div>
 </details>
 
+<!-- Weekly Intelligence widget -->
+<div style="background:var(--surface);border-radius:10px;padding:14px;margin:12px 0;border:1px solid var(--border)">
+<div style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:8px">📊 Weekly Intelligence <span style="font-size:10px;background:var(--accent);color:white;padding:2px 6px;border-radius:4px;margin-left:6px">Auto</span></div>
+<div id="jemma-weekly-intel" style="font-size:12px;color:var(--text2)">Loading...</div>
+</div>
+
 <!-- 折叠：网页资源 -->
 <details class="kid-details">
 <summary>🔗 Web resources (sites and links)</summary>
@@ -1681,6 +1687,28 @@ async function loadResources(){
  ];
  allResources=resources;
  renderResources();
+ // Weekly Intelligence widget（动态加载 Jemma 数据）
+ fetch('/api/research/weekly').then(r=>r.json()).then(d=>{
+   const items = d.items.jemma || [];
+   const cats = {competitions:[], subjects:[], admissions:[]};
+   items.forEach(item=>{
+     const t = (item.topic+' '+item.query).toLowerCase();
+     let cat = 'admissions';
+     if(/competition|bpho|ukmt|smc|imc|bebras|olympiad/.test(t)) cat='competitions';
+     else if(/exam|aqa|edexcel|esat|physics unit|maths unit|specification|subject/.test(t)) cat='subjects';
+     cats[cat].push(item);
+   });
+   let h = '<div style="font-size:11px;color:var(--text2);margin-bottom:8px">Updated: '+d.generated_at.slice(0,10)+'</div>';
+   const catNames = {competitions:'🏆 Competitions', subjects:'📚 Subjects', admissions:'🎓 Admissions'};
+   for(const cat of ['competitions','subjects','admissions']){
+     if(cats[cat].length===0) continue;
+     h+='<div style="margin-top:10px;font-weight:600;font-size:12px;color:var(--accent)">'+catNames[cat]+'</div>';
+     cats[cat].forEach(item=>{
+       h+='<details style="margin:6px 0;padding:4px 0;border-bottom:1px solid var(--border)"><summary style="cursor:pointer;font-size:13px;font-weight:500;color:var(--text)">'+item.topic+'</summary><div style="margin-top:6px;font-size:12px;line-height:1.5;color:var(--text2);white-space:pre-wrap">'+item.digest+'</div></details>';
+     });
+   }
+   document.getElementById('jemma-weekly-intel').innerHTML = h;
+ }).catch(e=>document.getElementById('jemma-weekly-intel').innerHTML='<div style="color:var(--red);font-size:12px">Failed to load</div>');
 }
 function renderResources(){
  const container=document.getElementById('resource-list');

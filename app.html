@@ -1924,6 +1924,10 @@ async function loadResources(){
    </div>
   </div>
   <div class="rcat-section">
+   <div class="rcat-title">Weekly Intelligence <span class="rcat-badge">Auto</span></div>
+   <div id="diya-weekly-intel" style="padding:8px 0"><div style="font-size:12px;color:var(--text2)">Loading...</div></div>
+  </div>
+  <div class="rcat-section">
    <div class="rcat-title">Planning Docs</div>
    <div class="rcat-links">
     <a href="/Diya_Plan.html" target="_blank" class="rcat-link">Diya Academic Planning v7 <span class="rcat-badge">Complete</span></a>
@@ -1934,6 +1938,28 @@ async function loadResources(){
    </div>
   </div>
  </div>`;
+ // Weekly Intelligence widget（动态加载 Diya 数据）
+ fetch('/api/research/weekly').then(r=>r.json()).then(d=>{
+   const items = d.items.diya || [];
+   const cats = {competitions:[], subjects:[], admissions:[]};
+   items.forEach(item=>{
+     const t = (item.topic+' '+item.query).toLowerCase();
+     let cat = 'admissions';
+     if(/competition|bpho|ukmt|smc|imc|bebras|olympiad/.test(t)) cat='competitions';
+     else if(/exam|aqa|edexcel|esat|physics unit|maths unit|specification|subject/.test(t)) cat='subjects';
+     cats[cat].push(item);
+   });
+   let h = '<div style="font-size:11px;color:var(--text2);margin-bottom:8px">Updated: '+d.generated_at.slice(0,10)+'</div>';
+   const catNames = {competitions:'🏆 Competitions', subjects:'📚 Subjects', admissions:'🎓 Admissions'};
+   for(const cat of ['competitions','subjects','admissions']){
+     if(cats[cat].length===0) continue;
+     h+='<div style="margin-top:10px;font-weight:600;font-size:12px;color:var(--accent)">'+catNames[cat]+'</div>';
+     cats[cat].forEach(item=>{
+       h+='<details style="margin:6px 0;padding:4px 0;border-bottom:1px solid var(--border)"><summary style="cursor:pointer;font-size:13px;font-weight:500;color:var(--text)">'+item.topic+'</summary><div style="margin-top:6px;font-size:12px;line-height:1.5;color:var(--text2);white-space:pre-wrap">'+item.digest+'</div></details>';
+     });
+   }
+   document.getElementById('diya-weekly-intel').innerHTML = h;
+ }).catch(e=>document.getElementById('diya-weekly-intel').innerHTML='<div style="color:var(--red);font-size:12px">Failed to load</div>');
 }
 
 // 资源筛选：按链接文本/href 关键词归类（避免改动 60+ 条链接的 HTML 结构）
