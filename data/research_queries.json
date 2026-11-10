@@ -1,0 +1,16 @@
+{
+  "diya": [
+    {"topic": "Imperial Engineering 2027 entry", "query": "Imperial College London engineering 2027 entry requirements A-level ESAT"},
+    {"topic": "UCAS 2027 deadlines", "query": "UCAS application deadlines 2027 entry UK universities"},
+    {"topic": "AQA Physics exam changes", "query": "AQA A-level Physics 2027 exam changes specification updates"},
+    {"topic": "Edexcel Maths updates", "query": "Edexcel A-level Maths Further Maths 2027 exam updates"},
+    {"topic": "BPhO competition dates", "query": "British Physics Olympiad BPhO 2026-2027 competition dates registration"},
+    {"topic": "Imperial outreach events", "query": "Imperial College London engineering open days outreach events 2026"}
+  ],
+  "jemma": [
+    {"topic": "Headington GCSE options", "query": "Headington School Oxford GCSE subject options timeline Year 10"},
+    {"topic": "UKMT competition dates", "query": "UKMT IMC intermediate maths challenge 2027 dates registration"},
+    {"topic": "Bebras challenge", "query": "Bebras UK computational thinking challenge 2026-2027 dates"},
+    {"topic": "GCSE STEM advice", "query": "GCSE subject choices STEM A-level university preparation advice UK"}
+  ]
+}

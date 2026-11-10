@@ -582,6 +582,44 @@ def _load_config():
     c = _load_llm_config()
     return {'api_key': c['api_key'], 'base_url': c['base_url'], 'model': c['model'], 'temperature': c['temperature']}
 
+
+def _llm_providers():
+    """供应商链：主配置（llm_config.json，UI可编辑）在前，data/llm_fallback.json 兜底在后。
+    任一主供应商 429/超时/空回复时自动切下一个（2026-11-10，根治单点配额故障）。"""
+    provs = []
+    cfg = _load_config()
+    if cfg.get('api_key'):
+        provs.append({'base_url': cfg['base_url'], 'api_key': cfg['api_key'],
+                      'model': cfg['model'], 'label': 'primary', 'temperature': cfg.get('temperature', 0.7)})
+    try:
+        fb = json.load(open(os.path.join(DATA_DIR, 'llm_fallback.json')))
+        for p in (fb if isinstance(fb, list) else fb.get('providers', [])):
+            if isinstance(p, dict) and p.get('api_key') and (p.get('base_url') or p.get('endpoint')) and p.get('model'):
+                provs.append({'base_url': _normalize_endpoint(p.get('base_url') or p.get('endpoint')),
+                              'api_key': p['api_key'], 'model': p['model'],
+                              'label': p.get('label') or 'fallback', 'temperature': p.get('temperature', 0.7)})
+    except Exception:
+        pass
+    return provs
+
+
+def _llm_complete_once(p, messages, timeout=90.0):
+    """单供应商非流式补全。成功返回非空文本；失败返回 None（调用方切下一家）。"""
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            resp = client.post(
+                f"{p['base_url']}/chat/completions",
+                headers={'Authorization': f"Bearer {p['api_key']}", 'Content-Type': 'application/json'},
+                json={'model': p['model'], 'messages': messages, 'max_tokens': CHAT_MAX_TOKENS,
+                      'temperature': p.get('temperature', 0.7), **_llm_extra_params(p['base_url'])})
+        if resp.status_code == 200:
+            content = (resp.json().get('choices') or [{}])[0].get('message', {}).get('content', '') or ''
+            return content if content.strip() else None
+        print(f"[llm-fallback] {p['label']} HTTP {resp.status_code}: {resp.text[:100]}")
+    except Exception as e:
+        print(f"[llm-fallback] {p['label']} EXC: {str(e)[:100]}")
+    return None
+
 def _call_llm(conv, child, plan_info):
     """Call DeepSeek V4 Pro LLM with full conversation history + full plan context."""
     system_prompt = _build_system_prompt(child, plan_info)
@@ -610,30 +648,40 @@ def _call_llm(conv, child, plan_info):
     if not api_key:
         return '[配置错误] 未配置 LLM API Key。请在侧边栏「⚙️ LLM 设置」中填写 OpenAI 兼容端点、API Key 与模型。'
 
-    try:
-        with httpx.Client(timeout=60.0) as client:
-            resp = client.post(
-                f'{base_url}/chat/completions',
-                headers={
-                    'Authorization': f'Bearer {api_key}',
-                    'Content-Type': 'application/json'
-                },
-                json={
-                    'model': model,
-                    'messages': messages,
-                    'max_tokens': CHAT_MAX_TOKENS,
-                    'temperature': temperature,
-                    **_llm_extra_params(base_url)
-                }
-            )
+    # 供应商链：主配置 + data/llm_fallback.json（2026-11-10 双链改造）
+    errors = []
+    for p in _llm_providers():
+        try:
+            with httpx.Client(timeout=60.0) as client:
+                resp = client.post(
+                    f"{p['base_url']}/chat/completions",
+                    headers={
+                        'Authorization': f"Bearer {p['api_key']}",
+                        'Content-Type': 'application/json'
+                    },
+                    json={
+                        'model': p['model'],
+                        'messages': messages,
+                        'max_tokens': CHAT_MAX_TOKENS,
+                        'temperature': temperature,
+                        **_llm_extra_params(p['base_url'])
+                    }
+                )
             if resp.status_code == 200:
                 result = resp.json()
                 content = result['choices'][0]['message']['content']
-                return content if content else '[模型返回空内容]'
+                if content and content.strip():
+                    return content
+                errors.append(f"[{p['label']}] 空回复")
             else:
-                return f'[LLM错误 {resp.status_code}]: {resp.text[:100]}'
-    except Exception as e:
-        return f'[网络错误]: {str(e)[:100]}'
+                errors.append(f"[{p['label']}] HTTP {resp.status_code}")
+                print(f"[llm-fallback] {p['label']} HTTP {resp.status_code}: {resp.text[:120]}")
+        except Exception as e:
+            errors.append(f"[{p['label']}] {str(e)[:60]}")
+            print(f"[llm-fallback] {p['label']} EXC: {str(e)[:100]}")
+    if not errors:
+        return '[配置错误] 无可用 LLM 供应商。'
+    return '[LLM错误] 全部供应商失败: ' + ' | '.join(errors[:3])
 
 
 def _llm_extra_params(base_url):
@@ -819,7 +867,8 @@ def chat_stream():
                         }
                     ) as resp:
                         if resp.status_code != 200:
-                            yield _sse({'error': f'LLM错误 {resp.status_code}'})
+                            # 主供应商失败：不直接报错，流转到 finally 的供应商链兜底（2026-11-10 双链）
+                            print(f"[stream] primary HTTP {resp.status_code}: {resp.text[:120]}")
                             return
                         for line in resp.iter_lines():
                             if line.startswith('data: '):
@@ -850,24 +899,19 @@ def chat_stream():
             # 孩子下一问就"失忆"。现在无论正常结束/异常/断开都入库：
             # 断开时保留已收到的部分正文；正文为空且客户端还在则走非流式补答；补不到则只存问题不存空回答。
             if not full_reply.strip() and not client_gone:
-                try:
-                    with httpx.Client(timeout=90.0) as client:
-                        r2 = client.post(
-                            f"{cfg['base_url']}/chat/completions",
-                            headers={'Authorization': f"Bearer {cfg['api_key']}", 'Content-Type': 'application/json'},
-                            json={'model': cfg['model'], 'messages': messages, 'max_tokens': CHAT_MAX_TOKENS,
-                                  'temperature': cfg.get('temperature', 0.7), **_llm_extra_params(cfg['base_url'])})
-                    if r2.status_code == 200:
-                        full_reply = (r2.json().get('choices') or [{}])[0].get('message', {}).get('content', '') or ''
-                        if full_reply:
+                # 供应商链兜底：主配置 + fallbacks 依次尝试非流式补全，取第一个非空结果
+                for p in _llm_providers():
+                    text = _llm_complete_once(p, messages, timeout=90.0)
+                    if text:
+                        full_reply = text
+                        try:
                             yield _sse({'token': full_reply})
-                    else:
-                        yield _sse({'error': f'LLM错误 {r2.status_code}'})
-                except GeneratorExit:
-                    raise
-                except Exception as e2:
+                        except GeneratorExit:
+                            raise
+                        break
+                if not full_reply.strip():
                     try:
-                        yield _sse({'error': str(e2)[:100]})
+                        yield _sse({'error': 'All providers failed — please try again shortly'})
                     except GeneratorExit:
                         raise
             try:
@@ -3649,6 +3693,27 @@ def hrd_img_delete(iid):
     resp = jsonify({'ok': True, 'id': iid})
     _hrd_cors(resp)
     return resp
+
+
+# ── 入学情报周报（2026-11-10）────────────────────────────────────────────
+@app.route('/api/research/weekly', methods=['GET', 'OPTIONS'])
+def api_research_weekly():
+    """GET: 返回 data/research_weekly.json（由 research_weekly.py 生成）。"""
+    if request.method == 'OPTIONS':
+        return _cors()
+    try:
+        data = json.load(open(os.path.join(DATA_DIR, 'research_weekly.json')))
+        resp = jsonify(data)
+        _set_cors(resp)
+        return resp
+    except FileNotFoundError:
+        resp = jsonify({'error': 'No data yet — run research_weekly.py first'})
+        _set_cors(resp)
+        return resp, 404
+    except Exception as e:
+        resp = jsonify({'error': str(e)})
+        _set_cors(resp)
+        return resp, 500
 
 
 if __name__ == '__main__':

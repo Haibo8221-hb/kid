@@ -1,0 +1,9 @@
+[
+  {
+    "label": "qwen-token-plan",
+    "endpoint": "https://token-plan.maas.qianwenaiapi.com/compatible-mode/v1",
+    "model": "qwen3.8-max",
+    "api_key": "sk-sp-H.DXXRXX.3k7L.MEYCIQCJVB2LdCAoQTghNZ0fVXSwG5e9_a0b4pupA1XkVecjGQIhAL9GwxfhCDhnutkmpe4gfn7SV0GHHQcsWnNyzOWl07cr",
+    "temperature": 0.7
+  }
+]
