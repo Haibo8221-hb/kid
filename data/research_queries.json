@@ -5,12 +5,21 @@
     {"topic": "AQA Physics exam changes", "query": "AQA A-level Physics 2027 exam changes specification updates"},
     {"topic": "Edexcel Maths updates", "query": "Edexcel A-level Maths Further Maths 2027 exam updates"},
     {"topic": "BPhO competition dates", "query": "British Physics Olympiad BPhO 2026-2027 competition dates registration"},
-    {"topic": "Imperial outreach events", "query": "Imperial College London engineering open days outreach events 2026"}
+    {"topic": "Imperial outreach events", "query": "Imperial College London engineering open days outreach events 2026"},
+    {"topic": "BPhO Round 1 2026 specifics", "query": "BPhO Senior Physics Challenge Round 1 2026 exam date registration deadline results"},
+    {"topic": "UKMT SMC 2026 results", "query": "UKMT Senior Mathematical Challenge SMC 2026 results date BMO qualification cutoff"},
+    {"topic": "ESAT 2026 details", "query": "ESAT Engineering Science Admissions Test 2026 exam date registration format structure"},
+    {"topic": "AQA Physics unit updates", "query": "AQA A-level Physics Unit 1 2 3 4 5 specification changes 2026 2027"},
+    {"topic": "Imperial engineering specializations", "query": "Imperial College Mechanical vs Electrical vs Civil vs Chemical engineering A-level requirements comparison"}
   ],
   "jemma": [
     {"topic": "Headington GCSE options", "query": "Headington School Oxford GCSE subject options timeline Year 10"},
     {"topic": "UKMT competition dates", "query": "UKMT IMC intermediate maths challenge 2027 dates registration"},
     {"topic": "Bebras challenge", "query": "Bebras UK computational thinking challenge 2026-2027 dates"},
-    {"topic": "GCSE STEM advice", "query": "GCSE subject choices STEM A-level university preparation advice UK"}
+    {"topic": "GCSE STEM advice", "query": "GCSE subject choices STEM A-level university preparation advice UK"},
+    {"topic": "UKMT IMC 2027 specifics", "query": "UKMT Intermediate Maths Challenge IMC 2027 exact date registration how to enter progression rules"},
+    {"topic": "Bebras 2026-27 specifics", "query": "Bebras UK 2026 2027 competition date registration deadline sample questions computational thinking"},
+    {"topic": "Headington GCSE process", "query": "Headington Rye Oxford GCSE options process when choose subjects STEM recommended combination"},
+    {"topic": "GCSE exam boards", "query": "Headington School Oxford GCSE exam board AQA Edexcel Physics Chemistry Biology which board"}
   ]
 }
