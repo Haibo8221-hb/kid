@@ -56,6 +56,33 @@ def requires_human(text, importance):
     return importance >= 8 or any(k in t for k in DECISION_KW)
 
 
+def clean_excerpt(text, limit=600):
+    """MCP 搜索返回可能是 {"pages":[{"snippet":...}]} 结构——抽取人类可读正文再入事件队列。"""
+    t = (text or '').strip()
+    if t.startswith('{') or t.startswith('['):
+        try:
+            d = json.loads(t)
+            parts = []
+            def walk(o):
+                if isinstance(o, dict):
+                    for k in ('title', 'snippet', 'content', 'text'):
+                        v = o.get(k)
+                        if isinstance(v, str) and v.strip():
+                            parts.append(v.strip())
+                    for v in o.values():
+                        if isinstance(v, (dict, list)):
+                            walk(v)
+                elif isinstance(o, list):
+                    for x in o:
+                        walk(x)
+            walk(d)
+            if parts:
+                t = ' | '.join(dict.fromkeys(parts))  # 去重保序
+        except Exception:
+            pass
+    return t[:limit]
+
+
 def add_event(ev):
     """事件去重（同 child+topic+fp 不重复入队）。返回是否新增。"""
     events = read_json(EVENTS_FILE, []) or []
@@ -155,7 +182,7 @@ def collect_once():
                                    'ts': now_iso(), 'child': child, 'topic': topic,
                                    'importance': imp, 'fp': fp,
                                    'requires_human': requires_human(text, imp),
-                                   'excerpt': text[:600],
+                                   'excerpt': clean_excerpt(text),
                                    'status': 'pending_review' if requires_human(text, imp) else 'pending_notify'})
                 if added:
                     stats['events'] += 1
