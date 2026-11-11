@@ -37,6 +37,8 @@ def age_days(path):
 def check_once():
     out = {'checked_at': now_iso(), 'sources': {}, 'red_count': 0, 'yellow_count': 0}
     state = read_json(os.path.join(REFRESH_DIR, 'collect_state.json'), {}) or {}
+    pause = (read_json(os.path.join(REFRESH_DIR, 'pause_flags.json'), {}) or {}).get('mcp_search', {})
+    mcp_paused = bool(pause.get('paused'))
 
     for name, path, green, yellow, note in FILE_SOURCES:
         a = age_days(path)
@@ -61,16 +63,21 @@ def check_once():
     except Exception:
         wa = None
     lvl = 'green' if (wa is not None and wa <= 8) else ('yellow' if (wa is not None and wa <= 20) else 'red')
-    out['sources']['research_weekly'] = {'age_days': wa, 'level': lvl, 'note': 'weekly digest content stamp'}
+    if mcp_paused:
+        lvl = 'paused'  # 家长指令暂停 MCP 搜索——陈旧是预期状态，不告警
+    out['sources']['research_weekly'] = {'age_days': wa, 'level': lvl,
+                                         'note': 'MCP search paused by parent 2026-11-12' if mcp_paused else 'weekly digest content stamp'}
 
     # 采集层运行状态
     coll = state.get('collect', {})
     per_q = state.get('per_query', {})
     fails = {k: v.get('consecutive_fail', 0) for k, v in per_q.items() if v.get('consecutive_fail', 0) >= 2}
     out['sources']['collect_30min'] = {
-        'last_run': coll.get('last_run'), 'level': 'red' if fails else 'green',
-        'note': f'failing queries: {fails}' if fails else 'all queries returning results'}
-    if fails:
+        'last_run': coll.get('last_run'),
+        'level': 'paused' if mcp_paused else ('red' if fails else 'green'),
+        'note': ('MCP search paused by parent 2026-11-12' if mcp_paused
+                 else (f'failing queries: {fails}' if fails else 'all queries returning results'))}
+    if fails and not mcp_paused:
         out['red_count'] += 1
 
     # L3 是否按期跑（live_brief 内容时间戳 >16 天 → 提醒）
