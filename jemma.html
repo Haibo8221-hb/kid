@@ -578,6 +578,8 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <div class="section">
 <div class="section-title"> ⏳ The days ahead</div>
 <div id="countdown-strip" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap"></div>
+<!-- Live Brief: pipeline 动态层（双周挑战/过期目标提醒），数据源 /api/live-brief -->
+<div id="live-brief" style="display:none;margin:0 0 14px;padding:10px 14px;border:1px solid var(--border);border-left:4px solid var(--accent2);border-radius:10px;background:var(--surface)"></div>
 </div>
 
 <!-- 长大以后的路 -->
@@ -1253,9 +1255,8 @@ const TIMER_TARGETS = [
 // 已移除（2026-10-15，已过期）：Summer Start（2026-07-01）
  {id:'t-gcse', name:'GCSE Exams', target:'2029-05-01', tag:'Jemma', tagClass:'green'},
  {id:'t-imc', name:'UKMT IMC', target:'2027-01-27', tag:'Jemma', tagClass:'accent2'},
- {id:'t-bebras', name:'Jemma Bebras (first day of the window)', target:'2026-11-09', tag:'Jemma', tagClass:'green'},
- {id:'t-halfterm', name:'Half Term', target:'2026-10-26', tag:'Both', tagClass:'yellow'}
- // TODO：Half Term 属学校校历项（现按通用值），请以学校校历核对后修正
+ {id:'t-bebras', name:'Bebras window closes', target:'2026-11-20', tag:'Jemma', tagClass:'green'}
+ // Half Term(2026-10-26) 已过期移除（2026-11-11）；Bebras 改挂窗口截止日（首日 11-09 已过，挂截止日才有行动意义）
 ];
 
 // Radar Chart (Canvas)
@@ -1537,6 +1538,22 @@ async function savePlanner(child){
 // Routes 
 async function loadRoutes(){
  const container=document.getElementById('routes-list');
+ // ── API-first：route_compare.json（L3 双周刷新 + 30min 检索合并），失败回退内嵌卡片 ──
+ try{
+  const rc=await fetch('/api/route-compare?child=jemma').then(r=>r.json());
+  if(rc&&rc.cards&&rc.cards.length){
+   container.innerHTML=rc.cards.map(r=>`
+   <div class="route-card${r.open===false?'':' open'}" id="route-${r.id}">
+    <div class="route-card-hdr" onclick="toggleRoute('${r.id}')">
+     <span class="rc-icon">${r.icon||''}</span>
+     <span class="rc-title">${r.title}${r.updated?` <span style="font-size:11px;color:var(--text2)">· ${r.updated}</span>`:''}</span>
+     <span class="rc-arrow"></span>
+    </div>
+    <div class="route-card-body">${r.body||r.content||''}</div>
+   </div>`).join('');
+   return;
+  }
+ }catch(e){console.warn('route-compare API unavailable — embedded fallback',e)}
  // Fetch research intel first
  let intelHtml='';
  try{
@@ -1870,6 +1887,7 @@ async function loadDashboard(){
  // Also load child data (banner, tasks, planner)
  loadChild('jemma');
  renderCountdown();
+ loadLiveBrief();   // pipeline 动态层：挑战/过期提醒
 }
 
 function initSubjectAnalysis(){
@@ -2419,12 +2437,31 @@ function logout(){
  }catch(e){ window.location.replace('index.html'); }
 }
 
+// ── Live Brief（pipeline L3 输出：双周挑战 + 过期目标提醒；深色主题适配）──
+async function loadLiveBrief(){
+ try{
+  const b=await fetch('/api/live-brief?child=jemma').then(r=>r.json());
+  if(!b||!b.generated_at)return;
+  const el=document.getElementById('live-brief'); if(!el)return;
+  const parts=[];
+  const ch=b.challenge||{};
+  if(ch.text&&ch.status!=='to_be_proposed_by_next_L3_refresh'){
+   parts.push(`<div style="font-size:13px;line-height:1.7"><b style="color:var(--accent2)">Fortnight challenge</b> · ${String(ch.text).replace(/</g,'&lt;')} <span style="color:var(--text3);font-size:11px">${ch.period||''}</span></div>`);
+  }
+  const exp=b.expired_goals||[];
+  if(exp.length){
+   parts.push(`<div style="font-size:13px;color:var(--yellow)">${exp.length} goal${exp.length>1?'s':''} past due — open Goal Desk to renew or archive (with a parent)</div>`);
+  }
+  if(parts.length){ el.innerHTML=parts.join(''); el.style.display='block'; }
+ }catch(e){ console.warn('live-brief failed',e); }
+}
+
 // Countdown：Today 只显示「下一个」大卡；完整列表在 My Plan
 function renderCountdown(){
  const today=new Date(); today.setHours(0,0,0,0);
  const events = [
  {label:'UKMT IMC 2027', date:'2027-01-27', emoji:'🥇', color:'#8e44ad'},
- {label:'Bebras 2026', date:'2026-11-01', emoji:'🦫', color:'#2980b9'},
+ {label:'Bebras window closes', date:'2026-11-20', emoji:'🦫', color:'#2980b9'},
   {label:'GCSE Starts', date:'2029-05-01', emoji:'📚', color:'#e74c3c'}
  ];
  // My Plan：完整倒计时条

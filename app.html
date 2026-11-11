@@ -595,6 +595,9 @@ canvas.radar{width:240px!important;height:240px!important}
 <!-- Countdown Strip -->
 <div id="countdown-strip" class="countdown-strip"></div>
 
+<!-- Live Brief: pipeline 动态层（双周挑战/过期目标提醒），数据源 /api/live-brief -->
+<div id="live-brief" style="display:none;margin:-6px 0 14px;padding:10px 14px;border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:10px;background:var(--surface)"></div>
+
 <!-- 今日任务全部完成后的「停止提示」：完成就收工，不过度学习（与 Jemma 同款交互） -->
 <div id="today-stop" class="kid-stop-hint" hidden>🎉 All three done for today! That is it for today — go and rest.</div>
 
@@ -1671,6 +1674,22 @@ async function savePlanner(child){
 // Routes — 8-Section Route Compare
 async function loadRoutes(){
  const C=document.getElementById('routes-list');
+ // ── API-first：route_compare.json（L3 双周刷新 + 30min 检索合并），失败回退内嵌卡片 ──
+ try{
+  const rc=await fetch('/api/route-compare?child=diya').then(r=>r.json());
+  if(rc&&rc.cards&&rc.cards.length){
+   C.innerHTML=rc.cards.map(r=>`
+   <div class="route-card${r.open?' open':''}" id="route-${r.id}">
+    <div class="route-card-hdr" onclick="toggleRoute('${r.id}')">
+     <span class="rc-title">${r.title}${r.updated?` <span style="font-size:10px;color:var(--text2)">· ${r.updated}</span>`:''}</span>
+     <span class="rc-arrow"></span>
+    </div>
+    <div class="route-card-body" style="font-size:11px;line-height:1.5">${r.body||r.content||''}</div>
+   </div>
+   `).join('');
+   return;
+  }
+ }catch(e){console.warn('route-compare API unavailable — embedded fallback',e)}
  const cards=[
   {id:'teacher',title:'Physics Teacher Advice · Miss Streule',open:true,body:`
    <table class="compare-table">
@@ -2073,6 +2092,7 @@ async function loadDashboard(){
  drawMainRadar();
  renderCountdownStrip();
  updateCountdownStrip();
+ loadLiveBrief();   // pipeline 动态层：挑战/过期提醒/API倒计时合并
  if (window.__dashTimer) clearInterval(window.__dashTimer);
     window.__dashTimer = setInterval(updateCountdownStrip, 60000);
  loadStudyTips();
@@ -2649,9 +2669,8 @@ async function loadReviewHistory(){
 // Countdown Strip 
 const COUNTDOWN_ITEMS = [
  {icon:'📚', name:'GCSE Exams Begin', target:'2027-05-12'},
- {icon:'🎓', name:'Sixth Form Starts', target:'2027-09-01'},
- // TODO(#13)：Half Term 属学校校历项（现按通用值），请以学校校历核对后修正
- {icon:'🌴', name:'Half Term', target:'2026-10-26'}
+ {icon:'🎓', name:'Sixth Form Starts', target:'2027-09-01'}
+ // Half Term(2026-10-26) 已过期移除；近期节点由 loadLiveBrief() 从 /api/live-brief 动态合并
 ];
 function renderCountdownStrip(){
  const el = document.getElementById('countdown-strip');
@@ -2681,6 +2700,29 @@ function updateCountdownStrip(){
  else if(d <= 400) el.classList.add('cool');
  else el.classList.add('far');
  });
+}
+
+// ── Live Brief（pipeline L3 输出：双周挑战 + 过期目标提醒 + API 倒计时合并进 strip）──
+async function loadLiveBrief(){
+ try{
+  const b=await fetch('/api/live-brief?child=diya').then(r=>r.json());
+  if(!b||!b.generated_at)return;
+  const cds=(b.countdowns||[]).filter(c=>c.days_left>=0&&c.date);
+  const have=new Set(COUNTDOWN_ITEMS.map(c=>c.target));
+  cds.forEach(c=>{ if(!have.has(c.date)&&COUNTDOWN_ITEMS.length<5){ COUNTDOWN_ITEMS.push({icon:'📌',name:String(c.what).slice(0,42),target:c.date}); have.add(c.date);} });
+  renderCountdownStrip(); updateCountdownStrip();
+  const el=document.getElementById('live-brief'); if(!el)return;
+  const parts=[];
+  const ch=b.challenge||{};
+  if(ch.text&&ch.status!=='to_be_proposed_by_next_L3_refresh'){
+   parts.push(`<div style="font-size:12px;line-height:1.6"><b style="color:var(--accent)">Fortnight challenge</b> · ${String(ch.text).replace(/</g,'&lt;')} <span style="color:var(--text2);font-size:10px">${ch.period||''}</span></div>`);
+  }
+  const exp=b.expired_goals||[];
+  if(exp.length){
+   parts.push(`<div style="font-size:12px;color:var(--red)">${exp.length} goal${exp.length>1?'s':''} past due — open Goal Desk to renew or archive (with a parent)</div>`);
+  }
+  if(parts.length){ el.innerHTML=parts.join(''); el.style.display='block'; }
+ }catch(e){ console.warn('live-brief failed',e); }
 }
 
 // 注(#8)：英文段落框架命名**统一为 PETAL**（家长 2026-10-15 确认："是 PETAL，不是那个 6 步写法"）。

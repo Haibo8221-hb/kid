@@ -1422,7 +1422,27 @@ def intel_api():
 
     intel_path = os.environ.get('RESEARCH_INTEL_PATH', os.path.join(DATA_DIR, 'plan_context', 'Research_Intel.md'))
     if not os.path.exists(intel_path):
-        return jsonify({'sections': [], 'updated': '', 'error': 'no data'})
+        # Fallback（2026-11-11）：Research_Intel.md 已退役——直接用检索周报 research_weekly.json
+        # 构建 sections（30min 采集链路的产物），标题带 Diya/Jemma 前缀供前端过滤。
+        try:
+            with open(os.path.join(DATA_DIR, 'research_weekly.json'), encoding='utf-8') as f:
+                w = json.load(f)
+        except Exception:
+            w = {}
+        sections = []
+        for child in ('diya', 'jemma'):
+            items = []
+            for it in (w.get('items') or {}).get(child, [])[:8]:
+                items.append({'title': it.get('topic', ''),
+                              'url': '/research-weekly.html',
+                              'snippet': (it.get('digest') or '')[:220]})
+            if items:
+                sections.append({'title': ('Diya' if child == 'diya' else 'Jemma') + ' · Admissions Intel',
+                                 'items': items})
+        resp = jsonify({'sections': sections, 'updated': str(w.get('generated_at', ''))[:16],
+                        'source': 'research_weekly.json'})
+        _set_cors(resp)
+        return resp
 
     with open(intel_path, 'r', encoding='utf-8') as f:
         md = f.read()
@@ -1461,6 +1481,178 @@ def intel_api():
     resp = jsonify({'sections': sections, 'updated': updated})
     _set_cors(resp)
     return resp
+
+
+# ── Refresh pipeline endpoints (2026-11-11) ──────────────
+# 数据文件均在 data/refresh/（pipeline/ 定时任务维护）；此层只读。
+REFRESH_DIR = os.path.join(DATA_DIR, 'refresh')
+
+
+def _refresh_read(name, default=None):
+    try:
+        with open(os.path.join(REFRESH_DIR, name), encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return default if default is not None else {}
+
+
+def _rc_child():
+    raw = str(request.args.get('child') or '').strip().lower()
+    return raw if raw in ('diya', 'jemma') else 'diya'
+
+
+def _cors_get(fn):
+    """OPTIONS 预检统一处理装饰逻辑（与站内其他 GET 端点一致）。"""
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _set_cors(resp)
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+    return fn()
+
+
+def _render_scorecards(cards, routes, weights):
+    """服务端计算加权总分并填进 scorecard 卡片表格（权重可调，前端零逻辑）。"""
+    order = ['entry_fit', 'career_visa', 'difficulty', 'deadline_risk', 'cost', 'lifestyle']
+    if routes:
+        def total_of(r):
+            sc = r.get('scores') or {}
+            return sum(float(sc.get(d, 0) or 0) * float(weights.get(d, 0) or 0) for d in order)
+        rows = []
+        for r in sorted(routes, key=total_of, reverse=True):
+            sc = r.get('scores') or {}
+            tds = ''.join(f'<td>{sc.get(d, "?")}</td>' for d in order)
+            ev = (r.get('evidence') or '').replace('<', '&lt;')
+            rows.append(f"<tr><td>{r.get('name','')}<div style='font-size:9px;color:var(--text2);margin-top:2px'>{ev[:220]}</div></td>"
+                        f"{tds}<td><b>{total_of(r):.2f}</b></td></tr>")
+        row_html = ''.join(rows)
+        wtxt = ' · '.join(f'{k}×{float(weights.get(k,0) or 0):.2f}' for k in order)
+        for c in cards:
+            body = c.get('body') or ''
+            if 'scorecard-table' in body:
+                idx = body.find('scorecard-table')
+                close = body.find('</table>', idx)
+                if close != -1:
+                    c['body'] = body[:close] + row_html + body[close:]
+                if "scorecard-weights" in c['body']:
+                    c['body'] = c['body'].replace("scorecard-weights' style='font-size:11px;margin-bottom:8px;color:var(--accent2)'></div>",
+                                                  "scorecard-weights' style='font-size:11px;margin-bottom:8px;color:var(--accent2)'>Weights: " + wtxt + " — parent-adjustable</div>", 1)
+    return cards
+
+
+def _intel_card(child):
+    """Live intel 卡：从 research_weekly.json（30min 采集链路产物）取该孩子最新 topic digest。"""
+    try:
+        with open(os.path.join(DATA_DIR, 'research_weekly.json'), encoding='utf-8') as f:
+            w = json.load(f)
+    except Exception:
+        return None
+    items = (w.get('items') or {}).get(child) or []
+    if not items:
+        return None
+    items = sorted(items, key=lambda it: str(it.get('topic_updated_at') or w.get('generated_at') or ''), reverse=True)[:6]
+    parts = []
+    for it in items:
+        dig = (it.get('digest') or '').replace('<', '&lt;').replace('>', '&gt;')
+        imp = it.get('importance')
+        badge = (f" <span style='font-size:9px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#fff'>imp {imp}</span>"
+                 if isinstance(imp, int) and imp >= 5 else '')
+        parts.append(f"<div style='margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)'>"
+                     f"<b style='font-size:12px'>{it.get('topic','')}</b>{badge}"
+                     f"<div style='font-size:11px;line-height:1.6;color:var(--text2);margin-top:3px;white-space:pre-wrap'>{dig[:520]}</div></div>")
+    gen = str(w.get('generated_at', ''))[:16].replace('T', ' ')
+    parts.append(f"<p style='font-size:10px;color:var(--text2)'>Auto-collected every 30 min (change-detected) · digests refreshed {gen} · "
+                 f"<a href='/research-weekly.html' style='color:var(--accent)'>full intel report</a></p>")
+    return {'id': 'live-intel', 'title': 'Live Admissions Intel · auto-collected', 'icon': '',
+            'open': False, 'updated': str(w.get('generated_at', ''))[:10], 'body': ''.join(parts)}
+
+
+@app.route('/api/route-compare', methods=['GET', 'OPTIONS'])
+def route_compare_api():
+    def build():
+        child = _rc_child()
+        rc = _refresh_read('route_compare.json', {})
+        section = rc.get(child) or {}
+        weights = rc.get('weights') or {}
+        cards = [dict(c) for c in (section.get('cards') or [])]
+        cards = _render_scorecards(cards, section.get('routes') or [], weights)
+        intel = _intel_card(child)
+        if intel:
+            cards.append(intel)
+        resp = jsonify({'child': child, 'weights': weights, 'weight_labels': rc.get('weight_labels', {}),
+                        'routes': section.get('routes', []), 'cards': cards,
+                        'updated': section.get('updated', ''),
+                        'scorecard_note': section.get('scorecard_note', '')})
+        _set_cors(resp)
+        return resp
+    return _cors_get(build)
+
+
+@app.route('/api/live-brief', methods=['GET', 'OPTIONS'])
+def live_brief_api():
+    def build():
+        child = _rc_child()
+        brief = _refresh_read('live_brief.json', {})
+        facts = _refresh_read('facts.json', {})
+        out = {
+            'generated_at': brief.get('generated_at', ''),
+            'child': child,
+            'countdowns': [c for c in (brief.get('countdowns') or []) if c.get('child') == child],
+            'freshness': brief.get('freshness', {}),
+            'expired_goals': [e for e in (brief.get('expired_goals') or []) if e.get('child') == child],
+            'alerts': brief.get('alerts', []),
+            'challenge': (facts.get(child, {}) or {}).get('challenge', {}),
+            'changes_this_period': brief.get('changes_this_period', {}),
+        }
+        resp = jsonify(out)
+        _set_cors(resp)
+        return resp
+    return _cors_get(build)
+
+
+@app.route('/api/events', methods=['GET', 'OPTIONS'])
+def events_api():
+    def build():
+        child = request.args.get('child')
+        status = request.args.get('status')
+        events = _refresh_read('events_pending.json', []) or []
+        out = []
+        for e in events:
+            if child and e.get('child') != child:
+                continue
+            if status and e.get('status') != status:
+                continue
+            e2 = dict(e)
+            e2['excerpt'] = str(e2.get('excerpt', ''))[:400]
+            out.append(e2)
+        resp = jsonify({'events': out[-50:], 'count': len(out)})
+        _set_cors(resp)
+        return resp
+    return _cors_get(build)
+
+
+@app.route('/api/weekly-digest', methods=['GET', 'OPTIONS'])
+def weekly_digest_api():
+    def build():
+        fmt = request.args.get('format', 'json')
+        if fmt == 'html':
+            try:
+                html = open(os.path.join(REFRESH_DIR, 'weekly_digest.html'), encoding='utf-8').read()
+                resp = app.response_class(html, mimetype='text/html')
+                _set_cors(resp)
+                return resp
+            except Exception:
+                return jsonify({'error': 'no digest yet'}), 404
+        d = _refresh_read('weekly_digest.json', {})
+        try:
+            d['txt'] = open(os.path.join(REFRESH_DIR, 'weekly_digest.txt'), encoding='utf-8').read()
+        except Exception:
+            d['txt'] = ''
+        resp = jsonify(d)
+        _set_cors(resp)
+        return resp
+    return _cors_get(build)
 
 
 # ── Resource Downloads (scan download dir) ──────────────

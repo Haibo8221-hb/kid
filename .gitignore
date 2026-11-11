@@ -87,3 +87,7 @@ analysis/*Finance*
 # ── 运行时备份/令牌（含密钥或家庭数据，绝不入库；*.bak 规则匹配不到 .bak-日期 变体）──
 data/*.bak-*
 data/hrd_token.txt
+
+# ── 刷新流水线运行时数据（服务器唯一真源，不入库）──
+data/refresh/
+pipeline/__pycache__/
