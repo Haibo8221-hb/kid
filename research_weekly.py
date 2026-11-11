@@ -157,7 +157,7 @@ fetch('/api/research/weekly').then(r=>r.json()).then(d=>{{
         send_email_report(result)
 
 def send_email_report(data):
-    """发送周报邮件给 Diya + Jemma"""
+    """发送周报邮件给 Diya + Jemma（精简版：top 3 重点 + 引导访问 dashboard）"""
     import smtplib
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
@@ -177,40 +177,87 @@ def send_email_report(data):
         'jemma': 'h00427@headingtonschool.com'
     }
     
-    # 构建 HTML 邮件
+    # 筛选每个孩子的 top 3 重点（按关键词优先级）
+    def get_top_items(items, n=3):
+        """筛选最重要的 n 条（竞赛/截止日 > 考试变化 > 其他）"""
+        priority_keywords = ['deadline', 'registration', 'exam date', 'bpho', 'ukmt', 'esat', 'ucas']
+        scored = []
+        for item in items:
+            text = (item['topic'] + ' ' + item['query']).lower()
+            score = sum(2 if kw in text else 1 for kw in priority_keywords if kw in text)
+            scored.append((score, item))
+        scored.sort(reverse=True, key=lambda x: x[0])
+        return [item for _, item in scored[:n]]
+    
+    # 构建 HTML 邮件（精简版）
     html = f"""
-    <html><body style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
-    <h1 style="color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 10px;">
-        Weekly Admissions Intelligence
-    </h1>
-    <p style="color: #6c757d; font-size: 12px;">Generated: {data['generated_at']}</p>
+    <html>
+    <head><meta charset="UTF-8"></head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa;">
+        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h1 style="color: #0d6efd; margin: 0 0 8px 0; font-size: 24px;">
+                📊 Weekly Intelligence
+            </h1>
+            <p style="color: #6c757d; font-size: 13px; margin: 0 0 24px 0;">
+                {data['generated_at'][:10]} · Top highlights for you
+            </p>
     """
     
     for child in ['diya', 'jemma']:
         items = data.get('items', {}).get(child, [])
         if not items:
             continue
-        html += f"<h2 style='color: #198754; margin-top: 30px;'>{child.upper()}</h2>"
-        for item in items:
+        
+        top_items = get_top_items(items, n=3)
+        html += f"""
+            <div style="margin-bottom: 28px;">
+                <h2 style="color: #198754; font-size: 18px; margin: 0 0 12px 0; border-bottom: 2px solid #198754; padding-bottom: 6px;">
+                    {child.upper()}'s Highlights
+                </h2>
+        """
+        
+        for i, item in enumerate(top_items, 1):
+            # 提取第一句话作为摘要（不超过 100 字）
+            digest_lines = item['digest'].split('\n')
+            summary = digest_lines[0][:100] + ('...' if len(digest_lines[0]) > 100 else '')
+            
             html += f"""
-            <div style='background: #f8f9fa; border-radius: 8px; padding: 12px; margin: 10px 0;'>
-                <div style='font-weight: 600; color: #0d6efd; font-size: 14px;'>{item['topic']}</div>
-                <div style='margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-size: 13px;'>{item['digest']}</div>
-            </div>
+                <div style="background: #f8f9fa; border-left: 3px solid #0d6efd; padding: 10px 14px; margin: 10px 0; border-radius: 6px;">
+                    <div style="font-weight: 600; color: #212529; font-size: 14px; margin-bottom: 4px;">
+                        {i}. {item['topic']}
+                    </div>
+                    <div style="color: #495057; font-size: 13px; line-height: 1.5;">
+                        {summary}
+                    </div>
+                </div>
             """
+        
+        html += "</div>"
     
     html += """
-    <p style='margin-top: 30px; font-size: 12px; color: #6c757d;'>
-        View full dashboard: <a href='https://xgrow.me/research-weekly.html'>https://xgrow.me/research-weekly.html</a>
-    </p>
-    </body></html>
+            <div style="text-align: center; margin-top: 32px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                <a href="https://xgrow.me/research-weekly.html" 
+                   style="display: inline-block; background: #0d6efd; color: white; padding: 12px 28px; 
+                          text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                    View Full Dashboard →
+                </a>
+                <p style="color: #6c757d; font-size: 12px; margin-top: 12px;">
+                    Complete analysis, timeline, and resources on your dashboard
+                </p>
+            </div>
+        </div>
+        <p style="text-align: center; color: #adb5bd; font-size: 11px; margin-top: 16px;">
+            xgrow.me · Weekly Admissions Intelligence
+        </p>
+    </body>
+    </html>
     """
     
     # 发送
     try:
         msg = MIMEMultipart('alternative')
         msg['From'] = SMTP_USER
-        msg['Subject'] = f"Weekly Intelligence Report - {data['generated_at'][:10]}"
+        msg['Subject'] = f"📊 Weekly Intelligence - {data['generated_at'][:10]} (Top Highlights)"
         msg.attach(MIMEText(html, 'html'))
         
         server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=30)
@@ -220,7 +267,7 @@ def send_email_report(data):
             msg['To'] = email
             server.send_message(msg)
             print(f'[email] Sent to {child} ({email})')
-            del msg['To']  # 清除以便下次设置
+            del msg['To']
         
         server.quit()
         print('[email] All emails sent successfully')
