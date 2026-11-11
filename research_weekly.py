@@ -152,6 +152,80 @@ fetch('/api/research/weekly').then(r=>r.json()).then(d=>{{
 </script></body></html>"""
     open(out_html,'w').write(html)
     print(f'Wrote {out_html}')
+    # 发送邮件（仅 weekly 模式，即每周一自动跑时）
+    if os.environ.get('RESEARCH_SEND_EMAIL', '0') == '1':
+        send_email_report(result)
+
+def send_email_report(data):
+    """发送周报邮件给 Diya + Jemma"""
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    
+    SMTP_HOST = 'smtp.qq.com'
+    SMTP_PORT = 465
+    SMTP_USER = os.environ.get('SMTP_USER', 'xgrow@qq.com')
+    SMTP_PASS = os.environ.get('SMTP_PASS', '')
+    
+    if not SMTP_PASS:
+        print('[email] SMTP_PASS not set, skipping email')
+        return
+    
+    # 收件人
+    recipients = {
+        'diya': 'h00426@headingtonschool.com',
+        'jemma': 'h00427@headingtonschool.com'
+    }
+    
+    # 构建 HTML 邮件
+    html = f"""
+    <html><body style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+    <h1 style="color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 10px;">
+        Weekly Admissions Intelligence
+    </h1>
+    <p style="color: #6c757d; font-size: 12px;">Generated: {data['generated_at']}</p>
+    """
+    
+    for child in ['diya', 'jemma']:
+        items = data.get('items', {}).get(child, [])
+        if not items:
+            continue
+        html += f"<h2 style='color: #198754; margin-top: 30px;'>{child.upper()}</h2>"
+        for item in items:
+            html += f"""
+            <div style='background: #f8f9fa; border-radius: 8px; padding: 12px; margin: 10px 0;'>
+                <div style='font-weight: 600; color: #0d6efd; font-size: 14px;'>{item['topic']}</div>
+                <div style='margin-top: 8px; line-height: 1.6; white-space: pre-wrap; font-size: 13px;'>{item['digest']}</div>
+            </div>
+            """
+    
+    html += """
+    <p style='margin-top: 30px; font-size: 12px; color: #6c757d;'>
+        View full dashboard: <a href='https://xgrow.me/research-weekly.html'>https://xgrow.me/research-weekly.html</a>
+    </p>
+    </body></html>
+    """
+    
+    # 发送
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['From'] = SMTP_USER
+        msg['Subject'] = f"Weekly Intelligence Report - {data['generated_at'][:10]}"
+        msg.attach(MIMEText(html, 'html'))
+        
+        server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=30)
+        server.login(SMTP_USER, SMTP_PASS)
+        
+        for child, email in recipients.items():
+            msg['To'] = email
+            server.send_message(msg)
+            print(f'[email] Sent to {child} ({email})')
+            del msg['To']  # 清除以便下次设置
+        
+        server.quit()
+        print('[email] All emails sent successfully')
+    except Exception as e:
+        print(f'[email] Failed: {str(e)}')
 
 if __name__ == '__main__':
     main()
