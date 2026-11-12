@@ -2139,13 +2139,15 @@ async function loadSMCProgress(){
    return;
   }
   const latest = records[0];
-  const tier = smcGrade(latest.score);
+  const tier = latest.score!=null ? smcGrade(latest.score) : ((latest.award||'') + ' Award');
 
   // Latest result card
   const latestHtml = `
   <div style="display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;margin-bottom:14px">
    <div style="text-align:center;padding:12px 20px;background:var(--surface2);border-radius:12px">
-    <div style="font-size:34px;font-weight:800;color:var(--accent);line-height:1">${latest.score}<span style="font-size:16px;color:var(--text2)">/125</span></div>
+    ${latest.score!=null
+      ? `<div style="font-size:34px;font-weight:800;color:var(--accent);line-height:1">${latest.score}<span style="font-size:16px;color:var(--text2)">/125</span></div>`
+      : `<div style="font-size:26px;font-weight:800;color:var(--accent);line-height:1.2">${escHtml(latest.award||'—')}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">score not released</div>`}
     <div style="font-size:11px;color:var(--text2);margin-top:6px">${tier} · ${escHtml(latest.paper||'')}</div>
    </div>
    <div style="font-size:13px;line-height:1.8;color:var(--text2)">
@@ -2158,10 +2160,11 @@ async function loadSMCProgress(){
    </div>
   </div>`;
 
-  // Trend line (SVG) — only if 2+ records
+  // Trend line (SVG) — only if 2+ scored records
   let trendHtml = '';
-  if(records.length >= 2){
-   const sorted = records.slice().reverse(); // oldest first for the chart
+  const scoredRecords = records.filter(r=>r.score!=null);
+  if(scoredRecords.length >= 2){
+   const sorted = scoredRecords.slice().reverse(); // oldest first for the chart
    const W = 480, H = 120, padL = 40, padB = 24, padT = 10, padR = 10;
    const plotW = W - padL - padR, plotH = H - padT - padB;
    const minS = Math.min(...sorted.map(r=>r.score)) - 5;
@@ -2191,8 +2194,8 @@ async function loadSMCProgress(){
    ${records.slice(1).map(r=>`
     <div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-bottom:1px solid var(--border);font-size:12px">
      <span style="color:var(--text2);min-width:70px">${escHtml(r.date||'')}</span>
-     <span style="font-weight:700;color:var(--accent);min-width:50px">${r.score}/125</span>
-     <span style="color:var(--text2)">${smcGrade(r.score)} · ${escHtml(r.paper||'')}</span>
+     <span style="font-weight:700;color:var(--accent);min-width:50px">${r.score!=null ? r.score+'/125' : escHtml(r.award||'—')}</span>
+     <span style="color:var(--text2)">${r.score!=null ? smcGrade(r.score)+' · ' : ''}${escHtml(r.paper||'')}</span>
      ${r.weakness?`<span style="color:var(--orange);margin-left:auto;font-size:11px">${escHtml(r.weakness)}</span>`:''}
     </div>`).join('')}
   </div>` : '';
