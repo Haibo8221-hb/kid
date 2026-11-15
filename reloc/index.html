@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>迪拜搬迁台 · Dubai Relocation</title>
+<style>
+:root{--bg:#f4f6fa;--surface:#fff;--tx:#1a1d28;--tx2:#5b6474;--tx3:#8a93a5;--line:#e3e8f0;
+--blue:#3f7dff;--green:#10b981;--amber:#d97706;--red:#dc2626;--violet:#7c3aed}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Segoe UI','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--tx);font-size:16px;line-height:1.7;padding:20px;max-width:1080px;margin:0 auto}
+body.embed{padding:12px;max-width:none}
+h1{font-size:22px;margin-bottom:2px}
+.sub{color:var(--tx3);font-size:13px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:14px}
+.card h3{font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat b{font-size:24px;display:block}
+.stat span{font-size:12px;color:var(--tx3)}
+.badge{display:inline-block;padding:1px 9px;border-radius:9px;font-size:12px;font-weight:600}
+.b-high{background:#fee2e2;color:var(--red)}.b-med{background:#fef3c7;color:var(--amber)}
+.b-low{background:#dcfce7;color:#15803d}.b-todo{background:#e0e7ff;color:#4338ca}
+.b-waiting_on{background:#fef3c7;color:var(--amber)}.b-research{background:#ede9fe;color:var(--violet)}
+.b-doing{background:#dbeafe;color:var(--blue)}.b-done{background:#dcfce7;color:#15803d}.b-blocked{background:#fee2e2;color:var(--red)}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--tx);border-radius:9px;padding:6px 14px;font-size:14px;cursor:pointer}
+.btn-pri{background:var(--blue);border-color:var(--blue);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--tx3);font-weight:600;font-size:12.5px}
+.tid{font-weight:700;color:var(--blue);white-space:nowrap}
+.ov{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:8px 12px;margin-top:6px;font-size:14.5px}
+.src{font-size:12px;color:var(--tx3);word-break:break-all;margin-top:4px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chip{border:1px solid var(--line);border-radius:16px;padding:3px 13px;font-size:13px;cursor:pointer;background:var(--surface)}
+.chip.on{background:var(--tx);color:#fff;border-color:var(--tx)}
+.sel{border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:13px}
+.tool{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.muted{color:var(--tx3);font-size:13px}
+.finding{border-bottom:1px solid var(--line);padding:10px 0}
+.finding:last-child{border:0}
+#gate{position:fixed;inset:0;background:rgba(15,20,30,.55);display:flex;align-items:center;justify-content:center;z-index:9}
+#gate .box{background:#fff;border-radius:14px;padding:26px 28px;width:min(92vw,380px)}
+#gate input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:16px;margin:10px 0 14px}
+.hidden{display:none}
+a{color:var(--blue)}
+</style>
+</head>
+<body>
+<div id="app"><div class="sub">加载中…</div></div>
+<div id="gate" class="hidden"><div class="box">
+  <h1>迪拜搬迁台</h1><div class="sub">与 HRD 工作台共用同一同步口令</div>
+  <input id="pw" type="password" placeholder="同步口令（≥4位）">
+  <button class="btn btn-pri" id="pwSave" style="width:100%">进入</button>
+  <div class="sub" style="margin-top:10px">口令只在本机派生为令牌，不上传。</div>
+</div></div>
+<script>
+/* ── auth：复用工作台 wb_hrd_remote_token / deriveToken 口径 ── */
+var PREFIX='hrd-workbench-sync-v1:', RTOK='wb_hrd_remote_token';
+function getToken(){ try{return localStorage.getItem(RTOK)||'';}catch(e){return '';} }
+function setToken(t){ try{localStorage.setItem(RTOK,t);}catch(e){} }
+async function deriveToken(pw){
+  var d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(PREFIX+String(pw||'')));
+  return Array.from(new Uint8Array(d)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+function H(tok){ return {'Content-Type':'application/json','X-HRD-Token':tok}; }
+var state={data:null,findings:[],phase:'ALL'};
+
+async function boot(){
+  var tok=getToken();
+  if(!tok){ gate(true); return; }
+  try{
+    var r=await fetch('/api/hrd/reloc/summary',{headers:H(tok)});
+    if(r.status===401){ gate(true); return; }
+    state.data=await r.json();
+    try{
+      var r2=await fetch('/api/hrd/reloc/findings',{headers:H(tok)});
+      var d2=await r2.json(); state.findings=(d2.findings||[]);
+    }catch(e){}
+    render();
+  }catch(e){
+    document.getElementById('app').innerHTML='<div class="card">加载失败：'+e.message+' <button class="btn" onclick="boot()">重试</button></div>';
+  }
+}
+function gate(show){
+  document.getElementById('gate').classList.toggle('hidden',!show);
+  if(show){ var p=document.getElementById('pw'); p.focus();
+    document.getElementById('pwSave').onclick=async function(){
+      var v=p.value; if(!v||v.length<4){alert('口令至少4位');return;}
+      setToken(await deriveToken(v)); gate(false); boot();
+    };
+  }
+}
+function badge(cls,txt){ return '<span class="badge b-'+cls+'">'+txt+'</span>'; }
+function stBadge(s){ return badge(s,{todo:'待启动',research:'研究中',waiting_on:'等待外部',blocked:'受阻',doing:'进行中',done:'已完成',dropped:'放弃'}[s]||s); }
+function riskBadge(r){ return r==='high'?badge('high','高风险'):r==='med'?badge('med','中'):badge('low','低'); }
+function esc(s){ return String(s==null?'':s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function render(){
+  var d=state.data, dg=d.digest||{}, m=d.meta||{}, c=d.counts||{};
+  var ph=['ALL'].concat(Array.from(new Set(d.tasks.map(function(t){return t.phase;}))).sort());
+  var chips=ph.map(function(p){return '<span class="chip'+(state.phase===p?' on':'')+'" onclick="setPhase(\''+p+'\')">'+(p==='ALL'?'全部':p)+'</span>';}).join('');
+  var ov=(d.overdue||[]).map(function(o){return '<div class="ov">逾期 '+o.days+' 天 · <b>'+o.id+'</b> '+esc(o.title)+'（截止 '+o.due+'）</div>';}).join('')||'<div class="muted">无逾期项 ✓</div>';
+  var acts=(dg.actions||[]).map(function(a,i){return '<div style="margin-top:6px">'+(i+1)+'. '+esc(a)+'</div>';}).join('')||'<div class="muted">今日无行动项</div>';
+  var cp=(dg.critical_path||[]).map(function(x){return '<span class="badge b-'+(x.risk==='high'?'high':x.risk==='med'?'med':'low')+'">'+x.id+' '+stBadge(x.status).replace(/<[^>]*>/g,'')+'</span>';}).join(' ');
+  var rows=d.tasks.filter(function(t){return state.phase==='ALL'||t.phase===state.phase;}).map(function(t){
+    return '<tr><td class="tid">'+t.id+'</td><td>'+esc(t.title)+
+      (t.notes?'<div class="muted" style="font-size:12.5px">'+esc(t.notes)+'</div>':'')+'</td>'+
+      '<td>'+esc(t.owner||'—')+'</td><td>'+esc(t.due||'—')+(t.depends_on?'<div class="muted" style="font-size:12px">依赖 '+esc(t.depends_on)+'</div>':'')+'</td>'+
+      '<td>'+stBadge(t.status)+' '+riskBadge(t.risk)+(t.human_gate?' <span class="badge b-high">人工</span>':'')+'</td>'+
+      '<td><select class="sel" onchange="setSt(\''+t.id+'\',this.value)">'+
+      ['todo','research','waiting_on','blocked','doing','done'].map(function(s){return '<option value="'+s+'"'+(s===t.status?' selected':'')+'>'+({todo:'待启动',research:'研究中',waiting_on:'等待外部',blocked:'受阻',doing:'进行中',done:'已完成'})[s]+'</option>';}).join('')+'</select></td></tr>';
+  }).join('');
+  var fs=state.findings.map(function(f){
+    var src=(f.source||'').split(' || ').map(function(x){var p=x.split(': ');return p.length>1?'<a href="'+esc(p.slice(1).join(': '))+'" target="_blank" rel="noopener">'+esc(p[0])+'</a>':esc(x);}).join(' · ');
+    return '<div class="finding"><b>'+esc(f.task_id)+'</b> '+esc(f.topic||'')+' '+badge(f.confidence&&f.confidence.indexOf('高')===0?'low':f.confidence&&f.confidence.indexOf('中')===0?'med':'med',f.confidence||'')+
+      '<div style="margin-top:4px">'+esc(f.conclusion||'')+'</div>'+
+      (f.open_items&&f.open_items!=='[]'?'<div class="muted">待核实: '+esc(String(f.open_items))+'</div>':'')+
+      '<div class="src">核对 '+esc(String(f.checked).slice(0,10))+' · 来源: '+src+'</div></div>';}).join('')||'<div class="muted">暂无研究结论</div>';
+  document.getElementById('app').innerHTML=
+   (new URLSearchParams(location.search).get('embed')==='1'?'':
+    '<div class="tool"><div><h1>迪拜搬迁台</h1><div class="sub">伊斯坦布尔 → 迪拜 · '+esc(m.arrival_anchor||'')+'</div></div>'+
+    '<button class="btn" onclick="boot()">刷新</button></div>')+
+   '<div class="cards">'+
+    ['todo 待启动','research 研究中','waiting_on 等待外部','doing 进行中','done 已完成'].map(function(x){var a=x.split(' ');return '<div class="stat"><b>'+(c[a[0]]||0)+'</b><span>'+a[1]+'</span></div>';}).join('')+
+   '</div>'+
+   '<div class="card"><h3>项目参数</h3><div class="sub">'+
+    '办公地：'+esc(m.work_location||'')+'<br>住房决策：'+esc(m.housing||'')+'<br>女儿签证：'+esc(m.daughters_passport||'')+'<br>到达锚点：'+esc(m.arrival_anchor||'')+'</div></div>'+
+   '<div class="card"><h3>逾期项</h3>'+ov+'</div>'+
+   '<div class="card"><h3>今日行动（每日 '+String((dg.date||'').slice(0,10))+' 07:00 生成）</h3>'+acts+
+    '<div class="muted" style="margin-top:8px">关键路径：'+cp+'</div></div>'+
+   '<div class="card"><h3>研究结论</h3>'+fs+'</div>'+
+   '<div class="card"><h3>任务图（'+d.tasks.length+' 项）</h3><div class="chips">'+chips+'</div>'+
+    '<div style="overflow-x:auto"><table><tr><th>ID</th><th>任务</th><th>负责人</th><th>截止/依赖</th><th>状态</th><th>改状态</th></tr>'+rows+'</table></div>'+
+    '<div class="muted" style="margin-top:10px">红线：签字 / 付款 / 政府提交 / 押金——Agent 只备材料，执行永远人工确认。微信回复「完成/卡住/改期+任务号」同样生效。</div></div>';
+}
+function setPhase(p){ state.phase=p; render(); }
+async function setSt(id,s){
+  var tok=getToken();
+  var r=await fetch('/api/hrd/reloc/task',{method:'POST',headers:H(tok),body:JSON.stringify({id:id,status:s})});
+  var d=await r.json();
+  if(d.ok){ var t=state.data.tasks.find(function(x){return x.id===id;}); if(t) t.status=s; render(); }
+  else alert('更新失败：'+(d.error||''));
+}
+if(new URLSearchParams(location.search).get('embed')==='1') document.body.classList.add('embed');
+boot();
+</script>
+</body>
+</html>

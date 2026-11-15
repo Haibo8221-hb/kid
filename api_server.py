@@ -3908,5 +3908,113 @@ def api_research_weekly():
         return resp, 500
 
 
+
+# ── Relocation Agent（迪拜搬迁台，2026-11-15）— HRD令牌门控 ──
+# DB: data/reloc/tasks.db（root定时任务写，www经此API读写）；digest: data/reloc/digest_latest.json
+RELOC_DB = os.path.join(DATA_DIR, 'reloc', 'tasks.db')
+RELOC_DIGEST = os.path.join(DATA_DIR, 'reloc', 'digest_latest.json')
+
+
+def _reloc_con():
+    import sqlite3
+    con = sqlite3.connect(RELOC_DB, timeout=10)
+    con.row_factory = sqlite3.Row
+    con.execute('PRAGMA busy_timeout=8000')
+    return con
+
+
+def _reloc_resp(payload):
+    resp = jsonify(payload)
+    _hrd_cors(resp)
+    return resp
+
+
+@app.route('/api/hrd/reloc/summary', methods=['GET', 'OPTIONS'])
+def reloc_summary_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _hrd_cors(resp)
+        return resp
+    try:
+        con = _reloc_con()
+        tasks = [dict(r) for r in con.execute('SELECT * FROM tasks ORDER BY phase, id')]
+        counts = {}
+        for t in tasks:
+            counts[t['status']] = counts.get(t['status'], 0) + 1
+        overdue = []
+        from datetime import date as _d
+        today = _d.today()
+        for t in tasks:
+            if t['status'] in ('done', 'dropped') or not t['due']:
+                continue
+            try:
+                dd = (_d.fromisoformat(t['due']) - today).days
+            except ValueError:
+                continue
+            if dd < 0:
+                overdue.append({'id': t['id'], 'title': t['title'], 'due': t['due'], 'days': -dd})
+        digest = {}
+        try:
+            with open(RELOC_DIGEST, encoding='utf-8') as f:
+                digest = json.load(f)
+        except Exception:
+            pass
+        meta = {r['k']: r['v'] for r in con.execute('SELECT * FROM meta')}
+        con.close()
+        return _reloc_resp({'tasks': tasks, 'counts': counts, 'overdue': overdue,
+                            'digest': digest, 'meta': meta, 'ok': True})
+    except Exception as e:
+        return _reloc_resp({'ok': False, 'error': str(e)[:200]})
+
+
+@app.route('/api/hrd/reloc/findings', methods=['GET', 'OPTIONS'])
+def reloc_findings_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _hrd_cors(resp)
+        return resp
+    try:
+        con = _reloc_con()
+        rows = [dict(r) for r in con.execute(
+            'SELECT * FROM findings ORDER BY created DESC LIMIT 40')]
+        con.close()
+        return _reloc_resp({'findings': rows, 'ok': True})
+    except Exception as e:
+        return _reloc_resp({'ok': False, 'error': str(e)[:200]})
+
+
+@app.route('/api/hrd/reloc/task', methods=['POST', 'OPTIONS'])
+def reloc_task_update_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _hrd_cors(resp)
+        return resp
+    body = request.get_json(silent=True) or {}
+    tid = str(body.get('id') or '')
+    if not tid:
+        return _reloc_resp({'ok': False, 'error': 'id required'})
+    try:
+        con = _reloc_con()
+        cur = con.execute('SELECT * FROM tasks WHERE id=?', (tid,))
+        row = cur.fetchone()
+        if not row:
+            con.close()
+            return _reloc_resp({'ok': False, 'error': 'task not found'})
+        fields, vals = [], []
+        for k in ('status', 'notes', 'due', 'owner'):
+            if k in body and body[k] not in (None, ''):
+                fields.append(f'{k}=?')
+                vals.append(str(body[k]))
+        if fields:
+            vals.append(tid)
+            con.execute('UPDATE tasks SET ' + ','.join(fields) + ' WHERE id=?', vals)
+            con.commit()
+        task = dict(con.execute('SELECT * FROM tasks WHERE id=?', (tid,)).fetchone())
+        con.close()
+        return _reloc_resp({'ok': True, 'task': task})
+    except Exception as e:
+        return _reloc_resp({'ok': False, 'error': str(e)[:200]})
+
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=int(os.environ.get('PORT', 5000)), debug=False)
