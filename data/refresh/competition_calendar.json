@@ -1,0 +1,228 @@
+{
+  "verified_at": "2026-11-16",
+  "verified_by": "Cloud Hermes — 全部官方源核验",
+  "sources": {
+    "ukmt": "https://ukmt.org.uk/competition-calendar-2026-27",
+    "bpho": "https://www.bpho.org.uk/Competitions",
+    "bebras": "https://www.bebras.uk/index.php?action=content&id=20",
+    "perse": "https://form.raspberrypi.org/4874156",
+    "note": "报名均由学校(UKMT/BPhO)或教师(Raspberry Pi)统一操作；家长侧动作=提前向学校确认报名"
+  },
+  "diya": [
+    {
+      "id": "diya-junior-astro-2026",
+      "name": "Junior Astro Challenge (BPhO)",
+      "date": "2026-10-30",
+      "date_end": "2026-11-20",
+      "reg_deadline": "2026-11-20",
+      "eligibility": "Year 10-11 ✓",
+      "status": "open_now",
+      "priority": "high",
+      "action": "窗口正在关闭(11-20)！立即问物理老师学校是否给她报名",
+      "source": "https://www.bpho.org.uk/Competitions"
+    },
+    {
+      "id": "diya-ipc-online-2027",
+      "name": "IPC Online Competition (BPhO)",
+      "date": "2027-01-25",
+      "date_end": "2027-01-29",
+      "reg_deadline": null,
+      "reg_note": "学校统一报名(£20/school)，1月中旬前确认",
+      "eligibility": "Year 11 ✓ (2×30min online quiz)",
+      "status": "planned",
+      "priority": "high",
+      "action": "12月向物理老师确认报名",
+      "source": "https://www.bpho.org.uk/bpho/IPC.html"
+    },
+    {
+      "id": "diya-ipc-paper-2027",
+      "name": "Intermediate Physics Challenge (paper, BPhO)",
+      "date": "2027-02-26",
+      "reg_deadline": null,
+      "reg_note": "学校报名，免费；国际学校考3-01",
+      "eligibility": "Year 11 ✓ (1h paper)",
+      "status": "planned",
+      "priority": "high",
+      "action": "既定路线IPC，官方日期已确认；与IPC Online同期问报名",
+      "source": "https://www.bpho.org.uk/bpho/IPC.html"
+    },
+    {
+      "id": "diya-perse-coding-2027",
+      "name": "Perse Coding Team Challenge R1",
+      "date": "2027-01-25",
+      "date_end": "2027-02-05",
+      "reg_deadline": null,
+      "reg_note": "免费团队赛，需学校组队",
+      "eligibility": "Year 11及以下 ✓",
+      "status": "optional",
+      "priority": "low",
+      "action": "编程兴趣可选，问Computing部门",
+      "source": "https://form.raspberrypi.org/4874156"
+    },
+    {
+      "id": "diya-smc-2027",
+      "name": "Senior Mathematical Challenge (SMC 重考)",
+      "date": "2027-10-07",
+      "date_is_estimate": true,
+      "reg_deadline": null,
+      "reg_note": "预计日期(按2026年10月首个周三推算)，2027年官方日历公布后核实",
+      "eligibility": "Year 12 ✓",
+      "status": "planned",
+      "priority": "high",
+      "action": "UCAS窗口内最关键一场：Y12首个学期，金银线=BMO1资格",
+      "source": "https://ukmt.org.uk/competition-calendar-2026-27"
+    },
+    {
+      "id": "diya-esat-2028",
+      "name": "ESAT (Imperial/UCL engineering entrance)",
+      "date": "2028-10-12",
+      "date_end": "2028-10-16",
+      "date_is_estimate": true,
+      "reg_deadline": null,
+      "reg_note": "预计窗口(按2026模式10月中)，2028年7月底开放报名",
+      "eligibility": "Y13 ✓ (Maths1+Maths2+Physics)",
+      "status": "planned",
+      "priority": "high",
+      "action": "Imperial工程录取关键；备考时间表见plan_context分析文档",
+      "source": "https://imperial.ac.uk/study/apply/undergraduate/process/admissions-tests/esat"
+    },
+    {
+      "id": "diya-ucas-2028",
+      "name": "UCAS application (2029 entry)",
+      "date": "2028-10-15",
+      "date_is_estimate": true,
+      "reg_deadline": "2029-01-14",
+      "reg_note": "主轮截止约2029年1月底；Imperial工程无10-15提前截止(医学除外)",
+      "eligibility": "Y13",
+      "status": "planned",
+      "priority": "high",
+      "action": "PS素材从Y12开始积累(竞赛成绩/EPQ/项目)",
+      "source": "https://www.ucas.com"
+    }
+  ],
+  "jemma": [
+    {
+      "id": "jemma-bebras-2026",
+      "name": "UK Bebras Challenge 2026",
+      "date": "2026-11-09",
+      "date_end": "2026-11-20",
+      "reg_deadline": "2026-11-20",
+      "reg_note": "18:00 GMT 关闭；教师报名制、免费",
+      "eligibility": "Y9 ✓ (45min online)",
+      "status": "open_now",
+      "priority": "high",
+      "action": "已在校历；确认她已完成场次",
+      "source": "https://www.bebras.uk/"
+    },
+    {
+      "id": "jemma-bebras-results-2026",
+      "name": "Bebras 2026 正式成绩+证书",
+      "date": "2026-12-04",
+      "status": "planned",
+      "priority": "low",
+      "action": "证书发放(初步成绩11-27)",
+      "source": "https://www.bebras.uk/index.php?action=content&id=20"
+    },
+    {
+      "id": "jemma-imc-2027",
+      "name": "Intermediate Mathematical Challenge (IMC)",
+      "date": "2027-01-27",
+      "reg_deadline": null,
+      "reg_note": "学校报名制；UKMT截止通常考前2-3周→1月上旬向数学部确认",
+      "eligibility": "Year 9-11 ✓ (60min, 25题)",
+      "status": "planned",
+      "priority": "high",
+      "action": "Y9主战场(已有goal)；12月向数学老师确认报名",
+      "source": "https://ukmt.org.uk/competition-calendar-2026-27"
+    },
+    {
+      "id": "jemma-perse-coding-2027",
+      "name": "Perse Coding Team Challenge R1",
+      "date": "2027-01-25",
+      "date_end": "2027-02-05",
+      "reg_deadline": null,
+      "reg_note": "免费团队赛，需学校组队",
+      "eligibility": "Year 11及以下 ✓",
+      "status": "optional",
+      "priority": "low",
+      "action": "编程探索期可选(Compute线软努力度——适合低压力入门)",
+      "source": "https://form.raspberrypi.org/4874156"
+    },
+    {
+      "id": "jemma-rpi-coding-2027",
+      "name": "Raspberry Pi Coding Challenge",
+      "date": "2027-03-01",
+      "date_end": "2027-03-31",
+      "status": "optional",
+      "priority": "low",
+      "action": "Bebras同门(Raspberry Pi基金会)，3月自由参与",
+      "source": "https://www.bebras.uk/index.php?action=content&id=20"
+    },
+    {
+      "id": "jemma-kangaroo-2027",
+      "name": "Grey & Pink Kangaroo (UKMT)",
+      "date": "2027-03-18",
+      "eligibility": "IMC优秀者受邀",
+      "status": "invitation_likely",
+      "priority": "med",
+      "action": "IMC成绩决定；无需报名动作",
+      "source": "https://ukmt.org.uk/competition-calendar-2026-27"
+    },
+    {
+      "id": "jemma-olympiads-2027",
+      "name": "Cayley / Hamilton Olympiad (UKMT)",
+      "date": "2027-03-18",
+      "eligibility": "IMC顶尖者受邀(Y9对应Hamilton)",
+      "status": "invitation_likely",
+      "priority": "med",
+      "action": "IMC成绩决定",
+      "source": "https://ukmt.org.uk/competition-calendar-2026-27"
+    },
+    {
+      "id": "jemma-jpc-2028",
+      "name": "Junior Physics Challenge (BPhO, Y10)",
+      "date": "2028-04-23",
+      "date_end": "2028-05-14",
+      "date_is_estimate": true,
+      "reg_note": "按2027窗口推算，2027-28日历公布后核实；学校报名",
+      "eligibility": "Y10 ✓ (2027-28学年她升Y10)",
+      "status": "planned",
+      "priority": "med",
+      "action": "Y10物理首战(Phys 82%基础好)",
+      "source": "https://www.bpho.org.uk/Competitions"
+    },
+    {
+      "id": "jemma-imc-2028",
+      "name": "Intermediate Mathematical Challenge (Y10)",
+      "date": "2028-01-26",
+      "date_is_estimate": true,
+      "eligibility": "Y10 ✓",
+      "status": "planned",
+      "priority": "high",
+      "action": "2028年1月，Hamilton线关键年",
+      "source": "https://ukmt.org.uk/competition-calendar-2026-27"
+    },
+    {
+      "id": "jemma-bebras-2027",
+      "name": "UK Bebras Challenge 2027",
+      "date": "2027-11-08",
+      "date_end": "2027-11-19",
+      "eligibility": "Y10 ✓",
+      "status": "planned",
+      "priority": "med",
+      "action": "官方日历已公布2027日期",
+      "source": "https://www.bebras.uk/index.php?action=content&id=20"
+    }
+  ],
+  "shared": [
+    {
+      "id": "diya-nov-mocks-2026",
+      "name": "Diya Nov mocks (FMaths qualification gate)",
+      "date": "2026-11-30",
+      "status": "date_unconfirmed",
+      "priority": "high",
+      "action": "确切日期待向学校核实",
+      "source": "live_brief"
+    }
+  ]
+}

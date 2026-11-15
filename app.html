@@ -594,6 +594,7 @@ canvas.radar{width:240px!important;height:240px!important}
 
 <!-- Countdown Strip -->
 <div id="countdown-strip" class="countdown-strip"></div>
+<div id="comp-cal"></div>
 
 <!-- Live Brief: pipeline 动态层（双周挑战/过期目标提醒），数据源 /api/live-brief -->
 <div id="live-brief" style="display:none;margin:-6px 0 14px;padding:10px 14px;border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:10px;background:var(--surface)"></div>
@@ -2093,6 +2094,7 @@ async function loadDashboard(){
  renderCountdownStrip();
  updateCountdownStrip();
  loadLiveBrief();   // pipeline 动态层：挑战/过期提醒/API倒计时合并
+ loadCompCal();     // 官方竞赛日历：高优先级并入倒计时条 + 日历widget
  if (window.__dashTimer) clearInterval(window.__dashTimer);
     window.__dashTimer = setInterval(updateCountdownStrip, 60000);
  loadStudyTips();
@@ -2726,6 +2728,50 @@ async function loadLiveBrief(){
   }
   if(parts.length){ el.innerHTML=parts.join(''); el.style.display='block'; }
  }catch(e){ console.warn('live-brief failed',e); }
+}
+
+
+// ── Competition Calendar (official dates verified 16 Nov 2026; UKMT/BPhO/Bebras sources) ──
+async function loadCompCal(){
+ try{
+  const d=await fetch('/api/competition-calendar?child=diya').then(r=>r.json());
+  if(!d||!d.ok) return;
+  const items=d.items||[];
+  // merge near-term high-priority events into countdown strip (dedupe by target)
+  const now=Date.now();
+  items.filter(c=>c.priority==='high'&&c.date).forEach(c=>{
+   if(COUNTDOWN_ITEMS.some(x=>x.target===c.date)||COUNTDOWN_ITEMS.length>=6) return;
+   const days=(new Date(c.date).getTime()-now)/86400000;
+   if(days>=0&&days<=120) COUNTDOWN_ITEMS.push({icon:'\ud83d\udccc',name:(c.date_is_estimate?'(est.) ':'')+String(c.name).slice(0,42),target:c.date});
+  });
+  renderCountdownStrip(); updateCountdownStrip();
+  const el=document.getElementById('comp-cal'); if(!el) return;
+  const esc=s=>String(s==null?'':s).replace(/</g,'&lt;');
+  const fmt=ds=>new Date(ds).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const badge=c=>{
+   const map={open_now:['OPEN NOW','var(--red)'],planned:['Scheduled','var(--accent)'],optional:['Optional','var(--text2)'],invitation_likely:['If qualified','var(--orange)'],date_unconfirmed:['Date TBC','var(--orange)']};
+   const p=map[c.status]||[c.status,'var(--text2)'];
+   return '<span style="font-size:10px;font-weight:700;color:'+p[1]+';border:1px solid '+p[1]+'44;background:'+p[1]+'14;padding:1px 8px;border-radius:8px;white-space:nowrap">'+p[0]+'</span>';
+  };
+  const rows=items.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const html=rows.map(c=>{
+   const range=c.date_end?fmt(c.date)+' \u2013 '+fmt(c.date_end):fmt(c.date);
+   const reg=c.reg_deadline?'<span style="color:var(--red);font-weight:700;font-size:11px">\u00b7 Register by '+fmt(c.reg_deadline)+'</span>':(c.reg_note?'<span style="color:var(--text2);font-size:11px">\u00b7 '+esc(c.reg_note)+'</span>':'');
+   const est=c.date_is_estimate?' <span style="font-size:10px;color:var(--text2)">(est.)</span>':'';
+   return '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border)">'+
+    '<div style="min-width:120px;font-weight:700;font-size:12.5px;color:var(--accent)">'+range+est+'</div>'+
+    '<div style="flex:1;min-width:0">'+
+     '<div style="font-size:13px;font-weight:600">'+esc(c.name)+' '+badge(c)+'</div>'+
+     '<div style="font-size:11.5px;color:var(--text2);margin-top:2px">'+(c.eligibility?esc(c.eligibility)+' \u00b7 ':'')+reg+'</div>'+
+     (c.action?'<div style="font-size:11.5px;color:var(--text);margin-top:2px">'+esc(c.action)+'</div>':'')+
+     (c.source?'<a href="'+c.source+'" target="_blank" rel="noopener" style="font-size:10.5px;color:var(--accent2)">source</a>':'')+
+    '</div></div>';
+  }).join('');
+  el.innerHTML='<div style="margin-bottom:14px;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:var(--surface)">'+
+   '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'+
+    '<div style="font-size:14px;font-weight:700">Competition & Activity Calendar</div>'+
+    '<div style="font-size:10px;color:var(--text2)">official dates verified '+esc(d.verified_at||'')+'</div></div>'+html+'</div>';
+ }catch(e){ console.warn('comp-cal failed',e); }
 }
 
 // 注(#8)：英文段落框架命名**统一为 PETAL**（家长 2026-10-15 确认："是 PETAL，不是那个 6 步写法"）。

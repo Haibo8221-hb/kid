@@ -4217,5 +4217,24 @@ def reloc_auto_api():
         return _hrd_cors(jsonify({}))
     return reloc_ingest_api()
 
+
+# ── Competition Calendar（竞赛/活动日历，官方源核验 2026-11-16）──
+COMP_CAL_PATH = os.path.join(DATA_DIR, 'refresh', 'competition_calendar.json')
+
+
+@app.route('/api/competition-calendar', methods=['GET'])
+def competition_calendar_api():
+    child = request.args.get('child', 'diya')
+    try:
+        with open(COMP_CAL_PATH, encoding='utf-8') as f:
+            cal = json.load(f)
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)[:200]})
+    items = list(cal.get(child, []))
+    if child == 'diya':
+        items += cal.get('shared', [])
+    return jsonify({'ok': True, 'child': child, 'verified_at': cal.get('verified_at'),
+                    'sources': cal.get('sources', {}), 'items': items})
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=int(os.environ.get('PORT', 5000)), debug=False)

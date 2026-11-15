@@ -578,6 +578,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 <div class="section">
 <div class="section-title"> ⏳ The days ahead</div>
 <div id="countdown-strip" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap"></div>
+<div id="comp-cal" style="margin-bottom:14px"></div>
 <!-- Live Brief: pipeline 动态层（双周挑战/过期目标提醒），数据源 /api/live-brief -->
 <div id="live-brief" style="display:none;margin:0 0 14px;padding:10px 14px;border:1px solid var(--border);border-left:4px solid var(--accent2);border-radius:10px;background:var(--surface)"></div>
 </div>
@@ -1888,6 +1889,7 @@ async function loadDashboard(){
  loadChild('jemma');
  renderCountdown();
  loadLiveBrief();   // pipeline 动态层：挑战/过期提醒
+ loadCompCal();     // 官方竞赛日历：Y9竞赛/活动完整日历
 }
 
 function initSubjectAnalysis(){
@@ -2454,6 +2456,44 @@ async function loadLiveBrief(){
   }
   if(parts.length){ el.innerHTML=parts.join(''); el.style.display='block'; }
  }catch(e){ console.warn('live-brief failed',e); }
+}
+
+
+// ── Competition Calendar (official dates verified 16 Nov 2026; UKMT/BPhO/Bebras sources) ──
+async function loadCompCal(){
+ try{
+  const d=await fetch('/api/competition-calendar?child=jemma').then(r=>r.json());
+  if(!d||!d.ok) return;
+  const items=d.items||[];
+  const now=Date.now();
+  // pull next high-priority into Today big card if closer than current list
+  const el=document.getElementById('comp-cal'); if(!el) return;
+  const esc=s=>String(s==null?'':s).replace(/</g,'&lt;');
+  const fmt=ds=>new Date(ds).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const badge=c=>{
+   const map={open_now:['OPEN NOW','#e74c3c'],planned:['Scheduled','#8e44ad'],optional:['Optional','#7f8c8d'],invitation_likely:['If qualified','#f39c12']};
+   const p=map[c.status]||[c.status,'#7f8c8d'];
+   return '<span style="font-size:10px;font-weight:700;color:'+p[1]+';border:1px solid '+p[1]+'44;background:'+p[1]+'18;padding:1px 8px;border-radius:8px;white-space:nowrap">'+p[0]+'</span>';
+  };
+  const rows=items.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const html=rows.map(c=>{
+   const range=c.date_end?fmt(c.date)+' \u2013 '+fmt(c.date_end):fmt(c.date);
+   const reg=c.reg_deadline?'<span style="color:#e74c3c;font-weight:700;font-size:11px">\u00b7 Register by '+fmt(c.reg_deadline)+'</span>':(c.reg_note?'<span style="color:var(--text2);font-size:11px">\u00b7 '+esc(c.reg_note)+'</span>':'');
+   const est=c.date_is_estimate?' <span style="font-size:10px;color:var(--text2)">(est.)</span>':'';
+   return '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border)">'+
+    '<div style="min-width:120px;font-weight:700;font-size:12.5px;color:#8e44ad">'+range+est+'</div>'+
+    '<div style="flex:1;min-width:0">'+
+     '<div style="font-size:13px;font-weight:600">'+esc(c.name)+' '+badge(c)+'</div>'+
+     '<div style="font-size:11.5px;color:var(--text2);margin-top:2px">'+(c.eligibility?esc(c.eligibility)+' \u00b7 ':'')+reg+'</div>'+
+     (c.action?'<div style="font-size:11.5px;margin-top:2px">'+esc(c.action)+'</div>':'')+
+     (c.source?'<a href="'+c.source+'" target="_blank" rel="noopener" style="font-size:10.5px;color:#2980b9">source</a>':'')+
+    '</div></div>';
+  }).join('');
+  el.innerHTML='<div style="margin-bottom:14px;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">'+
+   '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'+
+    '<div style="font-size:14px;font-weight:700">Competition & Activity Calendar</div>'+
+    '<div style="font-size:10px;color:var(--text2)">official dates verified '+esc(d.verified_at||'')+'</div></div>'+html+'</div>';
+ }catch(e){ console.warn('comp-cal failed',e); }
 }
 
 // Countdown：Today 只显示「下一个」大卡；完整列表在 My Plan
