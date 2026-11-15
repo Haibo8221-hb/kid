@@ -207,7 +207,8 @@ function weeklyBlock(d){
       '<div class="row">推荐方案：<span class="rep">'+esc(c.recommend)+'</span></div>'+
       '<div class="row">理由：'+esc(c.why)+'　截止：'+esc(c.deadline||'—')+'</div>'+
       '<div class="row muted">回复“1”即同意（微信同效）　·　'+c.id+'</div>'+
-      '<div class="row"><button class="btn" onclick="copyConfirm(this)" data-txt="'+esc(line)+'">复制确认请求</button></div></div>';
+      '<div class="row"><button class="btn" onclick="copyConfirm(this)" data-txt="'+esc(line)+'">复制确认请求</button>'+
+      '<button class="btn" onclick="ackConfirm(this)" data-id="'+esc(c.id||'')+'" data-item="'+esc(c.item||'')+'">已确认 · 销账</button></div></div>';
   }).join('')||'<div class="muted">· 本周无需确认</div>';
   var cnclHtml=cncl.map(function(x){return '<div class="cncl">· '+esc(x)+'</div>';}).join('');
   var g=d.gate||dg.gate||{}, f=d.family||dg.family||{};
@@ -226,6 +227,16 @@ function copyConfirm(btn){
   var t=btn.getAttribute('data-txt')||'';
   try{ navigator.clipboard.writeText(t).then(function(){toast('已复制，可直接粘贴回复');}); }
   catch(e){ toast('请长按选择文字复制'); }
+}
+async function ackConfirm(btn){
+  var id=btn.getAttribute('data-id')||'', item=btn.getAttribute('data-item')||'';
+  try{
+    var r=await api('/api/hrd/reloc/confirm',{method:'POST',body:JSON.stringify({id:id,item:item})});
+    var d=await r.json();
+    if(!r.ok||!d.ok) throw new Error(d.error||('HTTP '+r.status));
+    toast('已销账 · v'+d.version);
+    await boot(true);
+  }catch(e){ toast('销账失败：'+e.message); }
 }
 
 /* ── 调研结论：自动归类 / 摘要折叠 / 来源还原 / 需知会聚合（RESEARCH_V3） ── */
@@ -445,7 +456,8 @@ async function runIngest(force){
     if(!r.ok||!d.ok) throw new Error(d.error||('HTTP '+r.status));
     if(d.skipped){ toast(d.seconds_left+' 秒内已分析过，跳过'); }
     else{
-      toast('AI 入库完成 · v'+d.version+(d.degraded?'（降级模式）':''));
+      toast('AI 入库完成 · v'+d.version+(d.degraded?'（降级模式）':'')+
+        ((d.auto_closed&&d.auto_closed.length)?' · 自动关闭 '+d.auto_closed.map(function(x){return x.id;}).join('/'):''));
       var msg=document.getElementById('ingestMsg');
       if(msg) msg.textContent='AI 于 '+String(d.updated).slice(11,16)+' 更新 · '+(d.actions||[]).length+' 条进展 · '+(d.confirmations||[]).length+' 条待确认';
     }

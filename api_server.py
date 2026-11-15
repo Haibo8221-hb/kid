@@ -4175,10 +4175,14 @@ def reloc_ingest_api():
             '{"actions":["本周已自动完成或下一步该做的，≤3件，每件一句"],'
             '"confirmations":[{"id":"任务ID","item":"事项","recommend":"推荐方案","why":"一句话理由","deadline":"截止"}],'
             '"countdown":["距锚点剩余周数/闸门状态/家属签状态/关键风险，≤4条"],'
+            '"status_updates":[{"id":"任务ID","status":"done","why":"一句话依据"}],'
             '"focus":["关键路径任务ID，最多5个"],'
             '"note":"一句话整体进度与最大风险"}。'
             'confirmations 只在 A付款/B签字合同/C提交证件给第三方/D取舍差<10%/E信息无法补全 五类情形生成(≤3条，同类合并)；'
-            '其余一律自动执行，不列入 confirmations。禁止编造任务ID或事实；签字/付款/政府提交/押金类不得说已完成。'
+            '其余一律自动执行，不列入 confirmations。status_updates 仅当家长本次录入或已核实结论明确表示某任务'
+            '已完成/已确认/无需再跟进时生成(id必须是清单中真实ID，status固定done，why写依据，≤3条)；'
+            '禁止包含 GATE-01/FAM-01 与 human_gate=1 的付款/签字/交证件红线任务；禁止把政府提交/押金类说成已完成。'
+            '禁止编造任务ID或事实。'
             '不要输出 JSON 以外的任何文字。'
         )
         extra = ('\n\n【家长本次录入的新线索——必须纳入分析，不得忽略】\n' + user_input) if user_input else ''
@@ -4202,9 +4206,27 @@ def reloc_ingest_api():
                 confirmations.append({'id': str(c.get('id') or '')[:24], 'item': str(c.get('item') or '')[:120],
                                       'recommend': str(c.get('recommend') or '')[:120],
                                       'why': str(c.get('why') or '')[:120], 'deadline': str(c.get('deadline') or '')[:40]})
+        # AI 判定"已核实/已完成"的任务 -> 自动执行状态更新（闭环，不再只写建议）
+        known = {t['id'] for t in tasks}
+        status_updates = []
+        for _u in (parsed.get('status_updates') or [])[:5]:
+            if not isinstance(_u, dict):
+                continue
+            _sid = str(_u.get('id') or '')[:24]
+            _sst = str(_u.get('status') or '')[:16].lower()
+            if _sid in known and _sst == 'done':
+                status_updates.append({'id': _sid, 'status': 'done',
+                                       'why': str(_u.get('why') or '家长已确认')[:120]})
+        # 兜底：LLM 只在 actions 文本里写了"更新P4-06为done"也能执行
+        import re as _re2
+        for _a in actions:
+            for _m in list(_re2.finditer(r'([A-Z]\d+[-\u2013]\d+)[^\u3002\uff1b;\n]{0,12}?done', _a, _re2.I)) + \
+                      list(_re2.finditer(r'done[^\u3002\uff1b;\n]{0,12}?([A-Z]\d+[-\u2013]\d+)', _a, _re2.I)):
+                _sid = _m.group(1).replace('\u2013', '-')
+                if _sid in known and not any(x['id'] == _sid for x in status_updates):
+                    status_updates.append({'id': _sid, 'status': 'done', 'why': '从行动建议自动执行'})
         countdown = [str(x)[:160] for x in (parsed.get('countdown') or []) if x][:4]
         focus = [str(x)[:24] for x in (parsed.get('focus') or []) if x][:8]
-        known = {t['id'] for t in tasks}
         focus = [x for x in focus if x in known]
         if not actions:
             # LLM 不可用/解析失败：降级为基于逾期与高风险任务的可执行清单，不让页面空转
@@ -4223,6 +4245,24 @@ def reloc_ingest_api():
                                           'recommend': '材料已备好，确认后再执行',
                                           'why': '涉及付款/签字/提交证件，属人工确认红线。',
                                           'deadline': str(t['due'] or '按里程碑')})
+        # 已销账的确认项不再出现（避免"我确认过了怎么还问我"）
+        def _reloc_ckey(_id, _item):
+            import hashlib as _hl
+            return _hl.sha256((str(_id) + '|' + str(_item)).encode('utf-8')).hexdigest()[:16]
+
+        def _reloc_confirmed():
+            try:
+                _c0 = _reloc_con()
+                _row = _c0.execute("SELECT v FROM meta WHERE k='confirmed_items'").fetchone()
+                _c0.close()
+                _arr = json.loads(_row['v']) if _row else []
+                return _arr if isinstance(_arr, list) else []
+            except Exception:
+                return []
+
+        _cf_keys = {str(x.get('key')) for x in _reloc_confirmed() if isinstance(x, dict)}
+        confirmations = [c for c in confirmations
+                         if _reloc_ckey(c.get('id'), c.get('item')) not in _cf_keys]
         if not countdown:
             countdown = [week_ctx] if week_ctx else []
         note = str(parsed.get('note') or '')[:300]
@@ -4257,6 +4297,26 @@ def reloc_ingest_api():
         atomic_write(RELOC_DIGEST, digest, ensure_ascii=False, indent=2)
 
         con = _reloc_con()
+        # 执行 AI 判定：只改非红线、非闸门/家属签、且尚未完成的任务
+        applied = []
+        for _u in status_updates:
+            _sid = _u['id']
+            if _sid in ('GATE-01', 'FAM-01'):
+                continue                      # 闸门/家属签永远人工确认
+            _row = con.execute('SELECT status,human_gate FROM tasks WHERE id=?', (_sid,)).fetchone()
+            if not _row or _row['human_gate'] or _row['status'] in ('done', 'dropped'):
+                continue                      # 红线任务/已完成不再改
+            con.execute("UPDATE tasks SET status='done' WHERE id=?", (_sid,))
+            applied.append({'id': _sid, 'why': _u.get('why') or ''})
+        if applied:
+            con.commit()
+            for _a in applied:
+                actions.insert(0, '已自动关闭 ' + _a['id'] + '：' + str(_a.get('why') or '家长已确认')[:80])
+            digest['actions'] = actions[:5]
+            if isinstance(digest.get('weekly'), dict):
+                digest['weekly']['done_auto'] = actions[:5]
+            digest['auto_closed'] = applied
+            atomic_write(RELOC_DIGEST, digest, ensure_ascii=False, indent=2)
         if user_input:
             con.execute('INSERT INTO findings(task_id,topic,conclusion,source,checked,confidence,open_items,created) '
                         'VALUES(?,?,?,?,?,?,?,?)',
@@ -4270,7 +4330,60 @@ def reloc_ingest_api():
         return _reloc_resp({'ok': True, 'version': ver + 1, 'updated': now,
                             'actions': actions, 'focus': focus, 'note': note,
                             'confirmations': confirmations, 'countdown': countdown,
-                            'degraded': digest['degraded']})
+                            'auto_closed': applied, 'degraded': digest['degraded']})
+
+    except Exception as e:
+        return _reloc_resp({'ok': False, 'error': str(e)[:200]})
+
+@app.route('/api/hrd/reloc/confirm', methods=['POST', 'OPTIONS'])
+def reloc_confirm_api():
+    """家长已确认的请求销账：写入 confirmed_items 并从当前 digest 移除，
+    下次 ingest 不再生成同 key 的确认项；版本递增触发页面轮询刷新。"""
+    if request.method == 'OPTIONS':
+        return _hrd_cors(jsonify({}))
+    body = request.get_json(silent=True) or {}
+    _id = str(body.get('id') or '')[:24]
+    _item = str(body.get('item') or '')[:120]
+    if not _id and not _item:
+        return _reloc_resp({'ok': False, 'error': 'id or item required'})
+    try:
+        import hashlib as _hl
+        _key = _hl.sha256((_id + '|' + _item).encode('utf-8')).hexdigest()[:16]
+        con = _reloc_con()
+        try:
+            _row = con.execute("SELECT v FROM meta WHERE k='confirmed_items'").fetchone()
+            _confirmed = json.loads(_row['v']) if _row else []
+            if not isinstance(_confirmed, list):
+                _confirmed = []
+        except Exception:
+            _confirmed = []
+        if not any(isinstance(x, dict) and x.get('key') == _key for x in _confirmed):
+            _confirmed.append({'key': _key, 'id': _id, 'item': _item,
+                               'ts': datetime.now().isoformat(timespec='seconds')})
+        _reloc_meta_set(con, 'confirmed_items', json.dumps(_confirmed[-100:], ensure_ascii=False))
+        con.commit()
+        con.close()
+        dg = {}
+        try:
+            with open(RELOC_DIGEST, encoding='utf-8') as f:
+                _x = json.load(f)
+            if isinstance(_x, dict):
+                dg = _x
+        except Exception:
+            pass
+        dg['confirmations'] = [c for c in (dg.get('confirmations') or [])
+                               if _hl.sha256((str(c.get('id') or '') + '|' +
+                                              str(c.get('item') or '')).encode('utf-8')).hexdigest()[:16] != _key]
+        if isinstance(dg.get('weekly'), dict):
+            dg['weekly']['confirmations'] = dg['confirmations']
+        dg['version'] = int(dg.get('version') or 0) + 1
+        dg['updated'] = datetime.now().isoformat(timespec='seconds')
+        atomic_write(RELOC_DIGEST, dg, ensure_ascii=False, indent=2)
+        con2 = _reloc_con()
+        _reloc_meta_set(con2, 'version', dg['version'])
+        con2.commit()
+        con2.close()
+        return _reloc_resp({'ok': True, 'key': _key, 'version': dg['version']})
     except Exception as e:
         return _reloc_resp({'ok': False, 'error': str(e)[:200]})
 

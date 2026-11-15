@@ -558,6 +558,57 @@ try:
 except Exception as _e:
     check(False, 'Reloc ingest 降级分支自检异常：%s' % _e)
 
+print('== Reloc ingest 自动闭环（已核实→改状态→销账）==')
+try:
+    import sqlite3 as _sq, json as _js, tempfile as _tf, os as _os
+    # 隔离临时 DATA_DIR，重建模块级路径常量
+    _tmp = _tf.mkdtemp(prefix='p0close_')
+    _old_db, _old_dg, _old_ht = A.RELOC_DB, A.RELOC_DIGEST, A._HRD_TOKEN_FILE
+    A.RELOC_DB = _os.path.join(_tmp, 'reloc', 'tasks.db')
+    A.RELOC_DIGEST = _os.path.join(_tmp, 'reloc', 'digest_latest.json')
+    _os.makedirs(_os.path.dirname(A.RELOC_DB), exist_ok=True)
+    with open(A._hrd_token_path(), 'w', encoding='utf-8') as _f:
+        _f.write('p0close_token')
+    _co = _sq.connect(A.RELOC_DB)
+    _co.execute('CREATE TABLE tasks (id TEXT PRIMARY KEY,phase TEXT,title TEXT,status TEXT,owner TEXT,due TEXT,depends_on TEXT,risk TEXT,human_gate INTEGER DEFAULT 0,docs TEXT,source TEXT DEFAULT "",checked TEXT DEFAULT "",notes TEXT DEFAULT "")')
+    _co.execute('CREATE TABLE meta (k TEXT PRIMARY KEY, v TEXT)')
+    _co.execute('CREATE TABLE findings (id INTEGER PRIMARY KEY AUTOINCREMENT,task_id TEXT,topic TEXT,conclusion TEXT,source TEXT,checked TEXT,confidence TEXT,open_items TEXT DEFAULT "",created TEXT)')
+    _co.executemany('INSERT INTO tasks(id,phase,title,status,due,risk,human_gate) VALUES(?,?,?,?,?,?,?)', [
+        ('X-01','X','普通任务','research','2026-11-30','med',0),
+        ('X-02','X','红线任务','todo','2026-12-10','high',1),
+        ('GATE-01','GATE','闸门','todo','2027-01-02','high',1)])
+    _co.commit(); _co.close()
+    _orig_llm = A._reloc_llm
+    A._reloc_llm = lambda messages, timeout=120: _js.dumps({
+        'actions': ['更新X-01为done：已核实'],
+        'status_updates': [{'id':'X-01','status':'done','why':'家长已确认'},
+                           {'id':'X-02','status':'done','why':'尝试改红线'},
+                           {'id':'GATE-01','status':'done','why':'尝试改闸门'}],
+        'confirmations': [{'id':'X-02','item':'需签字','recommend':'签字','why':'红线','deadline':'x'}],
+        'focus': [], 'countdown': [], 'note': ''})
+    try:
+        _rh = {'X-HRD-Token': 'p0close_token'}
+        _r = c.post('/api/hrd/reloc/ingest', json={'force':True,'input':'X-01已确认'}, headers=_rh)
+        _d = _r.get_json() or {}
+        check(_d.get('ok') is True, 'ingest 闭环正常返回')
+        _co = _sq.connect(A.RELOC_DB)
+        _st = dict(_co.execute('SELECT id,status FROM tasks').fetchall())
+        _co.close()
+        check(_st.get('X-01') == 'done', 'AI 判定已核实 → 普通任务自动改 done')
+        check(_st.get('X-02') == 'todo', 'human_gate 红线任务不被自动改')
+        check(_st.get('GATE-01') == 'todo', '闸门任务不被自动改')
+        check(any(x['id']=='X-01' for x in (_d.get('auto_closed') or [])), '返回 auto_closed 含已关闭任务')
+        _r2 = c.post('/api/hrd/reloc/confirm', json={'id':'X-02','item':'需签字'}, headers=_rh)
+        check((_r2.get_json() or {}).get('ok') is True, '确认销账端点正常')
+        _r3 = c.post('/api/hrd/reloc/ingest', json={'force':True}, headers=_rh)
+        _cf = (_r3.get_json() or {}).get('confirmations') or []
+        check(not any(x['id']=='X-02' for x in _cf), '销账后确认项不再生成')
+    finally:
+        A._reloc_llm = _orig_llm
+        A.RELOC_DB, A.RELOC_DIGEST = _old_db, _old_dg
+except Exception as _e:
+    check(False, 'Reloc 自动闭环自检异常：%s' % _e)
+
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
 if FAILS:
     import sys as _sys
