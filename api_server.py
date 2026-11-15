@@ -4142,7 +4142,7 @@ def reloc_ingest_api():
             except ValueError:
                 pass
         tasks = [dict(r) for r in con.execute(
-            'SELECT id,title,status,due,owner,risk,notes FROM tasks ORDER BY phase,id')]
+            'SELECT * FROM tasks ORDER BY phase,id')]
         findings = [dict(r) for r in con.execute(
             'SELECT task_id,topic,conclusion,confidence,checked FROM findings '
             'ORDER BY created DESC LIMIT 25')]
@@ -4218,7 +4218,7 @@ def reloc_ingest_api():
                                       'recommend': '未下发→答"未下发+预计时间"；已下发→回复"1"',
                                       'why': '租房登记/车辆上牌/孩子入学均以其为前置条件。', 'deadline': '本周内'})
             for t in tasks:
-                if t['human_gate'] and t['status'] not in ('done', 'dropped') and len(confirmations) < 3:
+                if t.get('human_gate') and t['status'] not in ('done', 'dropped') and len(confirmations) < 3:
                     confirmations.append({'id': t['id'], 'item': str(t['title'])[:120],
                                           'recommend': '材料已备好，确认后再执行',
                                           'why': '涉及付款/签字/提交证件，属人工确认红线。',
