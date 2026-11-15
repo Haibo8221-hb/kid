@@ -109,7 +109,7 @@ function getToken(){ try{return localStorage.getItem(RTOK)||'';}catch(e){return 
 function setToken(t){ try{localStorage.setItem(RTOK,t);}catch(e){} }
 function H(tok){ return {'Content-Type':'application/json','X-HRD-Token':tok}; }
 var state={data:null,findings:[],phase:'ALL',autorun:true,ingesting:false,
-           ver:'',updated:'',booting:false,lastAutoAt:0,rphase:'ALL'};
+           ver:'',updated:'',booting:false,lastAutoAt:0,rphase:'ALL',draft:'',bootPending:false};
 var POLL_MS=30000;
 var AUTO_MS=30*60*1000;
 
@@ -151,7 +151,8 @@ async function api(path,opt){
   return r;
 }
 async function boot(silent){
-  if(state.booting) return;
+  /* 防重入但不吞请求：正在拉取时标记 pending，等当前这轮结束后自动再跑一轮 */
+  if(state.booting){ state.bootPending=true; return waitBoot(); }
   state.booting=true;
   try{
     var r=await api('/api/hrd/reloc/summary');
@@ -173,7 +174,19 @@ async function boot(silent){
     document.getElementById('app').innerHTML='<div class="card">加载失败：'+esc(e.message)+
       ' <button class="btn" onclick="boot()">重试</button></div>';
     pulse('同步失败','err');
-  }finally{ state.booting=false; }
+  }finally{
+    state.booting=false;
+    if(state.bootPending){
+      state.bootPending=false;
+      setTimeout(function(){ boot(true); },0);
+    }
+  }
+}
+function waitBoot(){
+  return new Promise(function(res){
+    var t=setInterval(function(){ if(!state.booting){ clearInterval(t); res(); } },30);
+    setTimeout(function(){ clearInterval(t); res(); },8000);
+  });
 }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function badge(cls,txt){ return '<span class="badge b-'+cls+'">'+esc(txt)+'</span>'; }
@@ -372,6 +385,11 @@ function researchBlock(fs){
 
 var PHASE_LABEL={GATE:'工作签闸门',FAM:'家属签证',HOUSE:'住房',CAR:'用车',KIDS:'孩子教育',DOCS:'文件签署'};
 function render(){
+  /* 保留正在输入的草稿与光标，避免 30 秒轮询把 textarea 冲掉 */
+  var _old=document.getElementById('ingestInput');
+  var _focused=_old&&document.activeElement===_old;
+  var _pos=_old&&typeof _old.selectionStart==='number'?_old.selectionStart:null;
+  if(_old&&_old.value) state.draft=_old.value;
   var d=state.data, dg=d.digest||{}, m=d.meta||{}, c=d.counts||{};
   var phases=Array.from(new Set(d.tasks.map(function(t){return t.phase;}))).sort();
   var chips=['ALL'].concat(phases).map(function(p){
@@ -394,7 +412,7 @@ function render(){
    '<div class="card"><h3>AI 入库 · 自循环</h3>'+
     '<div class="muted">按行为规范 v2 分析 6 条主线与已核实结论，产出周报三段，自动写回并递增版本（'+POLL_MS/1000+' 秒同步，每 '+AUTO_MS/60000+' 分钟自动分析）。信息搜集/比价/清单/草稿/催办/排期/预警全部自动；仅付款·签字·交证件·偏好取舍·信息缺失五类需你确认。</div>'+
     '<div class="muted" style="margin-top:10px">录入新线索（可选）：政策变化、签证/住房进展、学校反馈——AI 一并分析，金额会保留原币种并附折算。</div>'+
-    '<textarea id="ingestInput" placeholder="例：11/14 学校回复：Latin 已换成 Classical Civilisation；房租 AED 95,000/年（≈¥18.6万，11/15 查）…"></textarea>'+
+    '<textarea id="ingestInput" placeholder="例：11/14 学校回复：Latin 已换成 Classical Civilisation；房租 AED 95,000/年（≈¥18.6万，11/15 查）…" oninput="state.draft=this.value;"></textarea>'+
     '<div class="chips"><button class="btn btn-pri" id="ingestBtn" onclick="runIngest(true)"'+(state.ingesting?' disabled':'')+'>'+
       (state.ingesting?'分析中…':'立即 AI 入库')+'</button>'+
       '<button class="btn" onclick="toggleAuto()">'+(state.autorun?'暂停自动循环':'恢复自动循环')+'</button></div>'+
@@ -403,6 +421,9 @@ function render(){
    '<div class="card"><h3>主线任务图（'+d.tasks.length+' 项 · 6 条主线）</h3><div class="chips">'+chips+'</div>'+
     '<div style="overflow-x:auto"><table><tr><th>ID</th><th>里程碑</th><th>负责</th><th>截止/前置</th><th>状态</th><th>改状态</th></tr>'+rows+'</table></div>'+
     '<div class="muted" style="margin-top:10px">跟踪粒度：工作签由公司办、只留 GATE-01 一个下发状态；家属签只记三状态；4 类主事项只保留里程碑。红线：签字/付款/交证件永远人工确认。</div></div>';
+  var _new=document.getElementById('ingestInput');
+  if(_new&&state.draft){ _new.value=state.draft; }
+  if(_new&&_focused){ try{ _new.focus(); if(_pos!=null)_new.setSelectionRange(_pos,_pos); }catch(e){} }
 }
 function setPhase(p){ state.phase=p; render(); }
 async function setSt(id,s){
@@ -428,9 +449,14 @@ async function runIngest(force){
       var msg=document.getElementById('ingestMsg');
       if(msg) msg.textContent='AI 于 '+String(d.updated).slice(11,16)+' 更新 · '+(d.actions||[]).length+' 条进展 · '+(d.confirmations||[]).length+' 条待确认';
     }
-    if(inp && userInput && d.ok && !d.skipped){ inp.value=''; toast('已录入 '+userInput.length+' 字，AI 已纳入分析'); }
     state.lastAutoAt=Date.now();
+    /* 入库成功后先确保数据刷新完成，再清空草稿，避免"没更新"错觉 */
     await boot(true);
+    if(userInput && d.ok && !d.skipped){
+      state.draft='';
+      var ninp=document.getElementById('ingestInput'); if(ninp) ninp.value='';
+      toast('已录入 '+userInput.length+' 字，AI 已纳入分析');
+    }
   }catch(e){ toast('AI 入库失败：'+e.message); pulse('入库失败','err'); }
   finally{
     state.ingesting=false;
@@ -440,7 +466,12 @@ async function runIngest(force){
 }
 function toggleAuto(){ state.autorun=!state.autorun; toast(state.autorun?'自动循环已恢复':'自动循环已暂停'); render(); }
 
-setInterval(function(){ if(!state.ingesting) boot(true); },POLL_MS);
+setInterval(function(){
+  if(state.ingesting) return;                       /* 入库中不轮询，防止重建 DOM */
+  var ta=document.getElementById('ingestInput');
+  if(ta && document.activeElement===ta && ta.value) return; /* 用户正在输入时不打断 */
+  boot(true);
+},POLL_MS);
 setInterval(function(){
   if(!state.autorun||state.ingesting||document.hidden) return;
   if(Date.now()-state.lastAutoAt<AUTO_MS) return;
