@@ -85,6 +85,9 @@ def _logout_epoch():
 
 def _mark_logout(now=None):
     now = float(now or time.time())
+    # 与 _make_token 的 iat 同口径（毫秒向下取整）：否则同毫秒内登出后新签发的
+    # token 其 iat(整毫秒) 会小于 logout_at(微秒) 而被误杀（CI 上观测到的 flaky）。
+    now = int(now * 1000) / 1000.0
     try:
         atomic_write(AUTH_STATE_FILE, {'logout_at': now}, ensure_ascii=False)
     except Exception as e:
