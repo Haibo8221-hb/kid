@@ -1,0 +1,10 @@
+[Unit]
+Description=Relocation daily loop 12:00 CST (07:00 Istanbul)
+
+[Timer]
+OnCalendar=*-*-* 12:00:00
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

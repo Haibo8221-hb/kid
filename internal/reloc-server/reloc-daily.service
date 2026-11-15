@@ -1,0 +1,10 @@
+[Unit]
+Description=Relocation Agent daily loop (07:00 Istanbul)
+
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=/etc/plan-api.env
+ExecStart=/opt/plan-api/bin/python /root/reloc/reloc_daily.py
+StandardOutput=append:/root/reloc/daily.log
+StandardError=append:/root/reloc/daily.log
