@@ -1,5 +1,5 @@
 [Unit]
-Description=Relocation Agent daily loop (07:00 Istanbul)
+Description=Relocation Agent weekly loop (Monday 07:00 Istanbul) rules-v2
 
 [Service]
 Type=oneshot

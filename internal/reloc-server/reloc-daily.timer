@@ -1,8 +1,8 @@
 [Unit]
-Description=Relocation daily loop 12:00 CST (07:00 Istanbul)
+Description=Relocation weekly loop (Monday 12:00 CST = 07:00 Istanbul) · rules v2
 
 [Timer]
-OnCalendar=*-*-* 12:00:00
+OnCalendar=Mon *-*-* 12:00:00
 Persistent=true
 RandomizedDelaySec=120
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>迪拜搬迁台 · Dubai Relocation</title>
+<title>迪拜搬迁台 · Dubai Relocation · 规范 v2</title>
 <style>
 :root{--bg:#f4f6fa;--surface:#fff;--tx:#1a1d28;--tx2:#5b6474;--tx3:#8a93a5;--line:#e3e8f0;
 --blue:#3f7dff;--green:#10b981;--amber:#d97706;--red:#dc2626;--violet:#7c3aed}
@@ -11,9 +11,10 @@
 body{font-family:-apple-system,'PingFang SC','Segoe UI','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--tx);font-size:16px;line-height:1.7;padding:20px;max-width:1080px;margin:0 auto}
 body.embed{padding:12px;max-width:none}
 h1{font-size:22px;margin-bottom:2px}
+h3{font-size:15px}
 .sub{color:var(--tx3);font-size:13px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:14px}
-.card h3{font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h3{margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .stat b{font-size:24px;display:block}
@@ -43,6 +44,18 @@ th{color:var(--tx3);font-weight:600;font-size:12.5px}
 .hidden{display:none}
 #ingestInput{width:100%;min-height:74px;margin-top:10px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font:14px/1.6 inherit;color:var(--tx);background:var(--surface);resize:vertical}
 a{color:var(--blue)}
+/* 周报三段 */
+.sec-title{font-size:13px;font-weight:700;color:var(--tx2);letter-spacing:.3px;margin:10px 0 4px}
+.confirm{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:14px}
+.confirm b{color:#b45309}
+.confirm .row{margin-top:3px}
+.confirm .rep{color:#166534;font-weight:600}
+details{ margin-top:8px }
+details summary{cursor:pointer;color:var(--blue);font-size:13px}
+details[open] summary{margin-bottom:8px}
+.cncl{font-size:14px;padding:3px 0}
+table.cmp{font-size:13px}
+table.cmp td,table.cmp th{padding:5px 8px}
 /* 自循环状态条 */
 #pulse{position:fixed;right:16px;bottom:16px;z-index:8;background:var(--surface);border:1px solid var(--line);
   border-radius:12px;padding:8px 13px;font-size:12.5px;box-shadow:0 4px 18px rgba(20,30,50,.12);color:var(--tx2)}
@@ -59,17 +72,15 @@ a{color:var(--blue)}
 <div id="pulse" class="hidden">状态：<b>初始化</b></div>
 <div id="toast"></div>
 <script>
-/* ── 令牌：服务端自动注入（bootstrap），页面不再要求人工输入 ──
-   服务端 hrd_token.txt 仍是唯一真源；页面启动同源请求 /api/reloc/bootstrap 取令牌，
-   缓存在本机 localStorage 复用，令牌文件变更导致失效时自动重新取一次。 */
+/* ── 令牌：服务端自动注入（bootstrap），页面不再要求人工输入 ── */
 var RTOK='wb_hrd_remote_token';
 function getToken(){ try{return localStorage.getItem(RTOK)||'';}catch(e){return '';} }
 function setToken(t){ try{localStorage.setItem(RTOK,t);}catch(e){} }
 function H(tok){ return {'Content-Type':'application/json','X-HRD-Token':tok}; }
 var state={data:null,findings:[],phase:'ALL',autorun:true,ingesting:false,
            ver:'',updated:'',booting:false,lastAutoAt:0};
-var POLL_MS=30000;          // 状态/版本轮询：30 秒
-var AUTO_MS=30*60*1000;     // 自动 AI 入库：30 分钟（服务端另有 5 分钟节流）
+var POLL_MS=30000;
+var AUTO_MS=30*60*1000;
 
 function pulse(text,kind){
   var el=document.getElementById('pulse'); if(!el) return;
@@ -101,7 +112,6 @@ async function api(path,opt){
   o.headers=Object.assign({},H(tok),o.headers||{});
   var r=await fetch(path,o);
   if(r.status===401){
-    // 令牌可能已轮换：清缓存重取一次
     try{localStorage.removeItem(RTOK);}catch(e){}
     tok=await getTokenAuto();
     o.headers=Object.assign({},H(tok),o.headers||{});
@@ -135,56 +145,114 @@ async function boot(silent){
   }finally{ state.booting=false; }
 }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function badge(cls,txt){ return '<span class="badge b-'+cls+'">'+txt+'</span>'; }
+function badge(cls,txt){ return '<span class="badge b-'+cls+'">'+esc(txt)+'</span>'; }
 function stBadge(s){ return badge(s,{todo:'待启动',research:'研究中',waiting_on:'等待外部',blocked:'受阻',doing:'进行中',done:'已完成',dropped:'放弃'}[s]||s); }
 function riskBadge(r){ return r==='high'?badge('high','高风险'):r==='med'?badge('med','中'):badge('low','低'); }
 
+/* ── 周报：三段式（≤15行精神：先结论后依据） ── */
+function weeklyBlock(d){
+  var dg=d.digest||{};
+  var w=dg.weekly||{};
+  var done=(w.done_auto||dg.actions||[]);
+  var confs=(w.confirmations||dg.confirmations||[]);
+  var cncl=(w.countdown||dg.countdown||[]);
+  var doneHtml=done.map(function(a){return '<div class="cncl">· '+esc(a)+'</div>';}).join('')||'<div class="muted">· 本周无自动进展</div>';
+  var confHtml=confs.map(function(c){
+    var line='【需确认】'+c.item+'｜推荐：'+c.recommend+'｜'+c.why+'｜截止'+(c.deadline||'—')+'｜回复"1"即同意';
+    return '<div class="confirm"><b>【需确认】'+esc(c.item)+'</b>'+
+      '<div class="row">推荐方案：<span class="rep">'+esc(c.recommend)+'</span></div>'+
+      '<div class="row">理由：'+esc(c.why)+'　截止：'+esc(c.deadline||'—')+'</div>'+
+      '<div class="row muted">回复“1”即同意（微信同效）　·　'+c.id+'</div>'+
+      '<div class="row"><button class="btn" onclick="copyConfirm(this)" data-txt="'+esc(line)+'">复制确认请求</button></div></div>';
+  }).join('')||'<div class="muted">· 本周无需确认</div>';
+  var cnclHtml=cncl.map(function(x){return '<div class="cncl">· '+esc(x)+'</div>';}).join('');
+  var g=d.gate||dg.gate||{}, f=d.family||dg.family||{};
+  var gHtml='<div class="cncl">· 工作签闸门 GATE-01：'+(g.issued?'<span class="rep">已下发</span>':'<span class="badge b-waiting_on">待确认（每周五问一次）</span>')+'</div>';
+  var fHtml='<div class="cncl">· 家属签 FAM-01：'+esc(f.stage||'材料齐备')+'（材料齐备→递交→获批）</div>';
+  var cp=(dg.critical_path||[]).map(function(x){return badge(x.risk==='high'?'high':x.risk==='med'?'med':'low',x.id+' '+x.status);}).join(' ')||'<span class="muted">无</span>';
+  return '<div class="card"><h3>本周汇总 <span class="muted" style="font-weight:400;font-size:12px">版本 '+esc(state.ver||'—')+' · 规范 v2</span></h3>'+
+    '<div class="sec-title">① 已完成（自动）</div>'+doneHtml+
+    '<div class="sec-title">② 需你确认（'+confs.length+'/3）</div>'+confHtml+
+    '<div class="sec-title">③ 关键路径倒计时与风险</div>'+cnclHtml+gHtml+fHtml+
+    '<div class="muted" style="margin-top:6px">关键路径：'+cp+'</div>'+
+    (dg.note?'<div class="muted" style="margin-top:6px">'+esc(dg.note)+'</div>':'')+
+    '</div>';
+}
+function copyConfirm(btn){
+  var t=btn.getAttribute('data-txt')||'';
+  try{ navigator.clipboard.writeText(t).then(function(){toast('已复制，可直接粘贴回复');}); }
+  catch(e){ toast('请长按选择文字复制'); }
+}
+
+/* ── 调研结论：6段结构（结论 / 对比表 / 评分 / 来源 / 风险 / 下一步），附录默认折叠 ── */
+function researchBlock(fs){
+  var body=fs.map(function(f){
+    var obj=null;
+    try{ var p=JSON.parse(f.conclusion||''); if(p&&typeof p==='object'&&p.conclusion!=null) obj=p; }catch(e){}
+    if(!obj){
+      return '<div class="finding"><b>'+esc(f.task_id)+'</b> '+esc(f.topic||'')+
+        ' <div style="margin-top:4px">'+esc(f.conclusion||'')+'</div>'+
+        '<div class="src">核对 '+esc(String(f.checked).slice(0,10))+'</div></div>';
+    }
+    var tbl='';
+    if(obj.table&&obj.table.length){
+      var keys=Object.keys(obj.table[0]).slice(0,6);
+      tbl='<table class="cmp"><tr>'+keys.map(function(k){return '<th>'+esc(k)+'</th>';}).join('')+'</tr>'+
+        obj.table.slice(0,5).map(function(row){return '<tr>'+keys.map(function(k){return '<td>'+esc(row[k])+'</td>';}).join('')+'</tr>';}).join('')+'</table>';
+    }
+    var srcs=(obj.sources&&obj.sources.length)?obj.sources.map(function(s){
+      var u=s.url||''; var t=s.title||'来源';
+      return u?'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(t)+'</a>':esc(t);
+    }).join(' · '):'<span class="muted">未核实</span>';
+    var risks=(obj.risks||[]).slice(0,3).map(function(r){return '<div class="cncl">· '+esc(r)+'</div>';}).join('')||'<div class="muted">· 未列出</div>';
+    var na=(obj.next_auto||[]).map(function(x){return '<div class="cncl">· 自动：'+esc(x)+'</div>';}).join('');
+    var nc=(obj.next_confirm||[]).map(function(x){return '<div class="cncl">· 需确认：'+esc(x)+'</div>';}).join('');
+    return '<div class="finding"><b>'+esc(f.task_id)+'</b> '+esc(f.topic||'')+' '+badge((f.confidence||'').indexOf('高')===0?'low':'med',f.confidence||'')+
+      '<div class="sec-title">结论</div><div>'+esc(obj.conclusion)+'</div>'+
+      '<details><summary>附录：对比表 / 评分 / 来源 / 风险 / 下一步</summary>'+
+        '<div class="sec-title">对比与评分</div>'+(tbl||'<div class="muted">未核实</div>')+
+        (obj.score_rule?'<div class="muted" style="margin-top:4px">评分规则：'+esc(obj.score_rule)+'</div>':'')+
+        '<div class="sec-title">数据来源与日期</div><div class="src">'+srcs+'　核对 '+esc(String(f.checked).slice(0,10))+'</div>'+
+        '<div class="sec-title">风险与不确定点</div>'+risks+
+        '<div class="sec-title">下一步</div>'+(na||nc||'<div class="muted">无</div>')+
+      '</details></div>';
+  }).join('')||'<div class="muted">暂无研究结论</div>';
+  return '<div class="card"><h3>调研结论 <span class="muted" style="font-weight:400;font-size:12px">6段规范 · 附录折叠</span></h3>'+body+'</div>';
+}
+
+var PHASE_LABEL={GATE:'工作签闸门',FAM:'家属签证',HOUSE:'住房',CAR:'用车',KIDS:'孩子教育',DOCS:'文件签署'};
 function render(){
   var d=state.data, dg=d.digest||{}, m=d.meta||{}, c=d.counts||{};
-  var ph=['ALL'].concat(Array.from(new Set(d.tasks.map(function(t){return t.phase;}))).sort());
-  var chips=ph.map(function(p){return '<span class="chip'+(state.phase===p?' on':'')+'" onclick="setPhase(\''+p+'\')">'+(p==='ALL'?'全部':p)+'</span>';}).join('');
-  var ov=(d.overdue||[]).map(function(o){return '<div class="ov">逾期 '+o.days+' 天 · <b>'+o.id+'</b> '+esc(o.title)+'（截止 '+o.due+'）</div>';}).join('')||'<div class="muted">无逾期项</div>';
-  var acts=(dg.actions||[]).map(function(a,i){return '<div style="margin-top:6px">'+(i+1)+'. '+esc(a)+'</div>';}).join('')||'<div class="muted">今日无行动项</div>';
-  var cp=(dg.critical_path||[]).map(function(x){return '<span class="badge b-'+(x.risk==='high'?'high':x.risk==='med'?'med':'low')+'">'+x.id+' '+stBadge(x.status).replace(/<[^>]*>/g,'')+'</span>';}).join(' ');
-  var note=dg.note?'<div class="muted" style="margin-top:8px">'+esc(dg.note)+'</div>':'';
+  var phases=Array.from(new Set(d.tasks.map(function(t){return t.phase;}))).sort();
+  var chips=['ALL'].concat(phases).map(function(p){
+    return '<span class="chip'+(state.phase===p?' on':'')+'" onclick="setPhase(\''+p+'\')">'+
+      (p==='ALL'?'全部':(PHASE_LABEL[p]||p))+'</span>';}).join('');
   var rows=d.tasks.filter(function(t){return state.phase==='ALL'||t.phase===state.phase;}).map(function(t){
     return '<tr><td class="tid">'+t.id+'</td><td>'+esc(t.title)+
       (t.notes?'<div class="muted" style="font-size:12.5px">'+esc(t.notes)+'</div>':'')+'</td>'+
-      '<td>'+esc(t.owner||'—')+'</td><td>'+esc(t.due||'—')+(t.depends_on?'<div class="muted" style="font-size:12px">依赖 '+esc(t.depends_on)+'</div>':'')+'</td>'+
-      '<td>'+stBadge(t.status)+' '+riskBadge(t.risk)+(t.human_gate?' <span class="badge b-high">人工</span>':'')+'</td>'+
+      '<td>'+esc(t.owner||'—')+'</td><td>'+esc(t.due||'—')+(t.depends_on?'<div class="muted" style="font-size:12px">前置 '+esc(t.depends_on)+'</div>':'')+'</td>'+
+      '<td>'+stBadge(t.status)+' '+riskBadge(t.risk)+(t.human_gate?' <span class="badge b-high">需确认</span>':'')+'</td>'+
       '<td><select class="sel" onchange="setSt(\''+t.id+'\',this.value)">'+
       ['todo','research','waiting_on','blocked','doing','done'].map(function(s){return '<option value="'+s+'"'+(s===t.status?' selected':'')+'>'+({todo:'待启动',research:'研究中',waiting_on:'等待外部',blocked:'受阻',doing:'进行中',done:'已完成'})[s]+'</option>';}).join('')+'</select></td></tr>';
   }).join('');
-  var fs=state.findings.map(function(f){
-    var src=(f.source||'').split(' || ').map(function(x){var p=x.split(': ');return p.length>1?'<a href="'+esc(p.slice(1).join(': '))+'" target="_blank" rel="noopener">'+esc(p[0])+'</a>':esc(x);}).join(' · ');
-    return '<div class="finding"><b>'+esc(f.task_id)+'</b> '+esc(f.topic||'')+' '+badge(f.confidence&&f.confidence.indexOf('高')===0?'low':f.confidence&&f.confidence.indexOf('中')===0?'med':'med',f.confidence||'')+
-      '<div style="margin-top:4px">'+esc(f.conclusion||'')+'</div>'+
-      (f.open_items&&f.open_items!=='[]'?'<div class="muted">待核实: '+esc(String(f.open_items))+'</div>':'')+
-      '<div class="src">核对 '+esc(String(f.checked).slice(0,10))+' · 来源: '+src+'</div></div>';}).join('')||'<div class="muted">暂无研究结论</div>';
   document.getElementById('app').innerHTML=
    (new URLSearchParams(location.search).get('embed')==='1'?'':
     '<div class="tool"><div><h1>迪拜搬迁台</h1><div class="sub">伊斯坦布尔 → 迪拜 · '+esc(m.arrival_anchor||'')+
     ' · 数据版本 '+esc(state.ver||'—')+' · 更新 '+esc(state.updated.slice(0,16).replace('T',' '))+'</div></div>'+
     '<div><button class="btn" onclick="boot()">刷新</button></div></div>')+
+   weeklyBlock(d)+
    '<div class="card"><h3>AI 入库 · 自循环</h3>'+
-    '<div class="muted">调用现有 LLM 主/备链分析任务与已核实研究结论，产出今日行动与关键路径，自动写回数据库并递增版本（'+POLL_MS/1000+' 秒轮询同步，每 '+AUTO_MS/60000+' 分钟自动分析一次）。AI 只备材料，签字/付款/政府提交/押金永远人工确认。</div>'+
-    '<div class="muted" style="margin-top:10px">录入新线索（可选）：政策变化、签证/住房进展、面试/考试反馈、待核实信息——AI 会连同任务与已核实结论一起分析。</div>'+
-    '<textarea id="ingestInput" placeholder="例：11/14 学校回复：Latin 已换成 Classical Civilisation；签证材料清单新增银行流水（11/20 前）…"></textarea>'+    '<div class="chips"><button class="btn btn-pri" id="ingestBtn" onclick="runIngest(true)"'+(state.ingesting?' disabled':'')+'>'+
+    '<div class="muted">按行为规范 v2 分析 6 条主线与已核实结论，产出周报三段，自动写回并递增版本（'+POLL_MS/1000+' 秒同步，每 '+AUTO_MS/60000+' 分钟自动分析）。信息搜集/比价/清单/草稿/催办/排期/预警全部自动；仅付款·签字·交证件·偏好取舍·信息缺失五类需你确认。</div>'+
+    '<div class="muted" style="margin-top:10px">录入新线索（可选）：政策变化、签证/住房进展、学校反馈——AI 一并分析，金额会保留原币种并附折算。</div>'+
+    '<textarea id="ingestInput" placeholder="例：11/14 学校回复：Latin 已换成 Classical Civilisation；房租 AED 95,000/年（≈¥18.6万，11/15 查）…"></textarea>'+
+    '<div class="chips"><button class="btn btn-pri" id="ingestBtn" onclick="runIngest(true)"'+(state.ingesting?' disabled':'')+'>'+
       (state.ingesting?'分析中…':'立即 AI 入库')+'</button>'+
       '<button class="btn" onclick="toggleAuto()">'+(state.autorun?'暂停自动循环':'恢复自动循环')+'</button></div>'+
     '<div class="muted" id="ingestMsg">'+esc(m.last_ingest_by==='reloc-ai-ingest'?('最近由 AI 于 '+String(m.last_ingest||'').slice(5,16).replace('T',' ')+' 更新'):'尚未执行 AI 入库')+'</div></div>'+
-   '<div class="cards">'+
-    ['todo 待启动','research 研究中','waiting_on 等待外部','doing 进行中','done 已完成'].map(function(x){var a=x.split(' ');return '<div class="stat"><b>'+(c[a[0]]||0)+'</b><span>'+a[1]+'</span></div>';}).join('')+
-   '</div>'+
-   '<div class="card"><h3>项目参数</h3><div class="sub">'+
-    '办公地：'+esc(m.work_location||'')+'<br>住房决策：'+esc(m.housing||'')+'<br>女儿签证：'+esc(m.daughters_passport||'')+'<br>到达锚点：'+esc(m.arrival_anchor||'')+'</div></div>'+
-   '<div class="card"><h3>逾期项</h3>'+ov+'</div>'+
-   '<div class="card"><h3>今日行动（数据版本 '+esc(state.ver||'—')+'）</h3>'+acts+note+
-    '<div class="muted" style="margin-top:8px">关键路径：'+cp+'</div></div>'+
-   '<div class="card"><h3>研究结论</h3>'+fs+'</div>'+
-   '<div class="card"><h3>任务图（'+d.tasks.length+' 项）</h3><div class="chips">'+chips+'</div>'+
-    '<div style="overflow-x:auto"><table><tr><th>ID</th><th>任务</th><th>负责人</th><th>截止/依赖</th><th>状态</th><th>改状态</th></tr>'+rows+'</table></div>'+
-    '<div class="muted" style="margin-top:10px">红线：签字 / 付款 / 政府提交 / 押金——Agent 只备材料，执行永远人工确认。微信回复「完成/卡住/改期+任务号」同样生效。</div></div>';
+   researchBlock(state.findings)+
+   '<div class="card"><h3>主线任务图（'+d.tasks.length+' 项 · 6 条主线）</h3><div class="chips">'+chips+'</div>'+
+    '<div style="overflow-x:auto"><table><tr><th>ID</th><th>里程碑</th><th>负责</th><th>截止/前置</th><th>状态</th><th>改状态</th></tr>'+rows+'</table></div>'+
+    '<div class="muted" style="margin-top:10px">跟踪粒度：工作签由公司办、只留 GATE-01 一个下发状态；家属签只记三状态；4 类主事项只保留里程碑。红线：签字/付款/交证件永远人工确认。</div></div>';
 }
 function setPhase(p){ state.phase=p; render(); }
 async function setSt(id,s){
@@ -208,7 +276,7 @@ async function runIngest(force){
     else{
       toast('AI 入库完成 · v'+d.version+(d.degraded?'（降级模式）':''));
       var msg=document.getElementById('ingestMsg');
-      if(msg) msg.textContent='AI 于 '+String(d.updated).slice(11,16)+' 更新 · '+(d.actions||[]).length+' 条行动'+(d.note?' · '+d.note:'');
+      if(msg) msg.textContent='AI 于 '+String(d.updated).slice(11,16)+' 更新 · '+(d.actions||[]).length+' 条进展 · '+(d.confirmations||[]).length+' 条待确认';
     }
     if(inp && userInput && d.ok && !d.skipped){ inp.value=''; toast('已录入 '+userInput.length+' 字，AI 已纳入分析'); }
     state.lastAutoAt=Date.now();
@@ -222,7 +290,6 @@ async function runIngest(force){
 }
 function toggleAuto(){ state.autorun=!state.autorun; toast(state.autorun?'自动循环已恢复':'自动循环已暂停'); render(); }
 
-/* 自循环：轮询状态/版本 + 定时自动入库（页面开着即工作，无需人工干预） */
 setInterval(function(){ if(!state.ingesting) boot(true); },POLL_MS);
 setInterval(function(){
   if(!state.autorun||state.ingesting||document.hidden) return;
@@ -230,7 +297,6 @@ setInterval(function(){
   state.lastAutoAt=Date.now();
   runIngest(false);
 },60000);
-/* 多标签页/跨页面同步：localStorage 版本变化时重新拉取 */
 try{ window.addEventListener('storage',function(e){ if(e.key==='reloc-version') boot(true); }); }catch(e){}
 function watchVersion(){
   var v=(state.data&&state.data.meta.version)||'';

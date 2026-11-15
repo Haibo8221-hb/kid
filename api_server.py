@@ -3924,6 +3924,27 @@ def api_research_weekly():
 RELOC_DB = os.path.join(DATA_DIR, 'reloc', 'tasks.db')
 RELOC_DIGEST = os.path.join(DATA_DIR, 'reloc', 'digest_latest.json')
 
+RELOC_BRIEF_V2 = (
+ '【行为规范 v2·必须遵守】'
+ '1 跟踪粒度：只跟踪6条主线(GATE-01工作签闸门/FAM-01家属签3状态/HOUSE-01住房/CAR-01用车/'
+ 'KIDS-01孩子教育/DOCS-01文件签署)。海波本人工作签由公司办理，除"居留签/Emirates ID是否已下发"'
+ '一个状态外不拆解；家属签只记材料齐备→递交→获批；4类主事项只保留里程碑，不拆子任务。'
+ '2 自动化：信息搜集/比价/筛选/去重/打分排序/材料清单生成并复用已有证件/表格邮件草稿/跟进催办/'
+ '排期倒计时/依赖检查/风险预警/每周汇总 全部自动完成，不问海波。'
+ '3 仅五类情形请确认：A付款/押金/定金/不可退费用；B签字/合同/法律承诺；C提交身份证件或敏感信息给第三方；'
+ 'D≥2选项得分差<10%且取舍取决于个人偏好；E信息缺失且无法检索或用已有文件补全。'
+ '每次只问一个问题，格式：【需确认】事项｜推荐方案｜理由(一句话)｜截止时间｜回复"1"即同意；'
+ '每周确认请求≤3条，同类合并。'
+ '4 输出规范(每个调研主题)：①结论≤3行(推荐哪个/为什么/需海波做什么，没有则"无需操作")'
+ '②对比表≤5候选、每候选≤6维度 ③评分规则一行 ④数据来源与日期(查不到标"未核实"，禁止编造)'
+ '⑤风险与不确定点≤3条 ⑥下一步(自动执行/需确认分开列)。先结论后依据，能表格不段落，一主题一页，细节放附录折叠。'
+ '5 节奏：每周1条汇总≤15行=①已完成(自动)②需确认(0-3条)③关键路径倒计时与风险；'
+ '无待办只报"无需操作"；距搬迁锚点剩余周数变化时自动重排优先级。'
+ '6 约束：价格/政策/费用标查询日期，重要结论≥2来源交叉核对；不确定就写"不确定"并说明如何核实，不猜；'
+ '房租/学费/押金金额一律保留原币种并附折算。'
+)
+
+
 
 def _reloc_con():
     import sqlite3
@@ -4135,17 +4156,34 @@ def reloc_ingest_api():
         compact_findings = '\n'.join(
             f"- {f['task_id']} | {str(f['topic'] or '')[:80]} | {str(f['conclusion'] or '')[:160]}"
             for f in findings[:25])
+        # 闸门+家属签+周数上下文（行为规范 v2：作为前置条件注入，不展开为任务）
+        gates = [t for t in tasks if t['id'] in ('GATE-01', 'FAM-01')]
+        compact_gates = '\n'.join(f"- {t['id']} | {t['title'][:60]} | 状态={t['status']}" for t in gates)
+        def _weeks_left():
+            a = str(meta.get('arrival_anchor') or '')
+            try:
+                from datetime import date as _date
+                return max(0, (_date.fromisoformat(a[:10]) - _date.today()).days // 7)
+            except Exception:
+                return None
+        _wl = _weeks_left()
+        week_ctx = (f"距搬迁锚点约 {_wl} 周；优先级档 {meta.get('priority_tier','?')}。" if _wl is not None else "锚点未设。")
         system = (
-            '你是搬迁项目经理助理，服务对象是伊斯坦布尔→迪拜 2027-01/02 的家庭搬迁。'
-            '只依据提供的任务与已核实研究结论，输出严格 JSON：'
-            '{"actions":["今天最该做的3件事，每件一句话，具体可执行"],'
-            '"focus":["当前关键路径上的任务ID，最多5个"],'
-            '"note":"一句话说明整体进度与最大风险"}。'
-            '禁止编造任务ID或事实；签字/付款/政府提交/押金类只能提醒人工确认，不得说已完成。'
+            RELOC_BRIEF_V2 +
+            '你是搬迁项目经理助理(伊斯坦布尔→迪拜 2027-01/02)。只依据提供的任务与已核实研究结论。'
+            '输出严格 JSON：'
+            '{"actions":["本周已自动完成或下一步该做的，≤3件，每件一句"],'
+            '"confirmations":[{"id":"任务ID","item":"事项","recommend":"推荐方案","why":"一句话理由","deadline":"截止"}],'
+            '"countdown":["距锚点剩余周数/闸门状态/家属签状态/关键风险，≤4条"],'
+            '"focus":["关键路径任务ID，最多5个"],'
+            '"note":"一句话整体进度与最大风险"}。'
+            'confirmations 只在 A付款/B签字合同/C提交证件给第三方/D取舍差<10%/E信息无法补全 五类情形生成(≤3条，同类合并)；'
+            '其余一律自动执行，不列入 confirmations。禁止编造任务ID或事实；签字/付款/政府提交/押金类不得说已完成。'
             '不要输出 JSON 以外的任何文字。'
         )
         extra = ('\n\n【家长本次录入的新线索——必须纳入分析，不得忽略】\n' + user_input) if user_input else ''
-        user = f'任务清单：\n{compact_tasks}\n\n已核实研究结论：\n{compact_findings or "（暂无）"}' + extra
+        ctx_line = f'\n\n【闸门/家属签状态】\n{compact_gates}\n【周上下文】{week_ctx}' if compact_gates else ''
+        user = f'任务清单：\n{compact_tasks}\n\n已核实研究结论：\n{compact_findings or "（暂无）"}' + ctx_line + extra
         raw = _reloc_llm([{'role': 'system', 'content': system},
                           {'role': 'user', 'content': user}])
         parsed = {}
@@ -4158,6 +4196,13 @@ def reloc_ingest_api():
                 except Exception:
                     parsed = {}
         actions = [str(x)[:200] for x in (parsed.get('actions') or []) if x][:5]
+        confirmations = []
+        for c in (parsed.get('confirmations') or [])[:3]:
+            if isinstance(c, dict):
+                confirmations.append({'id': str(c.get('id') or '')[:24], 'item': str(c.get('item') or '')[:120],
+                                      'recommend': str(c.get('recommend') or '')[:120],
+                                      'why': str(c.get('why') or '')[:120], 'deadline': str(c.get('deadline') or '')[:40]})
+        countdown = [str(x)[:160] for x in (parsed.get('countdown') or []) if x][:4]
         focus = [str(x)[:24] for x in (parsed.get('focus') or []) if x][:8]
         known = {t['id'] for t in tasks}
         focus = [x for x in focus if x in known]
@@ -4165,6 +4210,21 @@ def reloc_ingest_api():
             # LLM 不可用/解析失败：降级为基于逾期与高风险任务的可执行清单，不让页面空转
             overdue = [t for t in tasks if t['due'] and t['status'] not in ('done', 'dropped')]
             actions = [f'推进 {t["id"]}：{str(t["title"])[:60]}' for t in overdue[:3]] or ['检查任务清单是否为空']
+        if not confirmations:
+            # 闸门每周确认固定1条；其余红线任务补位，≤3条
+            gate_t = next((t for t in tasks if t['id'] == 'GATE-01'), None)
+            if gate_t and gate_t['status'] != 'done':
+                confirmations.append({'id': 'GATE-01', 'item': '居留签 / Emirates ID 是否已下发（本周确认）',
+                                      'recommend': '未下发→答"未下发+预计时间"；已下发→回复"1"',
+                                      'why': '租房登记/车辆上牌/孩子入学均以其为前置条件。', 'deadline': '本周内'})
+            for t in tasks:
+                if t['human_gate'] and t['status'] not in ('done', 'dropped') and len(confirmations) < 3:
+                    confirmations.append({'id': t['id'], 'item': str(t['title'])[:120],
+                                          'recommend': '材料已备好，确认后再执行',
+                                          'why': '涉及付款/签字/提交证件，属人工确认红线。',
+                                          'deadline': str(t['due'] or '按里程碑')})
+        if not countdown:
+            countdown = [week_ctx] if week_ctx else []
         note = str(parsed.get('note') or '')[:300]
 
         now = datetime.now().isoformat(timespec='seconds')
@@ -4185,10 +4245,14 @@ def reloc_ingest_api():
             'actions': actions,
             'critical_path': new_cp,
             'note': note,
+            'confirmations': confirmations,
+            'countdown': countdown,
+            'weekly': {'done_auto': actions, 'confirmations': confirmations, 'countdown': countdown},
             'version': ver + 1,
             'updated': now,
             'by': 'reloc-ai-ingest',
             'degraded': not bool(parsed),
+            'rules_version': '2',
         })
         atomic_write(RELOC_DIGEST, digest, ensure_ascii=False, indent=2)
 
@@ -4205,6 +4269,7 @@ def reloc_ingest_api():
         con.close()
         return _reloc_resp({'ok': True, 'version': ver + 1, 'updated': now,
                             'actions': actions, 'focus': focus, 'note': note,
+                            'confirmations': confirmations, 'countdown': countdown,
                             'degraded': digest['degraded']})
     except Exception as e:
         return _reloc_resp({'ok': False, 'error': str(e)[:200]})
