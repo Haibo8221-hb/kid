@@ -212,6 +212,76 @@
       "priority": "med",
       "action": "官方日历已公布2027日期",
       "source": "https://www.bebras.uk/index.php?action=content&id=20"
+    },
+    {
+      "id": "jemma-gcse-options-2027",
+      "name": "GCSE Options decision (Y9 spring) — Latin→Classical Civ 在此落定",
+      "date": "2027-02-15",
+      "date_end": "2027-03-31",
+      "date_is_estimate": true,
+      "reg_note": "英国惯例Y9春term options evening+表格；Headington确切日期待问学校",
+      "eligibility": "约9门GCSE；15门选修含新增Photography/RS",
+      "status": "date_unconfirmed",
+      "priority": "high",
+      "action": "2027-01起关注学校通知；与Latin老师谈Classical Civ转换利弊；STEM软努力度→CompSci/三科科学选项评估",
+      "source": "https://publications.headington.org/sixth-form-courses-guide/"
+    },
+    {
+      "id": "jemma-piano-g8-2027",
+      "name": "Piano Grade 8 (ABRSM)",
+      "date": "2027-03-15",
+      "date_is_estimate": true,
+      "reg_note": "2027春夏考期官方TBC；报名窗口短(1-2周)需盯abrsm.org/exambooking；前置=Grade 5 Theory(硬门槛,状态待确认)；2027考试可用旧大纲曲目(overlap至2027-12-31)或新2027&28大纲",
+      "eligibility": "Theory G5+ 必须先过",
+      "status": "date_unconfirmed",
+      "priority": "med",
+      "action": "与钢琴老师定考期和大纲版本；无Theory G5则先安排线上乐理考(随约随考)",
+      "source": "https://www.abrsm.org/exambooking"
+    },
+    {
+      "id": "jemma-german-gate-2028",
+      "name": "Y10 方向门 (German 学习计划启动决策)",
+      "date": "2028-07-15",
+      "reg_note": "既定决策门：通过则德语计划自动启动(与最终是否走德国路线解耦)",
+      "status": "planned",
+      "priority": "med",
+      "action": "decoupling原则已在My Timeline页；此门只需执行预设计划",
+      "source": "jemma.html My 6-Year Timeline"
+    },
+    {
+      "id": "jemma-sch-music-2028",
+      "name": "16+ Music Scholarship application (Y11 autumn)",
+      "date": "2028-10-14",
+      "date_is_estimate": true,
+      "reg_note": "内部生Autumn term向Headmistress申请；按2026模式截止=10月中旬周三noon；Music Scholarship Day约2029年1月末周",
+      "eligibility": "钢琴G8是核心材料",
+      "status": "planned",
+      "priority": "high",
+      "action": "钢琴强项的奖学金杠杆：G8成绩+曲目储备+面试准备；与学术奖学金可并行",
+      "source": "https://publications.headington.org/scholarships-and-special-awards-16-headington-rye-oxford/"
+    },
+    {
+      "id": "jemma-sch-academic-2028",
+      "name": "16+ Academic Scholarship (internal, Y11 autumn)",
+      "date": "2028-10-14",
+      "date_is_estimate": true,
+      "reg_note": "内部生需Autumn term写信给Headmistress登记意愿；评估在校内进行",
+      "eligibility": "成绩单+竞赛记录(IMC/Hamilton链)",
+      "status": "planned",
+      "priority": "med",
+      "action": "IMC/竞赛成绩积累到Y11就是申请素材",
+      "source": "https://publications.headington.org/scholarships-and-special-awards-16-headington-rye-oxford/academic-scholarships"
+    },
+    {
+      "id": "jemma-ucas-2029",
+      "name": "UCAS application (2030 entry)",
+      "date": "2029-10-15",
+      "date_is_estimate": true,
+      "eligibility": "Y13",
+      "status": "planned",
+      "priority": "low",
+      "action": "远期锚点：Y12秋开始PS素材积累",
+      "source": "https://www.ucas.com"
     }
   ],
   "shared": [
