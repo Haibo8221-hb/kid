@@ -1,0 +1,143 @@
+== #3 密码 / Cookie ==
+  PASS  错误密码 401（实际 401）
+  PASS  正确密码 200（实际 200）
+  Set-Cookie: kid_auth=1797354523.1794762523264.9fabb8131a2dac9b91cbdc8634d2c3ec; Expires=Tue, 15 Dec 2026 17:08:43 GMT; Max-Age=2592000; Secure; HttpOnly; Path=/; SameSite=Lax
+  PASS  Cookie 带 Secure
+  PASS  Cookie 带 HttpOnly
+  PASS  Cookie 带 SameSite=Lax
+  PASS  APP_PASSWORD 已配置（非内置默认）
+== #4 登出吊销 ==
+  PASS  登出前会话有效（实际 200）
+  PASS  登出接口 200（实际 200）
+  PASS  登出后旧 token 401（实际 401）
+  PASS  登出后新登录 token 有效（实际 200）
+== #2 child/user 白名单（路径穿越）==
+  PASS  /api/planner 未写出穿越文件（返回 200，落盘 []）
+  PASS  /api/tasks 未写出穿越文件（返回 200，落盘 []）
+  PASS  /api/review 未写出穿越文件（返回 200，落盘 []）
+  PASS  /api/chat/stream 未写出穿越文件（返回 503，落盘 []）
+  PASS  /api/errors/diya 未写出穿越文件（返回 200，落盘 []）
+== #1 错题 POST / DELETE ==
+  POST -> 200 {'id': '33043eb4-9316-4f6b-b99a-7b0fd18749f4', 'ok': True, 'total': 1}
+  PASS  POST /api/errors/<child> 200（原 405）
+  PASS  返回记录 id
+  PASS  GET 可见新记录（实际 1）
+  DELETE -> 200 {'ok': True, 'total': 0}
+  PASS  DELETE /api/errors/<child>/<id> 200（原 405）
+  PASS  DELETE 后记录数归零
+  PASS  删除不存在记录 404（实际 404）
+  PASS  空题目 400（实际 400）
+== 存量无 id 自动补齐 ==
+  PASS  存量记录已自动补 id
+  PASS  存量记录可删除（实际 200）
+== #11 Notes 服务端持久化 ==
+  PASS  GET notes 200（实际 200）
+  PASS  GET notes 初始 payload 为空对象
+  PASS  PUT notes 成功（实际 200）
+  PASS  PUT 后 updatedAt 回读一致
+  PASS  PUT 后 payload 回读一致（自由形态，不规定结构）
+  PASS  payload 非对象应 400（实际 400）
+  PASS  notes 接口受 _safe_child 白名单保护
+  PASS  notes 落盘到 data/notes_<child>.json
+  PASS  未登录 GET notes 应 401（实际 401）
+  PASS  未登录 PUT notes 应 401（实际 401）
+== #12 错题分页 ==
+  PASS  分页 total=120（实际 120）
+  PASS  第1页 50 条（实际 50）
+  PASS  第1页 has_more=True
+  PASS  第3页 20 条（实际 20）
+  PASS  末页 has_more=False
+  PASS  分页拼接顺序与全量顺序一致（排序口径未漂移）
+  PASS  subject=Maths 过滤后 60 条（实际 60）
+  PASS  筛选结果全部命中科目
+  PASS  不分页时返回全部 120 条（实际 120）
+  PASS  stats=1 提供 mastered_total / new_this_week（供分页前端计数）
+  PASS  首屏传输量显著下降：9KB vs 全量 22KB
+== 登录限流（新增-D）==
+  PASS  连续失败达阈值后锁定（实际 429）
+  PASS  锁定期内正确密码也被拒（实际 429）
+  PASS  未失败来源不受影响（实际 200）
+  PASS  清除计数后可正常登录（实际 200）
+== Decide 决定卡持久化接口（2026-10-19：Latin 等自主选择）==
+  PASS  未登录访问 decide 401（实际 401）
+  PASS  初始 decide 快照为空
+  PASS  PUT decide 快照成功
+  PASS  GET 读回已存选择（刷新/跨设备真源）
+  PASS  updatedAt 原样返回供前端比较新旧
+  PASS  payload 非对象 400（实际 400）
+  PASS  非法 child 回退白名单默认值（防路径穿越）
+== TWP 三周计划接口（R5：2026-10-19 数据外置）==
+  PASS  未登录访问 twp 401（实际 401）
+  PASS  GET twp 返回孩子标识
+  PASS  GET twp 有周数据（weeks=3；种子或运行时）
+  PASS  weeks[0] 含 label/start/end 必填字段
+  PASS  PUT twp 全量覆盖成功且版本号递增
+  PASS  GET 读回更新后的计划（改计划无需发版）
+  PASS  weeks 结构非法 400（实际 400）
+  PASS  空 weeks 400（实际 400）
+== R7 错因字段（cause PUT 读写回环 + stats 聚合）==
+  PASS  POST 错题（R7 测试用）
+  PASS  新错题有 id（R7 前置）
+  PASS  PUT cause=concept 成功（R7 自测回写）
+  PASS  GET 读回 cause 字段
+  PASS  stats by_cause 聚合正确（{'concept': 1}）
+  PASS  PUT 空串清除错因（自评会了时复用）
+  PASS  清理 R7 测试错题
+== Dashboard twp 聚合（R2：三周计划勾选与日常任务分开统计）==
+  PASS  POST /api/tasks 写入含 twp 键的任务集
+  PASS  日常任务统计不含 twp 键（total=2, done=1）
+  PASS  twp 完成度单独聚合（done=1/2）
+== 目标台 API（seed / ai 端点）==
+  PASS  GET /api/goals 返回三段结构
+  PASS  POST /api/goals/seed 注入示例目标（8 个）
+  PASS  seed 幂等保护：已有目标时拒绝覆盖
+  PASS  seed 后目标可读（8 个）
+  PASS  seed 目标含页面渲染所需字段
+  PASS  AI 端点成功解析模型指令
+  PASS  AI 回显模型 reply
+  PASS  AI 产出 update_goal 操作
+  PASS  AI 产出 create_goal 操作
+  PASS  AI 新建目标已落库（8 → 9）
+  PASS  AI 新建目标使用稳定选项 id（fldEn）
+  PASS  AI 新建目标落库每日上限=20
+  PASS  AI 新建目标状态用稳定 id（stDoing）
+  PASS  AI 修改字段已落库（每日上限=15）
+  PASS  AI 按学科分类已落库（领域=fldMa）
+  PASS  AI 白名单：非法字段被忽略
+  PASS  AI 白名单内的字段正常生效
+  PASS  AI 缺字段请求仍正常返回
+  PASS  AI 缺必填字段时拒绝创建（无 create_goal 落库）
+  PASS  AI 缺字段时 reply 如实说明未创建
+  PASS  缺字段时目标数不变
+  PASS  AI 删除请求转为归档（archive_goal）
+  PASS  归档后目标数据仍保留（未硬删除）
+  PASS  归档目标状态=stGive
+  PASS  AI 遇到非 JSON 回复时不误改数据
+  PASS  非 JSON 回复后目标数不变
+  PASS  AI 端点拒绝空消息
+  PASS  AI 解析器容忍 ```json 代码块
+  PASS  AI 解析器从夹带文字中抽取 JSON
+  PASS  AI 解析器对不可解析内容返回 None（不误改数据）
+  PASS  目标台 API 复用平台鉴权（未登录 401）
+== 目标台 child 隔离（Diya / Jemma 各自数据）==
+  PASS  jemma 建目标成功
+  PASS  diya 建目标成功
+  PASS  jemma 只看到自己的目标（['ZZJMARKZZ']）
+  PASS  diya 只看到自己的目标（['化学 Paper 2 冲 7（口径待裁定）', '错题总清库（113 条 → 真掌握 22–34 条）', '物理必做实验方法描述默写（12 份）', 'SMC Q9–13 数论代数断档修复（10 题）', '英语核心词汇 200 词 + PETAL 段落限时', '11/07 16+ Entrance Day 口述准备（3 项）', 'P0：化学 G7/G4 口径裁定（10/23 前给结论）', 'P0：Headington 16+ late application 登记（10/24 前）', '每日复习 20 个单词', 'ZZDMARKZZ']）
+  PASS  不传 child 等同 diya（['化学 Paper 2 冲 7（口径待裁定）', '错题总清库（113 条 → 真掌握 22–34 条）', '物理必做实验方法描述默写（12 份）', 'SMC Q9–13 数论代数断档修复（10 题）', '英语核心词汇 200 词 + PETAL 段落限时', '11/07 16+ Entrance Day 口述准备（3 项）', 'P0：化学 G7/G4 口径裁定（10/23 前给结论）', 'P0：Headington 16+ late application 登记（10/24 前）', '每日复习 20 个单词', 'ZZDMARKZZ']）
+  PASS  非法 child 回落 diya，不泄露 jemma 数据
+  PASS  打卡按 child 隔离（jemma=1 diya=0）
+  PASS  jemma 不能修改 diya 的目标（返回 404）
+  PASS  diya 目标未被越权修改
+  PASS  给 jemma 播种不影响 diya 数据（10 → 10）
+  PASS  jemma 播种成功（8 个目标）
+  PASS  AI 端点只看到该孩子的目标（不把对方的发给模型）
+== AI 代打卡上限与归档（置于隔离计数断言之后，避免污染计数）==
+  PASS  AI 代打卡被每日上限截断（50→20）
+  PASS  AI 代打卡带 by_ai 标记（前端可见）
+  PASS  AI 代打卡截断时 reply 如实说明
+  PASS  AI 代打卡备注为英文可见标记
+  PASS  AI 代打卡选项字段用稳定 id（ckNormal/stSmooth）
+
+结果: ALL PASS
+EXIT=0
