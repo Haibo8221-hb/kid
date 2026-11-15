@@ -222,6 +222,11 @@ a{color:var(--accent);text-decoration:none}a:hover{color:#7aa5ff}
 
 /* Shared */
 .panel-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+/* Sub-tab bar（导航精简 v2：My Week / Goals & Routes / My Library 分组内切换） */
+.subtabbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.subtab{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:7px 16px;border-radius:20px;font-size:13px;cursor:pointer;font-weight:600}
+.subtab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.subtab:hover:not(.active){border-color:var(--accent)}
 .section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
 .section-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -510,7 +515,7 @@ canvas.radar{width:240px!important;height:240px!important}
 .twp-week .tw-focus b{color:var(--orange)}
 </style>
 <!-- 儿童友好高亮与互动组件层（与 Jemma 页面共用同一套，保证高亮逻辑一致） -->
-<link rel="stylesheet" href="/assets/kid.css?v=20261022">
+<link rel="stylesheet" href="/assets/kid.css?v=20261115">
 </head>
 <body data-kid-page="diya">
 
@@ -529,18 +534,13 @@ canvas.radar{width:240px!important;height:240px!important}
  <p>Year 11 · My Own Study Desk</p>
 </div>
 <ul class="sidebar-nav">
-<li><a href="#" data-tab="dashboard" class="active" onclick="switchTab('dashboard');return false">🏠 Dashboard</a></li>
-<li><a href="#" data-tab="goals" onclick="switchTab('goals');return false">🎯 Goal Desk</a></li>
-<li><a href="#" data-tab="route-compare" onclick="switchTab('route-compare');return false">🗺️ Route Compare</a></li>
-<li><a href="#" data-tab="resources" onclick="switchTab('resources');return false">📦 Learning Resources</a></li>
-<li><a href="#" data-tab="planner" onclick="switchTab('planner');return false">📅 Weekly Plan</a></li>
-<li><a href="#" data-tab="notes" onclick="switchTab('notes');return false">📝 Notes</a></li>
+<li><a href="#" data-tab="dashboard" class="active" onclick="switchTab('dashboard');return false">🏠 Home</a></li>
+<li><a href="#" data-tab="myweek" onclick="switchTab('myweek');return false">📅 My Week</a></li>
 <li><a href="#" data-tab="errors" onclick="switchTab('errors');return false">❌ Error Book</a></li>
-<li><a href="#" data-tab="subject-analysis" onclick="switchTab('subject-analysis');return false">📊 Subject Analysis</a></li>
-<li><a href="#" data-tab="upload" onclick="switchTab('upload');return false">📤 Upload</a></li>
-<li><a href="#" data-tab="weekly-review" onclick="switchTab('weekly-review');return false">📋 Weekly Review</a></li>
-<li><a href="#" data-tab="chat" onclick="switchTab('chat');return false">💬 AI Chat</a></li>
-<li><a href="#" data-tab="bpho" onclick="switchTab('bpho');return false">⚛️ Physics Olympiad</a></li>
+<li><a href="#" data-tab="subject-analysis" onclick="switchTab('subject-analysis');return false">📊 My Grades</a></li>
+<li><a href="#" data-tab="goalsroutes" onclick="switchTab('goalsroutes');return false">🎯 Goals & Routes</a></li>
+<li><a href="#" data-tab="chat" onclick="switchTab('chat');return false">💬 Ask AI</a></li>
+<li><a href="#" data-tab="library" onclick="switchTab('library');return false">📚 My Library</a></li>
 </ul>
 <div class="profile-card" id="profile-card">
  <div class="profile-avatar" id="profile-avatar" onclick="showAvatarPicker()" title="Change Avatar"></div>
@@ -555,13 +555,10 @@ canvas.radar{width:240px!important;height:240px!important}
  </div>
 </div>
 <div class="sidebar-bottom">
-<div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">My Stuff</div>
-<a href="/macbeth_flashcards.html" target="_blank">Macbeth Flashcards</a>
-<a href="/inspector_calls_flashcards.html" target="_blank">Inspector Calls Flashcards</a>
-<a href="/Diya_Plan.html" target="_blank">My Full Plan</a>
-<a href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">My Summer Guide</a>
-<a href="#" id="llm-settings-btn" title="Configure LLM endpoint / API Key / model" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM module not loaded — version 20261022. Your browser or proxy is probably caching an old app.html. Please hard-refresh Ctrl+Shift+R, or use the versioned address: app.html?v=20261022');}}catch(e){alert('Could not open LLM settings: '+((e&&e.message)||e));} return false;">⚙️ LLM Settings</a>
-<a href="#" class="logout-btn" onclick="logout();return false">Logout</a>
+<div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">More</div>
+<a href="#" onclick="switchTab('upload');return false">📤 Upload Grades</a>
+<a href="#" id="llm-settings-btn" title="Configure LLM endpoint / API Key / model" onclick="try{if(typeof openLLMSettings==='function'){openLLMSettings();}else{alert('LLM module not loaded — version 20261115. Your browser or proxy is probably caching an old app.html. Please hard-refresh Ctrl+Shift+R, or use the versioned address: app.html?v=20261115');}}catch(e){alert('Could not open LLM settings: '+((e&&e.message)||e));} return false;">⚙️ Settings</a>
+<a href="#" class="logout-btn" onclick="logout();return false">Log Out</a>
 </div>
 </aside>
 <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
@@ -595,6 +592,12 @@ canvas.radar{width:240px!important;height:240px!important}
 <!-- Countdown Strip -->
 <div id="countdown-strip" class="countdown-strip"></div>
 <div id="comp-cal"></div>
+
+<!-- Physics Olympiad 快捷入口（导航精简后专题页从这里进，备赛期可临时置顶回导航） -->
+<div class="section" style="border-left:4px solid var(--accent2);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+<div class="section-title" style="margin:0"> ⚛️ Physics Olympiad</div>
+<button class="btn-sm" onclick="switchTab('bpho')">Open prep page →</button>
+</div>
 
 <!-- Live Brief: pipeline 动态层（双周挑战/过期目标提醒），数据源 /api/live-brief -->
 <div id="live-brief" style="display:none;margin:-6px 0 14px;padding:10px 14px;border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:10px;background:var(--surface)"></div>
@@ -873,7 +876,11 @@ Hong Kong parallel: HKUST+PolyU
  ROUTES
  -->
 <div id="tab-route-compare" class="tab-panel">
-<div class="panel-title"> Academic Routes</div>
+<div class="subtabbar" data-group="goalsroutes">
+<button class="subtab" data-sub="goals" onclick="switchSub('goalsroutes','goals')">🎯 My Goals</button>
+<button class="subtab active" data-sub="routes" onclick="switchSub('goalsroutes','routes')">🗺️ Route Compare</button>
+</div>
+<div class="panel-title"> Route Compare</div>
 
 <!-- 规划整合区：当前主计划 + 规划文档导航 -->
 <div class="section" style="border-left:4px solid var(--accent2)">
@@ -895,7 +902,20 @@ Hong Kong parallel: HKUST+PolyU
  RESOURCES
  -->
 <div id="tab-resources" class="tab-panel">
-<div class="panel-title"> Resource Center</div>
+<div class="subtabbar" data-group="library">
+<button class="subtab active" data-sub="resources" onclick="switchSub('library','resources')">📦 Resources</button>
+<button class="subtab" data-sub="notes" onclick="switchSub('library','notes')">📝 Notes</button>
+</div>
+<div class="section" style="border-left:4px solid var(--accent2);margin-bottom:14px">
+<div class="section-title">⭐ My Stuff</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<a class="btn-sm" href="/macbeth_flashcards.html" target="_blank">Macbeth Flashcards</a>
+<a class="btn-sm" href="/inspector_calls_flashcards.html" target="_blank">Inspector Calls Flashcards</a>
+<a class="btn-sm" href="/Diya_Plan.html" target="_blank">My Full Plan</a>
+<a class="btn-sm" href="/Diya_2026_5-8_Execution_Guide.html" target="_blank">My Summer Guide</a>
+</div>
+</div>
+<div class="panel-title"> My Library · Resources</div>
 <div class="filter-bar" id="resource-filter">
 <button class="filter-btn active" data-filter="all" onclick="filterResources('all')">All</button>
 <button class="filter-btn" data-filter="diya" onclick="filterResources('diya')">Diya</button>
@@ -913,7 +933,11 @@ Hong Kong parallel: HKUST+PolyU
  PLANNER
  -->
 <div id="tab-planner" class="tab-panel">
-<div class="panel-title"> Weekly Plan</div>
+<div class="subtabbar" data-group="myweek">
+<button class="subtab active" data-sub="plan" onclick="switchSub('myweek','plan')">📅 Plan</button>
+<button class="subtab" data-sub="review" onclick="switchSub('myweek','review')">📋 Review</button>
+</div>
+<div class="panel-title"> My Week · Plan</div>
 <div class="planner-controls" style="margin-bottom:12px">
 <button class="btn-sm" onclick="changeWeek('diya',-1)" title="Previous week">‹</button>
 <span id="planner-sync-label" style="font-size:13px;font-weight:600">--</span>
@@ -947,7 +971,11 @@ Hong Kong parallel: HKUST+PolyU
  WEEKLY REVIEW
  -->
 <div id="tab-weekly-review" class="tab-panel">
-<div class="panel-title"> Weekly Review</div>
+<div class="subtabbar" data-group="myweek">
+<button class="subtab" data-sub="plan" onclick="switchSub('myweek','plan')">📅 Plan</button>
+<button class="subtab active" data-sub="review" onclick="switchSub('myweek','review')">📋 Review</button>
+</div>
+<div class="panel-title"> My Week · Review</div>
 <div class="section">
 <div id="review-wizard">
 <div class="rw-progress" id="rw-progress"></div>
@@ -977,7 +1005,11 @@ Hong Kong parallel: HKUST+PolyU
  NOTES
  -->
 <div id="tab-notes" class="tab-panel">
-<div class="panel-title"> Notes</div>
+<div class="subtabbar" data-group="library">
+<button class="subtab" data-sub="resources" onclick="switchSub('library','resources')">📦 Resources</button>
+<button class="subtab active" data-sub="notes" onclick="switchSub('library','notes')">📝 Notes</button>
+</div>
+<div class="panel-title"> My Library · Notes</div>
 <div class="section">
 <div class="notes-tabs" id="notes-tabs">
 <button class="ntab active" onclick="switchNotesTab('all')">All</button>
@@ -1047,7 +1079,11 @@ ERROR BOOK
 
 <!-- 目标台（Goal Desk）：内嵌 goals.html，登录态与主站共享（同一 cookie） -->
 <div id="tab-goals" class="tab-panel">
-<div class="panel-title">🎯 Goal Desk · Diya</div>
+<div class="subtabbar" data-group="goalsroutes">
+<button class="subtab active" data-sub="goals" onclick="switchSub('goalsroutes','goals')">🎯 My Goals</button>
+<button class="subtab" data-sub="routes" onclick="switchSub('goalsroutes','routes')">🗺️ Route Compare</button>
+</div>
+<div class="panel-title">🎯 My Goals · Diya</div>
 <div class="embed-wrap">
  <div class="embed-bar">
   <a class="btn" href="/goals.html" target="_blank">↗ Open in New Window</a>
@@ -1075,7 +1111,7 @@ ERROR BOOK
  SUBJECT ANALYSIS
  -->
 <div id="tab-subject-analysis" class="tab-panel">
-<div class="panel-title"> Subject Analysis · Diya</div>
+<div class="panel-title"> My Grades · Diya</div>
 <div id="sa-grid" class="sa-grid"><div class="error-empty">Loading...</div></div>
 </div>
 
@@ -1285,7 +1321,7 @@ window.addEventListener('error', function(e){
 // State 
 let currentChild = 'diya';
 // 版本号（构建标识）；用于诊断“缓存了旧版 app.html”——页面左下角徽标会显示它
-const APP_VERSION = '20261022';
+const APP_VERSION = '20261115';
 try{ const vb=document.getElementById('ver-badge'); if(vb) vb.textContent='build '+APP_VERSION; }catch(_){}
 let plannerWeeks = {diya:0};
 let plannerData = {diya:{}};
@@ -2024,23 +2060,44 @@ function reloadEmbed(frameId){
  const f=document.getElementById(frameId);
  if(f && f.src){ f.src=f.src; }
 }
+// ── 导航精简 v2：分组 tab（My Week / Goals & Routes / My Library）＋旧 tab 名兼容映射 ──
+const TAB_GROUPS={
+ myweek:{subs:[['plan','tab-planner'],['review','tab-weekly-review']],def:'plan'},
+ goalsroutes:{subs:[['goals','tab-goals'],['routes','tab-route-compare']],def:'goals'},
+ library:{subs:[['resources','tab-resources'],['notes','tab-notes']],def:'resources'}
+};
+const TAB_LEGACY={planner:['myweek','plan'],'weekly-review':['myweek','review'],goals:['goalsroutes','goals'],'route-compare':['goalsroutes','routes'],resources:['library','resources'],notes:['library','notes']};
+const SUB_LOADERS={plan:()=>loadPlannerView(),review:()=>{loadReviewWizard();loadMetacog();},routes:()=>loadRoutes(),resources:()=>loadResources(),notes:()=>loadNotes()};
+let curSub={};
+function switchSub(group,sub){curSub[group]=sub;switchTab(group);}
 function switchTab(tab){
+ let group=tab,sub=null;
+ if(TAB_LEGACY[tab]){group=TAB_LEGACY[tab][0];sub=TAB_LEGACY[tab][1];}
+ else if(TAB_GROUPS[tab]){sub=curSub[tab]||TAB_GROUPS[tab].def;}
  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));
- const panel=document.getElementById('tab-'+tab);
- if(panel) panel.classList.add('active');
- const nav=document.querySelector('.sidebar-nav a[data-tab="'+tab+'"]');
- if(nav) nav.classList.add('active');
- // Load data for each tab
- if(tab==='dashboard') loadDashboard();
- if(tab==='route-compare') loadRoutes();
- if(tab==='planner') loadPlannerView();
- if(tab==='resources') loadResources();
- if(tab==='chat') loadChatHistory();
- if(tab==='weekly-review'){ loadReviewWizard(); loadMetacog(); }
- if(tab==='notes') loadNotes();
- if(tab==='errors') loadErrorBook();
- if(tab==='subject-analysis') loadSubjectAnalysis();
+ if(TAB_GROUPS[group]){
+  curSub[group]=sub;
+  TAB_GROUPS[group].subs.forEach(([sid,pid])=>{
+   const panel=document.getElementById(pid);
+   if(panel) panel.classList.toggle('active',sid===sub);
+  });
+  if(SUB_LOADERS[sub]) SUB_LOADERS[sub]();
+  const nav=document.querySelector('.sidebar-nav a[data-tab="'+group+'"]');
+  if(nav) nav.classList.add('active');
+  document.querySelectorAll('.subtabbar[data-group="'+group+'"]').forEach(bar=>{
+   bar.querySelectorAll('.subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===sub));
+  });
+ }else{
+  const panel=document.getElementById('tab-'+tab);
+  if(panel) panel.classList.add('active');
+  const nav=document.querySelector('.sidebar-nav a[data-tab="'+tab+'"]');
+  if(nav) nav.classList.add('active');
+ }
+ if(group==='dashboard') loadDashboard();
+ if(group==='chat') loadChatHistory();
+ if(group==='errors') loadErrorBook();
+ if(group==='subject-analysis') loadSubjectAnalysis();
  // 内嵌页：src 一旦被设过就保持不变，切走再切回不重载（保留孩子的滚动位置与输入）
 }
 
@@ -3860,7 +3917,7 @@ try{ setupUploadZone(); refreshUploadList(); }catch(_){}
  }catch(_){}
 });
 </script>
-<script src="/assets/kid.js?v=20261022"></script>
+<script src="/assets/kid.js?v=20261115"></script>
 <script>
 // ═══ Metacognition trainer: weekly strategy + score calibration (2026-11-03) ═══
 // Storage: /api/metacog/<child> → payload {predictions:[], weekly:{ISOweek:{strategy,worked,didnt}}}
