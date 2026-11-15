@@ -527,37 +527,37 @@ finally:
     A.httpx.Client = _hx2
 
 
-print('== Reloc ingest 降级分支（human_gate 缺列不得崩）==')
-try:
-    import sqlite3 as _sq, json as _js
-    # 用旧 schema（无 human_gate 列）验证兼容：SELECT * + .get 都要稳
-    _rdb = A.RELOC_DB
-    import os as _os
-    _os.makedirs(_os.path.dirname(_rdb), exist_ok=True)
-    _rc = _sq.connect(_rdb)
-    _rc.execute('CREATE TABLE IF NOT EXISTS tasks (id TEXT PRIMARY KEY,phase TEXT,title TEXT,status TEXT,owner TEXT,due TEXT,depends_on TEXT,risk TEXT,notes TEXT)')
-    _rc.execute("INSERT OR REPLACE INTO tasks(id,phase,title,status,due,risk) VALUES('GATE-01','GATE','居留签','todo','2027-01-02','high')")
-    _rc.execute('CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)')
-    _rc.execute('CREATE TABLE IF NOT EXISTS findings (id INTEGER PRIMARY KEY AUTOINCREMENT,task_id TEXT,topic TEXT,conclusion TEXT,source TEXT,checked TEXT,confidence TEXT,open_items TEXT DEFAULT "",created TEXT)')
-    _rc.commit(); _rc.close()
-    with open(A._hrd_token_path(), 'w', encoding='utf-8') as _f:
-        _f.write('p0reloc_token_123')
-    _orig_llm = A._reloc_llm
-    A._reloc_llm = lambda messages, timeout=120: _js.dumps({'actions': ['p0 action'], 'focus': [], 'countdown': []})
-    try:
-        _rh = {'X-HRD-Token': 'p0reloc_token_123'}
-        _rr = c.post('/api/hrd/reloc/ingest', json={'force': True, 'input': 'p0测试'}, headers=_rh)
-        _rd = _rr.get_json() or {}
-        check(_rr.status_code == 200 and _rd.get('ok') is True,
-              'ingest 降级分支（LLM 无 confirmations）正常返回（实际 %s %s）' % (_rr.status_code, str(_rd.get('error') or '')))
-        check('human_gate' not in str(_rd.get('error') or ''),
-              '旧库无 human_gate 列时不再抛 KeyError')
-        check(bool(_rd.get('confirmations')), '降级分支仍产出闸门确认项')
-    finally:
-        A._reloc_llm = _orig_llm
-except Exception as _e:
-    check(False, 'Reloc ingest 降级分支自检异常：%s' % _e)
-
+print('== Reloc ingest 降级分支（human_gate 缺列不得崩）==')
+try:
+    import sqlite3 as _sq, json as _js
+    # 用旧 schema（无 human_gate 列）验证兼容：SELECT * + .get 都要稳
+    _rdb = A.RELOC_DB
+    import os as _os
+    _os.makedirs(_os.path.dirname(_rdb), exist_ok=True)
+    _rc = _sq.connect(_rdb)
+    _rc.execute('CREATE TABLE IF NOT EXISTS tasks (id TEXT PRIMARY KEY,phase TEXT,title TEXT,status TEXT,owner TEXT,due TEXT,depends_on TEXT,risk TEXT,notes TEXT)')
+    _rc.execute("INSERT OR REPLACE INTO tasks(id,phase,title,status,due,risk) VALUES('GATE-01','GATE','居留签','todo','2027-01-02','high')")
+    _rc.execute('CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)')
+    _rc.execute('CREATE TABLE IF NOT EXISTS findings (id INTEGER PRIMARY KEY AUTOINCREMENT,task_id TEXT,topic TEXT,conclusion TEXT,source TEXT,checked TEXT,confidence TEXT,open_items TEXT DEFAULT "",created TEXT)')
+    _rc.commit(); _rc.close()
+    with open(A._hrd_token_path(), 'w', encoding='utf-8') as _f:
+        _f.write('p0reloc_token_123')
+    _orig_llm = A._reloc_llm
+    A._reloc_llm = lambda messages, timeout=120: _js.dumps({'actions': ['p0 action'], 'focus': [], 'countdown': []})
+    try:
+        _rh = {'X-HRD-Token': 'p0reloc_token_123'}
+        _rr = c.post('/api/hrd/reloc/ingest', json={'force': True, 'input': 'p0测试'}, headers=_rh)
+        _rd = _rr.get_json() or {}
+        check(_rr.status_code == 200 and _rd.get('ok') is True,
+              'ingest 降级分支（LLM 无 confirmations）正常返回（实际 %s %s）' % (_rr.status_code, str(_rd.get('error') or '')))
+        check('human_gate' not in str(_rd.get('error') or ''),
+              '旧库无 human_gate 列时不再抛 KeyError')
+        check(bool(_rd.get('confirmations')), '降级分支仍产出闸门确认项')
+    finally:
+        A._reloc_llm = _orig_llm
+except Exception as _e:
+    check(False, 'Reloc ingest 降级分支自检异常：%s' % _e)
+
 print('\n结果:', 'ALL PASS' if not FAILS else f'{len(FAILS)} FAILED -> {FAILS}')
 if FAILS:
     import sys as _sys
