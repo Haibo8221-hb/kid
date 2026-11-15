@@ -24,6 +24,7 @@ h1{font-size:22px;margin-bottom:2px}
 .b-waiting_on{background:#fef3c7;color:var(--amber)}.b-research{background:#ede9fe;color:var(--violet)}
 .b-doing{background:#dbeafe;color:var(--blue)}.b-done{background:#dcfce7;color:#15803d}.b-blocked{background:#fee2e2;color:var(--red)}
 .btn{border:1px solid var(--line);background:var(--surface);color:var(--tx);border-radius:9px;padding:6px 14px;font-size:14px;cursor:pointer}
+.btn:disabled{opacity:.55;cursor:wait}
 .btn-pri{background:var(--blue);border-color:var(--blue);color:#fff}
 table{width:100%;border-collapse:collapse;font-size:14px}
 td,th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
@@ -33,133 +34,118 @@ th{color:var(--tx3);font-weight:600;font-size:12.5px}
 .src{font-size:12px;color:var(--tx3);word-break:break-all;margin-top:4px}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 .chip{border:1px solid var(--line);border-radius:16px;padding:3px 13px;font-size:13px;cursor:pointer;background:var(--surface)}
-.chip.on{background:var(--tx);color:#fff;border-color:var(--tx)}
+.chip.on{background:var(--tx);color:var(--blue);border-color:var(--tx)}
 .sel{border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:13px}
 .tool{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .muted{color:var(--tx3);font-size:13px}
 .finding{border-bottom:1px solid var(--line);padding:10px 0}
 .finding:last-child{border:0}
-#gate{position:fixed;inset:0;background:rgba(15,20,30,.55);display:flex;align-items:center;justify-content:center;z-index:9}
-#gate .box{background:#fff;border-radius:14px;padding:26px 28px;width:min(92vw,380px)}
-#gate input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:16px;margin:10px 0 14px}
 .hidden{display:none}
 a{color:var(--blue)}
+/* 自循环状态条 */
+#pulse{position:fixed;right:16px;bottom:16px;z-index:8;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;padding:8px 13px;font-size:12.5px;box-shadow:0 4px 18px rgba(20,30,50,.12);color:var(--tx2)}
+#pulse b{color:var(--green)}
+#pulse.busy b{color:var(--amber)}
+#pulse.err b{color:var(--red)}
+#toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:10;background:var(--tx);color:#fff;
+  border-radius:9px;padding:9px 16px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s}
+#toast.on{opacity:1}
 </style>
 </head>
 <body>
 <div id="app"><div class="sub">加载中…</div></div>
-<div id="gate" class="hidden"><div class="box">
-  <h1>迪拜搬迁台</h1><div class="sub">与 HRD 工作台共用同一同步口令</div>
-  <input id="pw" type="password" placeholder="同步口令（≥4位）">
-  <button class="btn btn-pri" id="pwSave" style="width:100%">进入</button>
-  <div class="sub" style="margin-top:10px">口令只在本机派生为令牌，不上传。</div>
-</div></div>
+<div id="pulse" class="hidden">状态：<b>初始化</b></div>
+<div id="toast"></div>
 <script>
-/* ── auth：复用工作台 wb_hrd_remote_token / deriveToken 口径 ── */
-var PREFIX='hrd-workbench-sync-v1:', RTOK='wb_hrd_remote_token';
+/* ── 令牌：服务端自动注入（bootstrap），页面不再要求人工输入 ──
+   服务端 hrd_token.txt 仍是唯一真源；页面启动同源请求 /api/reloc/bootstrap 取令牌，
+   缓存在本机 localStorage 复用，令牌文件变更导致失效时自动重新取一次。 */
+var RTOK='wb_hrd_remote_token';
 function getToken(){ try{return localStorage.getItem(RTOK)||'';}catch(e){return '';} }
 function setToken(t){ try{localStorage.setItem(RTOK,t);}catch(e){} }
-var _SHA_K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
-0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
-0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
-0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
-0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
-0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
-0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
-0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
-function utf8Bytes(str){
-  var out=[], i=0, c, c2, cp;
-  str=String(str==null?'':str);
-  while(i<str.length){
-    c=str.charCodeAt(i++);
-    if(c<0x80){ out.push(c); }
-    else if(c<0x800){ out.push(0xC0|(c>>6),0x80|(c&0x3F)); }
-    else if(c>=0xD800&&c<=0xDBFF&&i<str.length){
-      c2=str.charCodeAt(i++);
-      if(c2>=0xDC00&&c2<=0xDFFF){
-        cp=((c-0xD800)<<10)+(c2-0xDC00)+0x10000;
-        out.push(0xF0|(cp>>18),0x80|((cp>>12)&0x3F),0x80|((cp>>6)&0x3F),0x80|(cp&0x3F));
-      }else{ out.push(0xEF,0xBF,0xBD); i--; }
-    }
-    else{ out.push(0xE0|(c>>12),0x80|((c>>6)&0x3F),0x80|(c&0x3F)); }
-  }
-  return out;
-}
-function _ror(x,n){ return ((x>>>n)|(x<<(32-n)))>>>0; }
-function sha256Hex(str){
-  var b=utf8Bytes(str), bitLen=b.length*8;
-  var bitHi=Math.floor(bitLen/4294967296), bitLo=bitLen%4294967296;
-  b.push(0x80);
-  while(b.length%64!==56) b.push(0);
-  b.push((bitHi>>>24)&0xFF,(bitHi>>>16)&0xFF,(bitHi>>>8)&0xFF,bitHi&0xFF,
-         (bitLo>>>24)&0xFF,(bitLo>>>16)&0xFF,(bitLo>>>8)&0xFF,bitLo&0xFF);
-  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
-  var w=new Array(64), off, i, a, bb, c, d, e, f, g, h, s0, s1, S0, S1, ch, maj, t1, t2;
-  for(off=0; off<b.length; off+=64){
-    for(i=0;i<16;i++) w[i]=((b[off+i*4]<<24)|(b[off+i*4+1]<<16)|(b[off+i*4+2]<<8)|b[off+i*4+3])>>>0;
-    for(i=16;i<64;i++){
-      s0=(_ror(w[i-15],7)^_ror(w[i-15],18)^(w[i-15]>>>3))>>>0;
-      s1=(_ror(w[i-2],17)^_ror(w[i-2],19)^(w[i-2]>>>10))>>>0;
-      w[i]=(w[i-16]+s0+w[i-7]+s1)>>>0;
-    }
-    a=H[0]; bb=H[1]; c=H[2]; d=H[3]; e=H[4]; f=H[5]; g=H[6]; h=H[7];
-    for(i=0;i<64;i++){
-      S1=(_ror(e,6)^_ror(e,11)^_ror(e,25))>>>0;
-      ch=((e&f)^((~e)&g))>>>0;
-      t1=(h+S1+ch+_SHA_K[i]+w[i])>>>0;
-      S0=(_ror(a,2)^_ror(a,13)^_ror(a,22))>>>0;
-      maj=((a&bb)^(a&c)^(bb&c))>>>0;
-      t2=(S0+maj)>>>0;
-      h=g; g=f; f=e; e=(d+t1)>>>0; d=c; c=bb; bb=a; a=(t1+t2)>>>0;
-    }
-    H[0]=(H[0]+a)>>>0; H[1]=(H[1]+bb)>>>0; H[2]=(H[2]+c)>>>0; H[3]=(H[3]+d)>>>0;
-    H[4]=(H[4]+e)>>>0; H[5]=(H[5]+f)>>>0; H[6]=(H[6]+g)>>>0; H[7]=(H[7]+h)>>>0;
-  }
-  var hex='';
-  for(i=0;i<8;i++) hex+=('0000000'+(H[i]>>>0).toString(16)).slice(-8);
-  return hex;
-}
-function deriveToken(pw){ return sha256Hex(PREFIX+String(pw==null?'':pw)); }
 function H(tok){ return {'Content-Type':'application/json','X-HRD-Token':tok}; }
-var state={data:null,findings:[],phase:'ALL'};
+var state={data:null,findings:[],phase:'ALL',autorun:true,ingesting:false,
+           ver:'',updated:'',booting:false,lastAutoAt:0};
+var POLL_MS=30000;          // 状态/版本轮询：30 秒
+var AUTO_MS=30*60*1000;     // 自动 AI 入库：30 分钟（服务端另有 5 分钟节流）
 
-async function boot(){
+function pulse(text,kind){
+  var el=document.getElementById('pulse'); if(!el) return;
+  el.classList.remove('hidden','busy','err');
+  if(kind) el.classList.add(kind);
+  el.innerHTML='状态：<b>'+esc(text)+'</b>'+
+    (state.ver?' · 版本 '+esc(state.ver):'')+
+    (state.updated?' · 更新 '+esc(state.updated.slice(5,16).replace('T',' ')):'');
+}
+function toast(msg){
+  var t=document.getElementById('toast'); if(!t) return;
+  t.textContent=msg; t.classList.add('on');
+  clearTimeout(t._timer); t._timer=setTimeout(function(){t.classList.remove('on');},2600);
+}
+async function getTokenAuto(){
   var tok=getToken();
-  if(!tok){ gate(true); return; }
+  if(tok) return tok;
   try{
-    var r=await fetch('/api/hrd/reloc/summary',{headers:H(tok)});
-    if(r.status===401){ gate(true); return; }
-    state.data=await r.json();
+    var r=await fetch('/api/reloc/bootstrap');
+    if(!r.ok) return '';
+    var d=await r.json();
+    if(d&&d.token){ setToken(d.token); return d.token; }
+  }catch(e){}
+  return '';
+}
+async function api(path,opt){
+  var tok=await getTokenAuto();
+  var o=Object.assign({},opt||{});
+  o.headers=Object.assign({},H(tok),o.headers||{});
+  var r=await fetch(path,o);
+  if(r.status===401){
+    // 令牌可能已轮换：清缓存重取一次
+    try{localStorage.removeItem(RTOK);}catch(e){}
+    tok=await getTokenAuto();
+    o.headers=Object.assign({},H(tok),o.headers||{});
+    r=await fetch(path,o);
+  }
+  return r;
+}
+async function boot(silent){
+  if(state.booting) return;
+  state.booting=true;
+  try{
+    var r=await api('/api/hrd/reloc/summary');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    var d=await r.json();
+    if(!d.ok) throw new Error(d.error||'summary failed');
+    var changed=(state.ver!==String(d.meta.version||''));
+    state.data=d;
+    state.ver=String(d.meta.version||'');
+    state.updated=d.meta.last_ingest||String((d.digest||{}).date||'');
     try{
-      var r2=await fetch('/api/hrd/reloc/findings',{headers:H(tok)});
+      var r2=await api('/api/hrd/reloc/findings');
       var d2=await r2.json(); state.findings=(d2.findings||[]);
     }catch(e){}
     render();
+    if(changed && !silent && state.ver){ toast('已同步新版 v'+state.ver); }
+    pulse(state.ingesting?'AI 入库中…':'已同步');
   }catch(e){
-    document.getElementById('app').innerHTML='<div class="card">加载失败：'+e.message+' <button class="btn" onclick="boot()">重试</button></div>';
-  }
+    document.getElementById('app').innerHTML='<div class="card">加载失败：'+esc(e.message)+
+      ' <button class="btn" onclick="boot()">重试</button></div>';
+    pulse('同步失败','err');
+  }finally{ state.booting=false; }
 }
-function gate(show){
-  document.getElementById('gate').classList.toggle('hidden',!show);
-  if(show){ var p=document.getElementById('pw'); p.focus();
-    document.getElementById('pwSave').onclick=async function(){
-      var v=p.value; if(!v||v.length<4){alert('口令至少4位');return;}
-      setToken(await deriveToken(v)); gate(false); boot();
-    };
-  }
-}
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function badge(cls,txt){ return '<span class="badge b-'+cls+'">'+txt+'</span>'; }
 function stBadge(s){ return badge(s,{todo:'待启动',research:'研究中',waiting_on:'等待外部',blocked:'受阻',doing:'进行中',done:'已完成',dropped:'放弃'}[s]||s); }
 function riskBadge(r){ return r==='high'?badge('high','高风险'):r==='med'?badge('med','中'):badge('low','低'); }
-function esc(s){ return String(s==null?'':s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function render(){
   var d=state.data, dg=d.digest||{}, m=d.meta||{}, c=d.counts||{};
   var ph=['ALL'].concat(Array.from(new Set(d.tasks.map(function(t){return t.phase;}))).sort());
   var chips=ph.map(function(p){return '<span class="chip'+(state.phase===p?' on':'')+'" onclick="setPhase(\''+p+'\')">'+(p==='ALL'?'全部':p)+'</span>';}).join('');
-  var ov=(d.overdue||[]).map(function(o){return '<div class="ov">逾期 '+o.days+' 天 · <b>'+o.id+'</b> '+esc(o.title)+'（截止 '+o.due+'）</div>';}).join('')||'<div class="muted">无逾期项 ✓</div>';
+  var ov=(d.overdue||[]).map(function(o){return '<div class="ov">逾期 '+o.days+' 天 · <b>'+o.id+'</b> '+esc(o.title)+'（截止 '+o.due+'）</div>';}).join('')||'<div class="muted">无逾期项</div>';
   var acts=(dg.actions||[]).map(function(a,i){return '<div style="margin-top:6px">'+(i+1)+'. '+esc(a)+'</div>';}).join('')||'<div class="muted">今日无行动项</div>';
   var cp=(dg.critical_path||[]).map(function(x){return '<span class="badge b-'+(x.risk==='high'?'high':x.risk==='med'?'med':'low')+'">'+x.id+' '+stBadge(x.status).replace(/<[^>]*>/g,'')+'</span>';}).join(' ');
+  var note=dg.note?'<div class="muted" style="margin-top:8px">'+esc(dg.note)+'</div>':'';
   var rows=d.tasks.filter(function(t){return state.phase==='ALL'||t.phase===state.phase;}).map(function(t){
     return '<tr><td class="tid">'+t.id+'</td><td>'+esc(t.title)+
       (t.notes?'<div class="muted" style="font-size:12.5px">'+esc(t.notes)+'</div>':'')+'</td>'+
@@ -176,15 +162,22 @@ function render(){
       '<div class="src">核对 '+esc(String(f.checked).slice(0,10))+' · 来源: '+src+'</div></div>';}).join('')||'<div class="muted">暂无研究结论</div>';
   document.getElementById('app').innerHTML=
    (new URLSearchParams(location.search).get('embed')==='1'?'':
-    '<div class="tool"><div><h1>迪拜搬迁台</h1><div class="sub">伊斯坦布尔 → 迪拜 · '+esc(m.arrival_anchor||'')+'</div></div>'+
-    '<button class="btn" onclick="boot()">刷新</button></div>')+
+    '<div class="tool"><div><h1>迪拜搬迁台</h1><div class="sub">伊斯坦布尔 → 迪拜 · '+esc(m.arrival_anchor||'')+
+    ' · 数据版本 '+esc(state.ver||'—')+' · 更新 '+esc(state.updated.slice(0,16).replace('T',' '))+'</div></div>'+
+    '<div><button class="btn" onclick="boot()">刷新</button></div></div>')+
+   '<div class="card"><h3>AI 入库 · 自循环</h3>'+
+    '<div class="muted">调用现有 LLM 主/备链分析任务与已核实研究结论，产出今日行动与关键路径，自动写回数据库并递增版本（'+POLL_MS/1000+' 秒轮询同步，每 '+AUTO_MS/60000+' 分钟自动分析一次）。AI 只备材料，签字/付款/政府提交/押金永远人工确认。</div>'+
+    '<div class="chips"><button class="btn btn-pri" id="ingestBtn" onclick="runIngest(true)"'+(state.ingesting?' disabled':'')+'>'+
+      (state.ingesting?'分析中…':'立即 AI 入库')+'</button>'+
+      '<button class="btn" onclick="toggleAuto()">'+(state.autorun?'暂停自动循环':'恢复自动循环')+'</button></div>'+
+    '<div class="muted" id="ingestMsg">'+esc(m.last_ingest_by==='reloc-ai-ingest'?('最近由 AI 于 '+String(m.last_ingest||'').slice(5,16).replace('T',' ')+' 更新'):'尚未执行 AI 入库')+'</div></div>'+
    '<div class="cards">'+
     ['todo 待启动','research 研究中','waiting_on 等待外部','doing 进行中','done 已完成'].map(function(x){var a=x.split(' ');return '<div class="stat"><b>'+(c[a[0]]||0)+'</b><span>'+a[1]+'</span></div>';}).join('')+
    '</div>'+
    '<div class="card"><h3>项目参数</h3><div class="sub">'+
     '办公地：'+esc(m.work_location||'')+'<br>住房决策：'+esc(m.housing||'')+'<br>女儿签证：'+esc(m.daughters_passport||'')+'<br>到达锚点：'+esc(m.arrival_anchor||'')+'</div></div>'+
    '<div class="card"><h3>逾期项</h3>'+ov+'</div>'+
-   '<div class="card"><h3>今日行动（每日 '+String((dg.date||'').slice(0,10))+' 07:00 生成）</h3>'+acts+
+   '<div class="card"><h3>今日行动（数据版本 '+esc(state.ver||'—')+'）</h3>'+acts+note+
     '<div class="muted" style="margin-top:8px">关键路径：'+cp+'</div></div>'+
    '<div class="card"><h3>研究结论</h3>'+fs+'</div>'+
    '<div class="card"><h3>任务图（'+d.tasks.length+' 项）</h3><div class="chips">'+chips+'</div>'+
@@ -193,14 +186,54 @@ function render(){
 }
 function setPhase(p){ state.phase=p; render(); }
 async function setSt(id,s){
-  var tok=getToken();
-  var r=await fetch('/api/hrd/reloc/task',{method:'POST',headers:H(tok),body:JSON.stringify({id:id,status:s})});
+  var r=await api('/api/hrd/reloc/task',{method:'POST',body:JSON.stringify({id:id,status:s})});
   var d=await r.json();
-  if(d.ok){ var t=state.data.tasks.find(function(x){return x.id===id;}); if(t) t.status=s; render(); }
+  if(d.ok){ var t=state.data.tasks.find(function(x){return x.id===id;}); if(t) t.status=s; render(); toast('已更新 '+id); }
   else alert('更新失败：'+(d.error||''));
+}
+async function runIngest(force){
+  if(state.ingesting) return;
+  state.ingesting=true; pulse('AI 入库中…','busy');
+  var btn=document.getElementById('ingestBtn'); if(btn){btn.disabled=true;btn.textContent='分析中…';}
+  try{
+    var r=await api('/api/hrd/reloc/ingest',{method:'POST',body:JSON.stringify({force:!!force})});
+    var d=await r.json();
+    if(!r.ok||!d.ok) throw new Error(d.error||('HTTP '+r.status));
+    if(d.skipped){ toast(d.seconds_left+' 秒内已分析过，跳过'); }
+    else{
+      toast('AI 入库完成 · v'+d.version+(d.degraded?'（降级模式）':''));
+      var msg=document.getElementById('ingestMsg');
+      if(msg) msg.textContent='AI 于 '+String(d.updated).slice(11,16)+' 更新 · '+(d.actions||[]).length+' 条行动'+(d.note?' · '+d.note:'');
+    }
+    state.lastAutoAt=Date.now();
+    await boot(true);
+  }catch(e){ toast('AI 入库失败：'+e.message); pulse('入库失败','err'); }
+  finally{
+    state.ingesting=false;
+    var b=document.getElementById('ingestBtn'); if(b){b.disabled=false;b.textContent='立即 AI 入库';}
+    if(!state.ingesting) pulse('已同步');
+  }
+}
+function toggleAuto(){ state.autorun=!state.autorun; toast(state.autorun?'自动循环已恢复':'自动循环已暂停'); render(); }
+
+/* 自循环：轮询状态/版本 + 定时自动入库（页面开着即工作，无需人工干预） */
+setInterval(function(){ if(!state.ingesting) boot(true); },POLL_MS);
+setInterval(function(){
+  if(!state.autorun||state.ingesting||document.hidden) return;
+  if(Date.now()-state.lastAutoAt<AUTO_MS) return;
+  state.lastAutoAt=Date.now();
+  runIngest(false);
+},60000);
+/* 多标签页/跨页面同步：localStorage 版本变化时重新拉取 */
+try{ window.addEventListener('storage',function(e){ if(e.key==='reloc-version') boot(true); }); }catch(e){}
+function watchVersion(){
+  var v=(state.data&&state.data.meta.version)||'';
+  try{ if(v && localStorage.getItem('reloc-version')!==String(v)) localStorage.setItem('reloc-version',String(v)); }catch(e){}
+  setTimeout(watchVersion,5000);
 }
 if(new URLSearchParams(location.search).get('embed')==='1') document.body.classList.add('embed');
 boot();
+watchVersion();
 </script>
 </body>
 </html>

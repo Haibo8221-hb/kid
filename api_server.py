@@ -4016,5 +4016,188 @@ def reloc_task_update_api():
         return _reloc_resp({'ok': False, 'error': str(e)[:200]})
 
 
+
+# ── Relocation Bootstrap（页面令牌自动注入，2026-11-15）────────────────
+# 背景：家长要求打开迪拜搬迁台不再手工输入同步口令。
+# 服务端令牌文件继续保留——HRD 工作台主数据（/api/hrd/state 等）仍受 X-HRD-Token
+# 保护；搬迁台页面改为通过本端点自动取令牌，token 不写死在公开仓库里，服务端可随时
+# 换文件即吊销。
+# 安全边界：仅 GET；验证 Origin/Referer 同源；令牌文件缺失/为空 -> 401（fail closed）。
+# 注意：同源头可伪造，本端点实质把「能打开页面」视作授权。若需真正保密，应把
+# /reloc/ 放到内网或加 IP 白名单——不要在公网页面上承载敏感信息。
+@app.route('/api/reloc/bootstrap', methods=['GET', 'OPTIONS'])
+def reloc_bootstrap_api():
+    if request.method == 'OPTIONS':
+        return _hrd_cors(jsonify({}))
+    origin = request.headers.get('Origin', '')
+    referer = request.headers.get('Referer', '')
+    host = request.host_url.rstrip('/')
+    if origin and origin != host:
+        return _hrd_cors(jsonify({'error': 'bad origin'})), 403
+    if referer and not referer.startswith(host + '/'):
+        return _hrd_cors(jsonify({'error': 'bad referer'})), 403
+    try:
+        with open(_hrd_token_path(), 'r', encoding='utf-8') as f:
+            tok = f.read().strip()
+    except OSError:
+        tok = ''
+    if not tok:
+        return _hrd_unauthorized()
+    return _hrd_cors(jsonify({'token': tok, 'ok': True}))
+
+
+# ── Relocation AI 入库（2026-11-15）─────────────────────────────────────
+# 页面「AI 入库」按钮调用：读取 tasks/findings -> 现有 LLM 主/备链分析 ->
+# 产出今日行动与关键路径提示 -> 原子写 digest_latest.json + meta.version 递增。
+# 红线：AI 只更新 digest/研究结论，绝不自动改任务状态（签字/付款/政府提交永远人工确认）。
+# 节流：默认 5 分钟内不重复跑；force=true 可强制（页面按钮用 force）。
+RELOC_INGEST_MIN_GAP_SEC = 300
+RELOC_AUTO_INGEST_MIN_SEC = 1800        # 页面自动循环的最小间隔（30 分钟）
+
+
+def _reloc_llm(messages, timeout=120):
+    """复用 _llm_providers() 主/备链做一次性补全；全失败返回 None。"""
+    for p in _llm_providers():
+        try:
+            with httpx.Client(timeout=timeout) as client:
+                resp = client.post(
+                    f"{p['base_url']}/chat/completions",
+                    headers={'Authorization': f"Bearer {p['api_key']}",
+                             'Content-Type': 'application/json'},
+                    json={'model': p['model'], 'messages': messages, 'max_tokens': 2500,
+                          'temperature': 0.3, **_llm_extra_params(p['base_url'])})
+            if resp.status_code == 200:
+                txt = (resp.json().get('choices') or [{}])[0].get('message', {}).get('content', '') or ''
+                if txt.strip():
+                    return txt.strip()
+            print(f'[reloc-llm] {p.get("label")} HTTP {resp.status_code}: {resp.text[:100]}')
+        except Exception as e:
+            print(f'[reloc-llm] {p.get("label")} EXC: {str(e)[:100]}')
+    return None
+
+
+def _reloc_meta_get(con):
+    return {r['k']: r['v'] for r in con.execute('SELECT k,v FROM meta')}
+
+
+def _reloc_meta_set(con, k, v):
+    """meta 表是 k/v 结构；先 UPDATE，缺行再 INSERT（兼容表上有额外 NOT NULL 列）。"""
+    cur = con.execute('UPDATE meta SET v=? WHERE k=?', (str(v), k))
+    if cur.rowcount == 0:
+        con.execute('INSERT INTO meta(k,v) VALUES(?,?)', (k, str(v)))
+
+
+@app.route('/api/hrd/reloc/ingest', methods=['POST', 'OPTIONS'])
+def reloc_ingest_api():
+    if request.method == 'OPTIONS':
+        return _hrd_cors(jsonify({}))
+    body = request.get_json(silent=True) or {}
+    force = bool(body.get('force'))
+    try:
+        con = _reloc_con()
+        meta = _reloc_meta_get(con)
+        last = str(meta.get('last_ingest') or '')
+        ver = int(meta.get('version') or 0)
+        if not force and last:
+            try:
+                age = (datetime.now() - datetime.fromisoformat(last)).total_seconds()
+                if 0 <= age < RELOC_INGEST_MIN_GAP_SEC:
+                    con.close()
+                    return _reloc_resp({'ok': True, 'skipped': True, 'seconds_left':
+                                        round(RELOC_INGEST_MIN_GAP_SEC - age),
+                                        'version': ver, 'updated': last})
+            except ValueError:
+                pass
+        tasks = [dict(r) for r in con.execute(
+            'SELECT id,title,status,due,owner,risk,notes FROM tasks ORDER BY phase,id')]
+        findings = [dict(r) for r in con.execute(
+            'SELECT task_id,topic,conclusion,confidence,checked FROM findings '
+            'ORDER BY created DESC LIMIT 25')]
+        con.close()
+
+        # 数据不足也允许跑（产出空行动），但不能编造任务
+        compact_tasks = '\n'.join(
+            f"- {t['id']} | {t['title'][:70]} | 状态={t['status']} | 截止={t['due'] or '—'} | "
+            f"风险={t['risk'] or '—'} | 负责人={t['owner'] or '—'}"
+            for t in tasks[:120])
+        compact_findings = '\n'.join(
+            f"- {f['task_id']} | {str(f['topic'] or '')[:80]} | {str(f['conclusion'] or '')[:160]}"
+            for f in findings[:25])
+        system = (
+            '你是搬迁项目经理助理，服务对象是伊斯坦布尔→迪拜 2027-01/02 的家庭搬迁。'
+            '只依据提供的任务与已核实研究结论，输出严格 JSON：'
+            '{"actions":["今天最该做的3件事，每件一句话，具体可执行"],'
+            '"focus":["当前关键路径上的任务ID，最多5个"],'
+            '"note":"一句话说明整体进度与最大风险"}。'
+            '禁止编造任务ID或事实；签字/付款/政府提交/押金类只能提醒人工确认，不得说已完成。'
+            '不要输出 JSON 以外的任何文字。'
+        )
+        user = f'任务清单：\n{compact_tasks}\n\n已核实研究结论：\n{compact_findings or "（暂无）"}'
+        raw = _reloc_llm([{'role': 'system', 'content': system},
+                          {'role': 'user', 'content': user}])
+        parsed = {}
+        if raw:
+            import re as _re
+            m = _re.search(r'\{[\s\S]*\}', raw)
+            if m:
+                try:
+                    parsed = json.loads(m.group(0))
+                except Exception:
+                    parsed = {}
+        actions = [str(x)[:200] for x in (parsed.get('actions') or []) if x][:5]
+        focus = [str(x)[:24] for x in (parsed.get('focus') or []) if x][:8]
+        known = {t['id'] for t in tasks}
+        focus = [x for x in focus if x in known]
+        if not actions:
+            # LLM 不可用/解析失败：降级为基于逾期与高风险任务的可执行清单，不让页面空转
+            overdue = [t for t in tasks if t['due'] and t['status'] not in ('done', 'dropped')]
+            actions = [f'推进 {t["id"]}：{str(t["title"])[:60]}' for t in overdue[:3]] or ['检查任务清单是否为空']
+        note = str(parsed.get('note') or '')[:300]
+
+        now = datetime.now().isoformat(timespec='seconds')
+        # 合并写入：服务器 daily 脚本的 overdue/meta/date 等字段必须保留
+        digest = {}
+        try:
+            with open(RELOC_DIGEST, encoding='utf-8') as f:
+                existing = json.load(f)
+            if isinstance(existing, dict): digest = existing
+        except Exception:
+            pass
+        old_cp = {str(x.get('id')): x for x in (digest.get('critical_path') or []) if isinstance(x, dict)}
+        new_cp = []
+        for x in focus:
+            item = dict(old_cp.get(x, {'id': x, 'risk': 'med', 'status': 'pending'}))
+            new_cp.append(item)
+        digest.update({
+            'actions': actions,
+            'critical_path': new_cp,
+            'note': note,
+            'version': ver + 1,
+            'updated': now,
+            'by': 'reloc-ai-ingest',
+            'degraded': not bool(parsed),
+        })
+        atomic_write(RELOC_DIGEST, digest, ensure_ascii=False, indent=2)
+
+        con = _reloc_con()
+        _reloc_meta_set(con, 'version', ver + 1)
+        _reloc_meta_set(con, 'last_ingest', now)
+        _reloc_meta_set(con, 'last_ingest_by', 'reloc-ai-ingest')
+        con.commit()
+        con.close()
+        return _reloc_resp({'ok': True, 'version': ver + 1, 'updated': now,
+                            'actions': actions, 'focus': focus, 'note': note,
+                            'degraded': digest['degraded']})
+    except Exception as e:
+        return _reloc_resp({'ok': False, 'error': str(e)[:200]})
+
+
+@app.route('/api/hrd/reloc/auto', methods=['POST', 'OPTIONS'])
+def reloc_auto_api():
+    """页面自动循环调用：节流窗口内跳过，过期则执行一次完整入库（等同 force=false）。"""
+    if request.method == 'OPTIONS':
+        return _hrd_cors(jsonify({}))
+    return reloc_ingest_api()
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=int(os.environ.get('PORT', 5000)), debug=False)
