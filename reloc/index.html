@@ -56,6 +56,37 @@ details[open] summary{margin-bottom:8px}
 .cncl{font-size:14px;padding:3px 0}
 table.cmp{font-size:13px}
 table.cmp td,table.cmp th{padding:5px 8px}
+/* 调研结论阅读层：卡片 / 自动归类 / 来源还原（RESEARCH_V3） */
+.rsch-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.rsch-stat{font-size:12.5px;color:var(--tx3)}
+.rsch-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 2px}
+.rsch-grp{margin-top:14px}
+.rsch-grp-t{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--tx2);
+  padding:5px 2px;border-bottom:1px solid var(--line)}
+.rcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:9px}
+.rcard.attention{border-left:3px solid var(--amber)}
+.rcard-head{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.rcard-id{font-size:11px;font-weight:700;color:var(--blue);background:#eff6ff;border-radius:6px;padding:1px 7px;white-space:nowrap}
+.rcard-topic{font-weight:700;font-size:14.5px;flex:1;min-width:170px;line-height:1.5}
+.rcard-meta{font-size:12px;color:var(--tx3);white-space:nowrap}
+.rcard-sum{margin-top:8px;font-size:14px;line-height:1.75;color:var(--tx)}
+.rcard-sum.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rcard-more{background:none;border:0;color:var(--blue);font-size:12.5px;cursor:pointer;padding:3px 0}
+.reflink{color:var(--blue);font-size:10px;vertical-align:super;text-decoration:none}
+.openbox{background:#fffbeb;border:1px solid #fde68a;border-radius:9px;padding:8px 11px;margin-top:9px;font-size:13px}
+.openbox b{color:#b45309}
+.openbox ul{margin:5px 0 0 16px;padding:0}
+.openbox li{margin:2px 0}
+.rcdetails{margin-top:8px}
+.srclist{list-style:none;margin:4px 0 0;padding:0}
+.srclist li{padding:5px 0;border-bottom:1px dashed var(--line);font-size:12.5px;word-break:break-word;line-height:1.55}
+.srclist li:last-child{border:0}
+.srclist .dom{color:var(--tx3);font-size:11px;margin-left:6px}
+.needbox{background:#fffbeb;border:1px solid #fde68a;border-radius:11px;padding:11px 13px;margin-top:10px}
+.needbox .t{font-weight:700;color:#b45309;font-size:13.5px}
+.needbox ol{margin:6px 0 0 18px;font-size:13px}
+.needbox li{margin:3px 0;line-height:1.6}
+
 /* 自循环状态条 */
 #pulse{position:fixed;right:16px;bottom:16px;z-index:8;background:var(--surface);border:1px solid var(--line);
   border-radius:12px;padding:8px 13px;font-size:12.5px;box-shadow:0 4px 18px rgba(20,30,50,.12);color:var(--tx2)}
@@ -78,7 +109,7 @@ function getToken(){ try{return localStorage.getItem(RTOK)||'';}catch(e){return 
 function setToken(t){ try{localStorage.setItem(RTOK,t);}catch(e){} }
 function H(tok){ return {'Content-Type':'application/json','X-HRD-Token':tok}; }
 var state={data:null,findings:[],phase:'ALL',autorun:true,ingesting:false,
-           ver:'',updated:'',booting:false,lastAutoAt:0};
+           ver:'',updated:'',booting:false,lastAutoAt:0,rphase:'ALL'};
 var POLL_MS=30000;
 var AUTO_MS=30*60*1000;
 
@@ -184,40 +215,159 @@ function copyConfirm(btn){
   catch(e){ toast('请长按选择文字复制'); }
 }
 
-/* ── 调研结论：6段结构（结论 / 对比表 / 评分 / 来源 / 风险 / 下一步），附录默认折叠 ── */
-function researchBlock(fs){
-  var body=fs.map(function(f){
-    var obj=null;
-    try{ var p=JSON.parse(f.conclusion||''); if(p&&typeof p==='object'&&p.conclusion!=null) obj=p; }catch(e){}
-    if(!obj){
-      return '<div class="finding"><b>'+esc(f.task_id)+'</b> '+esc(f.topic||'')+
-        ' <div style="margin-top:4px">'+esc(f.conclusion||'')+'</div>'+
-        '<div class="src">核对 '+esc(String(f.checked).slice(0,10))+'</div></div>';
-    }
-    var tbl='';
+/* ── 调研结论：自动归类 / 摘要折叠 / 来源还原 / 需知会聚合（RESEARCH_V3） ── */
+var RCH_PHASES=['GATE','FAM','HOUSE','CAR','KIDS','DOCS','OTHER'];
+var RCH_LABEL={GATE:'工作签闸门',FAM:'家属签证',HOUSE:'住房',CAR:'用车',KIDS:'孩子教育',DOCS:'文件签署',OTHER:'其他'};
+function rphase(f){
+  var t=String(f.task_id||'')+' '+String(f.topic||'');
+  if(/GATE|居留|Emirates|工作签|入职手续/i.test(t)) return 'GATE';
+  if(/FAM|家属签|配偶签/i.test(t)) return 'FAM';
+  if(/nursery|幼儿园|托儿|学校|入学|校历|探亲|教育|孩子|子女|waitlist|Headington|Blossom|小学/i.test(t)) return 'KIDS';
+  if(/认证|公证|apostille|FCDO|出生证|结婚证|学历|文件|签署|保单|保险|签证材料/i.test(t)) return 'DOCS';
+  if(/用车|汽车|驾照|上牌|车牌|购车/i.test(t)) return 'CAR';
+  if(/住房|租房|房租|房源|物业|小区|地址登记|入住|HOUSE/i.test(t)) return 'HOUSE';
+  return 'OTHER';
+}
+function rjson(x){ try{var a=JSON.parse(x||'[]');return Array.isArray(a)?a:[];}catch(e){return [];} }
+function rtext(x){ return String(x==null?'':x).replace(/\s+/g,' ').trim(); }
+function rsummary(t,n){
+  t=rtext(t); if(t.length<=n) return t;
+  var c=t.slice(0,n), p=Math.max(c.lastIndexOf('。'),c.lastIndexOf('；'),c.lastIndexOf('. '));
+  return (p>n*0.55?c.slice(0,p+1):c)+'…';
+}
+function rrefs(t){
+  var a=[],m,re=/\[(\d+)\]/g;
+  while((m=re.exec(String(t||'')))){var n=+m[1];if(a.indexOf(n)<0)a.push(n);}
+  return a.sort(function(x,y){return x-y;});
+}
+function rlink(t,cid){
+  return esc(t).replace(/\[(\d+)\]/g,function(all,n){
+    return '<a class="reflink" href="#src-'+cid+'-'+n+'" title="跳到来源 '+n+'">['+n+']</a>';
+  });
+}
+function rsources(f,obj){
+  if(obj&&obj.sources&&obj.sources.length) return obj.sources.map(function(x){
+    return {title:String(x.title||'来源'),url:String(x.url||'')};
+  });
+  return String(f.source||'').split(/\s*\|\|\s*/).map(function(part){
+    var m=part.match(/^(.+?):\s*(https?:\/\/\S+)\s*$/);
+    return m?{title:m[1].trim(),url:m[2].trim()}:{title:part.trim(),url:''};
+  }).filter(function(x){return x.title;});
+}
+function rsafe(u){ return /^https?:\/\//i.test(u)?esc(u):''; }
+function rdomain(u){ try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return '';} }
+function robj(f){
+  try{var p=JSON.parse(f.conclusion||'');if(p&&typeof p==='object'&&p.conclusion!=null)return p;}catch(e){}
+  return null;
+}
+function ropens(f,obj){ return rjson(f.open_items).concat(obj&&obj.next_confirm?obj.next_confirm:[]); }
+
+function rcard(f,cid){
+  var obj=robj(f);
+  var text=obj?String(obj.conclusion||''):String(f.conclusion||'');
+  var opens=ropens(f,obj), srcs=rsources(f,obj), refs=rrefs(text);
+  var sum=rsummary(text,150);
+  var conf=String(f.confidence||'');
+  var cc=conf.indexOf('高')===0?'low':conf.indexOf('中')===0?'med':'high';
+  var h='<div class="rcard'+(opens.length?' attention':'')+'" id="rc-'+cid+'">';
+  h+='<div class="rcard-head"><span class="rcard-id">'+esc(f.task_id||'')+'</span>'+
+     '<span class="rcard-topic">'+esc(f.topic||'调研')+'</span>'+
+     badge(cc,conf||'未标注')+'<span class="rcard-meta">'+esc(String(f.checked||'').slice(0,10))+'</span></div>';
+  h+='<div class="rcard-sum clamp" id="rcsum-'+cid+'">'+rlink(sum,cid)+'</div>';
+  h+='<div class="rcard-sum hidden" id="rcfull-'+cid+'">'+rlink(text,cid)+'</div>';
+  h+='<button class="rcard-more" onclick="rtoggle('+cid+')" id="rcbtn-'+cid+'">展开全文'+
+     (text.length>150?'（'+text.length+' 字）':'')+'</button>';
+  if(opens.length){
+    h+='<div class="openbox"><b>需你知会 · '+opens.length+' 项待核实</b><ul>'+
+      opens.slice(0,3).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+
+      (opens.length>3?'<li class="muted">另有 '+(opens.length-3)+' 项，见下方明细</li>':'')+'</ul></div>';
+  }
+  h+='<details class="rcdetails"><summary>来源与依据（'+srcs.length+'）· 全部待核实 · 6段明细</summary>';
+  h+='<div class="sec-title">数据来源与日期</div>';
+  h+=srcs.length?('<ul class="srclist">'+srcs.map(function(x,k){
+      var u=rsafe(x.url), d=rdomain(u);
+      return '<li id="src-'+cid+'-'+(k+1)+'">'+(k+1)+'. '+
+        (u?'<a href="'+u+'" target="_blank" rel="noopener">'+esc(x.title)+'</a>':esc(x.title))+
+        (d?'<span class="dom">'+esc(d)+'</span>':'')+'</li>';
+    }).join('')+'</ul>'):'<div class="muted">未核实</div>';
+  h+='<div class="muted" style="margin-top:5px">核对：'+esc(String(f.checked||'').slice(0,16).replace('T',' '))+
+     '　出处：'+esc(String(f.source||'').indexOf('家长录入')===0?'家长录入':String(f.source||'').slice(0,36))+'</div>';
+  if(opens.length) h+='<div class="sec-title">全部待核实（'+opens.length+'）</div><ul class="srclist">'+
+    opens.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
+  if(obj){
     if(obj.table&&obj.table.length){
       var keys=Object.keys(obj.table[0]).slice(0,6);
-      tbl='<table class="cmp"><tr>'+keys.map(function(k){return '<th>'+esc(k)+'</th>';}).join('')+'</tr>'+
-        obj.table.slice(0,5).map(function(row){return '<tr>'+keys.map(function(k){return '<td>'+esc(row[k])+'</td>';}).join('')+'</tr>';}).join('')+'</table>';
+      h+='<div class="sec-title">对比表</div><div style="overflow-x:auto"><table class="cmp"><tr>'+
+        keys.map(function(k){return '<th>'+esc(k)+'</th>';}).join('')+'</tr>'+
+        obj.table.slice(0,5).map(function(row){return '<tr>'+keys.map(function(k){return '<td>'+esc(row[k])+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>';
     }
-    var srcs=(obj.sources&&obj.sources.length)?obj.sources.map(function(s){
-      var u=s.url||''; var t=s.title||'来源';
-      return u?'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(t)+'</a>':esc(t);
-    }).join(' · '):'<span class="muted">未核实</span>';
-    var risks=(obj.risks||[]).slice(0,3).map(function(r){return '<div class="cncl">· '+esc(r)+'</div>';}).join('')||'<div class="muted">· 未列出</div>';
-    var na=(obj.next_auto||[]).map(function(x){return '<div class="cncl">· 自动：'+esc(x)+'</div>';}).join('');
-    var nc=(obj.next_confirm||[]).map(function(x){return '<div class="cncl">· 需确认：'+esc(x)+'</div>';}).join('');
-    return '<div class="finding"><b>'+esc(f.task_id)+'</b> '+esc(f.topic||'')+' '+badge((f.confidence||'').indexOf('高')===0?'low':'med',f.confidence||'')+
-      '<div class="sec-title">结论</div><div>'+esc(obj.conclusion)+'</div>'+
-      '<details><summary>附录：对比表 / 评分 / 来源 / 风险 / 下一步</summary>'+
-        '<div class="sec-title">对比与评分</div>'+(tbl||'<div class="muted">未核实</div>')+
-        (obj.score_rule?'<div class="muted" style="margin-top:4px">评分规则：'+esc(obj.score_rule)+'</div>':'')+
-        '<div class="sec-title">数据来源与日期</div><div class="src">'+srcs+'　核对 '+esc(String(f.checked).slice(0,10))+'</div>'+
-        '<div class="sec-title">风险与不确定点</div>'+risks+
-        '<div class="sec-title">下一步</div>'+(na||nc||'<div class="muted">无</div>')+
-      '</details></div>';
+    if(obj.score_rule) h+='<div class="muted" style="margin-top:4px">评分规则：'+esc(obj.score_rule)+'</div>';
+    if(obj.risks&&obj.risks.length) h+='<div class="sec-title">风险与不确定点</div>'+
+      obj.risks.slice(0,3).map(function(x){return '<div class="cncl">· '+esc(x)+'</div>';}).join('');
+    if(obj.next_auto&&obj.next_auto.length) h+='<div class="sec-title">下一步 · 自动执行</div>'+
+      obj.next_auto.map(function(x){return '<div class="cncl">· '+esc(x)+'</div>';}).join('');
+  }
+  h+='</details></div>';
+  return h;
+}
+
+function rneeds(list){
+  var items=[];
+  list.forEach(function(f){
+    var a=ropens(f,robj(f));
+    a.forEach(function(x){items.push({task:String(f.task_id||''),text:String(x)});});
+  });
+  if(!items.length) return '';
+  var tasks=[]; items.forEach(function(x){if(tasks.indexOf(x.task)<0)tasks.push(x.task);});
+  return '<div class="needbox"><div class="t">需你知会 · '+items.length+' 项待核实（自动汇总自 '+tasks.length+' 条调研）</div>'+
+    '<ol>'+items.slice(0,3).map(function(x){return '<li>'+esc(x.text)+' <span class="muted">['+esc(x.task)+']</span></li>';}).join('')+'</ol>'+
+    (items.length>3?'<div class="muted">另有 '+(items.length-3)+' 项，见各卡片内「需你知会」</div>':'')+
+    '<button class="btn" style="margin-top:8px" onclick="copyNeeds()">复制需知会清单</button></div>';
+}
+function copyNeeds(){
+  var out=[];
+  (state.findings||[]).forEach(function(f){
+    ropens(f,robj(f)).forEach(function(x){out.push('【需知会】'+(f.task_id||'')+'｜'+x);});
+  });
+  var t=out.slice(0,10).join('\n');
+  try{navigator.clipboard.writeText(t).then(function(){toast('已复制 '+Math.min(out.length,10)+' 项');});}
+  catch(e){toast('请长按选择文字复制');}
+}
+function setRPhase(p){ state.rphase=p; render(); }
+function rtoggle(id){
+  var s=document.getElementById('rcsum-'+id), f=document.getElementById('rcfull-'+id), b=document.getElementById('rcbtn-'+id);
+  if(!s||!f||!b) return;
+  if(f.classList.contains('hidden')){
+    s.classList.add('hidden'); f.classList.remove('hidden'); b.textContent='收起';
+  }else{
+    f.classList.add('hidden'); s.classList.remove('hidden'); b.textContent='展开全文';
+  }
+}
+function researchBlock(fs){
+  /* 自动剔除验证用脏数据；不误伤真实人工录入 */
+  var list=(fs||[]).filter(function(f){ return !/^验证测试：请忽略此条/.test(rtext(f.conclusion||f.topic)); });
+  var cards=list.map(function(f,k){
+    return {f:f,i:k,ph:rphase(f),n:ropens(f,robj(f)).length,date:String(f.checked||'')};
+  });
+  cards.sort(function(a,b){ return (b.n-a.n)||b.date.localeCompare(a.date); });
+  var phs=RCH_PHASES.filter(function(p){ return cards.some(function(c){return c.ph===p;}); });
+  var tabs='<div class="rsch-tabs"><span class="chip'+(state.rphase==='ALL'?' on':'')+'" onclick="setRPhase(\'ALL\')">全部 '+cards.length+'</span>'+
+    phs.map(function(p){
+      return '<span class="chip'+(state.rphase===p?' on':'')+'" onclick="setRPhase(\''+p+'\')">'+
+        RCH_LABEL[p]+' '+cards.filter(function(c){return c.ph===p;}).length+'</span>';
+    }).join('')+'</div>';
+  var shown=cards.filter(function(c){return state.rphase==='ALL'||c.ph===state.rphase;});
+  var body=phs.map(function(p){
+    var g=shown.filter(function(c){return c.ph===p;});
+    if(!g.length) return '';
+    return '<div class="rsch-grp"><div class="rsch-grp-t"><span>'+RCH_LABEL[p]+'</span><span>'+g.length+' 条</span></div>'+
+      g.map(function(c){return rcard(c.f,c.i);}).join('')+'</div>';
   }).join('')||'<div class="muted">暂无研究结论</div>';
-  return '<div class="card"><h3>调研结论 <span class="muted" style="font-weight:400;font-size:12px">6段规范 · 附录折叠</span></h3>'+body+'</div>';
+  var needN=0; list.forEach(function(f){needN+=ropens(f,robj(f)).length;});
+  return '<div class="card"><div class="rsch-head"><h3>调研结论 '+
+    '<span class="muted" style="font-weight:400;font-size:12px">自动归类 · 来源还原 · 需知会聚合</span></h3>'+
+    '<span class="rsch-stat">'+cards.length+' 条调研 · '+phs.length+' 类 · '+needN+' 项待核实</span></div>'+
+    rneeds(list)+tabs+body+'</div>';
 }
 
 var PHASE_LABEL={GATE:'工作签闸门',FAM:'家属签证',HOUSE:'住房',CAR:'用车',KIDS:'孩子教育',DOCS:'文件签署'};
