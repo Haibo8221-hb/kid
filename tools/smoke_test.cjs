@@ -459,19 +459,23 @@ function runPage(page) {
 
             // ── R8：目标台内嵌 + 物理奥赛页内化 + Subject Analysis 数据形状兼容 ──
             try {
-              // ① 侧栏：Dashboard 正下方是「目标台 Goal Desk」
+              // ① 侧栏 v2（导航精简 2026-11-15）：7 项固定顺序 + More 区
               const navLis = [...doc.querySelectorAll('.sidebar-nav li')].map(li => li.textContent.trim());
-              const dashIdx = navLis.findIndex(t => /Dashboard/.test(t));
-              const goalIdx = navLis.findIndex(t => /Goal Desk/i.test(t));
-              if (dashIdx >= 0 && goalIdx === dashIdx + 1)
-                pass.push('R8：侧栏「目标台」紧跟在 Dashboard 下方（第 ' + (goalIdx + 1) + ' 项）');
-              else fail.push('R8：侧栏顺序不对 dashboard=' + dashIdx + ' goals=' + goalIdx + ' → ' + navLis.slice(0, 4).join(' / '));
+              const expectNav = ['Home', 'My Week', 'Error Book', 'My Grades', 'Goals & Routes', 'Ask AI', 'My Library'];
+              const navOk = navLis.length === expectNav.length && expectNav.every((t, i) => navLis[i].indexOf(t) !== -1);
+              if (navOk) pass.push('R8：侧栏 v2 精简为 7 项且顺序正确（Home→My Library）');
+              else fail.push('R8：侧栏 v2 顺序不对 → ' + navLis.join(' / '));
+              const moreTxt = (doc.querySelector('.sidebar-bottom') || {}).textContent || '';
+              if (['Upload Grades', 'Settings', 'Log Out'].every(t => moreTxt.indexOf(t) !== -1))
+                pass.push('R8：More 区含 Upload Grades / Settings / Log Out');
+              else fail.push('R8：More 区缺项 → ' + moreTxt.replace(/\s+/g, ' ').slice(0, 80));
 
-              // ② Physics Olympiad 改为页内 tab，不再是新开窗口
-              const bphoLink = doc.querySelector('.sidebar-nav a[href="/bpho_resources.html"][target="_blank"]');
-              const bphoTab = doc.querySelector('.sidebar-nav a[data-tab="bpho"]');
-              if (!bphoLink && bphoTab) pass.push('R8：Physics Olympiad 已改为页内 tab（不再是新开窗口）');
-              else fail.push('R8：Physics Olympiad 仍是新窗口链接，或缺少 data-tab="bpho"');
+              // ② Physics Olympiad v2：撤出侧栏，Dashboard 卡片入口 + 页内面板保留
+              const bphoInNav = doc.querySelector('.sidebar-nav a[data-tab="bpho"]');
+              const bphoCard = [...doc.querySelectorAll('#tab-dashboard button')].find(b => /switchTab\('bpho'\)/.test(b.getAttribute('onclick') || ''));
+              const bphoPanel = doc.getElementById('tab-bpho');
+              if (!bphoInNav && bphoCard && bphoPanel) pass.push('R8：Physics Olympiad 已撤出侧栏，Dashboard 卡片入口+页内面板在位');
+              else fail.push('R8：Physics Olympiad 入口不对 nav=' + !!bphoInNav + ' card=' + !!bphoCard + ' panel=' + !!bphoPanel);
 
               // ③ 两个嵌入面板存在且 iframe 指向正确地址
               const gf = doc.getElementById('goalsFrame');
@@ -493,6 +497,23 @@ function runPage(page) {
               else fail.push('R8：switchTab("goals") 未激活 tab-goals');
               if (typeof window.reloadEmbed === 'function') pass.push('R8：reloadEmbed 已提供（嵌入页可手动刷新）');
               else fail.push('R8：缺少 reloadEmbed');
+
+              // ④b v2 分组子标签：My Week（Plan/Review）切换与旧名兼容映射
+              window.switchTab('myweek');
+              const wp = doc.getElementById('tab-planner');
+              const wr = doc.getElementById('tab-weekly-review');
+              const myWeekNav = doc.querySelector('.sidebar-nav a[data-tab="myweek"]');
+              if (wp && wp.classList.contains('active') && myWeekNav && myWeekNav.classList.contains('active'))
+                pass.push('R8：switchTab("myweek") 默认打开 Plan 子页并高亮导航');
+              else fail.push('R8：myweek 分组默认子页不对');
+              window.switchSub('myweek', 'review');
+              if (wr && wr.classList.contains('active') && !(wp && wp.classList.contains('active')))
+                pass.push('R8：switchSub("myweek","review") 切到 Review 子页（Plan 收起）');
+              else fail.push('R8：review 子页切换失败');
+              window.switchTab('planner');
+              if (wp && wp.classList.contains('active'))
+                pass.push('R8：旧名 switchTab("planner") 经兼容映射回到 Plan 子页');
+              else fail.push('R8：旧 tab 名兼容映射失败');
 
               // ⑤ Subject Analysis：真实数据里 tags 是**数组**，旧代码 .split() 会抛错 → "Load failed"
               //    这里用数组 tags + 字符串 tags 两种形状都必须能渲染
