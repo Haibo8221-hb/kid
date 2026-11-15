@@ -4103,6 +4103,8 @@ def reloc_ingest_api():
         return _hrd_cors(jsonify({}))
     body = request.get_json(silent=True) or {}
     force = bool(body.get('force'))
+    user_input = str(body.get('input') or '').strip()[:4000]
+    if user_input: force = True        # 有新录入线索时跳过节流，立即分析
     try:
         con = _reloc_con()
         meta = _reloc_meta_get(con)
@@ -4142,7 +4144,8 @@ def reloc_ingest_api():
             '禁止编造任务ID或事实；签字/付款/政府提交/押金类只能提醒人工确认，不得说已完成。'
             '不要输出 JSON 以外的任何文字。'
         )
-        user = f'任务清单：\n{compact_tasks}\n\n已核实研究结论：\n{compact_findings or "（暂无）"}'
+        extra = ('\n\n【家长本次录入的新线索——必须纳入分析，不得忽略】\n' + user_input) if user_input else ''
+        user = f'任务清单：\n{compact_tasks}\n\n已核实研究结论：\n{compact_findings or "（暂无）"}' + extra
         raw = _reloc_llm([{'role': 'system', 'content': system},
                           {'role': 'user', 'content': user}])
         parsed = {}
@@ -4190,6 +4193,11 @@ def reloc_ingest_api():
         atomic_write(RELOC_DIGEST, digest, ensure_ascii=False, indent=2)
 
         con = _reloc_con()
+        if user_input:
+            con.execute('INSERT INTO findings(task_id,topic,conclusion,source,checked,confidence,open_items,created) '
+                        'VALUES(?,?,?,?,?,?,?,?)',
+                        ('MANUAL', user_input[:60], user_input[:400], '家长录入('+now+')', now[:10],
+                         '人工录入', '[]', now))
         _reloc_meta_set(con, 'version', ver + 1)
         _reloc_meta_set(con, 'last_ingest', now)
         _reloc_meta_set(con, 'last_ingest_by', 'reloc-ai-ingest')

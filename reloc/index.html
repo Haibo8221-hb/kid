@@ -41,6 +41,7 @@ th{color:var(--tx3);font-weight:600;font-size:12.5px}
 .finding{border-bottom:1px solid var(--line);padding:10px 0}
 .finding:last-child{border:0}
 .hidden{display:none}
+#ingestInput{width:100%;min-height:74px;margin-top:10px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font:14px/1.6 inherit;color:var(--tx);background:var(--surface);resize:vertical}
 a{color:var(--blue)}
 /* 自循环状态条 */
 #pulse{position:fixed;right:16px;bottom:16px;z-index:8;background:var(--surface);border:1px solid var(--line);
@@ -167,7 +168,8 @@ function render(){
     '<div><button class="btn" onclick="boot()">刷新</button></div></div>')+
    '<div class="card"><h3>AI 入库 · 自循环</h3>'+
     '<div class="muted">调用现有 LLM 主/备链分析任务与已核实研究结论，产出今日行动与关键路径，自动写回数据库并递增版本（'+POLL_MS/1000+' 秒轮询同步，每 '+AUTO_MS/60000+' 分钟自动分析一次）。AI 只备材料，签字/付款/政府提交/押金永远人工确认。</div>'+
-    '<div class="chips"><button class="btn btn-pri" id="ingestBtn" onclick="runIngest(true)"'+(state.ingesting?' disabled':'')+'>'+
+    '<div class="muted" style="margin-top:10px">录入新线索（可选）：政策变化、签证/住房进展、面试/考试反馈、待核实信息——AI 会连同任务与已核实结论一起分析。</div>'+
+    '<textarea id="ingestInput" placeholder="例：11/14 学校回复：Latin 已换成 Classical Civilisation；签证材料清单新增银行流水（11/20 前）…"></textarea>'+    '<div class="chips"><button class="btn btn-pri" id="ingestBtn" onclick="runIngest(true)"'+(state.ingesting?' disabled':'')+'>'+
       (state.ingesting?'分析中…':'立即 AI 入库')+'</button>'+
       '<button class="btn" onclick="toggleAuto()">'+(state.autorun?'暂停自动循环':'恢复自动循环')+'</button></div>'+
     '<div class="muted" id="ingestMsg">'+esc(m.last_ingest_by==='reloc-ai-ingest'?('最近由 AI 于 '+String(m.last_ingest||'').slice(5,16).replace('T',' ')+' 更新'):'尚未执行 AI 入库')+'</div></div>'+
@@ -196,7 +198,10 @@ async function runIngest(force){
   state.ingesting=true; pulse('AI 入库中…','busy');
   var btn=document.getElementById('ingestBtn'); if(btn){btn.disabled=true;btn.textContent='分析中…';}
   try{
-    var r=await api('/api/hrd/reloc/ingest',{method:'POST',body:JSON.stringify({force:!!force})});
+    var inp=document.getElementById('ingestInput');
+    var userInput=inp?String(inp.value||'').trim():'';
+    var r=await api('/api/hrd/reloc/ingest',{method:'POST',
+      body:JSON.stringify({force:!!force,input:userInput})});
     var d=await r.json();
     if(!r.ok||!d.ok) throw new Error(d.error||('HTTP '+r.status));
     if(d.skipped){ toast(d.seconds_left+' 秒内已分析过，跳过'); }
@@ -205,6 +210,7 @@ async function runIngest(force){
       var msg=document.getElementById('ingestMsg');
       if(msg) msg.textContent='AI 于 '+String(d.updated).slice(11,16)+' 更新 · '+(d.actions||[]).length+' 条行动'+(d.note?' · '+d.note:'');
     }
+    if(inp && userInput && d.ok && !d.skipped){ inp.value=''; toast('已录入 '+userInput.length+' 字，AI 已纳入分析'); }
     state.lastAutoAt=Date.now();
     await boot(true);
   }catch(e){ toast('AI 入库失败：'+e.message); pulse('入库失败','err'); }
