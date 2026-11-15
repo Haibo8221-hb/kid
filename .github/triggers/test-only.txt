@@ -1,1 +1,1 @@
-recheck after logout epoch ms fix
+verify bootstrap public path fix

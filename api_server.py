@@ -85,9 +85,7 @@ def _logout_epoch():
 
 def _mark_logout(now=None):
     now = float(now or time.time())
-    # 与 _make_token 的 iat 同口径（毫秒向下取整）：否则同毫秒内登出后新签发的
-    # token 其 iat(整毫秒) 会小于 logout_at(微秒) 而被误杀（CI 上观测到的 flaky）。
-    now = int(now * 1000) / 1000.0
+
     try:
         atomic_write(AUTH_STATE_FILE, {'logout_at': now}, ensure_ascii=False)
     except Exception as e:
@@ -95,8 +93,14 @@ def _mark_logout(now=None):
     return now
 
 def _make_token(now=None):
-    """token = exp.iat.sig —— iat 为毫秒级浮点签发时间，用于登出后精确吊销。"""
+    """token = exp.iat.sig —— iat 为毫秒级浮点签发时间，用于登出后精确吊销。
+    新签 token 保证 iat 严格晚于登出水位线，避免同毫秒登出后重新登录被误杀。"""
+    supplied = now
     now = float(now or time.time())
+    if supplied is None:
+        epoch = _logout_epoch()
+        if now <= epoch:
+            now = epoch + 0.001
     exp = int(now + AUTH_TTL)
     iat_s = str(int(now * 1000))      # 毫秒整型，避免 token 中出现额外小数点
     sig = hmac.new(_auth_secret(), f'{exp}.{iat_s}'.encode(), hashlib.sha256).hexdigest()[:32]
@@ -114,7 +118,7 @@ def _verify_token(tok):
     good = hmac.new(_auth_secret(), f'{exp}.{iat_s}'.encode(), hashlib.sha256).hexdigest()[:32]
     if not hmac.compare_digest(sig, good):
         return False
-    if iat < _logout_epoch():     # 登出时刻之前签发的 token 全部失效
+    if iat <= _logout_epoch():    # 登出时刻及之前签发的 token 全部失效（含同毫秒）
         return False
     return exp > time.time()
 
@@ -133,7 +137,10 @@ def _is_public_api_path():
     p = request.path
     if request.method == 'OPTIONS':
         return True
-    return p in ('/api/auth/login', '/api/auth/logout', '/api/auth/status')
+    # /api/reloc/bootstrap：搬迁台页面令牌自动下发；自身有同源 Origin/Referer 校验
+    # + 令牌文件存在性校验（fail closed），此处放行以免被通用会话门控挡住。
+    return p in ('/api/auth/login', '/api/auth/logout', '/api/auth/status',
+                '/api/reloc/bootstrap')
 
 @app.before_request
 def _auth_gate():
