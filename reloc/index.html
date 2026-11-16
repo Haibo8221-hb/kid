@@ -108,10 +108,16 @@ var RTOK='wb_hrd_remote_token';
 function getToken(){ try{return localStorage.getItem(RTOK)||'';}catch(e){return '';} }
 function setToken(t){ try{localStorage.setItem(RTOK,t);}catch(e){} }
 function H(tok){ return {'Content-Type':'application/json','X-HRD-Token':tok}; }
+var DRAFT_KEY='reloc-draft';
+var VER_KEY='reloc-version';
+function loadDraft(){ try{ return localStorage.getItem(DRAFT_KEY)||''; }catch(e){ return ''; } }
+function saveDraft(v){ try{ if(v) localStorage.setItem(DRAFT_KEY,v); else localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+function clearDraft(){ state.draft=''; saveDraft(''); }
 var state={data:null,findings:[],phase:'ALL',autorun:true,ingesting:false,
-           ver:'',updated:'',booting:false,lastAutoAt:0,rphase:'ALL',draft:'',bootPending:false};
-var POLL_MS=30000;
+           ver:'',updated:'',booting:false,lastAutoAt:0,rphase:'ALL',draft:loadDraft(),bootPending:false,lastSyncAt:0};
 var AUTO_MS=30*60*1000;
+var VISIBLE_SYNC_GAP=60000;   /* 切回页面时的同步节流：距上次同步不足 60 秒不请求 */
+var _autoTimer=null;
 
 function pulse(text,kind){
   var el=document.getElementById('pulse'); if(!el) return;
@@ -168,24 +174,36 @@ async function boot(silent){
       var d2=await r2.json(); state.findings=(d2.findings||[]);
     }catch(e){}
     render();
+    state.lastSyncAt=Date.now();
+    /* 版本号写本地供其他标签页 storage 事件感知；值未变不写，避免回声 */
+    try{ if(state.ver && localStorage.getItem(VER_KEY)!==state.ver) localStorage.setItem(VER_KEY,state.ver); }catch(e){}
     if(changed && !silent && state.ver){ toast('已同步新版 v'+state.ver); }
     pulse(state.ingesting?'AI 入库中…':'已同步');
   }catch(e){
-    document.getElementById('app').innerHTML='<div class="card">加载失败：'+esc(e.message)+
-      ' <button class="btn" onclick="boot()">重试</button></div>';
+    if(!state.data){
+      document.getElementById('app').innerHTML='<div class="card">加载失败：'+esc(e.message)+
+        ' <button class="btn" onclick="boot()">重试</button></div>';
+    }else{
+      toast('同步失败：'+e.message+'（已保留当前内容与草稿）');
+    }
     pulse('同步失败','err');
   }finally{
     state.booting=false;
+    var ws=_bootWaiters.splice(0); ws.forEach(function(f){ f(); });
     if(state.bootPending){
       state.bootPending=false;
       setTimeout(function(){ boot(true); },0);
     }
   }
 }
+var _bootWaiters=[];
 function waitBoot(){
   return new Promise(function(res){
-    var t=setInterval(function(){ if(!state.booting){ clearInterval(t); res(); } },30);
-    setTimeout(function(){ clearInterval(t); res(); },8000);
+    _bootWaiters.push(res);
+    setTimeout(function(){
+      var i=_bootWaiters.indexOf(res);
+      if(i>-1){ _bootWaiters.splice(i,1); res(); }
+    },8000);                       /* 兜底超时，避免异常时永久挂起 */
   });
 }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -396,11 +414,11 @@ function researchBlock(fs){
 
 var PHASE_LABEL={GATE:'工作签闸门',FAM:'家属签证',HOUSE:'住房',CAR:'用车',KIDS:'孩子教育',DOCS:'文件签署'};
 function render(){
-  /* 保留正在输入的草稿与光标，避免 30 秒轮询把 textarea 冲掉 */
+  /* 事件触发同步也会重建 #app：保存草稿/焦点/光标，重建后恢复；草稿落 localStorage，F5 不丢 */
   var _old=document.getElementById('ingestInput');
   var _focused=_old&&document.activeElement===_old;
   var _pos=_old&&typeof _old.selectionStart==='number'?_old.selectionStart:null;
-  if(_old&&_old.value) state.draft=_old.value;
+  if(_old&&_old.value){ state.draft=_old.value; saveDraft(state.draft); }
   var d=state.data, dg=d.digest||{}, m=d.meta||{}, c=d.counts||{};
   var phases=Array.from(new Set(d.tasks.map(function(t){return t.phase;}))).sort();
   var chips=['ALL'].concat(phases).map(function(p){
@@ -421,9 +439,9 @@ function render(){
     '<div><button class="btn" onclick="boot()">刷新</button></div></div>')+
    weeklyBlock(d)+
    '<div class="card"><h3>AI 入库 · 自循环</h3>'+
-    '<div class="muted">按行为规范 v2 分析 6 条主线与已核实结论，产出周报三段，自动写回并递增版本（'+POLL_MS/1000+' 秒同步，每 '+AUTO_MS/60000+' 分钟自动分析）。信息搜集/比价/清单/草稿/催办/排期/预警全部自动；仅付款·签字·交证件·偏好取舍·信息缺失五类需你确认。</div>'+
+    '<div class="muted">按行为规范 v2 分析 6 条主线与已核实结论，产出周报三段，自动写回并递增版本（事件触发同步：AI 入库 / 状态变更 / 确认销账 / 切回页面 / 手动刷新；每 '+AUTO_MS/60000+' 分钟自动分析）。信息搜集/比价/清单/草稿/催办/排期/预警全部自动；仅付款·签字·交证件·偏好取舍·信息缺失五类需你确认。</div>'+
     '<div class="muted" style="margin-top:10px">录入新线索（可选）：政策变化、签证/住房进展、学校反馈——AI 一并分析，金额会保留原币种并附折算。</div>'+
-    '<textarea id="ingestInput" placeholder="例：11/14 学校回复：Latin 已换成 Classical Civilisation；房租 AED 95,000/年（≈¥18.6万，11/15 查）…" oninput="state.draft=this.value;"></textarea>'+
+    '<textarea id="ingestInput" placeholder="例：11/14 学校回复：Latin 已换成 Classical Civilisation；房租 AED 95,000/年（≈¥18.6万，11/15 查）…" oninput="onDraftInput(this)"></textarea>'+
     '<div class="chips"><button class="btn btn-pri" id="ingestBtn" onclick="runIngest(true)"'+(state.ingesting?' disabled':'')+'>'+
       (state.ingesting?'分析中…':'立即 AI 入库')+'</button>'+
       '<button class="btn" onclick="toggleAuto()">'+(state.autorun?'暂停自动循环':'恢复自动循环')+'</button></div>'+
@@ -433,9 +451,10 @@ function render(){
     '<div style="overflow-x:auto"><table><tr><th>ID</th><th>里程碑</th><th>负责</th><th>截止/前置</th><th>状态</th><th>改状态</th></tr>'+rows+'</table></div>'+
     '<div class="muted" style="margin-top:10px">跟踪粒度：工作签由公司办、只留 GATE-01 一个下发状态；家属签只记三状态；4 类主事项只保留里程碑。红线：签字/付款/交证件永远人工确认。</div></div>';
   var _new=document.getElementById('ingestInput');
-  if(_new&&state.draft){ _new.value=state.draft; }
+  if(_new&&state.draft){ _new.value=state.draft; saveDraft(state.draft); }
   if(_new&&_focused){ try{ _new.focus(); if(_pos!=null)_new.setSelectionRange(_pos,_pos); }catch(e){} }
 }
+function onDraftInput(el){ state.draft=el.value; saveDraft(state.draft); }
 function setPhase(p){ state.phase=p; render(); }
 async function setSt(id,s){
   var r=await api('/api/hrd/reloc/task',{method:'POST',body:JSON.stringify({id:id,status:s})});
@@ -449,7 +468,9 @@ async function runIngest(force){
   var btn=document.getElementById('ingestBtn'); if(btn){btn.disabled=true;btn.textContent='分析中…';}
   try{
     var inp=document.getElementById('ingestInput');
-    var userInput=inp?String(inp.value||'').trim():'';
+    /* 自动触发（force=false）绝不携带未提交草稿：只有用户点「立即 AI 入库」才提交。
+       否则 30 分钟自动循环会把输入到一半的内容悄悄分析并清空。 */
+    var userInput=force?(inp?String(inp.value||'').trim():''):'';
     var r=await api('/api/hrd/reloc/ingest',{method:'POST',
       body:JSON.stringify({force:!!force,input:userInput})});
     var d=await r.json();
@@ -465,7 +486,7 @@ async function runIngest(force){
     /* 入库成功后先确保数据刷新完成，再清空草稿，避免"没更新"错觉 */
     await boot(true);
     if(userInput && d.ok && !d.skipped){
-      state.draft='';
+      clearDraft();                       /* 仅入库成功才清草稿：跳过/失败一律保留 */
       var ninp=document.getElementById('ingestInput'); if(ninp) ninp.value='';
       toast('已录入 '+userInput.length+' 字，AI 已纳入分析');
     }
@@ -476,29 +497,47 @@ async function runIngest(force){
     if(!state.ingesting) pulse('已同步');
   }
 }
-function toggleAuto(){ state.autorun=!state.autorun; toast(state.autorun?'自动循环已恢复':'自动循环已暂停'); render(); }
-
-setInterval(function(){
-  if(state.ingesting) return;                       /* 入库中不轮询，防止重建 DOM */
-  var ta=document.getElementById('ingestInput');
-  if(ta && document.activeElement===ta && ta.value) return; /* 用户正在输入时不打断 */
-  boot(true);
-},POLL_MS);
-setInterval(function(){
-  if(!state.autorun||state.ingesting||document.hidden) return;
-  if(Date.now()-state.lastAutoAt<AUTO_MS) return;
-  state.lastAutoAt=Date.now();
-  runIngest(false);
-},60000);
-try{ window.addEventListener('storage',function(e){ if(e.key==='reloc-version') boot(true); }); }catch(e){}
-function watchVersion(){
-  var v=(state.data&&state.data.meta.version)||'';
-  try{ if(v && localStorage.getItem('reloc-version')!==String(v)) localStorage.setItem('reloc-version',String(v)); }catch(e){}
-  setTimeout(watchVersion,5000);
+function toggleAuto(){
+  state.autorun=!state.autorun;
+  toast(state.autorun?'自动循环已恢复':'自动循环已暂停');
+  scheduleAuto(); render();
 }
+/* 统一同步入口：仅在明确事件下调用，绝不周期性重建 DOM。
+   输入中 / 入库中 / 同步中一律不打断，避免冲掉未提交内容。 */
+function requestSync(){
+  if(state.ingesting||state.booting) return;
+  var ta=document.getElementById('ingestInput');
+  if(ta && document.activeElement===ta && ta.value) return;
+  boot(true);
+}
+/* 自动 AI 入库：一次性定时器排到下次 30 分钟，完成后再排下一次；不是轮询，且不重建 DOM */
+function scheduleAuto(){
+  clearTimeout(_autoTimer);
+  if(!state.autorun) return;
+  /* lastAutoAt 初值为 0 时用当前时间兜底，否则等待退化为 60 秒、形成每分钟检查 */
+  var wait=Math.max(60000, AUTO_MS-(Date.now()-(state.lastAutoAt||Date.now())));
+  _autoTimer=setTimeout(async function(){
+    if(!state.autorun||state.ingesting||document.hidden){ scheduleAuto(); return; }
+    var ta=document.getElementById('ingestInput');
+    if(ta && document.activeElement===ta && ta.value){ scheduleAuto(); return; } /* 输入中不自动入库 */
+    state.lastAutoAt=Date.now();
+    try{ await runIngest(false); }catch(e){}   /* 入库事件内部会触发 boot 刷新 */
+    scheduleAuto();
+  },wait);
+}
+/* 事件 1：其他标签页写入新版本号（由 boot 成功后写 localStorage 触发） */
+try{ window.addEventListener('storage',function(e){ if(e.key===VER_KEY) requestSync(); }); }catch(e){}
+/* 事件 2：从后台切回可见；60 秒内刚同步过则不再请求 */
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden) return;
+  if(Date.now()-state.lastSyncAt<VISIBLE_SYNC_GAP) return;
+  requestSync();
+});
+/* 事件 3：AI 入库完成 / 确认销账 / 任务状态变更 —— 各业务函数内已直接 boot 或 render
+   事件 4：手动「刷新」按钮 —— onclick="boot()" */
 if(new URLSearchParams(location.search).get('embed')==='1') document.body.classList.add('embed');
 boot();
-watchVersion();
+scheduleAuto();
 </script>
 </body>
 </html>

@@ -264,6 +264,26 @@ jobs:
             --include='*.html' --exclude='*' \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/plan/
 
+      # ── 迪拜搬迁台 /reloc：显式镜像到 IP vhost 根 ──────────────────
+      # 上方主站镜像只同步根目录 *.html，不含 reloc/ 子目录；若 nginx 无 alias，
+      # /reloc/index.html 会停留在旧版本（表现为「改了却不生效」）。此步幂等、不用
+      # --delete，即使 nginx 已把 /reloc/ 指向 SITE_ROOT 也只是多一份静态副本。
+      - name: Mirror /reloc page to IP vhost root (/var/www/plan)
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          echo "$KEY" > "$RUNNER_TEMP/key.pem"
+          chmod 600 "$RUNNER_TEMP/key.pem"
+          ssh -p ${{ secrets.ECS_PORT }} -i "$RUNNER_TEMP/key.pem" -o StrictHostKeyChecking=no \
+            ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }} \
+            "mkdir -p /var/www/plan/reloc"
+          rsync -az \
+            -e "ssh -p ${{ secrets.ECS_PORT }} -i $RUNNER_TEMP/key.pem -o StrictHostKeyChecking=no" \
+            ./reloc/ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/plan/reloc/
+          ssh -p ${{ secrets.ECS_PORT }} -i "$RUNNER_TEMP/key.pem" -o StrictHostKeyChecking=no \
+            ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }} \
+            "chown -R www:www /var/www/plan/reloc; test -s /var/www/plan/reloc/index.html && grep -c requestSync /var/www/plan/reloc/index.html"
+
       # ── 学习目标工作台（Diya）：独立目录部署 + 首次注入目标数据 ──────
       # 页面部署到 /var/www/plan/goals/（与主站平级的独立目录，不污染主站文件）
       # 数据走同源 /api/goals（Flask），落在服务器 data/goals.json —— 多端同步、真实存储。
