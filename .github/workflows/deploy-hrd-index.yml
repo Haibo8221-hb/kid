@@ -5,6 +5,10 @@ name: Deploy HRD workbench index (single file)
 # 搬迁页自身无法修复。仅 workflow_dispatch 触发，不随 push 运行。
 on:
   workflow_dispatch:
+  # 非默认分支上无法用 workflow_dispatch 触发（API 404），改用触发器文件推送触发
+  push:
+    paths:
+      - '.github/triggers/deploy-hrd.txt'
 
 jobs:
   deploy-index:
