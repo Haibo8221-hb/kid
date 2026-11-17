@@ -1,0 +1,518 @@
+===== when =====
+2026-11-17T19:49:44+08:00
+
+===== site root =====
+total 1992
+drwxr-xr-x 19 www  www    4096 Nov 17 19:48 .
+drwxr-xr-x  5 root root   4096 Oct 14 16:30 ..
+-rw-r--r--  1 www  www     158 Nov 16 16:19 .dockerignore
+-rw-r--r--  1 www  www    3773 Nov 16 16:19 .env.example
+drwxr-xr-x  8 www  www    4096 Nov 17 19:46 .git
+drwxr-xr-x  4 www  www    4096 Oct 18 18:30 .github
+-rw-r--r--  1 www  www    2936 Nov 16 16:19 .gitignore
+-rw-r--r--  1 www  www    8899 Nov 16 16:19 AQA_English_Language_P1_Model_Answers.md
+-rw-r--r--  1 www  www   37267 Nov 16 16:19 Diya_2026_5-8_Execution_Guide.html
+-rw-r--r--  1 www  www   34950 Nov 16 16:19 Diya_Jemma_Oxbridge_Plan.html
+-rw-r--r--  1 www  www   50658 Nov 16 16:19 Diya_Plan.html
+-rw-r--r--  1 www  www     749 Nov 16 16:19 Dockerfile
+-rw-r--r--  1 www  www    4301 Nov 16 16:19 INCIDENT_2026-11-03_AI_ASK_LLM.md
+-rw-r--r--  1 www  www   24754 Nov 16 16:19 Jemma_2026_Summer_Guide.html
+-rw-r--r--  1 www  www   23785 Nov 16 16:19 Jemma_Plan.html
+-rw-r--r--  1 www  www   10440 Nov 16 16:19 SETUP.md
+-rw-r--r--  1 www  www   16942 Nov 16 16:19 UPLOAD_FEATURE_DESIGN.md
+drwxr-xr-x  2 www  www    4096 Nov 16 16:20 __pycache__
+-rw-r--r--  1 www  www  195160 Nov 16 16:19 api_server.py
+-rw-r--r--  1 www  www  248989 Nov 16 16:19 app.html
+drwxr-xr-x  2 www  www    4096 Nov 16 16:19 assets
+-rw-r--r--  1 www  www    1293 Nov 16 16:19 backup.sh
+-rw-r--r--  1 www  www   12363 Nov 16 16:19 bpho_resources.html
+-rw-r--r--  1 www  www    5425 Nov 16 16:19 chat_prompt.md
+-rw-r--r--  1 www  www   58620 Nov 16 16:19 cold-war-flashcards.html
+-rw-r--r--  1 www  www   80423 Nov 16 16:19 cold-war-quiz.html
+drwxr-xr-x  8 www  www    4096 Nov 17 19:41 data
+drwxr-xr-x  2 www  www    4096 Nov 16 16:19 data-seed
+drwxr-xr-x  2 www  www    4096 Nov 16 16:19 deploy
+
+===== v2 dir =====
+v2/ NOT present (offline ok)
+
+===== v3 dir (2026-10-18 新增预览子树) =====
+total 1940
+drwxr-xr-x 10 www www   4096 Nov 16 16:19 .
+drwxr-xr-x 19 www www   4096 Nov 17 19:48 ..
+-rw-r--r--  1 www www    158 Nov 16 16:19 .dockerignore
+-rw-r--r--  1 www www   3773 Nov 16 16:19 .env.example
+-rw-r--r--  1 www www   2936 Nov 16 16:19 .gitignore
+-rw-r--r--  1 www www   8899 Nov 16 16:19 AQA_English_Language_P1_Model_Answers.md
+-rw-r--r--  1 www www  37267 Nov 16 16:19 Diya_2026_5-8_Execution_Guide.html
+-rw-r--r--  1 www www  34950 Nov 16 16:19 Diya_Jemma_Oxbridge_Plan.html
+-rw-r--r--  1 www www  50658 Nov 16 16:19 Diya_Plan.html
+-rw-r--r--  1 www www    749 Nov 16 16:19 Dockerfile
+-rw-r--r--  1 www www   4301 Nov 16 16:19 INCIDENT_2026-11-03_AI_ASK_LLM.md
+-rw-r--r--  1 www www  24754 Nov 16 16:19 Jemma_2026_Summer_Guide.html
+-rw-r--r--  1 www www  23785 Nov 16 16:19 Jemma_Plan.html
+-rw-r--r--  1 www www  10440 Nov 16 16:19 SETUP.md
+-rw-r--r--  1 www www  16942 Nov 16 16:19 UPLOAD_FEATURE_DESIGN.md
+-rw-r--r--  1 www www 195160 Nov 16 16:19 api_server.py
+-rw-r--r--  1 www www 248989 Nov 16 16:19 app.html
+drwxr-xr-x  2 www www   4096 Nov 16 16:19 assets
+-rw-r--r--  1 www www   1293 Nov 16 16:19 backup.sh
+
+===== assets dir =====
+total 80
+drwxr-xr-x  2 www www  4096 Nov 16 16:19 .
+drwxr-xr-x 19 www www  4096 Nov 17 19:48 ..
+-rw-r--r--  1 www www 10872 Nov 16 16:19 kid-common.js
+-rw-r--r--  1 www www 22315 Nov 16 16:19 kid.css
+-rw-r--r--  1 www www 33591 Nov 16 16:19 kid.js
+
+===== app.html fingerprint =====
+-rw-r--r-- 1 www www 248989 Nov 16 16:19 /www/wwwroot/kid/app.html
+-rw-r--r-- 1 www www 178707 Nov 16 16:19 /www/wwwroot/kid/jemma.html
+9d6ea0e4c60609a5c6883813bc843433  /www/wwwroot/kid/app.html
+cfc0ff7370849cf6f3dd1c877cb5201e  /www/wwwroot/kid/jemma.html
+
+===== nginx root directives (all vhosts) =====
+/www/server/panel/vhost/nginx/0.default.conf:3:    listen 80;
+/www/server/panel/vhost/nginx/0.default.conf:4:    server_name _;
+/www/server/panel/vhost/nginx/0.default.conf:6:    root /www/server/nginx/html;
+/www/server/panel/vhost/nginx/112.74.40.8.conf:3:    listen 80;
+/www/server/panel/vhost/nginx/112.74.40.8.conf:4:    server_name 112.74.40.8;
+/www/server/panel/vhost/nginx/112.74.40.8.conf:6:    root /var/www/plan;
+/www/server/panel/vhost/nginx/grow-consultant.conf:3:    listen 80;
+/www/server/panel/vhost/nginx/grow-consultant.conf:4:    listen 8080;
+/www/server/panel/vhost/nginx/grow-consultant.conf:5:    listen 443 ssl;
+/www/server/panel/vhost/nginx/grow-consultant.conf:12:    server_name grow-consultant.com www.grow-consultant.com;
+/www/server/panel/vhost/nginx/grow-consultant.conf:14:    root /www/wwwroot/kid;
+/www/server/panel/vhost/nginx/grow-consultant.conf:86:        root /www/wwwroot/java_node_ssl;
+/www/server/panel/vhost/nginx/phpfpm_status.conf:2:	listen 80;
+/www/server/panel/vhost/nginx/phpfpm_status.conf:3:	server_name 127.0.0.1;
+/www/server/panel/vhost/nginx/python_kid.conf:3:    listen 80;
+/www/server/panel/vhost/nginx/python_kid.conf:4:    listen 8080;
+/www/server/panel/vhost/nginx/python_kid.conf:5:    listen 443 ssl;
+/www/server/panel/vhost/nginx/python_kid.conf:12:    server_name xgrow.me www.xgrow.me;
+/www/server/panel/vhost/nginx/python_kid.conf:16:        proxy_ssl_server_name on;
+/www/server/panel/vhost/nginx/python_kid.conf:41:    root /www/wwwroot/kid;
+/www/server/panel/vhost/nginx/python_kid.conf:119:        root /www/wwwroot/java_node_ssl;
+
+===== /var/www/plan (IP vhost root) 全貌 =====
+total 12
+drwxr-xr-x   3 root root 4096 Oct 13 22:11 .
+drwxr-xr-x. 20 root root 4096 Oct 30 23:03 ..
+drwxr-xr-x  21 1001 1001 4096 Nov 16 16:20 plan
+--- /var/www/plan ---
+total 2052
+drwxr-xr-x 21 1001 1001   4096 Nov 16 16:20 .
+drwxr-xr-x  3 root root   4096 Oct 13 22:11 ..
+-rw-r--r--  1 www  www     158 Nov 12 03:17 .dockerignore
+-rw-r--r--  1 www  www     470 May 26 00:37 .env.docker
+-rw-r--r--  1 www  www    3773 Nov 12 03:17 .env.example
+-rw-r--r--  1 www  www     374 Jun  1 19:55 .env.local
+-rw-r--r--  1 www  www    2936 Nov 12 03:17 .gitignore
+drwxr-xr-x  3 root root   4096 Oct 14 01:07 .well-known
+-rw-r--r--  1 www  www    8899 Nov 12 03:17 AQA_English_Language_P1_Model_Answers.md
+-rw-r--r--  1 www  www   37267 Nov 16 16:19 Diya_2026_5-8_Execution_Guide.html
+-rw-r--r--  1 www  www   34950 Nov 16 16:19 Diya_Jemma_Oxbridge_Plan.html
+-rw-r--r--  1 www  www   50658 Nov 16 16:19 Diya_Plan.html
+-rw-r--r--  1 www  www     749 Nov 12 03:17 Dockerfile
+-rw-r--r--  1 www  www    4301 Nov 12 03:17 INCIDENT_2026-11-03_AI_ASK_LLM.md
+-rw-r--r--  1 www  www   24754 Nov 16 16:19 Jemma_2026_Summer_Guide.html
+-rw-r--r--  1 www  www   23785 Nov 16 16:19 Jemma_Plan.html
+-rw-r--r--  1 www  www   10440 Nov 12 03:17 SETUP.md
+-rw-r--r--  1 www  www   16942 Nov 12 03:17 UPLOAD_FEATURE_DESIGN.md
+drwxr-xr-x  2 www  www    4096 Nov 12 03:18 __pycache__
+-rw-r--r--  1 www  www  168776 Nov 12 03:17 api_server.py
+-rw-r--r--  1 www  www  248989 Nov 16 16:19 app.html
+-rw-r--r--  1 www  www   54663 May 22 16:26 app.html.bak2
+drwxr-xr-x  2 www  www    4096 Nov 16 16:19 assets
+-rw-r--r--  1 www  www    1293 Nov 12 03:17 backup.sh
+-rw-r--r--  1 www  www   12363 Nov 16 16:19 bpho_resources.html
+-rw-r--r--  1 www  www    5425 Nov 12 03:17 chat_prompt.md
+drwxr-xr-x  5 www  www    4096 Oct 30 22:12 claims
+-rw-r--r--  1 www  www   58620 Nov 16 16:19 cold-war-flashcards.html
+-rw-r--r--  1 www  www   80423 Nov 16 16:19 cold-war-quiz.html
+drwxr-xr-x  3 www  www    4096 Oct 18 18:27 data
+drwxr-xr-x  2 www  www    4096 Nov 12 03:17 data-seed
+drwxr-xr-x  2 www  www    4096 Nov 12 03:17 deploy
+-rw-r--r--  1 www  www   22489 Nov 16 16:19 diya_alevel_analysis.html
+-rw-r--r--  1 www  www   18552 Nov 16 16:19 diya_english_q4_graded.html
+-rw-r--r--  1 www  www   19429 Nov 16 16:19 diya_history_graded.html
+-rw-r--r--  1 www  www     300 Nov 12 03:17 docker-compose.yml
+drwxr-xr-x  2 www  www    4096 Nov 12 03:17 download
+drwxr-xr-x  5 www  www    4096 Oct 24 04:39 downloads
+-rw-r--r--  1 www  www    8453 Nov 12 03:17 email_error_poll.py
+--- /var/www/plan/data ---
+total 1288
+drwxr-xr-x  3 www  www    4096 Oct 18 18:27 .
+drwxr-xr-x 21 1001 1001   4096 Nov 16 16:20 ..
+-rw-r--r--  1 www  www  100465 Jun  3 21:32 chat_diya.json
+-rw-r--r--  1 www  www   17347 May 28 18:15 chat_jemma.json
+-rw-r--r--  1 www  www   16502 May 24 18:17 diya_chem_full_ocr.txt
+-rw-r--r--  1 www  www   22293 May 24 18:22 diya_chem_grading.json
+-rw-r--r--  1 www  www   25567 May 31 00:03 diya_chem_ocr.txt
+-rw-r--r--  1 www  www   19126 May 24 18:17 diya_chem_ocr_results.json
+-rw-r--r--  1 www  www    3834 May 31 00:51 diya_english_q4_20260530.txt
+--- /var/www/plan/assets ---
+total 80
+drwxr-xr-x  2 www  www   4096 Nov 16 16:19 .
+drwxr-xr-x 21 1001 1001  4096 Nov 16 16:20 ..
+-rw-r--r--  1 www  www  10872 Nov 16 16:19 kid-common.js
+-rw-r--r--  1 www  www  22315 Nov 16 16:19 kid.css
+-rw-r--r--  1 www  www  33591 Nov 16 16:19 kid.js
+
+===== 112.74.40.8.conf 全文 =====
+server
+{
+    listen 80;
+    server_name 112.74.40.8;
+    index index.html app.html index.php index.htm default.php default.htm default.html;
+    root /var/www/plan;
+
+    charset utf-8;
+
+    #CERT-APPLY-CHECK--START
+    # 用于SSL证书申请时的文件验证相关配置 -- 请勿删除
+    include /www/server/panel/vhost/nginx/well-known/112.74.40.8.conf;
+    #CERT-APPLY-CHECK--END
+    include /www/server/panel/vhost/nginx/extension/112.74.40.8/*.conf;
+
+
+    #ERROR-PAGE-START  错误页配置，可以注释、删除或修改
+    error_page 404 /404.html;
+    #error_page 502 /502.html;
+    #ERROR-PAGE-END
+
+    #PHP-INFO-START  PHP引用配置，可以注释或修改
+    include enable-php-00.conf;
+    #PHP-INFO-END
+
+    #REWRITE-START URL重写规则引用,修改后将导致面板设置的伪静态规则失效
+    include /www/server/panel/vhost/rewrite/112.74.40.8.conf;
+    #REWRITE-END
+
+    # ============================================================
+    # PLAN MIRROR (merged from plan-aliyun.conf, 2026-10-14)
+    # 主站需要 basic auth；公网 IP 不能像内网那样开放
+    # ============================================================
+    # auth_basic "升学规划";
+    # auth_basic_user_file /etc/nginx/.htpasswd;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~* \.html$ {
+        add_header Cache-Control "no-store";
+    }
+
+    # ^~ 让前缀匹配优先于宝塔的图片/js/css 正则块，
+    # 否则 /downloads/ 下的 .png/.jpg 会被迫走 auth_basic
+    location ^~ /downloads/ {
+        # auth_basic off;
+        autoindex off;
+        charset utf-8;
+        add_header Cache-Control "public, max-age=86400";
+    }
+
+    location ^~ /api/ {
+        # auth_basic off;
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_buffering off;
+    }
+
+    location ^~ /error_images/ {
+        # auth_basic off;
+    }
+    # =============== END PLAN MIRROR ===============
+
+    # 禁止访问的敏感文件
+    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|\.log|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+    {
+        return 404;
+    }
+
+    # 禁止访问的敏感目录
+    location ~* /(\.git|\.svn|\.bzr|\.vscode|\.claude|\.idea|\.ssh|\.github|\.npm|\.yarn|\.pnpm|\.cache|\.husky|\.turbo|\.next|\.nuxt|node_modules|runtime)/ {
+        return 404;
+    }
+
+    #一键申请SSL证书验证目录相关设置
+    location ~ \.well-known{
+        allow all;
+        # auth_basic off;
+    }
+
+    #禁止在证书验证目录放入敏感文件
+    if ( $uri ~ "^/\.well-known/.*\.(php|jsp|py|js|css|lua|ts|go|zip|tar\.gz|rar|7z|sql|bak)$" ) {
+        return 403;
+    }
+
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
+    {
+        expires      30d;
+        error_log /dev/null;
+        access_log /dev/null;
+    }
+
+    location ~ .*\.(js|css)?$
+    {
+        expires      12h;
+        error_log /dev/null;
+        access_log /dev/null;
+    }
+    access_log  /www/wwwlogs/112.74.40.8.log;
+    error_log  /www/wwwlogs/112.74.40.8.error.log;
+}
+
+===== plan-api WorkingDirectory =====
+ExecStart={ path=/opt/plan-api/bin/python ; argv[]=/opt/plan-api/bin/python api_server.py ; ignore_errors=no ; start_time=[Mon 2026-11-16 16:19:39 CST] ; stop_time=[n/a] ; pid=1787600 ; code=(null) ; status=0/0 }
+WorkingDirectory=/www/wwwroot/kid
+
+===== git state in webroot (排查疑似 revert) =====
+710a5e2 feat(grow-weekly): 孩子版文案活泼化(HOOKS个性化开场/CTA引导登录dashboard上传成绩作业/SIGNOFF鼓励式) + 发送脚本重写(md→HTML含表格渲染)
+f468b78 feat: Grow Weekly 周报生成器 — 聚合goals/日历/live_brief/smc生成双语周报草稿(孩子英文+家长中文摘要), 绝不自动发送; 日历条目补name_en
+1167c84 chore(ci): trigger test-only harness for P0 failure on v2
+ M api_server.py
+ M app.html
+ D pipeline/grow_weekly_send.py
+ M reloc/index.html
+ M tools/smoke_test.cjs
+?? data/.deploy-probe
+?? data/goals.json
+?? data/hrd.json
+?? data/reloc/
+?? data/twp_diya.json
+
+===== index.html v2 links =====
+no v2 in index.html
+
+===== auth_basic in panel vhost =====
+0.default.conf
+0.fastcgi_cache.conf
+0.site_total_log_format.conf
+0.websocket.conf
+112.74.40.8.conf
+112.74.40.8.conf.bak-20261015-noauth
+112.74.40.8.conf.bak.20261014005741
+112.74.40.8.conf.orig.20261014010656
+extension
+grow-consultant.conf
+grow-consultant.conf.bak-20261015-noauth
+phpfpm_status.conf
+python_kid.conf
+python_kid.conf.bak-202610141812
+python_kid.conf.bak-20261015-noauth
+python_kid.conf.bak.1793359667
+python_kid.conf.bak.20261026220343
+python_kid.conf.hrd_bak
+python_kid.conf.llm_bak
+tcp
+--- grep ---
+/www/server/panel/vhost/nginx/python_kid.conf.bak-20261015-noauth:19:    auth_basic "升学规划";
+/www/server/panel/vhost/nginx/python_kid.conf.bak-20261015-noauth:20:    auth_basic_user_file /etc/nginx/.htpasswd;
+/www/server/panel/vhost/nginx/python_kid.conf.bak-20261015-noauth:31:        auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.bak-20261015-noauth:40:        auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.bak-20261015-noauth:48:        auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.bak-20261015-noauth:74:    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|\.log|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+/www/server/panel/vhost/nginx/python_kid.conf.bak.1793359667:19:    # auth_basic "升学规划";
+/www/server/panel/vhost/nginx/python_kid.conf.bak.1793359667:20:    # auth_basic_user_file /etc/nginx/.htpasswd;
+/www/server/panel/vhost/nginx/python_kid.conf.bak.1793359667:36:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.bak.1793359667:45:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.bak.1793359667:53:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.bak.1793359667:79:    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|.log|\\.pem|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+/www/server/panel/vhost/nginx/112.74.40.8.conf.bak.20261014005741:50:    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|\.log|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+/www/server/panel/vhost/nginx/112.74.40.8.conf.orig.20261014010656:28:    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|\.log|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+/www/server/panel/vhost/nginx/python_kid.conf.llm_bak:46:    # auth_basic "升学规划";
+/www/server/panel/vhost/nginx/python_kid.conf.llm_bak:47:    # auth_basic_user_file /etc/nginx/.htpasswd;
+/www/server/panel/vhost/nginx/python_kid.conf.llm_bak:63:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.llm_bak:72:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.llm_bak:80:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.llm_bak:107:    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|.log|\\.pem|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+/www/server/panel/vhost/nginx/python_kid.conf.hrd_bak:26:    # auth_basic "升学规划";
+/www/server/panel/vhost/nginx/python_kid.conf.hrd_bak:27:    # auth_basic_user_file /etc/nginx/.htpasswd;
+/www/server/panel/vhost/nginx/python_kid.conf.hrd_bak:43:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.hrd_bak:52:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.hrd_bak:60:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf.hrd_bak:87:    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|.log|\\.pem|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+/www/server/panel/vhost/nginx/python_kid.conf.bak-202610141812:29:    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|\.log|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+/www/server/panel/vhost/nginx/grow-consultant.conf:19:    # auth_basic "升学规划";
+/www/server/panel/vhost/nginx/grow-consultant.conf:20:    # auth_basic_user_file /etc/nginx/.htpasswd;
+/www/server/panel/vhost/nginx/grow-consultant.conf:31:        # auth_basic off;
+/www/server/panel/vhost/nginx/grow-consultant.conf:40:        # auth_basic off;
+/www/server/panel/vhost/nginx/grow-consultant.conf:48:        # auth_basic off;
+/www/server/panel/vhost/nginx/grow-consultant.conf:74:    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|.log|\\.pem|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+/www/server/panel/vhost/nginx/python_kid.conf:46:    # auth_basic "升学规划";
+/www/server/panel/vhost/nginx/python_kid.conf:47:    # auth_basic_user_file /etc/nginx/.htpasswd;
+/www/server/panel/vhost/nginx/python_kid.conf:63:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf:72:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf:80:        # auth_basic off;
+/www/server/panel/vhost/nginx/python_kid.conf:107:    location ~* (\.user.ini|\.htaccess|\.htpasswd|\.env.*|\.project|\.bashrc|\.bash_profile|\.bash_logout|\.DS_Store|\.gitignore|\.gitattributes|LICENSE|README\.md|CLAUDE\.md|CHANGELOG\.md|CHANGELOG|CONTRIBUTING\.md|TODO\.md|FAQ\.md|composer\.json|composer\.lock|package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml|\.\w+~|\.swp|\.swo|\.bak(up)?|\.old|\.tmp|\.temp|.log|\\.pem|\.sql(\.gz)?|docker-compose\.yml|docker\.env|Dockerfile|\.csproj|\.sln|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|phpunit\.xml|phpunit\.xml|pom\.xml|build\.gradl|pyproject\.toml|requirements\.txt|application(-\w+)?\.(ya?ml|properties))$
+/www/server/panel/vhost/nginx/grow-consultant.conf.bak-20261015-noauth:19:    auth_basic "升学规划";
+
+===== nginx -T auth_basic =====
+
+===== plan-api service env =====
+ExecStart={ path=/opt/plan-api/bin/python ; argv[]=/opt/plan-api/bin/python api_server.py ; ignore_errors=no ; start_time=[Mon 2026-11-16 16:19:39 CST] ; stop_time=[n/a] ; pid=1787600 ; code=(null) ; status=0/0 }
+Environment=HERMES_HOME=/var/lib/plan-api APP_PASSWORD=bohai228 APP_STRICT_PASSWORD=1
+
+===== backend health =====
+api status: 401
+
+===== data dir (运行时数据真源) =====
+total 1760
+drwxr-xr-x  8 www www   4096 2026-11-17 19:41 .
+drwxr-xr-x 19 www www   4096 2026-11-17 19:48 ..
+-rw-r--r--  1 www www     31 2026-10-15 19:58 .deploy-probe
+-rw-r--r--  1 www www 100465 2026-11-16 00:58 chat_diya.json
+-rw-r--r--  1 www www 101950 2026-11-03 04:06 chat_diya.json.bak-tests-20261103
+-rw-r--r--  1 www www  17347 2026-11-16 00:58 chat_jemma.json
+-rw-r--r--  1 www www  56705 2026-11-03 03:53 chat_jemma.json.bak-empty-20261103
+-rw-r--r--  1 www www  54105 2026-11-03 04:06 chat_jemma.json.bak-tests-20261103
+-rw-r--r--  1 www www    109 2026-10-19 12:53 decide_jemma.json
+-rw-r--r--  1 www www  16502 2026-10-18 18:30 diya_chem_full_ocr.txt
+-rw-r--r--  1 www www  22293 2026-10-18 18:30 diya_chem_grading.json
+-rw-r--r--  1 www www  25567 2026-10-18 18:30 diya_chem_ocr.txt
+-rw-r--r--  1 www www  19126 2026-10-18 18:30 diya_chem_ocr_results.json
+-rw-r--r--  1 www www   3834 2026-10-18 18:30 diya_english_q4_20260530.txt
+-rw-r--r--  1 www www  15742 2026-10-18 18:30 diya_math_ocr.txt
+-rw-r--r--  1 www www  32805 2026-10-18 18:30 diya_physics_full_ocr.txt
+-rw-r--r--  1 www www  22940 2026-10-18 18:30 diya_physics_grading.json
+-rw-r--r--  1 www www  35823 2026-10-18 18:30 diya_physics_ocr.json
+-rw-r--r--  1 www www    295 2026-10-18 18:30 diya_test_20260530.json
+-rw-r--r--  1 www www 276299 2026-10-18 18:30 errors_diya.json
+-rw-r--r--  1 www www  34939 2026-10-18 18:30 errors_jemma.json
+-rw-------  1 www www  21370 2026-11-11 18:11 goals.json
+-rw-r--r--  1 www www  19901 2026-10-22 01:33 goals.json.bak-contam-20261111-163732
+-rw-r--r--  1 www www  72126 2026-11-17 19:41 hrd.json
+-rw-r--r--  1 www www  71158 2026-11-17 19:41 hrd.json.bak
+drwxr-xr-x  2 www www   4096 2026-10-28 18:51 hrd_imgs
+-rw-------  1 www www     64 2026-11-16 16:19 hrd_token.txt
+-rw-r--r--  1 www www   9471 2026-10-18 18:30 jemma_exam_full_ocr.txt
+-rw-r--r--  1 www www  15879 2026-10-18 18:30 jemma_exam_grading.json
+-rw-r--r--  1 www www  10880 2026-10-18 18:30 jemma_exam_ocr.json
+-rw-r--r--  1 www www    197 2026-10-31 04:26 llm_config.json
+-rw-r--r--  1 www www    284 2026-10-31 04:26 llm_config.json.bak-qwen-20261031
+-rw-r-----  1 www www    308 2026-11-10 17:40 llm_fallback.json
+-rw-r--r--  1 www www   2272 2026-10-18 18:30 model_comparison.json
+-rw-r--r--  1 www www   3801 2026-10-18 18:30 model_comparison_r2.json
+-rw-r--r--  1 www www    213 2026-11-16 01:00 notes_diya.json
+-rw-r--r--  1 www www     80 2026-10-19 05:04 notes_jemma.json
+drwxr-xr-x  2 www www   4096 2026-11-16 01:07 plan_context
+-rw-r--r--  1 www www   1660 2026-10-18 18:30 planner_diya.json
+-rw-r--r--  1 www www   1910 2026-10-18 18:30 planner_jemma.json
+drwxr-xr-x  3 www www   4096 2026-11-17 19:48 refresh
+drwxrwxr-x  2 www www   4096 2026-11-17 17:49 reloc
+-rw-r--r--  1 www www 129847 2026-10-18 18:30 research_2026-05-22.json
+-rw-r--r--  1 www www 141636 2026-10-18 18:30 research_2026-06-22.json
+--- 关键文件 ---
+ABSENT : auth_state.json
+present: llm_config.json (197B, 2026-10-31 04:26:34.164481107 +0800)
+present: errors_diya.json (276299B, 2026-10-18 18:30:03.813335032 +0800)
+present: errors_jemma.json (34939B, 2026-10-18 18:30:03.813335032 +0800)
+present: planner_diya.json (1660B, 2026-10-18 18:30:03.813335032 +0800)
+present: planner_jemma.json (1910B, 2026-10-18 18:30:03.813335032 +0800)
+present: tasks_diya.json (6084B, 2026-10-18 18:30:03.817335192 +0800)
+present: tasks_jemma.json (2819B, 2026-11-16 00:58:18.153820701 +0800)
+present: wiki_diya.json (296B, 2026-10-18 18:30:03.817335192 +0800)
+present: wiki_jemma.json (2B, 2026-10-18 18:30:03.817335192 +0800)
+present: smc_records.json (672B, 2026-11-16 00:58:18.153820701 +0800)
+--- 部署探针（验证 rsync 不再删 data/）---
+probe-1792065506-do-not-delete
+
+===== 备份 =====
+--- crontab ---
+0 3 * * * /opt/kid-backup/backup.sh >> /opt/kid-backup/cron.log 2>&1
+--- /opt/kid-backup ---
+total 228032
+drwxr-xr-x  2 root root    4096 Nov 17 03:00 .
+drwxr-xr-x. 6 root root    4096 Oct 30 23:03 ..
+-rw-r--r--  1 root root    2905 Nov 17 03:00 backup.log
+-rwxr-xr-x  1 root root     326 Oct 15 19:58 backup.sh
+-rw-r--r--  1 root root       0 Oct 16 03:00 cron.log
+-rw-r--r--  1 root root  325620 Oct 18 03:00 data-20261018-030001.tar.gz
+-rw-r--r--  1 root root  424033 Oct 19 03:00 data-20261019-030001.tar.gz
+-rw-r--r--  1 root root 2536856 Oct 20 03:00 data-20261020-030001.tar.gz
+-rw-r--r--  1 root root 2539959 Oct 21 03:00 data-20261021-030001.tar.gz
+-rw-r--r--  1 root root 2540494 Oct 22 03:00 data-20261022-030001.tar.gz
+-rw-r--r--  1 root root 8546910 Oct 23 03:00 data-20261023-030001.tar.gz
+-rw-r--r--  1 root root 8546912 Oct 24 03:00 data-20261024-030001.tar.gz
+-rw-r--r--  1 root root 8546913 Oct 25 03:00 data-20261025-030002.tar.gz
+-rw-r--r--  1 root root 8547007 Oct 26 03:00 data-20261026-030001.tar.gz
+-rw-r--r--  1 root root 8568253 Oct 27 03:00 data-20261027-030001.tar.gz
+-rw-r--r--  1 root root 8569420 Oct 28 03:00 data-20261028-030001.tar.gz
+-rw-r--r--  1 root root 8569459 Oct 29 03:00 data-20261029-030001.tar.gz
+-rw-r--r--  1 root root 8569459 Oct 30 03:00 data-20261030-030001.tar.gz
+-rw-r--r--  1 root root 8572987 Oct 31 03:00 data-20261031-030001.tar.gz
+-rw-r--r--  1 root root 8573265 Nov  1 03:00 data-20261101-030001.tar.gz
+-rw-r--r--  1 root root 8573265 Nov  2 03:00 data-20261102-030001.tar.gz
+-rw-r--r--  1 root root 8573892 Nov  3 03:00 data-20261103-030001.tar.gz
+-rw-r--r--  1 root root 8638661 Nov  4 03:00 data-20261104-030001.tar.gz
+-rw-r--r--  1 root root 8642896 Nov  5 03:00 data-20261105-030001.tar.gz
+-rw-r--r--  1 root root 8643244 Nov  6 03:00 data-20261106-030001.tar.gz
+-rw-r--r--  1 root root 8643498 Nov  7 03:00 data-20261107-030002.tar.gz
+-rw-r--r--  1 root root 8643486 Nov  8 03:00 data-20261108-030001.tar.gz
+-rw-r--r--  1 root root 8643486 Nov  9 03:00 data-20261109-030002.tar.gz
+-rw-r--r--  1 root root 8643486 Nov 10 03:00 data-20261110-030001.tar.gz
+-rw-r--r--  1 root root 8656602 Nov 11 03:00 data-20261111-030001.tar.gz
+-rw-r--r--  1 root root 8844004 Nov 12 03:00 data-20261112-030002.tar.gz
+-rw-r--r--  1 root root 8844918 Nov 13 03:00 data-20261113-030001.tar.gz
+-rw-r--r--  1 root root 8844938 Nov 14 03:00 data-20261114-030001.tar.gz
+-rw-r--r--  1 root root 8845704 Nov 15 03:00 data-20261115-030001.tar.gz
+-rw-r--r--  1 root root 8857736 Nov 16 03:00 data-20261116-030001.tar.gz
+-rw-r--r--  1 root root 8887181 Nov 17 03:00 data-20261117-030002.tar.gz
+--- backup.log ---
+2026-11-13T03:00:01+08:00 backup done: /opt/kid-backup/data-20261113-030001.tar.gz
+2026-11-14T03:00:02+08:00 backup done: /opt/kid-backup/data-20261114-030001.tar.gz
+2026-11-15T03:00:02+08:00 backup done: /opt/kid-backup/data-20261115-030001.tar.gz
+2026-11-16T03:00:02+08:00 backup done: /opt/kid-backup/data-20261116-030001.tar.gz
+2026-11-17T03:00:02+08:00 backup done: /opt/kid-backup/data-20261117-030002.tar.gz
+--- 恢复演练（解包最新备份并校验 JSON 可解析）---
+latest backup: /opt/kid-backup/data-20261117-030002.tar.gz
+errors_diya.json ok, type=list, len=113
+errors_jemma.json ok, type=list, len=16
+planner_diya.json ok, type=dict, len=16
+tasks_diya.json ok, type=dict, len=30
+
+===== LLM 配置来源检查 =====
+--- data/llm_config.json ---
+-rw-r--r-- 1 www www 197 Oct 31 04:26 /www/wwwroot/kid/data/llm_config.json
+--- .hermes/config.yaml ---
+ABSENT
+--- 服务环境变量中的 LLM 相关 key（仅显示是否有值）---
+
+===== HRD 工作台（服务器 only）/var/www/plan/hrd/index.html =====
+-rw-r--r-- 1 www www 347549 Nov 15 23:03 /var/www/plan/hrd/index.html
+51bb42bd7f483fa94f50915d32e23daa  /var/www/plan/hrd/index.html
+--- 刷新/嵌入相关行号 ---
+1238:  {key:'reloc', title:'迪拜搬迁台', en:'Dubai Relocation', group:'生活服务', icon:'backup', special:1, external:1}
+2351:function renderContent(){
+2359:  if(state.page==='reloc'){ c.innerHTML=viewReloc(); bindReloc(); return; }
+2364:function refreshAll(){ renderNav(); renderTopbar(); renderContent(); }
+2724:    +'<iframe id="clFrame" src="'+eu+'" title="个人保险索赔" '
+2725:    +'style="width:100%;height:calc(100vh - 208px);min-height:520px;border:0;display:block;background:#f5f7fa"></iframe>'
+2736:function relocUrl(){
+2737:  if(location.protocol==='file:') return '/reloc/index.html';
+2738:  return '/reloc/index.html';
+2740:function viewReloc(){
+2741:  var u=relocUrl()+(relocUrl().indexOf('?')>=0?'&':'?')+'embed=1';
+2748:    +'<iframe id="rlFrame" src="'+u+'" title="迪拜搬迁台" '
+2749:    +'style="width:100%;height:calc(100vh - 208px);min-height:520px;border:0;display:block;background:#f4f6fa"></iframe>'
+2754:function bindReloc(){
+2757:  if($('#rlOpen')) $('#rlOpen').onclick=function(){ window.open(relocUrl(),'_blank'); };
+2763:    +'<iframe id="learnFrame" src="learn.html" title="个人学习监控" '
+2764:    +'style="width:100%;height:calc(100vh - 208px);min-height:560px;border:0;display:block;background:#f5f7fa"></iframe>'
+2769:function bindLearn(){ /* iframe 自包含，无需额外绑定 */ }
+4012:function syncPoll(){
+4041:  _pollTimer=setInterval(syncPoll, 45000);
+--- /var/www/plan/hrd 目录清单（评估 rsync --delete 影响）---
+total 968
+drwxr-xr-x  2 www  www    4096 2026-11-15 23:03 .
+drwxr-xr-x 21 1001 1001   4096 2026-11-16 16:20 ..
+-rw-r--r--  1 www  www  347549 2026-11-15 23:03 index.html
+-rw-r--r--  1 root root 345974 2026-11-15 23:03 index.html.bak-reloc-20261115
+-rw-r--r--  1 www  www   61767 2026-11-07 18:12 learn.html
+-rw-r--r--  1 www  www  214985 2026-11-07 18:12 m.html
+-rw-r--r--  1 www  www    1802 2026-11-07 18:12 rag_weekly.json
