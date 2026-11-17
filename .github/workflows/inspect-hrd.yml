@@ -1,0 +1,38 @@
+name: Inspect HRD workbench (read-only)
+
+# 只读诊断：打印服务器上 /var/www/plan/hrd/index.html 的刷新相关代码段。
+# 仅 workflow_dispatch 触发，不随 push 运行，不修改任何服务器文件。
+on:
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump refresh-related code (read-only)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          # 只读命令：ls / md5sum / grep，无任何写入
+          script: |
+            F=/var/www/plan/hrd/index.html
+            echo "=== META ==="
+            ls -l "$F"
+            wc -c "$F"
+            md5sum "$F"
+            echo "=== RELOC REFS ==="
+            grep -n -i "reloc" "$F" | head -30
+            echo "=== IFRAME ==="
+            grep -n "iframe" "$F" | head -20
+            echo "=== setInterval ==="
+            grep -n "setInterval" "$F" | head -20
+            echo "=== refreshAll def ==="
+            grep -n "function refreshAll" -A 8 "$F" | head -20
+            echo "=== renderContent def ==="
+            grep -n "function renderContent" -A 40 "$F" | head -60
+            echo "=== syncPoll def ==="
+            grep -n "function syncPoll" -A 36 "$F" | head -50
+            echo "=== END ==="
