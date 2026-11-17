@@ -2355,11 +2355,41 @@ function renderContent(){
   if(state.page==='skills'){ c.innerHTML=viewSkills(); bindSkills(); return; }
   if(state.page==='knowledge'){ c.innerHTML=viewKnowledge(); bindKnowledge(); return; }
   if(state.page==='claims'){ c.innerHTML=viewClaims(); bindClaims(); return; }
+  if(state.page==='reloc'){ renderRelocView(); return; }
   if(state.page==='learn'){ c.innerHTML=viewLearn(); bindLearn(); return; }
-  if(state.page==='reloc'){ c.innerHTML=viewReloc(); bindReloc(); return; }
   if(state.page==='hrview'){ c.innerHTML=viewHrView(); bindHrView(); return; }
   var m=MODULES.filter(function(x){return x.key===state.page;})[0];
   c.innerHTML=viewModule(m); bindModule(m);
+}
+/* 迪拜搬迁台：内嵌 /reloc/index.html?embed=1。
+   refreshAll() 会被 syncPoll(45 秒) 及各类操作频繁调用，若每次都重建 DOM，
+   iframe 会被整体重新加载——表现为「搬迁页不断自动刷新、正在输入的内容被冲掉」。
+   故：iframe 已存在且 src 未变时只重绑事件，不重建；手动「刷新」按钮仍可主动重载。 */
+function relocUrl(){ return '/reloc/index.html'; }
+function relocEmbedUrl(){ var u=relocUrl(); return u+(u.indexOf('?')>=0?'&':'?')+'embed=1'; }
+function viewReloc(){
+  var u=relocEmbedUrl();
+  return '<div class="page-head"><div><h2>迪拜搬迁台</h2>'
+    +'<div class="sub">伊斯坦布尔 → 迪拜 2027-01/02 全家搬迁 · 任务图+每日研究循环+微信确认 · 与工作台共用同步口令</div></div>'
+    +'<div class="toolbar" style="display:flex;gap:10px">'
+    +'<button class="btn" id="rlReload">刷新</button>'
+    +'<button class="btn btn-pri" id="rlOpen">新窗口打开</button></div></div>'
+    +'<div class="card" style="padding:0;overflow:hidden">'
+    +'<iframe id="rlFrame" src="'+u+'" title="迪拜搬迁台" '
+    +'style="width:100%;height:calc(100vh - 208px);min-height:520px;border:0;display:block;background:#f4f6fa"></iframe>'
+    +'</div>'
+    +'<div class="sub" style="margin-top:10px;color:var(--tx3);font-size:12.5px">'
+    +'每日07:00(伊斯坦布尔)自动研究+生成行动清单并推送微信；本页可改任务状态。重大动作(签约/付款/政府提交)永远人工确认。</div>';
+}
+function bindReloc(){
+  var f=$('#rlFrame');
+  if($('#rlReload')) $('#rlReload').onclick=function(){ if(f) f.src=f.src; };
+  if($('#rlOpen')) $('#rlOpen').onclick=function(){ window.open(relocUrl(),'_blank'); };
+}
+function renderRelocView(){
+  var c=$('#content'), f=$('#rlFrame');
+  if(f && f.getAttribute('src')===relocEmbedUrl()){ bindReloc(); return; }  /* 保留现存 iframe，不重载 */
+  c.innerHTML=viewReloc(); bindReloc();
 }
 function refreshAll(){ renderNav(); renderTopbar(); renderContent(); }
 
@@ -2732,29 +2762,6 @@ function bindClaims(){
   var f=$('#clFrame');
   var r=$('#clReload'); if(r) r.onclick=function(){ if(f) f.src=f.src; };
   var o=$('#clOpen'); if(o) o.onclick=function(){ window.open(claimsUrl(),'_blank'); };
-}
-function relocUrl(){
-  if(location.protocol==='file:') return '/reloc/index.html';
-  return '/reloc/index.html';
-}
-function viewReloc(){
-  var u=relocUrl()+(relocUrl().indexOf('?')>=0?'&':'?')+'embed=1';
-  return '<div class="page-head"><div><h2>迪拜搬迁台</h2>'
-    +'<div class="sub">伊斯坦布尔 → 迪拜 2027-01/02 全家搬迁 · 任务图+每日研究循环+微信确认 · 与工作台共用同步口令</div></div>'
-    +'<div class="toolbar" style="display:flex;gap:10px">'
-    +'<button class="btn" id="rlReload">刷新</button>'
-    +'<button class="btn btn-pri" id="rlOpen">新窗口打开</button></div></div>'
-    +'<div class="card" style="padding:0;overflow:hidden">'
-    +'<iframe id="rlFrame" src="'+u+'" title="迪拜搬迁台" '
-    +'style="width:100%;height:calc(100vh - 208px);min-height:520px;border:0;display:block;background:#f4f6fa"></iframe>'
-    +'</div>'
-    +'<div class="sub" style="margin-top:10px;color:var(--tx3);font-size:12.5px">'
-    +'每日07:00(伊斯坦布尔)自动研究+生成行动清单并推送微信；本页可改任务状态。重大动作(签约/付款/政府提交)永远人工确认。</div>';
-}
-function bindReloc(){
-  var f=$('#rlFrame');
-  if($('#rlReload')) $('#rlReload').onclick=function(){ if(f) f.src=f.src; };
-  if($('#rlOpen')) $('#rlOpen').onclick=function(){ window.open(relocUrl(),'_blank'); };
 }
 function viewLearn(){
   return '<div class="page-head"><div><h2>个人学习监控</h2>'
