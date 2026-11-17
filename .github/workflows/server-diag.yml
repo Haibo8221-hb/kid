@@ -124,6 +124,13 @@ jobs:
               ls -la "${{ secrets.SITE_ROOT }}/.hermes/config.yaml" 2>/dev/null || echo "ABSENT"
               echo "--- 服务环境变量中的 LLM 相关 key（仅显示是否有值）---"
               systemctl show plan-api -p Environment 2>/dev/null | tr ' ' '\n' | grep -i "llm\|openai\|deepseek\|api_key" | sed 's/=.*/=<set>/' || echo "none"
+              echo
+              echo "===== HRD 工作台（服务器 only）/var/www/plan/hrd/index.html ====="
+              HF=/var/www/plan/hrd/index.html
+              ls -l "$HF" 2>/dev/null || echo "ABSENT"
+              md5sum "$HF" 2>/dev/null
+              echo "--- 刷新/嵌入相关行号 ---"
+              grep -n -i "reloc\|iframe\|setInterval\|function refreshAll\|function renderContent\|function syncPoll\|location.reload" "$HF" 2>/dev/null | head -60
             } > "$OUT" 2>&1
             echo "--- collected ---"
             cat "$OUT"
@@ -141,6 +148,8 @@ jobs:
           TS=$(date -u +%Y%m%d-%H%M%S)
           rsync -az -e "ssh -p $ECS_PORT -i key.pem -o StrictHostKeyChecking=no" \
             "$ECS_USER@$ECS_HOST:/tmp/kid-diag.txt" "diagnostics/server-$TS.txt" || echo "RSYNC FAILED"
+          rsync -az -e "ssh -p $ECS_PORT -i key.pem -o StrictHostKeyChecking=no" \
+            "$ECS_USER@$ECS_HOST:/var/www/plan/hrd/index.html" "diagnostics/hrd-index.html" || echo "HRD FETCH FAILED"
           cp "diagnostics/server-$TS.txt" diagnostics/latest.txt
           ls -la diagnostics
           echo "TS=$TS" >> "$GITHUB_ENV"
