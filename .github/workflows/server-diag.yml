@@ -52,6 +52,30 @@ jobs:
                 ls -la /var/www/plan/hrd 2>/dev/null || echo "/var/www/plan/hrd dir NOT present"
               fi
               echo
+              echo "===== 域名 vhost python_kid.conf 全文（定位 /hrd/ 实际服务路径）====="
+              cat /www/server/panel/vhost/nginx/python_kid.conf 2>/dev/null | head -140
+              echo
+              echo "===== /www/wwwroot/kid/hrd/ 状态 ====="
+              ls -la /www/wwwroot/kid/hrd 2>/dev/null || echo "/www/wwwroot/kid/hrd NOT present"
+              if [ -f /www/wwwroot/kid/hrd/index.html ]; then
+                md5sum /www/wwwroot/kid/hrd/index.html /var/www/plan/hrd/index.html 2>/dev/null
+                echo -n "域名侧 tbFetch: ";  grep -c "function tbFetch" /www/wwwroot/kid/hrd/index.html || echo 0
+                echo -n "域名侧 tbState: ";  grep -c "var tbState" /www/wwwroot/kid/hrd/index.html || echo 0
+              fi
+              echo
+              echo "===== 后端 API 冒烟（localhost:5000，GET timebox）====="
+              TOK=$(cat /www/wwwroot/kid/data/hrd_token.txt 2>/dev/null | tr -d '\n')
+              if [ -n "$TOK" ]; then
+                curl -s -m 10 -H "X-HRD-Token: $TOK" "http://127.0.0.1:5000/api/hrd/timebox" | head -c 400
+                echo
+              else
+                echo "hrd_token.txt ABSENT"
+              fi
+              echo
+              echo "===== nginx 域名入口实际服务的 /hrd/ 页面（带 Host 头自测）====="
+              curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "function tbFetch" || echo "0 (tbFetch not in served page)"
+              curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "function tbStopTimer" || echo "0"
+              echo
               echo "===== site root ====="
               ls -la "${{ secrets.SITE_ROOT }}" | head -30
               echo
