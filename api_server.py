@@ -4096,6 +4096,12 @@ def _ensure_tb_schema():
         synced_at TEXT
     )''')
     con.execute("CREATE INDEX IF NOT EXISTS idx_calendar_edate ON calendar_events(edate)")
+    # 忽略黑名单：桥接脚本按日期全量覆盖同步，被忽略的 uid 必须持久过滤，
+    # 否则下次 sync 又会写回。脚本只推今明两天，7 天前的忽略记录可安全清除。
+    con.execute('''CREATE TABLE IF NOT EXISTS calendar_dismissed (
+        uid TEXT PRIMARY KEY,
+        dismissed_at TEXT
+    )''')
     con.commit()
     con.close()
 
@@ -4175,6 +4181,15 @@ def calendar_sync_api():
                 (uid[:200], edate, str(ev.get('start') or '')[:5], str(ev.get('end') or '')[:5],
                  str(ev.get('subject') or '')[:200], str(ev.get('location') or '')[:200],
                  1 if ev.get('all_day') else 0, now))
+        # 用户忽略过的日程不得被重新同步写入
+        dismissed = {r[0] for r in con.execute('SELECT uid FROM calendar_dismissed').fetchall()}
+        for edate in list(by_date):
+            by_date[edate] = [r for r in by_date[edate] if r[0] not in dismissed]
+            if not by_date[edate]:
+                del by_date[edate]
+        # 黑名单滚动清理：脚本只推今明两天，7 天前的忽略记录已无意义
+        cutoff = (datetime.now() - timedelta(days=7)).isoformat(timespec='seconds')
+        con.execute('DELETE FROM calendar_dismissed WHERE dismissed_at < ?', (cutoff,))
         for edate in by_date:
             con.execute('DELETE FROM calendar_events WHERE edate=?', (edate,))
         con.executemany('INSERT OR REPLACE INTO calendar_events(uid,edate,start_time,end_time,subject,location,all_day,synced_at)'
@@ -4198,11 +4213,15 @@ def calendar_get_api():
         if not uid:
             return _hrd_cors(jsonify({'ok': False, 'error': 'uid required'}))
         try:
+            uid200 = uid[:200]
             con = _reloc_con()
-            con.execute('DELETE FROM calendar_events WHERE uid=?', (uid[:200],))
+            con.execute('DELETE FROM calendar_events WHERE uid=?', (uid200,))
+            # 记入忽略黑名单：否则桥接脚本全量覆盖同步会把它写回
+            con.execute('INSERT OR REPLACE INTO calendar_dismissed(uid,dismissed_at) VALUES(?,?)',
+                        (uid200, datetime.now().isoformat(timespec='seconds')))
             con.commit()
             con.close()
-            return _hrd_cors(jsonify({'ok': True, 'dismissed': uid[:200]}))
+            return _hrd_cors(jsonify({'ok': True, 'dismissed': uid200}))
         except Exception as e:
             return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
     d = request.args.get('date') or datetime.now().date().isoformat()
