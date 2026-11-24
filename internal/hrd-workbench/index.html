@@ -2552,11 +2552,12 @@ function tbLoadTasks(){
   var today=tbTodayStr();
   var wk=new Date(Date.now()+7*864e5);
   var wkStr=wk.getFullYear()+'-'+('0'+(wk.getMonth()+1)).slice(-2)+'-'+('0'+wk.getDate()).slice(-2);
-  var g={over:[],today:[],week:[],later:[]};
+  var g={over:[],today:[],week:[],later:[],nodate:[]};
   function push(due,title,val){
     var d=String(due||'').slice(0,10);
     var item={title:title,val:val,due:d};
-    if(!d||d>wkStr) g.later.push(item);
+    if(!d) g.nodate.push(item);                    // 未设截止日期：默认显示（新加待办立即可见）
+    else if(d>wkStr) g.later.push(item);           // 有日期但 7 天外：折叠
     else if(d<today) g.over.push(item);
     else if(d===today) g.today.push(item);
     else g.week.push(item);
@@ -2582,11 +2583,11 @@ function tbLoadTasks(){
       });
       sel.appendChild(og);
     }
-    fill(g.over,'逾期',true); fill(g.today,'今天待办'); fill(g.week,'未来7天');
-    if(showAll) fill(g.later,'之后/未设日期');
+    fill(g.over,'逾期',true); fill(g.today,'今天待办'); fill(g.week,'未来7天'); fill(g.nodate,'未设日期');
+    if(showAll) fill(g.later,'7天以后');
     else if(g.later.length){
       var og=document.createElement('optgroup');
-      og.label='之后/未设日期（'+g.later.length+'项，勾选"显示全部"可见）';
+      og.label='7天以后（'+g.later.length+'项，勾选"显示全部"可见）';
       sel.appendChild(og);
     }
   }
