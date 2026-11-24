@@ -2463,6 +2463,7 @@ function viewTimebox(){
    +'<input id="tbTitleIn" placeholder="一句话成果（能说出 done 标准的任务才进盒）" style="flex:1;min-width:240px;padding:8px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
    +'<div id="tbEst" style="display:flex;gap:4px"></div>'
    +'<select id="tbTask" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;max-width:230px"><option value="">关联搬迁任务（可选）</option></select>'
+   +'<label style="font-size:12px;color:var(--c-text-3);display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" id="tbTaskAll" onchange="tbLoadTasks()">显示全部</label>'
    +'<button class="btn btn-pri" id="tbAdd">加盒</button></div></div>'
    +'<div id="tbList" class="card" style="padding:6px 16px"></div>'
    +'<div class="card" style="padding:14px 16px;margin-top:14px">'
@@ -2544,10 +2545,39 @@ function tbLoadTasks(){
   tbFetch('/api/hrd/reloc/summary').then(function(j){
     if(!j||!j.ok||!j.tasks) return;
     var sel=$('#tbTask'); if(!sel) return;
-    var open=j.tasks.filter(function(t){return ['todo','doing','research','waiting_on','blocked'].indexOf(t.status)>=0;}).slice(0,60);
-    for(var i=0;i<open.length;i++){
-      var o=document.createElement('option'); o.value=open[i].id;
-      o.textContent=open[i].id+' · '+open[i].title.slice(0,34); sel.appendChild(o);
+    while(sel.options.length>1) sel.remove(1);
+    var open=j.tasks.filter(function(t){return ['todo','doing','research','waiting_on','blocked'].indexOf(t.status)>=0;});
+    var today=tbTodayStr();
+    var wk=new Date(Date.now()+7*864e5);
+    var wkStr=wk.getFullYear()+'-'+('0'+(wk.getMonth()+1)).slice(-2)+'-'+('0'+wk.getDate()).slice(-2);
+    var g={over:[],today:[],week:[],later:[]};
+    open.forEach(function(t){
+      var d=t.due||'';
+      if(!d||d>wkStr) g.later.push(t);
+      else if(d<today) g.over.push(t);
+      else if(d===today) g.today.push(t);
+      else g.week.push(t);
+    });
+    function fill(list,label,warn){
+      if(!list.length) return;
+      list.sort(function(a,b){return (a.due||'9999')<(b.due||'9999')?-1:1;});
+      var og=document.createElement('optgroup');
+      og.label=label+(warn?' ⚠':'')+'（'+list.length+'）';
+      list.forEach(function(t){
+        var o=document.createElement('option'); o.value=t.id;
+        o.textContent=t.id+' · '+t.title.slice(0,30)+(t.due?'（'+t.due.slice(5)+'）':'');
+        if(warn) o.style.color='#c0392b';
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    }
+    var showAll=$('#tbTaskAll') && $('#tbTaskAll').checked;
+    fill(g.over,'逾期',true); fill(g.today,'今天待办'); fill(g.week,'未来7天');
+    if(showAll) fill(g.later,'之后/未设日期');
+    else if(g.later.length){
+      var og=document.createElement('optgroup');
+      og.label='之后/未设日期（'+g.later.length+'项，勾选"显示全部"可见）';
+      sel.appendChild(og);
     }
   }).catch(function(){});
 }
