@@ -4048,6 +4048,145 @@ def reloc_task_update_api():
 
 
 
+# ── 每日复盘（三段式：经过/原因/改进，2026-11-18）────────────────
+@app.route('/api/hrd/dayreview', methods=['GET', 'OPTIONS'])
+def dayreview_get_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({}); _hrd_cors(resp); return resp
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    d = request.args.get('date') or datetime.now().date().isoformat()
+    try:
+        con = _reloc_con()
+        row = con.execute('SELECT * FROM daily_reviews WHERE rdate=?', (d,)).fetchone()
+        recent = [dict(r) for r in con.execute(
+            "SELECT rdate, mood, action_text FROM daily_reviews WHERE action_text!='' ORDER BY rdate DESC LIMIT 5").fetchall()]
+        con.close()
+        return _hrd_cors(jsonify({'ok': True, 'review': dict(row) if row else None, 'recent': recent}))
+    except Exception as e:
+        return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
+
+@app.route('/api/hrd/dayreview', methods=['POST', 'OPTIONS'])
+def dayreview_post_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({}); _hrd_cors(resp); return resp
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    b = request.get_json(silent=True) or {}
+    d = str(b.get('rdate') or datetime.now().date().isoformat())
+    def clip(v): return str(v or '')[:2000]
+    now = datetime.now().isoformat(timespec='seconds')
+    try:
+        con = _reloc_con()
+        con.execute('''INSERT INTO daily_reviews(rdate,mood,pass_text,cause_text,action_text,created,updated)
+            VALUES(?,?,?,?,?,?,?)
+            ON CONFLICT(rdate) DO UPDATE SET mood=excluded.mood, pass_text=excluded.pass_text,
+            cause_text=excluded.cause_text, action_text=excluded.action_text, updated=excluded.updated''',
+            (d, clip(b.get('mood')), clip(b.get('pass')), clip(b.get('cause')), clip(b.get('action')), now, now))
+        con.commit()
+        row = con.execute('SELECT * FROM daily_reviews WHERE rdate=?', (d,)).fetchone()
+        con.close()
+        return _hrd_cors(jsonify({'ok': True, 'review': dict(row)}))
+    except Exception as e:
+        return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
+
+# ── 今日时间盒（Timeboxing 视图 API，2026-11-18）────────────────
+@app.route('/api/hrd/timebox', methods=['GET', 'OPTIONS'])
+def timebox_get_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _hrd_cors(resp)
+        return resp
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    d = request.args.get('date') or datetime.now().date().isoformat()
+    try:
+        con = _reloc_con()
+        boxes = [dict(r) for r in con.execute(
+            'SELECT * FROM timeboxes WHERE tdate=? ORDER BY slot', (d,)).fetchall()]
+        stats = con.execute(
+            "SELECT COUNT(*) n, SUM(CASE WHEN status IN ('done','overflow') THEN 1 ELSE 0 END) done_n,"
+            " SUM(CASE WHEN status='done' THEN 1 ELSE 0 END) strict_done,"
+            " SUM(COALESCE(actual_min,0)) focus_min FROM timeboxes WHERE tdate>=date('now','-6 days')").fetchone()
+        dev = con.execute(
+            "SELECT AVG(ABS(actual_min-est_min)*1.0/est_min) d FROM timeboxes"
+            " WHERE actual_min IS NOT NULL AND est_min>0 AND tdate>=date('now','-6 days')").fetchone()
+        con.close()
+        return _hrd_cors(jsonify({'ok': True, 'date': d, 'boxes': boxes, 'stats': {
+            'n': stats['n'] or 0, 'done_n': stats['done_n'] or 0,
+            'strict_done': stats['strict_done'] or 0,
+            'focus_min': stats['focus_min'] or 0,
+            'est_dev': round(dev['d'], 3) if dev and dev['d'] is not None else None}}))
+    except Exception as e:
+        return _hrd_resp_err(e)
+
+@app.route('/api/hrd/timebox', methods=['POST', 'OPTIONS'])
+def timebox_post_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _hrd_cors(resp)
+        return resp
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    b = request.get_json(silent=True) or {}
+    act = str(b.get('action') or '')
+    now = datetime.now().isoformat(timespec='seconds')
+    try:
+        con = _reloc_con()
+        if act == 'add':
+            slot = str(b.get('slot') or '09:00')
+            title = str(b.get('title') or '').strip()
+            est = int(b.get('est_min') or 0)
+            if not title or est <= 0:
+                con.close()
+                return _hrd_cors(jsonify({'ok': False, 'error': 'title and est_min required'}))
+            cur = con.execute(
+                'INSERT INTO timeboxes(tdate,slot,title,est_min,status,task_ref,created)'
+                ' VALUES(?,?,?,?,?,?,?)',
+                (b.get('date') or datetime.now().date().isoformat(), slot, title,
+                 est, 'planned', str(b.get('task_ref') or ''), now))
+            con.commit()
+            bid = cur.lastrowid
+            row = con.execute('SELECT * FROM timeboxes WHERE id=?', (bid,)).fetchone()
+            con.close()
+            return _hrd_cors(jsonify({'ok': True, 'box': dict(row)}))
+        bid = int(b.get('id') or 0)
+        row = con.execute('SELECT * FROM timeboxes WHERE id=?', (bid,)).fetchone()
+        if not row:
+            con.close()
+            return _hrd_cors(jsonify({'ok': False, 'error': 'box not found'}))
+        st = row['status']
+        if act == 'start' and st == 'planned':
+            con.execute("UPDATE timeboxes SET status='doing', started_at=? WHERE id=?", (now, bid))
+        elif act == 'end' and st == 'doing':
+            outcome = str(b.get('outcome') or 'done')
+            actual = int(b.get('actual_min') or 0)
+            if not actual and row['started_at']:
+                try:
+                    t0 = datetime.fromisoformat(row['started_at'])
+                    actual = max(1, round((datetime.now() - t0).total_seconds() / 60))
+                except Exception:
+                    actual = row['est_min']
+            con.execute('UPDATE timeboxes SET status=?, actual_min=?, ended_at=? WHERE id=?',
+                        (outcome, actual, now, bid))
+            tref = row['task_ref']
+            if outcome == 'done' and tref:
+                con.execute("UPDATE tasks SET status='done' WHERE id=? AND status NOT IN ('done','dropped')", (tref,))
+        elif act in ('drop', 'delete'):
+            con.execute('DELETE FROM timeboxes WHERE id=?', (bid,))
+        else:
+            con.close()
+            return _hrd_cors(jsonify({'ok': False, 'error': 'bad action/state: ' + act + '/' + st}))
+        con.commit()
+        row2 = con.execute('SELECT * FROM timeboxes WHERE id=?', (bid,)).fetchone()
+        con.close()
+        return _hrd_cors(jsonify({'ok': True, 'box': dict(row2) if row2 else None}))
+    except Exception as e:
+        return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
+
+def _hrd_resp_err(e):
+    return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
+
 # ── Relocation Bootstrap（页面令牌自动注入，2026-11-15）────────────────
 # 背景：家长要求打开迪拜搬迁台不再手工输入同步口令。
 # 服务端令牌文件继续保留——HRD 工作台主数据（/api/hrd/state 等）仍受 X-HRD-Token
