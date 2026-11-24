@@ -2457,7 +2457,7 @@ function viewTimebox(){
    +'<input id="tbTitleIn" placeholder="一句话成果（能说出 done 标准的任务才进盒）" style="flex:1;min-width:240px;padding:8px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
    +'<div id="tbEst" style="display:flex;gap:4px"></div>'
    +'<select id="tbTask" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;max-width:230px"><option value="">关联待办任务（可选）</option></select>'
-   +'<label style="font-size:12px;color:var(--c-text-3);display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" id="tbTaskAll" onchange="tbLoadTasks()">显示全部</label>'
+   +'<label style="font-size:12px;color:var(--c-text-3);display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" id="tbTaskAll">显示全部</label>'
    +'<button class="btn btn-pri" id="tbAdd">加盒</button></div></div>'
    +'<div id="tbList" class="card" style="padding:6px 16px"></div>'
    +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;align-items:stretch">'
@@ -2815,6 +2815,9 @@ function renderTimeboxView(){
     }).catch(function(e){ alert('网络错误：'+e); });
   };
   $('#tbReload').onclick=function(){ tbLoad(); };
+  /* 显示全部开关：必须用 JS 属性绑定——脚本在 IIFE 闭包内，tbLoadTasks 非全局，
+     内联 onchange="tbLoadTasks()" 会因全局找不到函数而静默失效 */
+  var tbAll=$('#tbTaskAll'); if(tbAll) tbAll.onchange=function(){ tbLoadTasks(); };
   tbLoad(); tbLoadTasks(); tbLoadCal(); drInit();
 }
 function refreshAll(){ renderNav(); renderTopbar(); renderContent(); }
