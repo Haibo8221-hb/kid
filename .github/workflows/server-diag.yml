@@ -63,6 +63,18 @@ jobs:
                 echo -n "域名侧 tbState: ";  grep -c "var tbState" /www/wwwroot/kid/hrd/index.html || echo 0
               fi
               echo
+              echo "===== 服务健康核查（2026-11-24 Failed to fetch 排查）====="
+              systemctl is-active plan-api nginx || true
+              ss -tlnp 2>/dev/null | grep -E ":5000|:443|:80 " | head -6
+              echo "--- plan-api 近期日志（错误） ---"
+              journalctl -u plan-api --since "2 hours ago" -p err --no-pager 2>/dev/null | tail -15
+              echo "--- plan-api 近期日志（尾部） ---"
+              journalctl -u plan-api --since "2 hours ago" --no-pager 2>/dev/null | tail -8
+              echo "--- nginx 自检 ---"
+              nginx -t 2>&1 | tail -2
+              echo "--- 本机 curl 域名入口（带 Host） ---"
+              curl -s -o /dev/null -w "hrd page: %{http_code}\n" -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" -k
+              echo
               echo "===== 后端 API 冒烟（localhost:5000，GET timebox）====="
               TOK=$(cat /www/wwwroot/kid/data/hrd_token.txt 2>/dev/null | tr -d '\n')
               if [ -n "$TOK" ]; then
