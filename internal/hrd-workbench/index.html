@@ -2460,7 +2460,7 @@ function viewTimebox(){
    +'<div style="font-weight:600;margin-bottom:10px;font-size:15px">新建时间盒</div>'
    +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
    +'<select id="tbSlot" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'+tbSlotOpts()+'</select>'
-   +'<input id="tbTitle" placeholder="一句话成果（能说出 done 标准的任务才进盒）" style="flex:1;min-width:240px;padding:8px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
+   +'<input id="tbTitleIn" placeholder="一句话成果（能说出 done 标准的任务才进盒）" style="flex:1;min-width:240px;padding:8px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
    +'<div id="tbEst" style="display:flex;gap:4px"></div>'
    +'<select id="tbTask" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;max-width:230px"><option value="">关联搬迁任务（可选）</option></select>'
    +'<button class="btn btn-pri" id="tbAdd">加盒</button></div></div>'
@@ -2640,11 +2640,11 @@ function renderTimeboxView(){
     estEl.appendChild(b);
   });
   $('#tbAdd').onclick=function(){
-    var t=$('#tbTitle').value.trim();
-    if(!t){ $('#tbTitle').focus(); return; }
+    var t=$('#tbTitleIn').value.trim();
+    if(!t){ $('#tbTitleIn').focus(); return; }
     var body={action:'add',slot:$('#tbSlot').value,title:t,est_min:tbEstSel,task_ref:$('#tbTask').value||''};
     tbFetch('/api/hrd/timebox',{method:'POST',body:JSON.stringify(body)}).then(function(j){
-      if(j.ok){ $('#tbTitle').value=''; tbLoad(); }
+      if(j.ok){ $('#tbTitleIn').value=''; tbLoad(); }
       else{ alert('加盒失败：'+(j.error||'')); }
     }).catch(function(e){ alert('网络错误：'+e); });
   };
