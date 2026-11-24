@@ -4084,6 +4084,17 @@ def _ensure_tb_schema():
     # 兜底：若服务器上已手工建过表但缺 rdate 唯一约束，ON CONFLICT upsert 会失败；
     # 唯一索引可补齐约束（有重复行时失败，由外层 try 捕获并记日志）。
     con.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_reviews_rdate ON daily_reviews(rdate)")
+    con.execute('''CREATE TABLE IF NOT EXISTS calendar_events (
+        uid TEXT PRIMARY KEY,
+        edate TEXT NOT NULL,
+        start_time TEXT,
+        end_time TEXT,
+        subject TEXT DEFAULT '',
+        location TEXT DEFAULT '',
+        all_day INTEGER DEFAULT 0,
+        synced_at TEXT
+    )''')
+    con.execute("CREATE INDEX IF NOT EXISTS idx_calendar_edate ON calendar_events(edate)")
     con.commit()
     con.close()
 
@@ -4137,6 +4148,61 @@ def dayreview_post_api():
         return _hrd_cors(jsonify({'ok': True, 'review': dict(row)}))
     except Exception as e:
         return _hrd_resp_err(e)
+
+# ── Outlook 日历桥接（本机 PowerShell 脚本推送，2026-11-24）────────────────
+@app.route('/api/hrd/calendar/sync', methods=['POST', 'OPTIONS'])
+def calendar_sync_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({}); _hrd_cors(resp); return resp
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    b = request.get_json(silent=True) or {}
+    events = b.get('events') or []
+    if not isinstance(events, list) or not events:
+        return _hrd_cors(jsonify({'ok': False, 'error': 'events required'}))
+    now = datetime.now().isoformat(timespec='seconds')
+    try:
+        con = _reloc_con()
+        # 按日期分组全量覆盖：同一日期先清旧再插新，天然幂等
+        by_date = {}
+        for ev in events[:500]:
+            uid = str(ev.get('uid') or '').strip()
+            edate = str(ev.get('date') or '').strip()
+            if not uid or not edate:
+                continue
+            by_date.setdefault(edate, []).append(
+                (uid[:200], edate, str(ev.get('start') or '')[:5], str(ev.get('end') or '')[:5],
+                 str(ev.get('subject') or '')[:200], str(ev.get('location') or '')[:200],
+                 1 if ev.get('all_day') else 0, now))
+        for edate in by_date:
+            con.execute('DELETE FROM calendar_events WHERE edate=?', (edate,))
+        con.executemany('INSERT OR REPLACE INTO calendar_events(uid,edate,start_time,end_time,subject,location,all_day,synced_at)'
+                        ' VALUES(?,?,?,?,?,?,?,?)', [r for d in by_date.values() for r in d])
+        con.commit()
+        con.close()
+        return _hrd_cors(jsonify({'ok': True, 'dates': sorted(by_date), 'count': sum(len(v) for v in by_date.values())}))
+    except Exception as e:
+        return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
+
+@app.route('/api/hrd/calendar', methods=['GET', 'OPTIONS'])
+def calendar_get_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({}); _hrd_cors(resp); return resp
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    d = request.args.get('date') or datetime.now().date().isoformat()
+    try:
+        con = _reloc_con()
+        evs = [dict(r) for r in con.execute(
+            'SELECT uid,edate,start_time,end_time,subject,location,all_day,synced_at'
+            ' FROM calendar_events WHERE edate=? AND all_day=0 ORDER BY start_time', (d,)).fetchall()]
+        allday = [dict(r) for r in con.execute(
+            'SELECT uid,edate,subject,location,synced_at FROM calendar_events'
+            ' WHERE edate=? AND all_day=1 ORDER BY subject', (d,)).fetchall()]
+        con.close()
+        return _hrd_cors(jsonify({'ok': True, 'date': d, 'events': evs, 'all_day': allday}))
+    except Exception as e:
+        return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
 
 # ── 今日时间盒（Timeboxing 视图 API，2026-11-18；2026-11-24 修复+增强）───────
 _TB_SLOT_RE = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')

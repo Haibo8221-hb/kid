@@ -2435,6 +2435,9 @@ function viewTimebox(){
    +'<div class="toolbar" style="display:flex;gap:10px"><button class="btn" id="tbReload">刷新</button></div></div>'
    +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;align-items:stretch">'
    +'<div id="tbStats" class="card" style="padding:14px 16px;flex:1;min-width:300px">加载中…</div>'
+   +'<div class="card" style="padding:12px 16px;min-width:300px;flex:1">'
+   +'<div style="font-weight:600;font-size:15px;margin-bottom:6px">今日日程 <span style="font-size:12px;font-weight:400;color:var(--c-text-3)">Outlook 同步</span></div>'
+   +'<div id="tbCal" style="font-size:13px;line-height:1.8;color:var(--c-text-2)">加载中…</div></div>'
    +'<div class="card" style="padding:12px 16px;min-width:300px">'
    +'<div style="font-weight:600;font-size:15px;margin-bottom:6px">Mood Meter · 每天给自己报 3 次坐标</div>'
    +'<svg viewBox="0 0 320 172" style="width:100%;max-width:380px;display:block">'
@@ -2581,6 +2584,57 @@ function tbLoadTasks(){
     }
   }).catch(function(){});
 }
+function tbSetEst(min){
+  tbEstSel=min;
+  var estEl=$('#tbEst'); if(!estEl) return;
+  Array.prototype.forEach.call(estEl.children,function(x){
+    var hit=x.textContent.indexOf(String(min)+'分')===0;
+    x.style.borderColor=hit?'#2f6fed':''; x.style.color=hit?'#2f6fed':''; x.style.fontWeight=hit?'600':'';
+  });
+}
+function tbSetSlot(v){
+  var sel=$('#tbSlot'); if(!sel) return;
+  var hit=null;
+  Array.prototype.forEach.call(sel.options,function(o){ if(o.value===v) hit=o; });
+  if(!hit){ hit=document.createElement('option'); hit.value=v; hit.textContent=v; sel.appendChild(hit); }
+  sel.value=v;
+}
+function tbCalToBox(ev){
+  tbSetSlot(ev.start_time||'09:00');
+  $('#tbTitleIn').value=ev.subject||'';
+  var est=30;
+  if(ev.start_time&&ev.end_time){
+    var p=ev.start_time.split(':'), q=ev.end_time.split(':');
+    var mins=(parseInt(q[0],10)*60+parseInt(q[1],10))-(parseInt(p[0],10)*60+parseInt(p[1],10));
+    if(mins>0) est=Math.max(15, Math.round(mins/5)*5);
+  }
+  tbSetEst(est);
+  $('#tbTitleIn').focus();
+}
+function tbLoadCal(){
+  var el=$('#tbCal'); if(!el) return;
+  tbFetch('/api/hrd/calendar?date='+tbTodayStr()).then(function(j){
+    if(!j||!j.ok){ el.textContent='日程加载失败'; return; }
+    el.textContent='';
+    if(!j.events.length&&!j.all_day.length){ el.textContent='今日无日程（未同步或空闲）'; return; }
+    j.all_day.forEach(function(ev){
+      var d=document.createElement('div'); d.textContent='· 全天：'+ev.subject; el.appendChild(d);
+    });
+    j.events.forEach(function(ev){
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+      var t=document.createElement('span');
+      t.style.cssText='color:var(--c-text-3);white-space:nowrap;font-variant-numeric:tabular-nums';
+      t.textContent=ev.start_time+'–'+ev.end_time;
+      var s=document.createElement('span'); s.textContent=ev.subject+(ev.location?'（'+ev.location+'）':'');
+      var b=document.createElement('button'); b.className='btn'; b.style.cssText='padding:1px 10px;font-size:12px';
+      b.textContent='转盒';
+      b.onclick=function(){ tbCalToBox(ev); };
+      row.appendChild(t); row.appendChild(s); row.appendChild(b);
+      el.appendChild(row);
+    });
+  }).catch(function(e){ el.textContent='日程加载失败：'+e; });
+}
 function tbAct(a,id,o){
   var body={action:a,id:parseInt(id,10)};
   if(a==='end') body.outcome=o;
@@ -2679,7 +2733,7 @@ function renderTimeboxView(){
     }).catch(function(e){ alert('网络错误：'+e); });
   };
   $('#tbReload').onclick=function(){ tbLoad(); };
-  tbLoad(); tbLoadTasks(); drInit();
+  tbLoad(); tbLoadTasks(); tbLoadCal(); drInit();
 }
 function refreshAll(){ renderNav(); renderTopbar(); renderContent(); }
 
