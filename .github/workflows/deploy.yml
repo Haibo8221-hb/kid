@@ -103,6 +103,49 @@ jobs:
             systemctl restart plan-api
             echo "==> deploy done"
 
+      # ── HRD 工作台页面部署（2026-11-24）────────────────────────────────
+      # 生产页面 /var/www/plan/hrd/index.html 原本游离在部署链外（快照与实机
+      # 已发生过漂移：fb6482f 快照缺 tbFetch/tbState，实机时间盒页不可用）。
+      # 治理：仓库 internal/hrd-workbench/index.html 为页面唯一真源，每次
+      # 部署自动覆盖实机（旧文件先按时间戳备份到同目录，可随时回滚）。
+      - name: Deploy HRD workbench page (backup first)
+        env:
+          KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          echo "$KEY" > "$RUNNER_TEMP/key.pem"
+          chmod 600 "$RUNNER_TEMP/key.pem"
+          rsync -az -e "ssh -p ${{ secrets.ECS_PORT }} -i $RUNNER_TEMP/key.pem -o StrictHostKeyChecking=no" \
+            internal/hrd-workbench/index.html \
+            ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/tmp/hrd-deploy-index.html
+
+      - name: Activate HRD page with timestamped backup
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          port: ${{ secrets.ECS_PORT }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            HP=/var/www/plan/hrd/index.html
+            if [ ! -d /var/www/plan/hrd ]; then echo "::error::/var/www/plan/hrd 不存在，中止"; exit 1; fi
+            TS=$(date +%Y%m%d-%H%M%S)
+            if [ -f "$HP" ]; then
+              cp -a "$HP" "/var/www/plan/hrd/index.html.bak-$TS"
+              echo "backup: /var/www/plan/hrd/index.html.bak-$TS ($(stat -c %s "/var/www/plan/hrd/index.html.bak-$TS")B)"
+            fi
+            NEW_MD5=$(md5sum /tmp/hrd-deploy-index.html | cut -d' ' -f1)
+            if [ "$NEW_MD5" = "$(md5sum "$HP" 2>/dev/null | cut -d' ' -f1)" ]; then
+              echo "页面内容与仓库一致，跳过覆盖"
+            else
+              install -m 644 -o root -g root /tmp/hrd-deploy-index.html "$HP"
+              echo "deployed: $HP ($(stat -c %s "$HP")B, md5=$NEW_MD5)"
+            fi
+            rm -f /tmp/hrd-deploy-index.html
+            echo "--- 上线后自检 ---"
+            echo -n "tbFetch: "; grep -c "function tbFetch" "$HP" || true
+            echo -n "tbState: "; grep -c "var tbState" "$HP" || true
+            echo -n "tbStopTimer: "; grep -c "function tbStopTimer" "$HP" || true
+
       # ── HRD 工作台 API 令牌（2026-10-25；2026-10-26 改密码派生）──────────
       # 工作台页面（/hrd/ 与本地 file://）无登录态，/api/hrd/* 改用 X-HRD-Token
       # 头校验。用户只需记一个「同步密码」：GitHub secret HRD_API_TOKEN 存密码
