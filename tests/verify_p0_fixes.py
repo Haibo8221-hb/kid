@@ -63,6 +63,15 @@ check(r.status_code == 401, f'登出后旧 token 401（实际 {r.status_code}）
 r = Authed(A._make_token()).get('/api/auth/status')
 check(r.status_code == 200, f'登出后新登录 token 有效（实际 {r.status_code}）')
 
+print('== #4b 登出→重签 毫秒截断竞态（iat 截断后必须严格晚于水位线）==')
+from unittest.mock import patch
+A._mark_logout(now=1000.000123)
+with patch.object(A.time, 'time', return_value=1000.000456):
+    check(A._verify_token(A._make_token()), '登出同毫秒窗口内重签的 token 有效')
+with patch.object(A.time, 'time', return_value=1000.000123):
+    check(A._verify_token(A._make_token()), 'now==epoch 时重签的 token 有效')
+A._mark_logout(now=0.0)   # 还原水位线，避免污染后续用例
+
 print('== #2 child/user 白名单（路径穿越）==')
 cc = Authed(A._make_token())
 for ep, payload in [('/api/planner', {'user': '../../evil', 'plan': {'a': 1}}),

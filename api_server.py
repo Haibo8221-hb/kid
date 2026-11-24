@@ -94,15 +94,16 @@ def _mark_logout(now=None):
 
 def _make_token(now=None):
     """token = exp.iat.sig —— iat 为毫秒级浮点签发时间，用于登出后精确吊销。
-    新签 token 保证 iat 严格晚于登出水位线，避免同毫秒登出后重新登录被误杀。"""
+    新签 token 保证 iat（毫秒截断后）严格晚于登出水位线，避免同毫秒登出后
+    重新登录被误杀：比较必须基于截断后的 iat，而非未截断的 now。"""
     supplied = now
     now = float(now or time.time())
-    if supplied is None:
-        epoch = _logout_epoch()
-        if now <= epoch:
-            now = epoch + 0.001
+    iat_ms = int(now * 1000)
+    if supplied is None and iat_ms / 1000.0 <= _logout_epoch():
+        iat_ms = int(_logout_epoch() * 1000) + 1   # 跨过毫秒边界，保证严格晚于水位线
+    now = iat_ms / 1000.0
     exp = int(now + AUTH_TTL)
-    iat_s = str(int(now * 1000))      # 毫秒整型，避免 token 中出现额外小数点
+    iat_s = str(iat_ms)               # 毫秒整型，避免 token 中出现额外小数点
     sig = hmac.new(_auth_secret(), f'{exp}.{iat_s}'.encode(), hashlib.sha256).hexdigest()[:32]
     return f'{exp}.{iat_s}.{sig}'
 
