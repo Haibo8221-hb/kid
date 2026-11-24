@@ -35,6 +35,23 @@ jobs:
               echo "===== when ====="
               date -Is
               echo
+              echo "===== HRD 工作台页面 timebox 函数核查（2026-11-24）====="
+              HP=/var/www/plan/hrd/index.html
+              if [ -f "$HP" ]; then
+                ls -la "$HP"; md5sum "$HP"
+                echo -n "tbFetch 定义: ";          grep -c "function tbFetch" "$HP" || echo 0
+                echo -n "tbState 定义: ";          grep -c "var tbState" "$HP" || echo 0
+                echo -n "tbStopTimer 定义: ";      grep -c "function tbStopTimer" "$HP" || echo 0
+                echo -n "renderTimeboxView 定义: "; grep -c "function renderTimeboxView" "$HP" || echo 0
+                echo -n "今日时间盒出现次数: ";     grep -c "今日时间盒" "$HP" || echo 0
+                echo -n "esc() 转义调用(tbRenderList 内): "; grep -c "esc(b.title)" "$HP" || echo 0
+                cp "$HP" /tmp/kid-diag-hrd.html
+                echo "live page copied to /tmp/kid-diag-hrd.html ($(stat -c %s /tmp/kid-diag-hrd.html) bytes)"
+              else
+                echo "$HP NOT present"
+                ls -la /var/www/plan/hrd 2>/dev/null || echo "/var/www/plan/hrd dir NOT present"
+              fi
+              echo
               echo "===== site root ====="
               ls -la "${{ secrets.SITE_ROOT }}" | head -30
               echo
@@ -141,6 +158,8 @@ jobs:
           TS=$(date -u +%Y%m%d-%H%M%S)
           rsync -az -e "ssh -p $ECS_PORT -i key.pem -o StrictHostKeyChecking=no" \
             "$ECS_USER@$ECS_HOST:/tmp/kid-diag.txt" "diagnostics/server-$TS.txt" || echo "RSYNC FAILED"
+          rsync -az -e "ssh -p $ECS_PORT -i key.pem -o StrictHostKeyChecking=no" \
+            "$ECS_USER@$ECS_HOST:/tmp/kid-diag-hrd.html" "diagnostics/hrd-live-$TS.html" || echo "HRD PAGE RSYNC SKIPPED (not collected)"
           cp "diagnostics/server-$TS.txt" diagnostics/latest.txt
           ls -la diagnostics
           echo "TS=$TS" >> "$GITHUB_ENV"
