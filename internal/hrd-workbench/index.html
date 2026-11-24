@@ -2351,6 +2351,8 @@ function renderTopbar(){ var m=MODULES.filter(function(x){return x.key===state.p
   var b=$('#btnSync'); if(b) b.onclick=function(){ applySync(); }; }
 function renderContent(){
   var c=$('#content');
+  /* P2 修复：离开时间盒页时停掉 30s 轮询，防止回调访问已销毁 DOM */
+  if(state.page!=='timebox' && typeof tbStopTimer==='function') tbStopTimer();
   if(state.page==='overview'){ c.innerHTML=viewOverview(); bindOverview(); return; }
   if(state.page==='stats'){ c.innerHTML=viewStats(); bindStats(); return; }
   if(state.page==='skills'){ c.innerHTML=viewSkills(); bindSkills(); return; }
@@ -2395,6 +2397,17 @@ function renderRelocView(){
 }
 /* ---- 今日时间盒（Timeboxing）---- */
 var tbEstSel=50;
+/* P0 修复（2026-11-24）：tbFetch / tbState 此前未定义，时间盒页一打开即
+   ReferenceError。tbFetch 复用 rHeaders()（X-HRD-Token，与 reloc 同步通道一致）。 */
+var tbState={boxes:[],stats:{},timer:null};
+function tbFetch(url,opts){
+  opts=opts||{};
+  var h=rHeaders(); h['Content-Type']='application/json';
+  return fetch(url,{method:opts.method||'GET',headers:h,body:opts.body||undefined,cache:'no-store'})
+    .then(function(r){ return r.json().catch(function(){ return {ok:false,error:'响应不是 JSON（HTTP '+r.status+'）'}; }); });
+}
+/* 离开时间盒页时清理轮询定时器，防止回调访问已销毁 DOM 持续报错 */
+function tbStopTimer(){ if(tbState.timer){ clearInterval(tbState.timer); tbState.timer=null; } }
 
 function tbSlotOpts(){
   var o='';
@@ -2408,8 +2421,12 @@ function tbBadge(st,box){
   return '<span style="display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;background:'+b[1]+';color:'+b[2]+'">'+b[0]+'</span>';
 }
 function tbMinutesDoing(box){
+  /* 优先用服务端计算的 elapsed_min：started_at 是服务器本地时间字符串，
+     浏览器时区与服务器不一致时本地解析会算错（时区修复，2026-11-24）。 */
+  if(box.elapsed_min!=null) return box.elapsed_min;
   if(!box.started_at) return 0;
   var t0=new Date(box.started_at.replace(' ','T'));
+  if(isNaN(t0.getTime())) return 0;
   return Math.max(0, Math.round((Date.now()-t0.getTime())/60000));
 }
 function viewTimebox(){
@@ -2475,7 +2492,7 @@ function tbRenderStats(){
    +'<div><div class="sub" style="font-size:12px">完成率</div><div style="font-size:22px;font-weight:700;color:'+(rate>=60?'#18a058':(rate>=30?'#b97a10':'#c33'))+'">'+rate+'%</div></div>'
    +'<div><div class="sub" style="font-size:12px">专注时长</div><div style="font-size:22px;font-weight:700">'+fh+'h</div></div>'
    +'<div><div class="sub" style="font-size:12px">估时偏差（低=准）</div><div style="font-size:22px;font-weight:700;color:'+(dev==='—'?'var(--c-text)':(s.est_dev<=0.25?'#18a058':(s.est_dev<=0.5?'#b97a10':'#c33')))+'">'+dev+'</div></div>'
-   +'<div class="sub" style="font-size:12.5px;line-height:1.7;flex:1;min-width:220px">盒「完成」含正常完成与超时续——到点后主动决策的都是好盒；「估时偏差」= |实际-估时|/估时 的7天均值。</div></div>';
+   +'<div class="sub" style="font-size:12.5px;line-height:1.7;flex:1;min-width:220px">盒「完成」含正常完成与超时续——到点后主动决策的都是好盒（放弃的盒不计入分母）；「估时偏差」= |实际-估时|/估时 的7天中位数。</div></div>';
 }
 function tbRenderList(){
   var el=$('#tbList');
@@ -2489,14 +2506,14 @@ function tbRenderList(){
     var diff = b.actual_min!=null? (b.actual_min-b.est_min) : null;
     var diffTx = diff===null? '' : ('<span style="font-size:12.5px;color:'+(diff<=0?'#18a058':'#c33')+'">实际 '+b.actual_min+' 分（'+(diff>0?'+':'')+diff+'）</span>');
     var btns='';
-    if(b.status==='planned') btns='<button class="btn btn-pri tbB" data-a="start" data-id="'+b.id+'">开始</button><button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
-    else if(b.status==='doing') btns='<button class="btn tbB" data-a="end" data-o="done" data-id="'+b.id+'">完成</button><button class="btn tbB" data-a="end" data-o="overflow" data-id="'+b.id+'">超时续</button><button class="btn tbB" data-a="end" data-o="dropped" data-id="'+b.id+'">放弃</button>';
+    if(b.status==='planned') btns='<button class="btn btn-pri tbB" data-a="start" data-id="'+b.id+'">开始</button><button class="btn tbB" data-a="update" data-id="'+b.id+'">改</button><button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
+    else if(b.status==='doing') btns='<button class="btn tbB" data-a="end" data-o="done" data-id="'+b.id+'">完成</button><button class="btn tbB" data-a="end" data-o="overflow" data-id="'+b.id+'">超时续</button><button class="btn tbB" data-a="end" data-o="dropped" data-id="'+b.id+'">放弃</button><button class="btn tbB" data-a="reset" data-id="'+b.id+'">回退</button>';
     else btns='<button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
-    var doingTx = b.status==='doing'? '<span style="font-size:12.5px;color:#2f6fed">已进行 '+mm+' 分 / '+b.est_min+' 分</span>' : '';
-    var refTx = b.task_ref? '<span style="font-size:12px;color:var(--c-text-3);background:var(--c-border-4);padding:1px 8px;border-radius:8px">'+b.task_ref+'</span>' : '';
+    var doingTx = b.status==='doing'? '<span style="font-size:12.5px;color:#2f6fed">已进行 '+mm+' 分 / '+esc(b.est_min)+' 分</span>' : '';
+    var refTx = b.task_ref? '<span style="font-size:12px;color:var(--c-text-3);background:var(--c-border-4);padding:1px 8px;border-radius:8px">'+esc(b.task_ref)+'</span>' : '';
     h+='<div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-top:'+(i?'1px solid var(--c-border-3)':'0')+';flex-wrap:wrap">'
-      +'<span style="font-weight:600;color:var(--c-navy);min-width:52px">'+b.slot+'</span>'
-      +'<span style="flex:1;min-width:200px;font-size:15px;line-height:1.7">'+b.title+'</span>'+refTx
+      +'<span style="font-weight:600;color:var(--c-navy);min-width:52px">'+esc(b.slot)+'</span>'
+      +'<span style="flex:1;min-width:200px;font-size:15px;line-height:1.7">'+esc(b.title)+'</span>'+refTx
       +'<span style="font-size:12.5px;color:var(--c-text-3)">'+(b.status==='planned'? b.est_min+' 分':'')+'</span>'
       +tbBadge(b.status,b)+doingTx+diffTx
       +'<span style="display:flex;gap:6px">'+btns+'</span></div>';
@@ -2507,17 +2524,20 @@ function tbRenderList(){
   });
 }
 function tbLoad(){
-  var today=new Date(); var ds=today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+  var ds=tbTodayStr();
   tbFetch('/api/hrd/timebox?date='+ds).then(function(j){
     if(!j.ok){ $('#tbStats').textContent='加载失败：'+(j.error||''); return; }
     tbState.boxes=j.boxes; tbState.stats=j.stats;
     tbRenderStats(); tbRenderList();
-    if(tbState.timer) clearInterval(tbState.timer);
-    tbState.timer=setInterval(function(){
-      var doing=tbState.boxes.filter(function(b){return b.status==='doing';});
-      if(!doing.length){ clearInterval(tbState.timer); return; }
-      tbRenderList();
-    }, 30000);
+    tbStopTimer();
+    var doing=tbState.boxes.filter(function(b){return b.status==='doing';});
+    if(doing.length){
+      /* 每 30 秒重新拉取：elapsed_min 由服务端计算，本地重渲染算不准时区 */
+      tbState.timer=setInterval(function(){
+        if(!document.getElementById('tbList')){ tbStopTimer(); return; }
+        tbLoad();
+      }, 30000);
+    }
   }).catch(function(e){ $('#tbStats').textContent='加载失败：'+e; });
 }
 function tbLoadTasks(){
@@ -2534,6 +2554,21 @@ function tbLoadTasks(){
 function tbAct(a,id,o){
   var body={action:a,id:parseInt(id,10)};
   if(a==='end') body.outcome=o;
+  if(a==='update'){
+    var box=null;
+    (tbState.boxes||[]).forEach(function(b){ if(String(b.id)===String(id)) box=b; });
+    var nt=prompt('修改标题：', box? box.title : '');
+    if(nt===null) return;
+    nt=nt.trim(); if(!nt){ alert('标题不能为空'); return; }
+    var ne=prompt('修改估时（分钟，正整数）：', box? box.est_min : 50);
+    if(ne===null) return;
+    ne=parseInt(ne,10);
+    if(!(ne>0 && ne<=1440)){ alert('估时须为 1-1440 的分钟数'); return; }
+    var ns=prompt('修改时段（HH:MM）：', box? box.slot : '09:00');
+    if(ns===null) return;
+    if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(ns)){ alert('时段格式须为 HH:MM'); return; }
+    body.title=nt; body.est_min=ne; body.slot=ns;
+  }
   tbFetch('/api/hrd/timebox',{method:'POST',body:JSON.stringify(body)}).then(function(j){
     if(!j.ok){ alert('操作失败：'+(j.error||'')); return; }
     tbLoad();
@@ -2561,9 +2596,9 @@ function drRenderRecent(list){
   for(var i=0;i<list.length;i++){
     var mc='#ccc'; for(var k=0;k<DR_MOODS.length;k++){ if(DR_MOODS[k][0]===list[i].mood) mc=DR_MOODS[k][2]; }
     var dot = list[i].mood? '<span style="display:inline-block;width:10px;height:10px;border-radius:5px;background:'+mc+';margin-right:8px;vertical-align:middle"></span>' : '';
-    h+='<div style="padding:4px 0;font-size:13px;line-height:1.7"><span style="color:var(--c-text-3);margin-right:8px">'+list[i].rdate.slice(5)+'</span>'
+    h+='<div style="padding:4px 0;font-size:13px;line-height:1.7"><span style="color:var(--c-text-3);margin-right:8px">'+esc(String(list[i].rdate).slice(5))+'</span>'
       +dot
-      +'<span>'+String(list[i].action_text).slice(0,80)+(String(list[i].action_text).length>80?'…':'')+'</span></div>';
+      +'<span>'+esc(String(list[i].action_text).slice(0,80))+(String(list[i].action_text).length>80?'…':'')+'</span></div>';
   }
   el.innerHTML=h+'</div>';
 }
@@ -2610,6 +2645,7 @@ function renderTimeboxView(){
     var body={action:'add',slot:$('#tbSlot').value,title:t,est_min:tbEstSel,task_ref:$('#tbTask').value||''};
     tbFetch('/api/hrd/timebox',{method:'POST',body:JSON.stringify(body)}).then(function(j){
       if(j.ok){ $('#tbTitle').value=''; tbLoad(); }
+      else{ alert('加盒失败：'+(j.error||'')); }
     }).catch(function(e){ alert('网络错误：'+e); });
   };
   $('#tbReload').onclick=function(){ tbLoad(); };

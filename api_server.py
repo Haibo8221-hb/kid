@@ -4049,6 +4049,54 @@ def reloc_task_update_api():
 
 
 # ── 每日复盘（三段式：经过/原因/改进，2026-11-18）────────────────
+def _hrd_resp_err(e):
+    return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
+
+# P0 修复（2026-11-24）：timeboxes / daily_reviews 此前全仓库无 DDL，首调必抛
+# no such table；daily_reviews 的 ON CONFLICT(rdate) upsert 依赖 rdate 主键约束。
+# 启动时幂等建表，与 reloc_seed.py（tasks/findings/daily_log）互补。
+def _ensure_tb_schema():
+    import sqlite3
+    con = sqlite3.connect(RELOC_DB, timeout=10)
+    con.execute('''CREATE TABLE IF NOT EXISTS timeboxes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tdate TEXT NOT NULL,
+        slot TEXT DEFAULT '09:00',
+        title TEXT NOT NULL,
+        est_min INTEGER NOT NULL DEFAULT 50,
+        status TEXT NOT NULL DEFAULT 'planned',
+        task_ref TEXT DEFAULT '',
+        created TEXT,
+        started_at TEXT,
+        actual_min INTEGER,
+        ended_at TEXT
+    )''')
+    con.execute("CREATE INDEX IF NOT EXISTS idx_timeboxes_tdate ON timeboxes(tdate)")
+    con.execute('''CREATE TABLE IF NOT EXISTS daily_reviews (
+        rdate TEXT PRIMARY KEY,
+        mood TEXT DEFAULT '',
+        pass_text TEXT DEFAULT '',
+        cause_text TEXT DEFAULT '',
+        action_text TEXT DEFAULT '',
+        created TEXT,
+        updated TEXT
+    )''')
+    # 兜底：若服务器上已手工建过表但缺 rdate 唯一约束，ON CONFLICT upsert 会失败；
+    # 唯一索引可补齐约束（有重复行时失败，由外层 try 捕获并记日志）。
+    con.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_reviews_rdate ON daily_reviews(rdate)")
+    con.commit()
+    con.close()
+
+try:
+    _ensure_tb_schema()
+except Exception as _e:  # DB 目录暂不可达时不阻断服务启动，首个请求仍会重试
+    log.warning('timebox ensure-schema deferred: %s', _e)
+
+# 统计窗口基准：与 tdate/created 的写入基准（服务器本地时区）保持一致。
+# 修复：原 SQL 用 UTC 的 date('now','-6 days')，东八区 0-8 点窗口会偏移一天。
+def _tb_window_start():
+    return (datetime.now() - timedelta(days=6)).date().isoformat()
+
 @app.route('/api/hrd/dayreview', methods=['GET', 'OPTIONS'])
 def dayreview_get_api():
     if request.method == 'OPTIONS':
@@ -4064,7 +4112,7 @@ def dayreview_get_api():
         con.close()
         return _hrd_cors(jsonify({'ok': True, 'review': dict(row) if row else None, 'recent': recent}))
     except Exception as e:
-        return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
+        return _hrd_resp_err(e)
 
 @app.route('/api/hrd/dayreview', methods=['POST', 'OPTIONS'])
 def dayreview_post_api():
@@ -4088,9 +4136,12 @@ def dayreview_post_api():
         con.close()
         return _hrd_cors(jsonify({'ok': True, 'review': dict(row)}))
     except Exception as e:
-        return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
+        return _hrd_resp_err(e)
 
-# ── 今日时间盒（Timeboxing 视图 API，2026-11-18）────────────────
+# ── 今日时间盒（Timeboxing 视图 API，2026-11-18；2026-11-24 修复+增强）───────
+_TB_SLOT_RE = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')
+_TB_OUTCOMES = ('done', 'overflow', 'dropped')
+
 @app.route('/api/hrd/timebox', methods=['GET', 'OPTIONS'])
 def timebox_get_api():
     if request.method == 'OPTIONS':
@@ -4102,21 +4153,42 @@ def timebox_get_api():
     d = request.args.get('date') or datetime.now().date().isoformat()
     try:
         con = _reloc_con()
-        boxes = [dict(r) for r in con.execute(
-            'SELECT * FROM timeboxes WHERE tdate=? ORDER BY slot', (d,)).fetchall()]
+        w0 = _tb_window_start()
+        now = datetime.now()
+        boxes = []
+        for r in con.execute('SELECT * FROM timeboxes WHERE tdate=? ORDER BY slot', (d,)).fetchall():
+            bx = dict(r)
+            # 服务端计算 doing 盒已进行分钟数：浏览器时区与服务器不一致时
+            # 前端本地解析 started_at 会算错，以此字段为准。
+            if bx['status'] == 'doing' and bx['started_at']:
+                try:
+                    t0 = datetime.fromisoformat(bx['started_at'])
+                    bx['elapsed_min'] = max(0, round((now - t0).total_seconds() / 60))
+                except Exception:
+                    bx['elapsed_min'] = None
+            else:
+                bx['elapsed_min'] = None
+            boxes.append(bx)
         stats = con.execute(
             "SELECT COUNT(*) n, SUM(CASE WHEN status IN ('done','overflow') THEN 1 ELSE 0 END) done_n,"
             " SUM(CASE WHEN status='done' THEN 1 ELSE 0 END) strict_done,"
-            " SUM(COALESCE(actual_min,0)) focus_min FROM timeboxes WHERE tdate>=date('now','-6 days')").fetchone()
-        dev = con.execute(
-            "SELECT AVG(ABS(actual_min-est_min)*1.0/est_min) d FROM timeboxes"
-            " WHERE actual_min IS NOT NULL AND est_min>0 AND tdate>=date('now','-6 days')").fetchone()
+            " SUM(COALESCE(actual_min,0)) focus_min FROM timeboxes"
+            " WHERE tdate>=? AND status!='dropped'", (w0,)).fetchone()
+        # 估时偏差改用中位数：均值对 actual_min 异常值（如 0/超长）过于敏感
+        devs = sorted(r[0] for r in con.execute(
+            "SELECT ABS(actual_min-est_min)*1.0/est_min FROM timeboxes"
+            " WHERE actual_min IS NOT NULL AND actual_min>0 AND est_min>0 AND tdate>=?", (w0,)).fetchall())
+        if devs:
+            m = len(devs)
+            med = devs[m // 2] if m % 2 else (devs[m // 2 - 1] + devs[m // 2]) / 2.0
+        else:
+            med = None
         con.close()
         return _hrd_cors(jsonify({'ok': True, 'date': d, 'boxes': boxes, 'stats': {
             'n': stats['n'] or 0, 'done_n': stats['done_n'] or 0,
             'strict_done': stats['strict_done'] or 0,
             'focus_min': stats['focus_min'] or 0,
-            'est_dev': round(dev['d'], 3) if dev and dev['d'] is not None else None}}))
+            'est_dev': round(med, 3) if med is not None else None}}))
     except Exception as e:
         return _hrd_resp_err(e)
 
@@ -4135,16 +4207,19 @@ def timebox_post_api():
         con = _reloc_con()
         if act == 'add':
             slot = str(b.get('slot') or '09:00')
-            title = str(b.get('title') or '').strip()
-            est = int(b.get('est_min') or 0)
-            if not title or est <= 0:
+            if not _TB_SLOT_RE.match(slot):
                 con.close()
-                return _hrd_cors(jsonify({'ok': False, 'error': 'title and est_min required'}))
+                return _hrd_cors(jsonify({'ok': False, 'error': 'slot must be HH:MM'}))
+            title = str(b.get('title') or '').strip()[:300]
+            est = int(b.get('est_min') or 0)
+            if not title or est <= 0 or est > 24 * 60:
+                con.close()
+                return _hrd_cors(jsonify({'ok': False, 'error': 'title and est_min(1-1440) required'}))
             cur = con.execute(
                 'INSERT INTO timeboxes(tdate,slot,title,est_min,status,task_ref,created)'
                 ' VALUES(?,?,?,?,?,?,?)',
                 (b.get('date') or datetime.now().date().isoformat(), slot, title,
-                 est, 'planned', str(b.get('task_ref') or ''), now))
+                 est, 'planned', str(b.get('task_ref') or '')[:64], now))
             con.commit()
             bid = cur.lastrowid
             row = con.execute('SELECT * FROM timeboxes WHERE id=?', (bid,)).fetchone()
@@ -4158,8 +4233,23 @@ def timebox_post_api():
         st = row['status']
         if act == 'start' and st == 'planned':
             con.execute("UPDATE timeboxes SET status='doing', started_at=? WHERE id=?", (now, bid))
+        elif act == 'reset' and st == 'doing':
+            # 误点开始的回退：doing -> planned，清空计时痕迹
+            con.execute("UPDATE timeboxes SET status='planned', started_at=NULL WHERE id=?", (bid,))
+        elif act == 'update' and st == 'planned':
+            # 仅 planned 状态可改标题/估时/时段
+            title = str(b.get('title') or row['title']).strip()[:300]
+            est = int(b.get('est_min') or row['est_min'])
+            slot = str(b.get('slot') or row['slot'])
+            if not title or est <= 0 or est > 24 * 60 or not _TB_SLOT_RE.match(slot):
+                con.close()
+                return _hrd_cors(jsonify({'ok': False, 'error': 'invalid title/est_min/slot'}))
+            con.execute('UPDATE timeboxes SET title=?, est_min=?, slot=? WHERE id=?', (title, est, slot, bid))
         elif act == 'end' and st == 'doing':
             outcome = str(b.get('outcome') or 'done')
+            if outcome not in _TB_OUTCOMES:
+                con.close()
+                return _hrd_cors(jsonify({'ok': False, 'error': 'bad outcome: ' + outcome}))
             actual = int(b.get('actual_min') or 0)
             if not actual and row['started_at']:
                 try:
@@ -4167,6 +4257,8 @@ def timebox_post_api():
                     actual = max(1, round((datetime.now() - t0).total_seconds() / 60))
                 except Exception:
                     actual = row['est_min']
+            if not actual:
+                actual = row['est_min']
             con.execute('UPDATE timeboxes SET status=?, actual_min=?, ended_at=? WHERE id=?',
                         (outcome, actual, now, bid))
             tref = row['task_ref']
@@ -4182,10 +4274,7 @@ def timebox_post_api():
         con.close()
         return _hrd_cors(jsonify({'ok': True, 'box': dict(row2) if row2 else None}))
     except Exception as e:
-        return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
-
-def _hrd_resp_err(e):
-    return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
+        return _hrd_resp_err(e)
 
 # ── Relocation Bootstrap（页面令牌自动注入，2026-11-15）────────────────
 # 背景：家长要求打开迪拜搬迁台不再手工输入同步口令。
