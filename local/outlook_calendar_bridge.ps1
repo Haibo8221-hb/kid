@@ -16,8 +16,7 @@ $tok = -join ($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($SECRET)) | ForEac
 function Log($msg) {
     $line = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss') + '  ' + $msg
     Write-Output $line
-    $logDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-    Add-Content -Path (Join-Path $logDir 'outlook_bridge.log') -Value $line -Encoding UTF8
+    Add-Content -Path (Join-Path $PSScriptRoot 'outlook_bridge.log') -Value $line -Encoding UTF8
 }
 
 try {
