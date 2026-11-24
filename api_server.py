@@ -4185,12 +4185,26 @@ def calendar_sync_api():
     except Exception as e:
         return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
 
-@app.route('/api/hrd/calendar', methods=['GET', 'OPTIONS'])
+@app.route('/api/hrd/calendar', methods=['GET', 'POST', 'OPTIONS'])
 def calendar_get_api():
     if request.method == 'OPTIONS':
         resp = jsonify({}); _hrd_cors(resp); return resp
     if not _hrd_token_valid():
         return _hrd_unauthorized()
+    # POST action=dismiss：忽略（删除）单条同步日历项
+    if request.method == 'POST':
+        b = request.get_json(silent=True) or {}
+        uid = str(b.get('uid') or '').strip()
+        if not uid:
+            return _hrd_cors(jsonify({'ok': False, 'error': 'uid required'}))
+        try:
+            con = _reloc_con()
+            con.execute('DELETE FROM calendar_events WHERE uid=?', (uid[:200],))
+            con.commit()
+            con.close()
+            return _hrd_cors(jsonify({'ok': True, 'dismissed': uid[:200]}))
+        except Exception as e:
+            return _hrd_cors(jsonify({'ok': False, 'error': str(e)[:200]}))
     d = request.args.get('date') or datetime.now().date().isoformat()
     try:
         con = _reloc_con()
@@ -4329,8 +4343,8 @@ def timebox_post_api():
             con.execute('UPDATE timeboxes SET status=?, actual_min=?, ended_at=? WHERE id=?',
                         (outcome, actual, now, bid))
             tref = row['task_ref']
-            if outcome == 'done' and tref:
-                con.execute("UPDATE tasks SET status='done' WHERE id=? AND status NOT IN ('done','dropped')", (tref,))
+            if outcome == 'done' and tref.startswith('r:'):
+                con.execute("UPDATE tasks SET status='done' WHERE id=? AND status NOT IN ('done','dropped')", (tref[2:],))
         elif act in ('drop', 'delete'):
             con.execute('DELETE FROM timeboxes WHERE id=?', (bid,))
         else:

@@ -2435,10 +2435,36 @@ function viewTimebox(){
    +'<div class="toolbar" style="display:flex;gap:10px"><button class="btn" id="tbReload">刷新</button></div></div>'
    +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;align-items:stretch">'
    +'<div id="tbStats" class="card" style="padding:14px 16px;flex:1;min-width:300px">加载中…</div>'
-   +'<div class="card" style="padding:12px 16px;min-width:300px;flex:1">'
-   +'<div style="font-weight:600;font-size:15px;margin-bottom:6px">今日日程 <span style="font-size:12px;font-weight:400;color:var(--c-text-3)">Outlook 同步</span></div>'
-   +'<div id="tbCal" style="font-size:13px;line-height:1.8;color:var(--c-text-2)">加载中…</div></div>'
-   +'<div class="card" style="padding:12px 16px;min-width:300px">'
+   +'<div class="card" style="padding:14px 18px;flex:1;min-width:300px">'
+   +'<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px"><div style="font-weight:600;font-size:15px">今日日程</div>'
+   +'<span style="font-size:12px;color:var(--c-text-3)">Outlook 同步 · 点「转盒」把会议变成时间盒</span></div>'
+   +'<div id="tbCal">加载中…</div></div></div>'
+   +'<div class="card" style="padding:14px 16px;margin-bottom:14px">'
+   +'<div style="font-weight:600;margin-bottom:10px;font-size:15px">新建时间盒</div>'
+   +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+   +'<select id="tbSlot" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'+tbSlotOpts()+'</select>'
+   +'<input id="tbTitleIn" placeholder="一句话成果（能说出 done 标准的任务才进盒）" style="flex:1;min-width:240px;padding:8px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
+   +'<div id="tbEst" style="display:flex;gap:4px"></div>'
+   +'<select id="tbTask" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;max-width:230px"><option value="">关联搬迁任务（可选）</option></select>'
+   +'<label style="font-size:12px;color:var(--c-text-3);display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" id="tbTaskAll" onchange="tbLoadTasks()">显示全部</label>'
+   +'<button class="btn btn-pri" id="tbAdd">加盒</button></div></div>'
+   +'<div id="tbList" class="card" style="padding:6px 16px"></div>'
+   +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;align-items:stretch">'
+   +'<div class="card" style="padding:14px 16px;flex:1;min-width:340px">'
+   +'<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">'
+   +'<div style="font-weight:600;font-size:15px">每日复盘</div>'
+   +'<input type="date" id="drDate" style="padding:6px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
+   +'<span style="font-size:13px;color:var(--c-text-2)">今天基调：</span><span id="drMood" style="display:flex;gap:6px"></span>'
+   +'<span style="flex:1"></span><span id="drStatus" style="font-size:12.5px;color:var(--c-text-3)"></span></div>'
+   +'<div style="display:flex;flex-direction:column;gap:8px">'
+   +'<textarea id="drPass" rows="2" placeholder="① 描述经过——发生了什么？关键细节、当时的场景、原话。写细节，日后回顾才能想起场景。" style="padding:10px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;line-height:1.7;resize:vertical"></textarea>'
+   +'<textarea id="drCause" rows="2" placeholder="② 分析原因——为什么？问一个为什么，再问第二个……直到碰到有深度的启发（套路性答案=还没问到底）。" style="padding:10px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;line-height:1.7;resize:vertical"></textarea>'
+   +'<textarea id="drAction" rows="2" placeholder="③ 改进措施——提炼一个认知点或行动点。越具体越好：明天就能执行的一句话。" style="padding:10px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;line-height:1.7;resize:vertical"></textarea></div>'
+   +'<div style="display:flex;gap:10px;align-items:center;margin-top:10px">'
+   +'<button class="btn btn-pri" id="drSave">保存复盘</button>'
+   +'<span class="sub" style="font-size:12px">建议睡前 5 分钟 · 只写今天真正有感觉的事，没感觉可以只填一段</span></div>'
+   +'<div id="drRecent" style="margin-top:12px"></div></div>'
+   +'<div class="card" style="padding:12px 16px;min-width:300px;max-width:430px;flex-shrink:0">'
    +'<div style="font-weight:600;font-size:15px;margin-bottom:6px">Mood Meter · 每天给自己报 3 次坐标</div>'
    +'<svg viewBox="0 0 320 172" style="width:100%;max-width:380px;display:block">'
    +'<rect x="8" y="8" width="146" height="72" rx="8" fill="#fdeaea"/>'
@@ -2459,30 +2485,6 @@ function viewTimebox(){
    +'<text x="178" y="152" font-size="11.5" fill="#7d9c8b">提示：恢复区，别有负罪感</text>'
    +'<text x="160" y="170" font-size="10.5" fill="#9aa5b3" text-anchor="middle">纵轴 能量（低→高）· 横轴 愉悦（不愉快→愉快）· 说出精确的词 = 第一调节手段</text>'
    +'</svg></div></div>'
-   +'<div class="card" style="padding:14px 16px;margin-bottom:14px">'
-   +'<div style="font-weight:600;margin-bottom:10px;font-size:15px">新建时间盒</div>'
-   +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
-   +'<select id="tbSlot" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'+tbSlotOpts()+'</select>'
-   +'<input id="tbTitleIn" placeholder="一句话成果（能说出 done 标准的任务才进盒）" style="flex:1;min-width:240px;padding:8px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
-   +'<div id="tbEst" style="display:flex;gap:4px"></div>'
-   +'<select id="tbTask" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;max-width:230px"><option value="">关联搬迁任务（可选）</option></select>'
-   +'<label style="font-size:12px;color:var(--c-text-3);display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" id="tbTaskAll" onchange="tbLoadTasks()">显示全部</label>'
-   +'<button class="btn btn-pri" id="tbAdd">加盒</button></div></div>'
-   +'<div id="tbList" class="card" style="padding:6px 16px"></div>'
-   +'<div class="card" style="padding:14px 16px;margin-top:14px">'
-   +'<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">'
-   +'<div style="font-weight:600;font-size:15px">每日复盘</div>'
-   +'<input type="date" id="drDate" style="padding:6px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
-   +'<span style="font-size:13px;color:var(--c-text-2)">今天基调：</span><span id="drMood" style="display:flex;gap:6px"></span>'
-   +'<span style="flex:1"></span><span id="drStatus" style="font-size:12.5px;color:var(--c-text-3)"></span></div>'
-   +'<div style="display:flex;flex-direction:column;gap:8px">'
-   +'<textarea id="drPass" rows="2" placeholder="① 描述经过——发生了什么？关键细节、当时的场景、原话。写细节，日后回顾才能想起场景。" style="padding:10px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;line-height:1.7;resize:vertical"></textarea>'
-   +'<textarea id="drCause" rows="2" placeholder="② 分析原因——为什么？问一个为什么，再问第二个……直到碰到有深度的启发（套路性答案=还没问到底）。" style="padding:10px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;line-height:1.7;resize:vertical"></textarea>'
-   +'<textarea id="drAction" rows="2" placeholder="③ 改进措施——提炼一个认知点或行动点。越具体越好：明天就能执行的一句话。" style="padding:10px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;line-height:1.7;resize:vertical"></textarea></div>'
-   +'<div style="display:flex;gap:10px;align-items:center;margin-top:10px">'
-   +'<button class="btn btn-pri" id="drSave">保存复盘</button>'
-   +'<span class="sub" style="font-size:12px">建议睡前 5 分钟 · 只写今天真正有感觉的事，没感觉可以只填一段</span></div>'
-   +'<div id="drRecent" style="margin-top:12px"></div></div>'
    +'<div class="sub" style="margin-top:12px;color:var(--tx3);font-size:12.5px;line-height:1.7">'
    +'方法要点：盒到点必须主动决策而不是漂移；估时偏差每周复盘——偏差越低说明你对任务耗时的直觉越准；每盒只装一件事，小任务合并进同一个盒。</div>';
 }
@@ -2545,36 +2547,41 @@ function tbLoad(){
   }).catch(function(e){ $('#tbStats').textContent='加载失败：'+e; });
 }
 function tbLoadTasks(){
-  tbFetch('/api/hrd/reloc/summary').then(function(j){
-    if(!j||!j.ok||!j.tasks) return;
-    var sel=$('#tbTask'); if(!sel) return;
+  var sel=$('#tbTask'); if(!sel) return;
+  var showAll=$('#tbTaskAll') && $('#tbTaskAll').checked;
+  var today=tbTodayStr();
+  var wk=new Date(Date.now()+7*864e5);
+  var wkStr=wk.getFullYear()+'-'+('0'+(wk.getMonth()+1)).slice(-2)+'-'+('0'+wk.getDate()).slice(-2);
+  var g={over:[],today:[],week:[],later:[]};
+  function push(due,title,val){
+    var d=String(due||'').slice(0,10);
+    var item={title:title,val:val,due:d};
+    if(!d||d>wkStr) g.later.push(item);
+    else if(d<today) g.over.push(item);
+    else if(d===today) g.today.push(item);
+    else g.week.push(item);
+  }
+  // 源1：工作台主待办（本地 tasks 表，状态非 已完成/已取消/暂停）
+  (state.data.tasks||[]).forEach(function(t){
+    if(t._deleted) return;
+    var st=t['状态']; if(st==='已完成'||st==='已取消'||st==='暂停') return;
+    push(t['截止'], (t['标题']||'').slice(0,36)+(t['优先级']?' ['+t['优先级']+']':''), 't:'+t._id);
+  });
+  function render(){
     while(sel.options.length>1) sel.remove(1);
-    var open=j.tasks.filter(function(t){return ['todo','doing','research','waiting_on','blocked'].indexOf(t.status)>=0;});
-    var today=tbTodayStr();
-    var wk=new Date(Date.now()+7*864e5);
-    var wkStr=wk.getFullYear()+'-'+('0'+(wk.getMonth()+1)).slice(-2)+'-'+('0'+wk.getDate()).slice(-2);
-    var g={over:[],today:[],week:[],later:[]};
-    open.forEach(function(t){
-      var d=t.due||'';
-      if(!d||d>wkStr) g.later.push(t);
-      else if(d<today) g.over.push(t);
-      else if(d===today) g.today.push(t);
-      else g.week.push(t);
-    });
     function fill(list,label,warn){
       if(!list.length) return;
-      list.sort(function(a,b){return (a.due||'9999')<(b.due||'9999')?-1:1;});
+      list.sort(function(a,b){return a.due<b.due?-1:1;});
       var og=document.createElement('optgroup');
       og.label=label+(warn?' ⚠':'')+'（'+list.length+'）';
-      list.forEach(function(t){
-        var o=document.createElement('option'); o.value=t.id;
-        o.textContent=t.id+' · '+t.title.slice(0,30)+(t.due?'（'+t.due.slice(5)+'）':'');
+      list.forEach(function(it){
+        var o=document.createElement('option'); o.value=it.val;
+        o.textContent=it.title+(it.due?'（'+it.due.slice(5)+'）':'');
         if(warn) o.style.color='#c0392b';
         og.appendChild(o);
       });
       sel.appendChild(og);
     }
-    var showAll=$('#tbTaskAll') && $('#tbTaskAll').checked;
     fill(g.over,'逾期',true); fill(g.today,'今天待办'); fill(g.week,'未来7天');
     if(showAll) fill(g.later,'之后/未设日期');
     else if(g.later.length){
@@ -2582,6 +2589,16 @@ function tbLoadTasks(){
       og.label='之后/未设日期（'+g.later.length+'项，勾选"显示全部"可见）';
       sel.appendChild(og);
     }
+  }
+  render();
+  // 源2：搬迁任务图（异步补充，〔搬迁〕标记）
+  tbFetch('/api/hrd/reloc/summary').then(function(j){
+    if(!j||!j.ok||!j.tasks) return;
+    j.tasks.forEach(function(t){
+      if(['todo','doing','research','waiting_on','blocked'].indexOf(t.status)<0) return;
+      push(t.due, '〔搬迁〕'+t.id+' · '+String(t.title||'').slice(0,30), 'r:'+t.id);
+    });
+    render();
   }).catch(function(){});
 }
 function tbSetEst(min){
@@ -2611,26 +2628,56 @@ function tbCalToBox(ev){
   tbSetEst(est);
   $('#tbTitleIn').focus();
 }
+function tbCalDismiss(uid,row){
+  tbFetch('/api/hrd/calendar',{method:'POST',body:JSON.stringify({action:'dismiss',uid:uid})}).then(function(j){
+    if(j&&j.ok){
+      row.style.transition='opacity .25s, max-height .25s'; row.style.opacity='0';
+      setTimeout(function(){ row.remove(); var el=$('#tbCal'); if(el&&!el.children.length) el.textContent='今日无日程（未同步或空闲）'; },250);
+    } else { alert('忽略失败：'+((j&&j.error)||'')); }
+  }).catch(function(e){ alert('网络错误：'+e); });
+}
+function tbCalBtn(label,fn,primary){
+  var b=document.createElement('button');
+  b.textContent=label;
+  b.style.cssText='padding:2px 12px;font-size:12px;border-radius:14px;border:1px solid var(--c-border-3);background:transparent;color:'+(primary?'#2f6fed':'var(--c-text-3)')+';cursor:pointer;white-space:nowrap';
+  b.onmouseenter=function(){ b.style.borderColor=primary?'#2f6fed':'#c0392b'; b.style.color=primary?'#2f6fed':'#c0392b'; };
+  b.onmouseleave=function(){ b.style.borderColor='var(--c-border-3)'; b.style.color=primary?'#2f6fed':'var(--c-text-3)'; };
+  b.onclick=fn;
+  return b;
+}
 function tbLoadCal(){
   var el=$('#tbCal'); if(!el) return;
   tbFetch('/api/hrd/calendar?date='+tbTodayStr()).then(function(j){
     if(!j||!j.ok){ el.textContent='日程加载失败'; return; }
     el.textContent='';
-    if(!j.events.length&&!j.all_day.length){ el.textContent='今日无日程（未同步或空闲）'; return; }
+    if(!j.events.length&&!j.all_day.length){
+      var empty=document.createElement('div');
+      empty.style.cssText='color:var(--c-text-3);padding:4px 2px;font-size:13px';
+      empty.textContent='今日无日程（未同步或空闲）';
+      el.appendChild(empty); return;
+    }
     j.all_day.forEach(function(ev){
-      var d=document.createElement('div'); d.textContent='· 全天：'+ev.subject; el.appendChild(d);
+      var d=document.createElement('div');
+      d.style.cssText='padding:6px 12px;margin:4px 0;border-radius:10px;background:var(--c-border-4);font-size:13px;color:var(--c-text-2)';
+      d.textContent='全天 · '+ev.subject;
+      el.appendChild(d);
     });
     j.events.forEach(function(ev){
       var row=document.createElement('div');
-      row.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+      row.style.cssText='display:flex;gap:10px;align-items:center;padding:7px 12px;margin:4px 0;border-radius:10px;background:var(--c-border-4);flex-wrap:wrap';
       var t=document.createElement('span');
-      t.style.cssText='color:var(--c-text-3);white-space:nowrap;font-variant-numeric:tabular-nums';
-      t.textContent=ev.start_time+'–'+ev.end_time;
-      var s=document.createElement('span'); s.textContent=ev.subject+(ev.location?'（'+ev.location+'）':'');
-      var b=document.createElement('button'); b.className='btn'; b.style.cssText='padding:1px 10px;font-size:12px';
-      b.textContent='转盒';
-      b.onclick=function(){ tbCalToBox(ev); };
-      row.appendChild(t); row.appendChild(s); row.appendChild(b);
+      t.style.cssText='font-size:12.5px;color:var(--c-text-3);white-space:nowrap;font-variant-numeric:tabular-nums;min-width:96px';
+      t.textContent=ev.start_time+' – '+ev.end_time;
+      var s=document.createElement('span');
+      s.style.cssText='flex:1;min-width:160px;font-size:13.5px;color:var(--c-text)';
+      s.textContent=ev.subject||'（无主题）';
+      var loc=document.createElement('span');
+      if(ev.location){ loc.style.cssText='font-size:12px;color:var(--c-text-3)'; loc.textContent=ev.location; }
+      var spacer=document.createElement('span'); spacer.style.cssText='flex:1';
+      row.appendChild(t); row.appendChild(s); if(ev.location) row.appendChild(loc);
+      row.appendChild(spacer);
+      row.appendChild(tbCalBtn('转盒',function(){ tbCalToBox(ev); },true));
+      row.appendChild(tbCalBtn('忽略',function(){ tbCalDismiss(ev.uid,row); },false));
       el.appendChild(row);
     });
   }).catch(function(e){ el.textContent='日程加载失败：'+e; });
@@ -2655,6 +2702,19 @@ function tbAct(a,id,o){
   }
   tbFetch('/api/hrd/timebox',{method:'POST',body:JSON.stringify(body)}).then(function(j){
     if(!j.ok){ alert('操作失败：'+(j.error||'')); return; }
+    // 完成盒时联动：task_ref 为 t: 前缀 = 工作台主待办，本地更新（后端只处理 r: 搬迁任务）
+    if(a==='end'&&o==='done'){
+      var box=null;
+      (tbState.boxes||[]).forEach(function(b){ if(String(b.id)===String(id)) box=b; });
+      var ref=(box&&box.task_ref)||'';
+      if(ref.slice(0,2)==='t:'){
+        var tid=ref.slice(2), changed=false;
+        (state.data.tasks||[]).forEach(function(r){
+          if(r._id===tid&&!r._deleted){ r['状态']='已完成'; r['进度']='100'; r['完成日']=tbTodayStr(); changed=true; }
+        });
+        if(changed&&typeof saveData==='function'){ saveData('tasks',state.data.tasks); renderContent(); }
+      }
+    }
     tbLoad();
   }).catch(function(e){ alert('网络错误：'+e); });
 }
