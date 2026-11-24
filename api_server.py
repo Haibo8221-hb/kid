@@ -4364,6 +4364,13 @@ def timebox_post_api():
             tref = row['task_ref']
             if outcome == 'done' and tref.startswith('r:'):
                 con.execute("UPDATE tasks SET status='done' WHERE id=? AND status NOT IN ('done','dropped')", (tref[2:],))
+        elif act == 'edit_actual' and st in ('done', 'overflow'):
+            # 已完成/超时续的盒允许修正实际用时（统计口径按修正值重算）
+            actual = int(b.get('actual_min') or 0)
+            if not (1 <= actual <= 24 * 60):
+                con.close()
+                return _hrd_cors(jsonify({'ok': False, 'error': 'actual_min must be 1-1440'}))
+            con.execute('UPDATE timeboxes SET actual_min=? WHERE id=?', (actual, bid))
         elif act in ('drop', 'delete'):
             con.execute('DELETE FROM timeboxes WHERE id=?', (bid,))
         else:

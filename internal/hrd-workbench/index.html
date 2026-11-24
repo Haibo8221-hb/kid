@@ -2445,7 +2445,7 @@ function viewTimebox(){
    +'<select id="tbSlot" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'+tbSlotOpts()+'</select>'
    +'<input id="tbTitleIn" placeholder="一句话成果（能说出 done 标准的任务才进盒）" style="flex:1;min-width:240px;padding:8px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
    +'<div id="tbEst" style="display:flex;gap:4px"></div>'
-   +'<select id="tbTask" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;max-width:230px"><option value="">关联搬迁任务（可选）</option></select>'
+   +'<select id="tbTask" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;max-width:230px"><option value="">关联待办任务（可选）</option></select>'
    +'<label style="font-size:12px;color:var(--c-text-3);display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" id="tbTaskAll" onchange="tbLoadTasks()">显示全部</label>'
    +'<button class="btn btn-pri" id="tbAdd">加盒</button></div></div>'
    +'<div id="tbList" class="card" style="padding:6px 16px"></div>'
@@ -2464,26 +2464,30 @@ function viewTimebox(){
    +'<button class="btn btn-pri" id="drSave">保存复盘</button>'
    +'<span class="sub" style="font-size:12px">建议睡前 5 分钟 · 只写今天真正有感觉的事，没感觉可以只填一段</span></div>'
    +'<div id="drRecent" style="margin-top:12px"></div></div>'
-   +'<div class="card" style="padding:12px 16px;min-width:300px;max-width:430px;flex-shrink:0">'
+   +'<div class="card" style="padding:12px 16px;flex:1;min-width:300px;max-width:620px">'
    +'<div style="font-weight:600;font-size:15px;margin-bottom:6px">Mood Meter · 每天给自己报 3 次坐标</div>'
-   +'<svg viewBox="0 0 320 172" style="width:100%;max-width:380px;display:block">'
-   +'<rect x="8" y="8" width="146" height="72" rx="8" fill="#fdeaea"/>'
-   +'<text x="20" y="30" font-size="13" font-weight="600" fill="#c33">红 · 高能量+不愉快</text>'
-   +'<text x="20" y="50" font-size="12.5" fill="#8c4a4a">愤怒 / 焦虑 / 紧张</text>'
-   +'<text x="20" y="68" font-size="11.5" fill="#b08080">提示：先精确命名，再选策略</text>'
-   +'<rect x="166" y="8" width="146" height="72" rx="8" fill="#fdf6e3"/>'
-   +'<text x="178" y="30" font-size="13" font-weight="600" fill="#b97a10">黄 · 高能量+愉快</text>'
-   +'<text x="178" y="50" font-size="12.5" fill="#8a6d3b">兴奋 / 热情 / 喜悦</text>'
-   +'<text x="178" y="68" font-size="11.5" fill="#a89a72">提示：趁势推进重要工作</text>'
-   +'<rect x="8" y="92" width="146" height="72" rx="8" fill="#e8eef7"/>'
-   +'<text x="20" y="114" font-size="13" font-weight="600" fill="#4a6fa5">蓝 · 低能量+不愉快</text>'
-   +'<text x="20" y="134" font-size="12.5" fill="#64748f">疲惫 / 沮丧 / 低落</text>'
-   +'<text x="20" y="152" font-size="11.5" fill="#8b98ad">提示：允许存在，别硬扛</text>'
-   +'<rect x="166" y="92" width="146" height="72" rx="8" fill="#e8f6ee"/>'
-   +'<text x="178" y="114" font-size="13" font-weight="600" fill="#18a058">绿 · 低能量+愉快</text>'
-   +'<text x="178" y="134" font-size="12.5" fill="#4f7f65">平静 / 满足 / 放松</text>'
-   +'<text x="178" y="152" font-size="11.5" fill="#7d9c8b">提示：恢复区，别有负罪感</text>'
-   +'<text x="160" y="170" font-size="10.5" fill="#9aa5b3" text-anchor="middle">纵轴 能量（低→高）· 横轴 愉悦（不愉快→愉快）· 说出精确的词 = 第一调节手段</text>'
+   +'<svg viewBox="0 0 660 162" style="width:100%;max-width:600px;display:block">'
+   +'<rect x="8" y="6" width="152" height="122" rx="8" fill="#fdeaea"/>'
+   +'<text x="84" y="34" font-size="20" font-weight="700" fill="#c33" text-anchor="middle">红 · 高能量</text>'
+   +'<text x="84" y="58" font-size="16" fill="#8c4a4a" text-anchor="middle">不愉快</text>'
+   +'<text x="84" y="86" font-size="15.5" fill="#6d3d3d" text-anchor="middle">愤怒/焦虑/紧张</text>'
+   +'<text x="84" y="112" font-size="15" fill="#b08080" text-anchor="middle">先命名，再选策略</text>'
+   +'<rect x="172" y="6" width="152" height="122" rx="8" fill="#fdf6e3"/>'
+   +'<text x="248" y="34" font-size="20" font-weight="700" fill="#b97a10" text-anchor="middle">黄 · 高能量</text>'
+   +'<text x="248" y="58" font-size="16" fill="#8a6d3b" text-anchor="middle">愉快</text>'
+   +'<text x="248" y="86" font-size="15.5" fill="#8a6d3b" text-anchor="middle">兴奋/热情/喜悦</text>'
+   +'<text x="248" y="112" font-size="15" fill="#a89a72" text-anchor="middle">趁势推进重要工作</text>'
+   +'<rect x="336" y="6" width="152" height="122" rx="8" fill="#e8eef7"/>'
+   +'<text x="412" y="34" font-size="20" font-weight="700" fill="#4a6fa5" text-anchor="middle">蓝 · 低能量</text>'
+   +'<text x="412" y="58" font-size="16" fill="#64748f" text-anchor="middle">不愉快</text>'
+   +'<text x="412" y="86" font-size="15.5" fill="#64748f" text-anchor="middle">疲惫/沮丧/低落</text>'
+   +'<text x="412" y="112" font-size="15" fill="#8b98ad" text-anchor="middle">允许存在，别硬扛</text>'
+   +'<rect x="500" y="6" width="152" height="122" rx="8" fill="#e8f6ee"/>'
+   +'<text x="576" y="34" font-size="20" font-weight="700" fill="#18a058" text-anchor="middle">绿 · 低能量</text>'
+   +'<text x="576" y="58" font-size="16" fill="#4f7f65" text-anchor="middle">愉快</text>'
+   +'<text x="576" y="86" font-size="15.5" fill="#4f7f65" text-anchor="middle">平静/满足/放松</text>'
+   +'<text x="576" y="112" font-size="15" fill="#7d9c8b" text-anchor="middle">恢复区，别有负罪感</text>'
+   +'<text x="330" y="150" font-size="14" fill="#9aa5b3" text-anchor="middle">纵轴 能量（低→高）· 横轴 愉悦（不愉快→愉快）· 说出精确的词 = 第一调节手段</text>'
    +'</svg></div></div>'
    +'<div class="sub" style="margin-top:12px;color:var(--tx3);font-size:12.5px;line-height:1.7">'
    +'方法要点：盒到点必须主动决策而不是漂移；估时偏差每周复盘——偏差越低说明你对任务耗时的直觉越准；每盒只装一件事，小任务合并进同一个盒。</div>';
@@ -2514,6 +2518,7 @@ function tbRenderList(){
     var btns='';
     if(b.status==='planned') btns='<button class="btn btn-pri tbB" data-a="start" data-id="'+b.id+'">开始</button><button class="btn tbB" data-a="update" data-id="'+b.id+'">改</button><button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
     else if(b.status==='doing') btns='<button class="btn tbB" data-a="end" data-o="done" data-id="'+b.id+'">完成</button><button class="btn tbB" data-a="end" data-o="overflow" data-id="'+b.id+'">超时续</button><button class="btn tbB" data-a="end" data-o="dropped" data-id="'+b.id+'">放弃</button><button class="btn tbB" data-a="reset" data-id="'+b.id+'">回退</button>';
+    else if(b.status==='done'||b.status==='overflow') btns='<button class="btn tbB" data-a="edit_actual" data-id="'+b.id+'">改实际</button><button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
     else btns='<button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
     var doingTx = b.status==='doing'? '<span style="font-size:12.5px;color:#2f6fed">已进行 '+mm+' 分 / '+esc(b.est_min)+' 分</span>' : '';
     var refTx = b.task_ref? '<span style="font-size:12px;color:var(--c-text-3);background:var(--c-border-4);padding:1px 8px;border-radius:8px">'+esc(b.task_ref)+'</span>' : '';
@@ -2686,6 +2691,15 @@ function tbLoadCal(){
 function tbAct(a,id,o){
   var body={action:a,id:parseInt(id,10)};
   if(a==='end') body.outcome=o;
+  if(a==='edit_actual'){
+    var bx=null;
+    (tbState.boxes||[]).forEach(function(b){ if(String(b.id)===String(id)) bx=b; });
+    var na=prompt('修正实际用时（分钟，正整数）：', bx&&bx.actual_min? bx.actual_min : '');
+    if(na===null) return;
+    na=parseInt(na,10);
+    if(!(na>0 && na<=1440)){ alert('实际用时须为 1-1440 的分钟数'); return; }
+    body.actual_min=na;
+  }
   if(a==='update'){
     var box=null;
     (tbState.boxes||[]).forEach(function(b){ if(String(b.id)===String(id)) box=b; });
