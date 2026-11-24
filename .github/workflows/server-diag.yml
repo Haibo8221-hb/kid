@@ -72,6 +72,14 @@ jobs:
                 echo "hrd_token.txt ABSENT"
               fi
               echo
+              echo "===== 主待办真源核查（GET /api/hrd/state 的 tasks）====="
+              TOK=$(cat /www/wwwroot/kid/data/hrd_token.txt 2>/dev/null | tr -d '\n')
+              if [ -n "$TOK" ]; then
+                curl -s -m 15 -H "X-HRD-Token: $TOK" "http://127.0.0.1:5000/api/hrd/state" | python3 -c "import sys,json; d=json.load(sys.stdin); ts=((d.get('data') or {}).get('tasks')) or []; op=[r for r in ts if not r.get('_deleted') and r.get('状态') not in ('已完成','已取消','暂停')]; man=[r for r in op if r.get('_src')=='manual']; print('server tasks total:',len(ts),'| open:',len(op),'| open&manual:',len(man)); [print('  -',str(r.get('标题'))[:36],'| due:',r.get('截止'),'| st:',r.get('状态'),'| src:',r.get('_src')) for r in op[:12]]"
+              else
+                echo "hrd_token.txt ABSENT"
+              fi
+              echo
               echo "===== nginx 域名入口实际服务的 /hrd/ 页面（带 Host 头自测）====="
               curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "function tbFetch" || echo "0 (tbFetch not in served page)"
               curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "function tbStopTimer" || echo "0"
