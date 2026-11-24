@@ -2403,8 +2403,19 @@ var tbState={boxes:[],stats:{},timer:null};
 function tbFetch(url,opts){
   opts=opts||{};
   var h=rHeaders(); h['Content-Type']='application/json';
-  return fetch(url,{method:opts.method||'GET',headers:h,body:opts.body||undefined,cache:'no-store'})
-    .then(function(r){ return r.json().catch(function(){ return {ok:false,error:'响应不是 JSON（HTTP '+r.status+'）'}; }); });
+  function go(){
+    return fetch(url,{method:opts.method||'GET',headers:h,body:opts.body||undefined,cache:'no-store'})
+      .then(function(r){ return r.json().catch(function(){ return {ok:false,error:'响应不是 JSON（HTTP '+r.status+'）'}; }); });
+  }
+  /* 网络层失败（Failed to fetch = 连接未完成，非服务器应答）：1 秒后自动重试一次；
+     仍失败才抛给界面，提示文案给出可操作建议。 */
+  return go().catch(function(e1){
+    if(!(e1 instanceof TypeError)) throw e1;
+    return new Promise(function(res){ setTimeout(res,1000); }).then(go).catch(function(e2){
+      if(!(e2 instanceof TypeError)) throw e2;
+      throw new Error('网络连接失败（请求未能到达服务器）。多为网络波动——可重试一次或刷新页面；若持续出现请检查网络/VPN。');
+    });
+  });
 }
 /* 离开时间盒页时清理轮询定时器，防止回调访问已销毁 DOM 持续报错 */
 function tbStopTimer(){ if(tbState.timer){ clearInterval(tbState.timer); tbState.timer=null; } }
