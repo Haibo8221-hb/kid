@@ -2399,7 +2399,7 @@ function renderRelocView(){
 var tbEstSel=50;
 /* P0 修复（2026-11-24）：tbFetch / tbState 此前未定义，时间盒页一打开即
    ReferenceError。tbFetch 复用 rHeaders()（X-HRD-Token，与 reloc 同步通道一致）。 */
-var tbState={boxes:[],stats:{},timer:null};
+var tbState={boxes:[],stats:{},timer:null,tpl:[],week:[],weekMon:null};
 function tbFetch(url,opts){
   opts=opts||{};
   var h=rHeaders(); h['Content-Type']='application/json';
@@ -2459,7 +2459,27 @@ function viewTimebox(){
    +'<select id="tbTask" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px;max-width:230px"><option value="">关联待办任务（可选）</option></select>'
    +'<label style="font-size:12px;color:var(--c-text-3);display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" id="tbTaskAll">显示全部</label>'
    +'<button class="btn btn-pri" id="tbAdd">加盒</button></div></div>'
+   +'<div id="tbTpl" class="card" style="padding:14px 16px;margin-bottom:14px">'
+   +'<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap"><div style="font-weight:600;font-size:15px">每日重复模板</div>'
+   +'<span style="font-size:12px;color:var(--c-text-3)">固定日程每天自动进盒（当天首次打开页面时落地）· 当天删掉的盒不会复活</span></div>'
+   +'<div id="tbTplList"></div>'
+   +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--c-border-3)">'
+   +'<select id="tbTplSlot" style="padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'+tbSlotOpts()+'</select>'
+   +'<input id="tbTplTitle" placeholder="每天固定做的事，如：晨间规划 / 收尾整理" style="flex:1;min-width:220px;padding:8px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:16px">'
+   +'<input id="tbTplEst" type="number" min="5" max="1440" value="30" style="width:78px;padding:8px 10px;border:1px solid var(--c-border);border-radius:8px;font-size:16px"><span style="font-size:13px;color:var(--c-text-3)">分钟</span>'
+   +'<span id="tbTplDays" style="display:flex;gap:4px;flex-wrap:wrap"></span>'
+   +'<button class="btn btn-pri" id="tbTplAdd">存为重复</button></div></div>'
    +'<div id="tbList" class="card" style="padding:6px 16px"></div>'
+   +'<div id="tbWeek" class="card" style="padding:14px 16px;margin-top:14px">'
+   +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">'
+   +'<div style="font-weight:600;font-size:15px">周视图</div>'
+   +'<span style="font-size:12px;color:var(--c-text-3)">一周各天的时间安排</span>'
+   +'<span style="flex:1"></span>'
+   +'<button class="btn" id="tbWkPrev">‹ 上周</button>'
+   +'<span id="tbWkLabel" style="font-size:14px;font-weight:600;color:var(--c-navy)"></span>'
+   +'<button class="btn" id="tbWkNow">本周</button>'
+   +'<button class="btn" id="tbWkNext">下周 ›</button></div>'
+   +'<div id="tbWeekGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px"></div></div>'
    +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;align-items:stretch">'
    +'<div class="card" style="padding:14px 16px;flex:1;min-width:340px">'
    +'<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">'
@@ -2795,6 +2815,110 @@ function drSave(){
     tbFetch('/api/hrd/dayreview?date='+d).then(function(j2){ if(j2.ok) drRenderRecent(j2.recent); }).catch(function(){});
   }).catch(function(e){ $('#drStatus').textContent='保存失败：'+e; });
 }
+/* ---- 每日重复模板 + 周视图（2026-11-25）---- */
+var TB_DAYS=['周一','周二','周三','周四','周五','周六','周日'];
+var tbTplDaysSel=[0,1,2,3,4]; /* 添加表单默认勾选工作日 */
+function tbMonOf(ds){
+  var t=new Date(ds+'T00:00:00'); if(isNaN(t.getTime())) return tbTodayStr();
+  t.setDate(t.getDate()-((t.getDay()+6)%7));
+  return t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2);
+}
+function tbTplLoad(){
+  tbFetch('/api/hrd/timebox/templates').then(function(j){
+    if(!j.ok) return;
+    tbState.tpl=j.templates||[]; tbTplRender();
+  }).catch(function(){});
+}
+function tbTplRender(){
+  var el=$('#tbTplList'); var ts=tbState.tpl||[];
+  if(!ts.length){ el.innerHTML='<div style="padding:8px 0;color:var(--c-text-3);font-size:13px">还没有模板——把每天固定要做的事（晨间规划、收尾整理、固定准备）存成模板，当天首次打开页面自动进盒。</div>'; return; }
+  var h='';
+  ts.forEach(function(t){
+    var days=(t.weekdays||'').split(',').filter(Boolean).map(function(x){return TB_DAYS[+x]||x;}).join('、');
+    h+='<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--c-border-3);flex-wrap:wrap">'
+      +'<span style="font-weight:600;color:var(--c-navy);min-width:52px">'+esc(t.slot)+'</span>'
+      +'<span style="flex:1;min-width:180px;font-size:14.5px;'+(t.enabled?'':'opacity:.45')+'">'+esc(t.title)+' <span style="font-size:12px;color:var(--c-text-3)">'+esc(t.est_min)+' 分</span></span>'
+      +'<span style="font-size:12px;color:var(--c-text-3)">'+esc(days)+'</span>'
+      +'<span style="font-size:12px;color:'+(t.enabled?'#18a058':'var(--c-text-3)')+'">'+(t.enabled?'启用':'停用')+'</span>'
+      +'<span style="display:flex;gap:6px"><button class="btn tbT" data-a="toggle" data-id="'+t.id+'">'+(t.enabled?'停用':'启用')+'</button><button class="btn tbT" data-a="delete" data-id="'+t.id+'">删</button></span></div>';
+  });
+  el.innerHTML=h;
+  Array.prototype.forEach.call(document.querySelectorAll('.tbT'),function(x){
+    x.onclick=function(){ tbTplAct(x.getAttribute('data-a'),x.getAttribute('data-id')); };
+  });
+}
+function tbTplAct(a,id){
+  tbFetch('/api/hrd/timebox/templates',{method:'POST',body:JSON.stringify({action:a,id:parseInt(id,10)})}).then(function(j){
+    if(!j.ok){ alert('操作失败：'+(j.error||'')); return; }
+    tbTplLoad(); tbWeekLoad();
+  }).catch(function(e){ alert('网络错误：'+e); });
+}
+function tbTplAdd(){
+  var title=($('#tbTplTitle').value||'').trim();
+  if(!title){ alert('请填写任务标题'); return; }
+  var est=parseInt($('#tbTplEst').value,10);
+  if(!(est>0&&est<=1440)){ alert('估时须为 1-1440 分钟'); return; }
+  if(!tbTplDaysSel.length){ alert('请至少选择一个重复的星期'); return; }
+  tbFetch('/api/hrd/timebox/templates',{method:'POST',body:JSON.stringify({action:'add',slot:$('#tbTplSlot').value,title:title,est_min:est,weekdays:tbTplDaysSel.join(',')})}).then(function(j){
+    if(!j.ok){ alert('保存失败：'+(j.error||'')); return; }
+    $('#tbTplTitle').value=''; $('#tbTplEst').value=30;
+    tbTplLoad();
+    tbWeekLoad(tbMonOf(tbTodayStr())); /* 新模板当天即生效：回本周触发自动落地 */
+    tbLoad();
+  }).catch(function(e){ alert('网络错误：'+e); });
+}
+function tbTplDaysRender(){
+  var el=$('#tbTplDays'); if(!el) return; var h='';
+  for(var i=0;i<7;i++){
+    var on=tbTplDaysSel.indexOf(i)>=0;
+    h+='<span data-d="'+i+'" class="tbD" style="padding:6px 9px;border-radius:8px;font-size:13px;cursor:pointer;user-select:none;border:1px solid '+(on?'var(--c-navy)':'var(--c-border)')+';color:'+(on?'var(--c-navy)':'var(--c-text-3)')+';background:'+(on?'var(--c-border-4)':'transparent')+'">'+TB_DAYS[i]+'</span>';
+  }
+  el.innerHTML=h;
+  Array.prototype.forEach.call(el.querySelectorAll('.tbD'),function(x){
+    x.onclick=function(){ var d=+x.getAttribute('data-d'); var ix=tbTplDaysSel.indexOf(d); if(ix>=0) tbTplDaysSel.splice(ix,1); else tbTplDaysSel.push(d); tbTplDaysRender(); };
+  });
+}
+function tbWeekLoad(mon){
+  tbFetch('/api/hrd/timebox?week='+(mon||tbState.weekMon||tbMonOf(tbTodayStr()))).then(function(j){
+    if(!j.ok){ var g=$('#tbWeekGrid'); if(g) g.textContent='加载失败：'+(j.error||''); return; }
+    tbState.week=j.boxes||[]; tbState.weekMon=j.week_start;
+    tbWeekRender();
+  }).catch(function(e){ var g=$('#tbWeekGrid'); if(g) g.textContent='加载失败：'+e; });
+}
+function tbWeekShift(n){
+  var t=new Date((tbState.weekMon||tbMonOf(tbTodayStr()))+'T00:00:00'); t.setDate(t.getDate()+n);
+  tbWeekLoad(tbMonOf(t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2)));
+}
+function tbWeekRender(){
+  var el=$('#tbWeekGrid'); if(!el) return;
+  var mon=tbState.weekMon||tbMonOf(tbTodayStr());
+  var m0=new Date(mon+'T00:00:00');
+  var today=tbTodayStr();
+  var byDay={};
+  (tbState.week||[]).forEach(function(b){ (byDay[b.tdate]=byDay[b.tdate]||[]).push(b); });
+  var stc={planned:'#f0f2f6',doing:'#eef3fd',done:'#e8f6ee',overflow:'#fdf2e2',dropped:'#fbe9e9'};
+  var h='';
+  for(var i=0;i<7;i++){
+    var dt=new Date(m0.getTime()); dt.setDate(dt.getDate()+i);
+    var ds=dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+('0'+dt.getDate()).slice(-2);
+    var bs=(byDay[ds]||[]).sort(function(a,b){return a.slot<b.slot?-1:1;});
+    var isToday=ds===today;
+    h+='<div style="border:1px solid '+(isToday?'var(--c-navy)':'var(--c-border-3)')+';background:'+(isToday?'var(--c-border-4)':'transparent')+';border-radius:10px;padding:8px;min-height:110px">'
+      +'<div style="font-weight:600;font-size:13px;color:'+(isToday?'var(--c-navy)':'var(--c-text-2)')+';margin-bottom:6px">'+TB_DAYS[i]+' '+(dt.getMonth()+1)+'/'+dt.getDate()+(isToday?' · 今':'')+'</div>';
+    if(!bs.length){ h+='<div style="font-size:12px;color:var(--c-text-3)">—</div>'; }
+    else{
+      bs.forEach(function(b){
+        var tt=b.title.length>16? b.title.slice(0,16)+'…' : b.title;
+        h+='<div title="'+esc(b.title)+' · '+esc(b.slot)+'" style="font-size:12px;line-height:1.5;background:'+(stc[b.status]||stc.planned)+';border-radius:6px;padding:3px 6px;margin-bottom:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis"><b>'+esc(b.slot)+'</b> '+esc(tt)+'</div>';
+      });
+    }
+    h+='</div>';
+  }
+  el.innerHTML=h;
+  var e2=new Date(m0.getTime()); e2.setDate(e2.getDate()+6);
+  var ds2=e2.getFullYear()+'-'+('0'+(e2.getMonth()+1)).slice(-2)+'-'+('0'+e2.getDate()).slice(-2);
+  $('#tbWkLabel').textContent=mon.slice(5)+' ~ '+ds2.slice(5);
+}
 function renderTimeboxView(){
   var c=$('#content'); c.innerHTML=viewTimebox();
   var estEl=$('#tbEst');
@@ -2818,7 +2942,13 @@ function renderTimeboxView(){
   /* 显示全部开关：必须用 JS 属性绑定——脚本在 IIFE 闭包内，tbLoadTasks 非全局，
      内联 onchange="tbLoadTasks()" 会因全局找不到函数而静默失效 */
   var tbAll=$('#tbTaskAll'); if(tbAll) tbAll.onchange=function(){ tbLoadTasks(); };
-  tbLoad(); tbLoadTasks(); tbLoadCal(); drInit();
+  /* 每日重复模板 + 周视图绑定（JS 属性绑定，闭包内可达） */
+  $('#tbTplAdd').onclick=tbTplAdd;
+  $('#tbWkPrev').onclick=function(){ tbWeekShift(-7); };
+  $('#tbWkNext').onclick=function(){ tbWeekShift(7); };
+  $('#tbWkNow').onclick=function(){ tbWeekLoad(tbMonOf(tbTodayStr())); };
+  tbTplDaysRender();
+  tbLoad(); tbTplLoad(); tbWeekLoad(); tbLoadTasks(); tbLoadCal(); drInit();
 }
 function refreshAll(){ renderNav(); renderTopbar(); renderContent(); }
 

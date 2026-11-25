@@ -4073,6 +4073,17 @@ def _ensure_tb_schema():
         ended_at TEXT
     )''')
     con.execute("CREATE INDEX IF NOT EXISTS idx_timeboxes_tdate ON timeboxes(tdate)")
+    # 每日重复时间盒模板（2026-11-25）：固定时段任务按星期自动重复进盒
+    con.execute('''CREATE TABLE IF NOT EXISTS timebox_templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slot TEXT DEFAULT '09:00',
+        title TEXT NOT NULL,
+        est_min INTEGER NOT NULL DEFAULT 50,
+        weekdays TEXT NOT NULL DEFAULT '0,1,2,3,4',
+        enabled INTEGER NOT NULL DEFAULT 1,
+        last_applied TEXT DEFAULT '',
+        created TEXT
+    )''')
     con.execute('''CREATE TABLE IF NOT EXISTS daily_reviews (
         rdate TEXT PRIMARY KEY,
         mood TEXT DEFAULT '',
@@ -4242,6 +4253,37 @@ def calendar_get_api():
 _TB_SLOT_RE = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')
 _TB_OUTCOMES = ('done', 'overflow', 'dropped')
 
+
+def _tb_apply_templates(con, today_iso):
+    """每日重复时间盒：当天首次被访问时自动落地（幂等，2026-11-25）。
+
+    规则：
+    - 仅处理 enabled=1 且 weekdays 含今天索引的模板（0=周一…6=周日）
+    - last_applied >= today 则跳过 -> 当天删掉的盒不会在刷新后复活
+    - 同 slot+title 已存在于今天也跳过插入（双保险），但仍写 last_applied
+    - 生成的盒 task_ref='tpl:<模板id>'，与手工盒/关联任务盒互不干扰
+    """
+    try:
+        wd = datetime.strptime(today_iso, '%Y-%m-%d').weekday()
+    except Exception:
+        return
+    now = datetime.now().isoformat(timespec='seconds')
+    for r in con.execute('SELECT * FROM timebox_templates WHERE enabled=1').fetchall():
+        days = [x.strip() for x in str(r['weekdays'] or '').split(',') if x.strip()]
+        if str(wd) not in days:
+            continue
+        if r['last_applied'] and str(r['last_applied']) >= today_iso:
+            continue
+        con.execute('UPDATE timebox_templates SET last_applied=? WHERE id=?', (today_iso, r['id']))
+        dup = con.execute('SELECT COUNT(*) c FROM timeboxes WHERE tdate=? AND slot=? AND title=?',
+                          (today_iso, r['slot'], r['title'])).fetchone()['c']
+        if dup:
+            continue
+        con.execute('INSERT INTO timeboxes(tdate,slot,title,est_min,status,task_ref,created)'
+                    ' VALUES(?,?,?,?,?,?,?)',
+                    (today_iso, r['slot'], r['title'], r['est_min'], 'planned',
+                     'tpl:' + str(r['id']), now))
+
 @app.route('/api/hrd/timebox', methods=['GET', 'OPTIONS'])
 def timebox_get_api():
     if request.method == 'OPTIONS':
@@ -4251,10 +4293,30 @@ def timebox_get_api():
     if not _hrd_token_valid():
         return _hrd_unauthorized()
     d = request.args.get('date') or datetime.now().date().isoformat()
+    wk = request.args.get('week')
     try:
         con = _reloc_con()
         w0 = _tb_window_start()
         now = datetime.now()
+        # 周视图：返回该周（周一~周日）全部盒，前端按 tdate 分组渲染（模板走 /templates 端点）
+        if wk:
+            try:
+                base = datetime.strptime(wk, '%Y-%m-%d').date()
+            except Exception:
+                con.close()
+                return _hrd_cors(jsonify({'ok': False, 'error': 'week must be YYYY-MM-DD'}))
+            mon = base - timedelta(days=base.weekday())
+            sun = mon + timedelta(days=6)
+            boxes = [dict(r) for r in con.execute(
+                'SELECT * FROM timeboxes WHERE tdate>=? AND tdate<=? ORDER BY tdate, slot',
+                (mon.isoformat(), sun.isoformat())).fetchall()]
+            con.close()
+            return _hrd_cors(jsonify({'ok': True, 'week_start': mon.isoformat(),
+                                      'week_end': sun.isoformat(), 'boxes': boxes}))
+        # 今日访问：先落地每日重复模板（幂等），再读当天盒
+        if d == datetime.now().date().isoformat():
+            _tb_apply_templates(con, d)
+            con.commit()
         boxes = []
         for r in con.execute('SELECT * FROM timeboxes WHERE tdate=? ORDER BY slot', (d,)).fetchall():
             bx = dict(r)
@@ -4380,6 +4442,90 @@ def timebox_post_api():
         row2 = con.execute('SELECT * FROM timeboxes WHERE id=?', (bid,)).fetchone()
         con.close()
         return _hrd_cors(jsonify({'ok': True, 'box': dict(row2) if row2 else None}))
+    except Exception as e:
+        return _hrd_resp_err(e)
+
+# ── 每日重复时间盒模板 CRUD（2026-11-25）──────────────────────────────
+@app.route('/api/hrd/timebox/templates', methods=['GET', 'OPTIONS'])
+def timebox_tpl_get_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _hrd_cors(resp)
+        return resp
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    try:
+        con = _reloc_con()
+        tpls = [dict(r) for r in con.execute(
+            'SELECT * FROM timebox_templates ORDER BY slot').fetchall()]
+        con.close()
+        return _hrd_cors(jsonify({'ok': True, 'templates': tpls}))
+    except Exception as e:
+        return _hrd_resp_err(e)
+
+
+@app.route('/api/hrd/timebox/templates', methods=['POST', 'OPTIONS'])
+def timebox_tpl_post_api():
+    if request.method == 'OPTIONS':
+        resp = jsonify({})
+        _hrd_cors(resp)
+        return resp
+    if not _hrd_token_valid():
+        return _hrd_unauthorized()
+    b = request.get_json(silent=True) or {}
+    act = str(b.get('action') or '')
+    now = datetime.now().isoformat(timespec='seconds')
+
+    def _parse_weekdays(v):
+        # 只接受 0-6（0=周一…6=周日），去重升序；空 -> 视为非法
+        days = sorted({int(x) for x in re.findall(r'[0-6]', str(v or ''))})
+        return ','.join(str(x) for x in days)
+
+    try:
+        con = _reloc_con()
+        if act == 'add':
+            slot = str(b.get('slot') or '09:00')
+            title = str(b.get('title') or '').strip()[:300]
+            est = int(b.get('est_min') or 0)
+            wd = _parse_weekdays(b.get('weekdays'))
+            if not _TB_SLOT_RE.match(slot) or not title or not (1 <= est <= 24 * 60) or not wd:
+                con.close()
+                return _hrd_cors(jsonify({'ok': False, 'error': 'slot/title/est_min(1-1440)/weekdays required'}))
+            cur = con.execute(
+                'INSERT INTO timebox_templates(slot,title,est_min,weekdays,enabled,last_applied,created)'
+                ' VALUES(?,?,?,?,1,"",?)', (slot, title, est, wd, now))
+            con.commit()
+            tid = cur.lastrowid
+            row = con.execute('SELECT * FROM timebox_templates WHERE id=?', (tid,)).fetchone()
+            con.close()
+            return _hrd_cors(jsonify({'ok': True, 'tpl': dict(row)}))
+        tid = int(b.get('id') or 0)
+        row = con.execute('SELECT * FROM timebox_templates WHERE id=?', (tid,)).fetchone()
+        if not row:
+            con.close()
+            return _hrd_cors(jsonify({'ok': False, 'error': 'template not found'}))
+        if act == 'update':
+            slot = str(b.get('slot') or row['slot'])
+            title = str(b.get('title') or row['title']).strip()[:300]
+            est = int(b.get('est_min') or row['est_min'])
+            wd = _parse_weekdays(b.get('weekdays') or row['weekdays'])
+            if not _TB_SLOT_RE.match(slot) or not title or not (1 <= est <= 24 * 60) or not wd:
+                con.close()
+                return _hrd_cors(jsonify({'ok': False, 'error': 'invalid slot/title/est_min/weekdays'}))
+            con.execute('UPDATE timebox_templates SET slot=?,title=?,est_min=?,weekdays=? WHERE id=?',
+                        (slot, title, est, wd, tid))
+        elif act == 'toggle':
+            con.execute('UPDATE timebox_templates SET enabled=? WHERE id=?',
+                        (0 if row['enabled'] else 1, tid))
+        elif act == 'delete':
+            con.execute('DELETE FROM timebox_templates WHERE id=?', (tid,))
+        else:
+            con.close()
+            return _hrd_cors(jsonify({'ok': False, 'error': 'bad action: ' + act}))
+        con.commit()
+        row2 = con.execute('SELECT * FROM timebox_templates WHERE id=?', (tid,)).fetchone()
+        con.close()
+        return _hrd_cors(jsonify({'ok': True, 'tpl': dict(row2) if row2 else None}))
     except Exception as e:
         return _hrd_resp_err(e)
 
