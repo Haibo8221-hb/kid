@@ -98,6 +98,7 @@ jobs:
               echo "===== nginx 域名入口实际服务的 /hrd/ 页面（带 Host 头自测）====="
               curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "function tbFetch" || echo "0 (tbFetch not in served page)"
               curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "function tbStopTimer" || echo "0"
+              curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "tbCalPendingUid" || echo "0 (转盒自动移除 not in served page)"
               echo
               echo "===== site root ====="
               ls -la "${{ secrets.SITE_ROOT }}" | head -30

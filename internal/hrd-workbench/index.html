@@ -2649,7 +2649,9 @@ function tbSetSlot(v){
   if(!hit){ hit=document.createElement('option'); hit.value=v; hit.textContent=v; sel.appendChild(hit); }
   sel.value=v;
 }
+var tbCalPendingUid=''; /* 转盒预填来源的日程 uid：加盒成功后自动 dismiss 该日程 */
 function tbCalToBox(ev){
+  tbCalPendingUid=ev.uid||'';
   tbSetSlot(ev.start_time||'09:00');
   $('#tbTitleIn').value=ev.subject||'';
   var est=30;
@@ -2934,7 +2936,16 @@ function renderTimeboxView(){
     if(!t){ $('#tbTitleIn').focus(); return; }
     var body={action:'add',slot:$('#tbSlot').value,title:t,est_min:tbEstSel,task_ref:$('#tbTask').value||''};
     tbFetch('/api/hrd/timebox',{method:'POST',body:JSON.stringify(body)}).then(function(j){
-      if(j.ok){ $('#tbTitleIn').value=''; tbLoad(); }
+      if(j.ok){
+        $('#tbTitleIn').value='';
+        tbLoad();
+        /* 转盒闭环：本次加盒源自某条日程的「转盒」预填 -> 自动从今日日程移除（复用忽略的 dismiss 通道） */
+        if(tbCalPendingUid){
+          var pu=tbCalPendingUid; tbCalPendingUid='';
+          tbFetch('/api/hrd/calendar',{method:'POST',body:JSON.stringify({action:'dismiss',uid:pu})})
+            .then(function(){ tbLoadCal(); }).catch(function(){ tbLoadCal(); });
+        }
+      }
       else{ alert('加盒失败：'+(j.error||'')); }
     }).catch(function(e){ alert('网络错误：'+e); });
   };
