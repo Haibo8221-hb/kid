@@ -296,6 +296,19 @@ tr.row-focus td{background:#eef3fd!important;box-shadow:inset 0 0 0 1px var(--bl
 .lb-prev{left:18px}.lb-next{right:18px}
 .lb-close{position:absolute;top:16px;right:18px;width:38px;height:38px;transform:none}
 .lb-count{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.75);font-size:12px;letter-spacing:.5px}
+/* ---------- 任务树（2026-11-26 分层分级 P0+P1）---------- */
+.tw{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;color:var(--tx3);cursor:pointer;font-size:11px;vertical-align:middle;margin-right:2px}
+.tw:hover{background:#eef3fd;color:var(--blue)}
+.t-auto-badge{display:inline-block;font-size:10px;line-height:1;padding:3px 6px;border-radius:10px;background:#eef3fd;color:#3a6fd8;border:1px solid #cfdefa;vertical-align:middle;margin-left:5px;font-weight:400}
+.tk-badge{cursor:pointer;vertical-align:middle;margin-left:5px}
+.t-trail{font-size:10.5px;color:var(--tx3);line-height:1.3;margin-bottom:1px;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-lead{display:inline-block;width:12px}
+tr[data-task-row]{transition:background .12s}
+tr.drop-sub>td{border-top:2px solid var(--blue);background:#f0f6ff}
+tr.drop-before>td{border-top:2px solid #18a058}
+tr.drop-after>td{border-bottom:2px solid #18a058}
+tr.dragging{opacity:.45}
+[data-mvto]{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 
 
@@ -1531,6 +1544,7 @@ function boot_data(){
   mergePromptsSeed();                       // 提示词种子版本变化 -> 纯增量追加
   mergeSkillsSeed();                        // 名册版本变化 -> 增量合并 + 种子对齐
   migrateTasks();
+  migrateTree();                            // 任务树：补 tid/孤儿修复/循环剪断/depth 重算/父任务自动汇总（幂等）
   migrateKnow();                            // 老记录补「来源」字段
   syncFromMd();   // 版本戳变化时自动把最新 md 内容合并进来
   initLocalGuard();   // file:// 旧副本 -> 显示停用横幅（在线版无操作）
@@ -1643,19 +1657,269 @@ function catCls(v){ v=String(v||'');
   return i>=0?CAT_PALETTE[i%CAT_PALETTE.length]:'tag-gray';
 }
 function genId(){ return 'r'+Math.random().toString(36).slice(2,10)+Date.now().toString(36); }
+
+/* ==================== 任务树引擎（2026-11-26 分层分级方案 P0+P1） ====================
+   设计要点（详见 待办任务分层分级方案.md）：
+   - 层级模型：邻接表 parent_tid + 冗余 root_tid/depth/order，3 层硬上限（0/1/2）
+   - 稳定 ID：tid 只在创建/迁移时生成一次；层级引用不用 _id（规避跨天 _id 漂移）
+   - 父任务自动化：_auto=true 时 状态/进度/完成日 系统汇总，数据层拦截手写
+   - 兼容：无 parent_tid 的旧记录视为根任务；repeat 实例(_rep)不继承层级字段 */
+var TREE_MAX_DEPTH=2;                                   // depth 0 父 / 1 子 / 2 叶子
+function newTid(){ return 'T-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6); }
+function taskByTid(tid){
+  var rows=state.data.tasks||[];
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; if(r&&!r._deleted&&r.tid===tid) return r; }
+  return null;
+}
+function taskChildren(tid){
+  var rows=state.data.tasks||[], out=[];
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    if(r&&!r._deleted&&r.parent_tid===tid) out.push(r);
+  }
+  out.sort(function(a,b){ return (Number(a.order)||0)-(Number(b.order)||0)||String(a.tid).localeCompare(String(b.tid)); });
+  return out;
+}
+function isParentTask(r){ return !!(r&&r._auto); }
+function taskDescendants(tid){
+  var out=[], stack=taskChildren(tid).reverse();
+  while(stack.length){ var r=stack.pop(); out.push(r); var kids=taskChildren(r.tid); for(var i=kids.length-1;i>=0;i--) stack.push(kids[i]); }
+  return out;
+}
+/* tid 不足时的组合指纹：父 tid :: 归一化标题，防同名子任务碰撞（根任务沿用旧指纹） */
+function taskFp(r){ return r&&r.parent_tid?hash32(r.parent_tid+'::'+normTitle(r['标题']||'')):fingerprint(r?r['标题']||'':''); }
+/* 迁移：幂等。补 tid / 孤儿转根 / 环剪断 / depth·root_tid 重算 / 父任务自动汇总 */
+function migrateTree(){
+  var rows=state.data.tasks||[], i, changed=false;
+  var alive=rows.filter(function(r){ return r&&!r._deleted; });
+  for(i=0;i<alive.length;i++){ if(!alive[i].tid){ alive[i].tid=newTid(); changed=true; } }
+  var known={}; alive.forEach(function(r){ known[r.tid]=1; });
+  for(i=0;i<alive.length;i++){
+    var r=alive[i];
+    if(r._rep){                                          // 重复实例：脱离层级，避免下期任务挂错父
+      if(r.parent_tid){ delete r.parent_tid; delete r.root_tid; delete r.depth; changed=true; }
+      continue;
+    }
+    if(r.parent_tid&&!known[r.parent_tid]){ delete r.parent_tid; delete r.root_tid; delete r.depth; changed=true; }
+  }
+  /* 环检测：沿 parent_tid 走链，步数超过 alive 数量说明有环 -> 剪断该链起点 */
+  alive.forEach(function(r){
+    if(!r.parent_tid) return;
+    var seen={}, cur=r, steps=0, cyclic=false;
+    while(cur&&cur.parent_tid&&steps<=alive.length){ if(seen[cur.tid]){ cyclic=true; break; } seen[cur.tid]=1; cur=taskByTid(cur.parent_tid); steps++; }
+    if(cyclic){ delete r.parent_tid; delete r.root_tid; delete r.depth; changed=true; }
+  });
+  /* BFS 重算 depth / root_tid，并标记父任务（显式队列携带层级，避免复用变量导致深度错乱） */
+  alive.forEach(function(r){
+    if(r.parent_tid) return;
+    r.depth=0; r.root_tid=r.tid;
+    var queue=[{n:r, d:0}];
+    while(queue.length){
+      var it=queue.shift();
+      taskChildren(it.n.tid).forEach(function(k){
+        k.depth=Math.min(it.d+1, TREE_MAX_DEPTH);
+        k.root_tid=r.tid;
+        queue.push({n:k, d:it.d+1});
+      });
+    }
+  });
+  /* _auto 标记基于「是否有子任务」而非「是否有父任务」：
+     叶子子任务必须保持手工口径（否则会被防双算规则误排除出待办统计） */
+  alive.forEach(function(r){
+    var hasKids=taskChildren(r.tid).length>0;
+    if(hasKids&&!r._auto){ r._auto=true; changed=true; }
+    if(!hasKids&&r._auto){ delete r._auto; changed=true; }
+  });
+  alive.forEach(function(r){
+    var want=r.parent_tid?r.parent_tid+'::'+normTitle(r['标题']||''):null;
+    if(want&&r._fp!==hash32(want)){ r._fp=hash32(want); changed=true; }  // 子任务指纹升级
+  });
+  if(changed||true) recalcAllParents(alive);             // 全量校准父任务汇总（兜底修复一切遗漏）
+  if(changed) saveData('tasks', state.data.tasks);
+}
+/* 单树汇总：叶子手工值 -> 父任务 加权平均进度 + 状态推导 + 完成日=max 叶子 */
+function recalcBranch(rootRec){
+  function walk(rec){
+    var kids=taskChildren(rec.tid);
+    if(!kids.length) return;
+    var sumW=0, sumP=0, done=0, pause=0, doing=0, maxDate='';
+    kids.forEach(function(k){
+      walk(k);
+      var w=Math.max(0,Number(k.weight)||1);
+      sumW+=w; sumP+=w*Math.max(0,Math.min(100,Number(k['进度'])||0));
+      var s=String(k['状态']||'');
+      if(s==='已完成'){ done++; var d=String(k['完成日']||'').slice(0,10); if(d>maxDate) maxDate=d; }
+      else if(s==='暂停') pause++;
+      else doing++;
+    });
+    if(!sumW) return;
+    rec._auto=true; rec._touched=rec._touched||{}; rec._touched['状态']=1; rec._touched['进度']=1; rec._touched['完成日']=1;
+    rec['进度']=Math.round(sumP/sumW);
+    rec['状态']= done===kids.length?'已完成':(doing>0?'进行中':'暂停');
+    rec['完成日']= done===kids.length?maxDate:'';
+    rec._mtime=nowIso();
+  }
+  walk(rootRec);
+}
+function recalcAllParents(alive){
+  (alive||(state.data.tasks||[]).filter(function(r){ return r&&!r._deleted; })).forEach(function(r){
+    if(r.parent_tid) return;
+    if(taskChildren(r.tid).length) recalcBranch(r);
+  });
+}
+function recalcUp(tid){
+  var cur=taskByTid(tid);
+  while(cur&&cur.parent_tid){ cur=taskByTid(cur.parent_tid); if(!cur) break; }
+  if(cur&&!cur.parent_tid&&taskChildren(cur.tid).length) recalcBranch(cur);
+}
+/* 沿祖先链自底向上逐层重算（子任务增删/移动/进度变化后的完整冒泡） */
+function recalcAncestorsOf(tid){
+  var cur=taskByTid(tid);
+  while(cur&&cur.parent_tid){
+    var p=taskByTid(cur.parent_tid); if(!p) break;
+    if(taskChildren(p.tid).length) recalcBranch(p);
+    cur=p;
+  }
+}
+/* 移动校验：newParentTid 为 null = 提升为根。返回 {ok:bool, msg:string} */
+function treeCanAttach(rec, newParentTid){
+  if(!newParentTid) return {ok:true};
+  var p=taskByTid(newParentTid);
+  if(!p) return {ok:false, msg:'目标父任务不存在'};
+  var cur=p, steps=0;                                    // 循环：不能挂到自己的后代
+  while(cur){ if(cur.tid===rec.tid) return {ok:false, msg:'不能移动到自己的子任务下'}; cur=taskByTid(cur.parent_tid); if(++steps>50) break; }
+  var maxRel=0;                                          // 深度：子树最深相对层级 + 目标层 +1 不得超上限
+  (function d(r,lv){ if(lv>maxRel) maxRel=lv; taskChildren(r.tid).forEach(function(k){ d(k,lv+1); }); })(rec,0);
+  if(Number(p.depth||0)+1+maxRel>TREE_MAX_DEPTH) return {ok:false, msg:'移动后将超过 '+((TREE_MAX_DEPTH+1)+' 层')+' 上限'};
+  return {ok:true};
+}
+/* 移动：整树平移 depth/root_tid，重排 order，双向 recalc */
+function apiMoveTask(tid, newParentTid, newIndex){
+  var rec=taskByTid(tid); if(!rec) return false;
+  var chk=treeCanAttach(rec,newParentTid); if(!chk.ok){ toast(chk.msg,1); return false; }
+  var oldParentTid=rec.parent_tid||null;
+  var oldRoot=rec.root_tid||null;
+  rec.parent_tid=newParentTid||undefined; if(!newParentTid) delete rec.parent_tid;
+  var sibs=taskChildren(newParentTid||null).filter(function(r){ return r.tid!==tid; });
+  if(newIndex===undefined||newIndex===null) newIndex=sibs.length;
+  sibs.splice(Math.max(0,Math.min(newIndex,sibs.length)),0,rec);
+  sibs.forEach(function(r,i){ r.order=(i+1)*10; });
+  var deltaRoot=(!newParentTid)?null:(taskByTid(newParentTid).root_tid||taskByTid(newParentTid).tid);
+  (function shift(r,d,root){ r.depth=d; r.root_tid=root||r.tid; taskChildren(r.tid).forEach(function(k){ shift(k,d+1,root); }); })(rec, newParentTid?(Number(taskByTid(newParentTid).depth)||0)+1:0, deltaRoot);
+  /* 原父失去最后一个子任务时回归叶子（保留最后一次汇总值转为手工值），防止残留 _auto 被防双算误隐藏 */
+  var oldP=oldParentTid?taskByTid(oldParentTid):null;
+  if(oldP&&!taskChildren(oldP.tid).length&&oldP._auto){ delete oldP._auto; }
+  recalcAncestorsOf(tid);                                // 旧父/新父及全部上层祖先逐层重算
+  return true;
+}
+/* 创建子任务：继承父任务 分类/负责人/部门/优先级，order 追加末尾 */
+function apiCreateSubtask(parentTid, fields){
+  var p=taskByTid(parentTid); if(!p) return null;
+  if(Number(p.depth||0)>=TREE_MAX_DEPTH){ toast('已达最深层级，不能再拆子任务',1); return null; }
+  var o={};
+  for(var k in fields){ if(fields.hasOwnProperty(k)) o[k]=fields[k]; }
+  ['分类','负责人','部门','优先级'].forEach(function(f){ if(o[f]===undefined||o[f]==='') o[f]=p[f]; });
+  o.tid=newTid(); o.parent_tid=parentTid; o.depth=(Number(p.depth)||0)+1; o.root_tid=p.root_tid||p.tid;
+  o.order=(taskChildren(parentTid).length+1)*10; o.weight=1; o['状态']=o['状态']||'进行中'; o['进度']=Number(o['进度'])||0;
+  o._id=genId(); o._src='manual'; o._ctime=nowIso(); o._mtime=o._ctime;
+  o._fp=hash32(parentTid+'::'+normTitle(o['标题']||''));
+  (state.data.tasks=state.data.tasks||[]).push(o);
+  recalcAncestorsOf(o.tid);                              // 父链自底向上完整冒泡
+  return o;
+}
+/* 删除：mode=cascade（默认，整树软删+墓碑）| promote（子任务上提到祖父） */
+function apiDeleteTask(tid, mode){
+  var rec=taskByTid(tid); if(!rec) return 0;
+  var parentTid=rec.parent_tid||null, n=0;
+  if(mode==='promote'){
+    var kids=taskChildren(tid);
+    kids.forEach(function(k){ k.parent_tid=parentTid||undefined; if(!parentTid) delete k.parent_tid;
+      k.depth=parentTid?Math.max(0,(Number(taskByTid(parentTid).depth)||0)+1):0;
+      k.root_tid=parentTid?(taskByTid(parentTid).root_tid||taskByTid(parentTid).tid):k.tid; k.order=(taskChildren(parentTid).length+1)*10; });
+    rec.__name=rec['标题']; pushUndo('tasks',rec); markDeleted('tasks',rec); n=1;
+    if(parentTid) recalcAncestorsOf(tid);
+  }else{
+    var all=taskDescendants(tid).concat([rec]);
+    all.forEach(function(r){ r.__name=r['标题']; pushUndo('tasks',r); markDeleted('tasks',r); n++; });
+    if(parentTid) recalcAncestorsOf(tid);
+  }
+  return n;
+}/* 完成动作（父任务=递归完成全部叶子；叶子=单条）-> recalcUp。返回下期重复实例或 null */
+function taskDoneAction(rec, done){
+  var next=null;
+  if(done&&isParentTask(rec)){
+    var leaves=taskDescendants(rec.tid).filter(function(r){ return !taskChildren(r.tid).length; });
+    leaves.forEach(function(l){ if(String(l['状态'])!=='已完成') next=markDone(l,true)||next; });
+    if(!leaves.length){ markDone(rec,true); recalcUp(rec.tid); return null; }
+  }else{
+    rec._touched=rec._touched||{}; rec._touched['状态']=1;
+    if(done){ rec['状态']='已完成'; rec['完成日']=todayStr(); rec['进度']=100; rec._touched['完成日']=1; rec._touched['进度']=1; MC.settle(rec); MC.maybeReview(rec); next=spawnNextRepeat(rec); }
+    else{ rec['状态']='进行中'; rec['完成日']=''; rec['进度']=0; rec._touched['完成日']=1; rec._touched['进度']=1; }
+  }
+  recalcUp(rec.tid);
+  return next;
+}
+/* 面包屑：祖先链标题（不含自身），如「子女教育能力提升 / 英语听说能力」 */
+function taskTrail(r){
+  var parts=[], cur=taskByTid(r.parent_tid), steps=0;
+  while(cur&&steps<5){ parts.unshift(cur['标题']||''); cur=taskByTid(cur.parent_tid); steps++; }
+  return parts.join(' / ');
+}
+/* 展开/折叠记忆：localStorage 持久化；搜索命中时自动展开祖先链 */
+function treeExpandMap(){ try{ return JSON.parse(localStorage.getItem(LS+'tree_expand')||'{}')||{}; }catch(e){ return {}; } }
+function treeSaveExpand(map){ try{ localStorage.setItem(LS+'tree_expand', JSON.stringify(map)); }catch(e){} }
+function treeToggle(tid){ var m=treeExpandMap(); if(m[tid]) delete m[tid]; else m[tid]=1; treeSaveExpand(m); renderContent(); }
+function treeAutoExpand(search){
+  if(!search) return {};
+  var map={}, rows=(state.data.tasks||[]).filter(function(r){ return r&&!r._deleted; });
+  var hit={};
+  rows.forEach(function(r){ if(matchSearch(r)) hit[r.tid]=1; });
+  rows.forEach(function(r){ if(!hit[r.tid]) return; map[r.tid]=1; var cur=r; while(cur&&cur.parent_tid){ map[cur.parent_tid]=1; cur=taskByTid(cur.parent_tid); } });
+  return map;
+}
+/* 树序 DFS：把扁平 rows 按父子关系+折叠状态排列（供列表渲染）。返回 [{rec,ind}] */
+function treeOrderRows(rows, expandMap){
+  var byId={}, roots=[];
+  rows.forEach(function(r){ byId[r.tid||('_id_'+r._id)]=r; });
+  rows.forEach(function(r){
+    var p=r.parent_tid?byId[r.parent_tid]:null;
+    if(p){ (p._treeKids=p._treeKids||[]).push(r); }
+    else roots.push(r);
+  });
+  var out=[];
+  function dfs(list, ind){
+    list.sort(function(a,b){ return (Number(a.order)||0)-(Number(b.order)||0); });
+    list.forEach(function(r){
+      out.push({rec:r, ind:ind});
+      var kids=r._treeKids||[]; delete r._treeKids;
+      if(kids.length&&(expandMap[r.tid]||state.search)) dfs(kids, ind+1);
+    });
+  }
+  dfs(roots, 0);
+  return out;
+}
+/* ==================== 任务树引擎结束 ==================== */
+
 /* computeToday：仅取「已逾期或今天到期」的任务。
    注：工作总览的「全部待办」区块已改用 computeOpen()（所有未完成任务）；
-   此函数保留备用（如需"今日到期"专项视图）。 */
+   此函数保留备用（如需"今日到期"专项视图）。
+   任务树防双算：父任务(有子任务)不进入待办/逾期/统计口径——其状态由子任务汇总而来 */
+function isContainerTask(r){
+  if(!r||r._deleted) return false;
+  if(r._auto) return true;
+  return !!(r.tid&&(state.data.tasks||[]).some(function(x){ return x&&!x._deleted&&x.parent_tid===r.tid; }));
+}
 function computeToday(){
   var t=todayStr();
   return (state.data.tasks||[]).filter(function(r){
-    return !r._deleted && r['状态']!=='已完成' && r['截止'] && String(r['截止']).slice(0,10)<=t;
+    return !r._deleted && !isContainerTask(r) && r['状态']!=='已完成' && r['截止'] && String(r['截止']).slice(0,10)<=t;
   }).sort(function(a,b){return String(a['截止']).localeCompare(String(b['截止']));});
 }
 /* 全部待办：所有未完成任务（含无截止日），复用统一排序规则
-   （状态分组 -> 优先级 -> 截止日），与待办任务页签保持同一顺序 */
+   （状态分组 -> 优先级 -> 截止日），与待办任务页签保持同一顺序。
+   父任务不单独计入（其进度已由子任务承载，防止完成率双算）。 */
 function computeOpen(){
-  var rows=(state.data.tasks||[]).filter(function(r){ return !r._deleted && r['状态']!=='已完成'; });
+  var rows=(state.data.tasks||[]).filter(function(r){ return !r._deleted && !isContainerTask(r) && r['状态']!=='已完成'; });
   return sortRows('tasks', rows);
 }
 /* 拖拽重排（总览「全部待办」）：把 dragId 移到 targetId 之前（after=false）
@@ -2210,7 +2474,8 @@ function mdRender(raw){
 /* ---- B7 数据统计与可视化 ---- */
 var PIE_COLORS=['#2f6fed','#7c4dff','#0f7d94','#c2621a','#18a058','#e5484d','#f0a020','#5b6675'];
 function tasksStats(){
-  var rows=(state.data.tasks||[]).filter(function(r){return !r._deleted;});
+  /* 任务树防双算：父任务（容器）不进统计，口径=叶子任务 */
+  var rows=(state.data.tasks||[]).filter(function(r){return !r._deleted&&!isContainerTask(r);});
   var byCat={}, byPrio={}, byStatus={};
   rows.forEach(function(r){
     var c=r['分类']||'未分类'; byCat[c]=(byCat[c]||0)+1;
@@ -3047,7 +3312,9 @@ function viewOverview(){
     var overdue=due && due<todayStr();
     var isToday=due && due===todayStr();
     var dot=due?(overdue?'#e5484d':(isToday?'#f0a020':'#2f6fed')):'#c3cbd8';
+    var trail=taskTrail(r);
     h+='<div class="ov-item'+(overdue?' ov-overdue':'')+'" draggable="true" data-tid="'+r._id+'"><span class="dot" style="background:'+dot+'"></span><span class="tt">'+esc(r['标题'])+'</span>'
+      +(trail?'<span class="tag tag-gray" title="'+esc(trail)+'">└ '+esc(trail.split(' / ').pop())+'</span>':'')
       +(overdue?'<span class="tag tag-red">逾期</span>':(isToday?'<span class="tag tag-amber">今日截止</span>':''))
       +(r['分类']?'<span class="tag '+catCls(r['分类'])+'">'+esc(r['分类'])+'</span>':'')
       +(r['重复']&&r['重复']!=='不重复'?'<span class="tag tag-purple">↻ '+esc(r['重复'])+'</span>':'')
@@ -3269,7 +3536,7 @@ function bindOverview(){
   Array.prototype.forEach.call($('#content').querySelectorAll('[data-done]'),function(el){
     el.addEventListener('click',function(){
       var id=el.getAttribute('data-done');
-      state.data.tasks.forEach(function(r){ if(r._id===id) markDone(r, true); });
+      state.data.tasks.forEach(function(r){ if(r._id===id) taskDoneAction(r, true); });
       saveData('tasks',state.data.tasks); toast('任务已完成（不会被下次同步改回）'); refreshAll();
     });
   });
@@ -3325,7 +3592,10 @@ var BOARD_COLS=[{k:'',label:'未开始'},{k:'进行中',label:'进行中'},{k:'�
 function boardCard(r){
   var due=String(r['截止']||'').slice(0,10);
   var overdue=due&&due<todayStr();
-  var h='<div class="bcard" draggable="true" data-task="'+r._id+'"><div class="t">'+esc(r['标题'])+'</div><div class="meta">'
+  var trail=taskTrail(r);
+  var h='<div class="bcard" draggable="true" data-task="'+r._id+'">'
+    +(trail?'<div class="t-trail" title="'+esc(trail)+'">'+esc(trail)+'</div>':'')
+    +'<div class="t">'+esc(r['标题'])+'</div><div class="meta">'
     +(r['分类']?'<span class="tag '+catCls(r['分类'])+'">'+esc(r['分类'])+'</span>':'')
     +(r['优先级']?'<span class="tag '+tagCls(r['优先级'])+'">'+esc(r['优先级'])+'</span>':'')
     +(due?'<span class="tag '+(overdue?'tag-red':(due===todayStr()?'tag-amber':'tag-gray'))+'">'+(overdue?'逾期 ':due===todayStr()?'今日 ':'')+fmtDate(r['截止'])+'</span>':'')
@@ -3336,9 +3606,11 @@ function boardCard(r){
   return h;
 }
 function viewTasksBoard(rows){
+  /* 任务树：父任务不进看板泳道（容器不该出现在状态列），只渲染叶子 */
+  var leaves=rows.filter(function(r){ return !isContainerTask(r); });
   var h='<div class="board">';
   BOARD_COLS.forEach(function(col){
-    var inCol=rows.filter(function(r){ return String(r['状态']||'')===col.k; });
+    var inCol=leaves.filter(function(r){ return String(r['状态']||'')===col.k; });
     h+='<div class="bcol" data-col="'+esc(col.k)+'"><div class="bcol-h"><span>'+col.label+'</span><span class="n">'+inCol.length+'</span></div>';
     if(!inCol.length) h+='<div class="bempty">拖拽任务到此列</div>';
     inCol.forEach(function(r){ h+=boardCard(r); });
@@ -3393,6 +3665,12 @@ function viewModule(m){
   all=hrvApplyModuleFilter(all,m.key);
   if(m.key==='tasks'&&state.repOnly) all=all.filter(function(r){ return r['重复']&&r['重复']!=='不重复'; });
   var rows=sortRows(m.key, all);
+  /* 任务树：列表视图按 DFS 树序渲染（缩进+折叠记忆；搜索时自动展开祖先链并全展开保证命中可见） */
+  var tStats=null, tExp=null, viewRows=null;
+  if(m.key==='tasks'&&state.taskView!=='board'){
+    tExp=state.search?treeAutoExpand(state.search):treeExpandMap();
+    viewRows=treeOrderRows(rows,tExp);
+  }else{ viewRows=rows.map(function(r){ return {rec:r, ind:0}; }); }
   var specs=filterSpecs(m);
   var fcount=0; for(var fk in moduleFilters(m)){ fcount+=(moduleFilters(m)[fk]||[]).length; }
   var h='<div class="page-head"><div><h2>'+m.title+'</h2><div class="sub">共 '+rows.length+' 条记录'
@@ -3413,9 +3691,15 @@ function viewModule(m){
   m.cols.forEach(function(c){ h+='<th>'+c.f+'</th>'; });
   h+='<th style="width:80px">操作</th></tr></thead><tbody>';
   if(!rows.length){ h+='<tr><td colspan="'+(m.cols.length+1)+'"><div class="empty">'+icon('file')+'暂无数据</div></td></tr>'; }
-  rows.forEach(function(r,ri){
+  viewRows.forEach(function(vr,ri){
+    var r=vr.rec;
     var done = r['状态']==='已完成';
-    h+='<tr'+(done?' class="row-done"':'')+(ri===state.focusIndex?' row-focus':'')+' data-idx="'+ri+'">';
+    var isPar=isParentTask(r);
+    var kids=taskChildren(r.tid);
+    var kidDone=0; kids.forEach(function(k){ if(String(k['状态'])==='已完成') kidDone++; });
+    var expanded=!!(state.search||tExp[r.tid]);
+    var indent=m.key==='tasks'?(vr.ind*22):0;
+    h+='<tr'+(done?' class="row-done"':'')+(ri===state.focusIndex?' row-focus':'')+' data-idx="'+ri+'" data-task-row="'+r.tid+'" style="'+(indent?'--tind:'+indent+'px;':'')+'">';
     m.cols.forEach(function(c){
       var cell=cellHtml(c,r);
       if(m.key==='notes'&&c.main&&(r._imgs||[]).length){
@@ -3424,20 +3708,42 @@ function viewModule(m){
       if(m.key==='tasks'&&c.main&&r['重复']&&r['重复']!=='不重复'){
         cell+=' <span class="tag tag-purple" title="重复任务：'+esc(r['重复'])+'">↻ '+esc(r['重复'])+'</span>';
       }
-      h+='<td data-label="'+c.f+'">'+cell+'</td>';
+      if(m.key==='tasks'&&c.main){
+        if(isPar){
+          /* 父任务：折叠箭头 + 子任务完成徽标 + 自动角标；面包屑在标题上方 */
+          var trail=taskTrail(r);
+          if(trail) cell='<div class="t-trail">'+esc(trail)+'</div>'+cell;
+          cell='<span class="tw'+(expanded?' on':'')+'" data-ttoggle="'+r.tid+'" title="'+(expanded?'折叠':'展开')+'子任务">'+(expanded?'▾':'▸')+'</span> '+cell;
+          cell+=' <span class="tag tag-gray tk-badge" data-ttoggle="'+r.tid+'" title="子任务完成进度（点击展开）">'+kidDone+'/'+kids.length+'</span>';
+          cell+=' <span class="t-auto-badge" title="状态与进度由子任务自动汇总">自动</span>';
+        }else if(kids.length){
+          cell+=' <span class="t-auto-badge" title="状态与进度由子任务自动汇总">自动</span>';
+        }
+        if(indent&&!isPar) cell='<span class="t-lead"></span>'+cell;
+      }
+      h+='<td data-label="'+c.f+'"'+(indent&&c.main?' style="padding-left:'+(8+indent)+'px"':'')+'>'+cell+'</td>';
     });
     h+='<td data-label="操作"><div class="row-acts">';
     if(m.key==='prompts'){
       h+='<button class="icon-btn" data-cp="'+r._id+'" title="复制提示词（支持 {{变量}} 填空）">'+icon('copy')+'</button>';
     }
     if(m.key==='tasks'){
-      h+= done
+      if(Number(r.depth||0)<TREE_MAX_DEPTH&&!isPar){
+        h+='<button class="icon-btn" data-tadd="'+r.tid+'" title="添加子任务">＋</button>';
+      }
+      if(!isPar&&kids.length){
+        h+='<button class="icon-btn" data-tbatch="'+r.tid+'" title="批量添加子任务">≡＋</button>';
+      }
+      h+= done&&!isPar
         ? '<button class="icon-btn" data-undone="'+r._id+'" title="撤销完成">↺</button>'
-        : '<button class="icon-btn done" data-done="'+r._id+'" title="标记完成">'
-          +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"/></svg></button>';
+        : (isPar&&done
+          ? ''
+          : '<button class="icon-btn done" data-done="'+r._id+'" title="标记完成'+(isPar?'（连同全部子任务）':'')+'">'
+            +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"/></svg></button>');
     }
     h+='<button class="icon-btn" data-edit="'+r._id+'">'+icon('file')+'</button>'
-      +'<button class="icon-btn del" data-del="'+r._id+'">✕</button></div></td></tr>';
+      +'<button class="icon-btn" data-tmove="'+r.tid+'" title="移动到…">⇄</button>'
+      +'<button class="icon-btn del" data-del="'+r._id+'"'+(isPar?' data-tparent="1"':'')+' title="'+(isPar?'删除父任务（可选级联删除全部子任务）':'删除')+'">✕</button></div></td></tr>';
   });
   h+='</tbody></table></div>';
   return h;
@@ -3564,23 +3870,112 @@ function bindModule(m){
       state.focusIndex=-1; renderContent();
     });
     if(state.taskView==='board') bindBoard(m);
-  }
+    /* 编辑 / 完成 / 撤销完成（tasks：完成走 taskDoneAction，父任务递归 + recalcUp） */
+    Array.prototype.forEach.call($('#content').querySelectorAll('[data-edit]'),function(b){
+      b.addEventListener('click',function(){ openForm(m,(state.data[m.key]||[]).filter(function(r){return r._id===b.getAttribute('data-edit');})[0]); });
+    });
+    Array.prototype.forEach.call($('#content').querySelectorAll('[data-done]'),function(b){
+      b.addEventListener('click',function(){
+        var id=b.getAttribute('data-done'), next=null;
+        (state.data[m.key]||[]).forEach(function(r){ if(r._id===id) next=taskDoneAction(r, true); });
+        saveData(m.key, state.data[m.key]);
+        toast('已完成'+(next?'，并生成下期重复任务':'（不会被下次同步改回）')); refreshAll();
+      });
+    });
+    Array.prototype.forEach.call($('#content').querySelectorAll('[data-undone]'),function(b){
+      b.addEventListener('click',function(){
+        var id=b.getAttribute('data-undone');
+        (state.data[m.key]||[]).forEach(function(r){ if(r._id===id) taskDoneAction(r, false); });
+        saveData(m.key, state.data[m.key]); toast('已撤销完成'); refreshAll();
+      });
+    });
+    /* ---- 任务树交互：折叠 / ＋子任务 / 批量添加 / 移动到 / 删除父任务 ---- */
+    /* 拖拽移动：目标行上 1/4 = 前置兄弟，中 1/2 = 变其子任务，下 1/4 = 后置兄弟。
+       校验循环/深度（treeCanAttach），非法落点 toast 提示，不动数据。 */
+    (function(){
+      var tbl=$('#content').querySelector('.tbl-wrap tbody');
+      if(!tbl) return;
+      var dragTid=null;
+      function rowOf(el){ return el&&el.closest?el.closest('[data-task-row]'):null; }
+      tbl.addEventListener('dragstart',function(e){
+        var tr=rowOf(e.target); if(!tr) return;
+        dragTid=tr.getAttribute('data-task-row');
+        tr.classList.add('dragging');
+        if(e.dataTransfer){ e.dataTransfer.effectAllowed='move'; try{ e.dataTransfer.setData('text/plain',dragTid); }catch(err){} }
+      });
+      tbl.addEventListener('dragend',function(){
+        Array.prototype.forEach.call(tbl.querySelectorAll('.dragging,.drop-sub,.drop-before,.drop-after'),function(el){
+          el.classList.remove('dragging','drop-sub','drop-before','drop-after');
+        });
+        dragTid=null;
+      });
+      tbl.addEventListener('dragover',function(e){
+        if(!dragTid) return;
+        var tr=rowOf(e.target); if(!tr) return;
+        var tid=tr.getAttribute('data-task-row');
+        if(tid===dragTid) return;
+        e.preventDefault();
+        Array.prototype.forEach.call(tbl.querySelectorAll('.drop-sub,.drop-before,.drop-after'),function(el){ el.classList.remove('drop-sub','drop-before','drop-after'); });
+        var r=tr.getBoundingClientRect(), y=(e.clientY-r.top)/r.height;
+        tr.classList.add(y<0.25?'drop-before':(y>0.75?'drop-after':'drop-sub'));
+      });
+      tbl.addEventListener('drop',function(e){
+        if(!dragTid) return;
+        var tr=rowOf(e.target); if(!tr) return;
+        e.preventDefault();
+        var tid=dragTid, targetTid=tr.getAttribute('data-task-row');
+        dragTid=null;
+        if(!targetTid||targetTid===tid) return;
+        var rec=taskByTid(tid); if(!rec) return;
+        var r=tr.getBoundingClientRect(), y=(e.clientY-r.top)/r.height, target=taskByTid(targetTid);
+        if(!target) return;
+        var ok=false;
+        if(y<0.25){                                            // 前置兄弟：挂到目标之父，插到其前
+          ok=apiMoveTask(tid, target.parent_tid||null, undefined);
+        }else if(y>0.75){                                      // 后置兄弟
+          ok=apiMoveTask(tid, target.parent_tid||null, undefined);
+        }else{                                                 // 变子任务
+          ok=apiMoveTask(tid, targetTid, undefined);
+        }
+        if(ok){ saveData('tasks',state.data.tasks); toast('任务已移动，进度已重新汇总'); refreshAll(); }
+      });
+    })();
+    Array.prototype.forEach.call($('#content').querySelectorAll('[data-ttoggle]'),function(el){
+      el.addEventListener('click',function(e){
+        if(e&&e.stopPropagation) e.stopPropagation();
+        treeToggle(el.getAttribute('data-ttoggle'));
+      });
+    });
+    Array.prototype.forEach.call($('#content').querySelectorAll('[data-tadd]'),function(b){
+      b.addEventListener('click',function(){
+        var p=taskByTid(b.getAttribute('data-tadd')); if(!p) return;
+        openTaskForm(p,null);
+      });
+    });
+    Array.prototype.forEach.call($('#content').querySelectorAll('[data-tbatch]'),function(b){
+      b.addEventListener('click',function(){ openBatchSubtasks(b.getAttribute('data-tbatch')); });
+    });
+    Array.prototype.forEach.call($('#content').querySelectorAll('[data-tmove]'),function(b){
+      b.addEventListener('click',function(){ openMoveMenu(b.getAttribute('data-tmove')); });
+    });
+    Array.prototype.forEach.call($('#content').querySelectorAll('[data-del]'),function(b){
+      b.addEventListener('click',function(){
+        var id=b.getAttribute('data-del');
+        if(b.getAttribute('data-tparent')==='1'){ openDeleteParent(id); return; }
+        openConfirm('确认删除该记录？','删除后不会被下次同步重新导入（已记入删除墓碑）。Ctrl+Z 可撤销本次删除。',function(){
+          var nameF=(m.cols&&m.cols[0]&&m.cols[0].f)||m.fields[0].f;
+          state.data[m.key].forEach(function(r){
+            if(r._id!==id) return;
+            r.__name=r[nameF]; pushUndo(m.key, r); markDeleted(m.key, r);
+            if(m.key==='tasks'&&r.tid) recalcUp(r.tid);
+          });
+          saveData(m.key,state.data[m.key]); toast('已删除（Ctrl+Z 可撤销）'); refreshAll();
+        });
+      });
+    });
+  }else{
   Array.prototype.forEach.call($('#content').querySelectorAll('[data-edit]'),function(b){
     b.addEventListener('click',function(){ openForm(m,(state.data[m.key]||[]).filter(function(r){return r._id===b.getAttribute('data-edit');})[0]); });
-  });
-  Array.prototype.forEach.call($('#content').querySelectorAll('[data-done]'),function(b){
-    b.addEventListener('click',function(){
-      var id=b.getAttribute('data-done');
-      (state.data[m.key]||[]).forEach(function(r){ if(r._id===id) markDone(r, true); });
-      saveData(m.key, state.data[m.key]); toast('已完成（不会被下次同步改回）'); refreshAll();
-    });
-  });
-  Array.prototype.forEach.call($('#content').querySelectorAll('[data-undone]'),function(b){
-    b.addEventListener('click',function(){
-      var id=b.getAttribute('data-undone');
-      (state.data[m.key]||[]).forEach(function(r){ if(r._id===id) markDone(r, false); });
-      saveData(m.key, state.data[m.key]); toast('已撤销完成'); refreshAll();
-    });
   });
   Array.prototype.forEach.call($('#content').querySelectorAll('[data-del]'),function(b){
     b.addEventListener('click',function(){
@@ -3595,6 +3990,7 @@ function bindModule(m){
       });
     });
   });
+  }
 }
 
 /* ---- AI Skill 面板 ---- */
@@ -3948,6 +4344,8 @@ function openForm(m,row,asNew){
   var focused=false;                                     // 新增时自动聚焦首个文本输入
   /* asNew（P0-1 笔记转待办）：预填新增——字段值取 row 渲染，保存走新增分支并携带 row._ref */
   var isEdit=!!row&&!asNew;
+  /* 任务树：父任务（有子任务）的状态/进度/完成日/重复由系统管理，表单禁用 */
+  var parLock=(m.key==='tasks'&&isEdit&&isContainerTask(row));
   /* 笔记配图：编辑列表提前初始化（网格首渲内联进 HTML，交互后再局部更新）。
      imgCellsHtml 必须是函数作用域（h 字符串构建时就要用），不能放进 if 块。 */
   var _editImgs=[], _delImgs=[];
@@ -3964,15 +4362,18 @@ function openForm(m,row,asNew){
   var h='<div class="modal-h"><h3>'+(isEdit?'编辑':'新增')+' · '+m.title+'</h3><button class="icon-btn" id="mClose">✕</button></div><div class="modal-b"><form id="mForm"><div class="f-grid">';
   m.fields.forEach(function(f){
     var full=(f.t==='textarea')?' style="grid-column:1/-1"':'';
-    h+='<div class="f-row"'+full+'><label>'+f.f+(f.req?' <span style="color:var(--red)">*</span>':'')+'</label>';
+    var locked=parLock&&(f.f==='状态'||f.f==='进度'||f.f==='完成日'||f.f==='重复');
+    h+='<div class="f-row"'+full+'><label>'+f.f+(f.req?' <span style="color:var(--red)">*</span>':'')+(locked?' <span style="color:var(--tx3);font-size:11px">（自动汇总）</span>':'')+'</label>';
     var val=row?row[f.f]:'';
     var af=(!isEdit&&!focused&&f.t==='text')?' autofocus':'';  // 快捷新建后可直接打字
     if(af) focused=true;
     if(f.t==='select'){
       var cur=val||(row?'':f.def||'');           // 新增时用 def 作为默认值
-      h+='<select name="'+f.f+'"><option value="">请选择</option>';
+      h+='<select name="'+f.f+'"'+(locked?' disabled':'')+'>';
+      if(!locked) h+='<option value="">请选择</option>';
       (f.opts||[]).forEach(function(o){ h+='<option'+(cur===o?' selected':'')+'>'+o+'</option>'; });
       h+='</select>';
+      if(locked) h+='<input type="hidden" name="'+f.f+'" value="'+esc(cur)+'">';
     }
     else if(f.t==='textarea'){
       if(m.key==='notes'){
@@ -3980,12 +4381,13 @@ function openForm(m,row,asNew){
           +'<div id="mdEditWrap"><textarea name="'+f.f+'" style="min-height:340px">'+esc(val||'')+'</textarea></div>'
           +'<div class="md-preview" id="mdPrevWrap" style="display:none"></div>';
       }else{
-        h+='<textarea name="'+f.f+'">'+esc(val||'')+'</textarea>';
+        h+='<textarea name="'+f.f+'"'+(locked?' disabled':'')+'>'+esc(val||'')+'</textarea>';
+        if(locked) h+='<input type="hidden" name="'+f.f+'" value="'+esc(val||'')+'">';
       }
     }
-    else if(f.t==='number'){ h+='<input type="number" step="any" name="'+f.f+'" value="'+esc(val||'')+'"'+(f.req?' required':'')+'>'; }
-    else if(f.t==='date'){ h+='<input type="date" name="'+f.f+'" value="'+esc(val||'')+'"'+(f.req?' required':'')+'>'; }
-    else{ h+='<input type="text" name="'+f.f+'" value="'+esc(val||'')+'"'+(f.req?' required':'')+af+'>'; }
+    else if(f.t==='number'){ h+='<input type="number" step="any" name="'+f.f+'" value="'+esc(val||'')+'"'+(f.req?' required':'')+(locked?' disabled':'')+'>'; if(locked) h+='<input type="hidden" name="'+f.f+'" value="'+esc(val===null||val===undefined?'':val)+'">'; }
+    else if(f.t==='date'){ h+='<input type="date" name="'+f.f+'" value="'+esc(val||'')+'"'+(f.req?' required':'')+(locked?' disabled':'')+'>'; if(locked) h+='<input type="hidden" name="'+f.f+'" value="'+esc(val||'')+'">'; }
+    else{ h+='<input type="text" name="'+f.f+'" value="'+esc(val||'')+'"'+(f.req?' required':'')+(locked?' disabled':'')+af+'>'; if(locked) h+='<input type="hidden" name="'+f.f+'" value="'+esc(val||'')+'">'; }
     h+='</div>';
   });
   if(m.key==='notes'){
@@ -4097,6 +4499,7 @@ function openForm(m,row,asNew){
         if(String(row[f.f]===undefined?'':row[f.f])!==String(obj[f.f]===undefined?'':obj[f.f])) row._touched[f.f]=1;
       });
       Object.keys(obj).forEach(function(k){ row[k]=obj[k]; });
+      if(parLock) recalcBranch(row);                   // 父任务：丢弃手写状态/进度，恢复系统汇总
       row._mtime=nowIso();                             // 最后更新时间：驱动「最近更新」排序
     }
     else{ obj._id=genId(); obj._src='manual'; if(m.autoDate) obj[m.autoDate]=todayStr(); obj._ctime=nowIso(); obj._mtime=obj._ctime; if(row&&row._ref) obj._ref=row._ref; (state.data[m.key]=state.data[m.key]||[]).push(obj); }
@@ -4164,6 +4567,129 @@ function openConfirm(title,desc,onOk){
   $('#cCancel').addEventListener('click',closeModal);
   $('#cOk').addEventListener('click',function(){ closeModal(); onOk(); });
 }
+/* ==================== 任务树弹窗（2026-11-26 P0+P1） ==================== */
+/* 子任务表单：复用模块字段，锁 分类/负责人/部门/优先级（继承父任务）；隐藏 状态/进度/完成日/重复 */
+function openTaskForm(parentRec, asNewRow){
+  var m=MODULES.filter(function(x){return x.key==='tasks';})[0];
+  var inherit={'分类':parentRec['分类'],'负责人':parentRec['负责人'],'部门':parentRec['部门'],'优先级':parentRec['优先级']};
+  var lockFields={'分类':1,'负责人':1,'部门':1,'优先级':1};
+  var hideFields={'状态':1,'进度':1,'完成日':1,'重复':1};
+  var h='<div class="modal-h"><h3>添加子任务 · '+esc(parentRec['标题']||'')+'</h3><button class="icon-btn" id="mClose">✕</button></div>'
+    +'<div class="modal-b"><form id="mForm"><div class="f-grid">';
+  m.fields.forEach(function(f){
+    if(hideFields[f.f]) return;
+    var full=(f.t==='textarea')?' style="grid-column:1/-1"':'';
+    h+='<div class="f-row"'+full+'><label>'+f.f+(f.req?' <span style="color:var(--red)">*</span>':'')+'</label>';
+    var val=(asNewRow&&asNewRow[f.f]!==undefined)?asNewRow[f.f]:(inherit[f.f]!==undefined?inherit[f.f]:'');
+    if(f.t==='select'){
+      var cur=val||(f.def||'');
+      h+='<select name="'+f.f+'"'+(lockFields[f.f]?' disabled title="继承父任务"':'')+'>';
+      (f.opts||[]).forEach(function(o){ h+='<option'+(cur===o?' selected':'')+'>'+o+'</option>'; });
+      h+='</select>';
+      if(lockFields[f.f]) h+='<input type="hidden" name="'+f.f+'" value="'+esc(cur)+'">';
+    }
+    else if(f.t==='textarea'){ h+='<textarea name="'+f.f+'">'+esc(val||'')+'</textarea>'; }
+    else if(f.t==='number'){ h+='<input type="number" step="any" name="'+f.f+'" value="'+esc(val||'')+'"'+(f.req?' required':'')+'>'; }
+    else if(f.t==='date'){ h+='<input type="date" name="'+f.f+'" value="'+esc(val||'')+'"'+(f.req?' required':'')+'>'; }
+    else{ h+='<input type="text" name="'+f.f+'" value="'+esc(val||'')+'"'+(f.req?' required':'')+' autofocus>'; }
+    h+='</div>';
+  });
+  h+='<div class="f-row" style="grid-column:1/-1"><label style="color:var(--tx3);font-size:12px">状态 / 进度 / 完成日由你手工维护；父任务「'+esc(parentRec['标题']||'')+'」的进度与状态将根据全部子任务自动汇总。</label></div>';
+  h+='</div></form></div><div class="modal-f"><button class="btn" id="mCancel">取消</button><button class="btn btn-pri" id="mSubmit">新增</button></div>';
+  $('#modalBox').innerHTML=h; $('#mask').classList.add('show');
+  $('#mClose').addEventListener('click',closeModal); $('#mCancel').addEventListener('click',closeModal);
+  $('#mSubmit').addEventListener('click',function(){
+    var form=$('#mForm'); if(!form.reportValidity()) return;
+    var obj={};
+    m.fields.forEach(function(f){
+      if(hideFields[f.f]) return;
+      var el=form.querySelector('[name="'+f.f+'"]'); obj[f.f]=el?el.value:'';
+    });
+    var o=apiCreateSubtask(parentRec.tid, obj);
+    if(!o) return;
+    saveData('tasks',state.data.tasks); closeModal(); toast('子任务已新增，父任务进度已自动更新'); refreshAll();
+  });
+}
+/* 批量添加子任务：一行一个，回车/换行分隔；继承父任务字段 */
+function openBatchSubtasks(parentTid){
+  var p=taskByTid(parentTid); if(!p) return;
+  var h='<div class="modal-h"><h3>批量添加子任务 · '+esc(p['标题']||'')+'</h3><button class="icon-btn" id="mClose">✕</button></div>'
+    +'<div class="modal-b"><div class="f-row"><label>每行一条子任务标题（继承分类/负责人/优先级；可带截止日期，如 <code>题目 2026-12-10</code>）</label>'
+    +'<textarea id="tsLines" style="min-height:180px" placeholder="完成英语摸底测试并确定学期目标 2026-11-30&#10;选定并购买分级读物与课程"></textarea></div>'
+    +'<div class="f-row" style="color:var(--tx3);font-size:12px">父任务当前深度 '+((Number(p.depth)||0)+1)+'/'+(TREE_MAX_DEPTH+1)+' 层'+((Number(p.depth)||0)>=TREE_MAX_DEPTH?' · 已达最深层级，不能再拆':'')+'</div></div>'
+    +'<div class="modal-f"><button class="btn" id="mCancel">取消</button><button class="btn btn-pri" id="mSubmit">全部添加</button></div>';
+  $('#modalBox').innerHTML=h; $('#mask').classList.add('show');
+  $('#mClose').addEventListener('click',closeModal); $('#mCancel').addEventListener('click',closeModal);
+  $('#mSubmit').addEventListener('click',function(){
+    var lines=String($('#tsLines').value||'').split(/\n+/), n=0;
+    lines.forEach(function(line){
+      line=line.trim(); if(!line) return;
+      var due='', mt=line.match(/\s(\d{4}-\d{2}-\d{2})$/);
+      if(mt){ due=mt[1]; line=line.slice(0,mt.index).trim(); }
+      if(!line) return;
+      var o=apiCreateSubtask(parentTid, {'标题':line, '截止':due});
+      if(o) n++;
+    });
+    if(!n){ toast('未解析到有效标题',1); return; }
+    saveData('tasks',state.data.tasks); closeModal(); toast('已添加 '+n+' 条子任务，父任务进度已更新'); refreshAll();
+  });
+}
+/* 移动到…菜单：树形缩进列出全部合法目标（自身及后代置灰），含「提升为顶级任务」 */
+function openMoveMenu(tid){
+  var rec=taskByTid(tid); if(!rec) return;
+  var rows=(state.data.tasks||[]).filter(function(r){ return r&&!r._deleted; });
+  var descendants={}; taskDescendants(tid).forEach(function(r){ descendants[r.tid]=1; });
+  var h='<div class="modal-h"><h3>移动到… · '+esc(rec['标题']||'')+'</h3><button class="icon-btn" id="mClose">✕</button></div><div class="modal-b">';
+  h+='<button class="btn" id="mvRoot" style="width:100%;margin-bottom:10px">提升为顶级任务</button>';
+  h+='<div class="f-row"><label>选择新的父任务（灰显为自身或其后代，不可选）</label><div id="mvList" style="max-height:320px;overflow:auto">';
+  var ordered=treeOrderRows(rows,{});
+  var seen={};
+  ordered.forEach(function(vr){
+    var r=vr.rec; if(seen[r.tid]) return; seen[r.tid]=1;
+    if(r.tid===tid||descendants[r.tid]){
+      h+='<div style="padding:5px 8px 5px '+(8+vr.ind*20)+'px;color:var(--tx3);font-size:12.5px">'+esc(r['标题']||'')+'（不可选）</div>';
+    }else{
+      var ok=treeCanAttach(rec, r.tid).ok;
+      h+='<button class="btn" data-mvto="'+r.tid+'" style="width:100%;text-align:left;padding:6px 10px;margin:2px 0'+(ok?'':';opacity:.45;cursor:not-allowed')+'"'+(ok?'':' disabled')+'>'
+        +'<span style="color:var(--tx3)">'+(vr.ind?'　'.repeat(vr.ind)+'└ ':'')+'</span>'+esc(r['标题']||'')+'</button>';
+    }
+  });
+  h+='</div></div></div><div class="modal-f"><button class="btn" id="mCancel">取消</button></div>';
+  $('#modalBox').innerHTML=h; $('#mask').classList.add('show');
+  $('#mClose').addEventListener('click',closeModal); $('#mCancel').addEventListener('click',closeModal);
+  $('#mvRoot').addEventListener('click',function(){
+    if(apiMoveTask(tid,null,undefined)){ saveData('tasks',state.data.tasks); closeModal(); toast('已移动为顶级任务'); refreshAll(); }
+  });
+  Array.prototype.forEach.call($('#mvList').querySelectorAll('[data-mvto]:not([disabled])'),function(b){
+    b.addEventListener('click',function(){
+      var pt=b.getAttribute('data-mvto');
+      if(apiMoveTask(tid,pt,undefined)){ saveData('tasks',state.data.tasks); closeModal(); toast('已移动，父任务进度已重新汇总'); refreshAll(); }
+    });
+  });
+}
+/* 父任务删除确认：级联删除整棵子树（含墓碑+可撤销） 或 仅删父任务、子任务上提一级 */
+function openDeleteParent(id){
+  var rec=(state.data.tasks||[]).filter(function(r){ return r._id===id; })[0];
+  if(!rec) return;
+  var n=taskDescendants(rec.tid).length;
+  var h='<div class="modal-h"><h3>删除父任务 · '+esc(rec['标题']||'')+'</h3><button class="icon-btn" id="mClose">✕</button></div>'
+    +'<div class="modal-b"><div style="font-size:13px;color:var(--tx2);line-height:1.8">'
+    +'该任务下有 <b>'+n+'</b> 条子任务。请选择处理方式：</div>'
+    +'<div class="f-row" style="margin-top:12px"><button class="btn" id="dpPromote" style="width:100%;text-align:left"><b>仅删除父任务</b> · '+n+' 条子任务上提一级，保留跟踪</button></div>'
+    +'<div class="f-row"><button class="btn" id="dpCascade" style="width:100%;text-align:left;border-color:var(--red);color:var(--red)"><b>级联删除</b> · 连同 '+n+' 条子任务一起删除（均记入墓碑，Ctrl+Z 可整组撤销）</button></div>'
+    +'</div><div class="modal-f"><button class="btn" id="mCancel">取消</button></div>';
+  $('#modalBox').innerHTML=h; $('#mask').classList.add('show');
+  $('#mClose').addEventListener('click',closeModal); $('#mCancel').addEventListener('click',closeModal);
+  $('#dpPromote').addEventListener('click',function(){
+    apiDeleteTask(rec.tid,'promote');
+    saveData('tasks',state.data.tasks); closeModal(); toast('父任务已删除，子任务已上提'); refreshAll();
+  });
+  $('#dpCascade').addEventListener('click',function(){
+    var c=apiDeleteTask(rec.tid,'cascade');
+    saveData('tasks',state.data.tasks); closeModal(); toast('已删除父任务及 '+c+' 条子任务（Ctrl+Z 可撤销）'); refreshAll();
+  });
+}
+/* ==================== 任务树弹窗结束 ==================== */
 function closeModal(){ $('#mask').classList.remove('show'); $('#modalBox').innerHTML=''; }
 $('#mask').addEventListener('click',function(e){ if(e.target===$('#mask')) closeModal(); });
 
@@ -4705,17 +5231,18 @@ function promptPassword(reason){
   });
 }
 
-/* ---- B5 截止提醒与到期视图 ---- */
+/* ---- B5 截止提醒与到期视图 ----
+   任务树防双算：父任务（容器）不进逾期/今日到期口径 */
 function computeOverdue(){
   var t=todayStr();
   return (state.data.tasks||[]).filter(function(r){
-    return !r._deleted && r['状态']!=='已完成' && r['截止'] && String(r['截止']).slice(0,10)<t;
+    return !r._deleted && !isContainerTask(r) && r['状态']!=='已完成' && r['截止'] && String(r['截止']).slice(0,10)<t;
   }).sort(function(a,b){ return String(a['截止']).localeCompare(String(b['截止'])); });
 }
 function computeDueToday(){
   var t=todayStr();
   return (state.data.tasks||[]).filter(function(r){
-    return !r._deleted && r['状态']!=='已完成' && String(r['截止']||'').slice(0,10)===t;
+    return !r._deleted && !isContainerTask(r) && r['状态']!=='已完成' && String(r['截止']||'').slice(0,10)===t;
   });
 }
 function bellPanelHtml(){
@@ -4744,7 +5271,7 @@ function bindBellPanel(){
   Array.prototype.forEach.call(pop.querySelectorAll('[data-bell-done]'),function(b){
     b.addEventListener('click',function(){
       var id=b.getAttribute('data-bell-done');
-      (state.data.tasks||[]).forEach(function(r){ if(r._id===id) markDone(r,true); });
+      (state.data.tasks||[]).forEach(function(r){ if(r._id===id) taskDoneAction(r,true); });
       saveData('tasks',state.data.tasks); refreshAll();
       pop.innerHTML=bellPanelHtml(); bindBellPanel();
       toast('已完成（不会被下次同步改回）');
