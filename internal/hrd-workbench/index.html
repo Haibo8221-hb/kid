@@ -1229,6 +1229,7 @@ var RAG_TESTS=[
 /* ---------- 模块注册表（离线，options 内嵌） ---------- */
 var MODULES=[
  {key:'overview', title:'工作总览', en:'Overview', group:'总览', icon:'grid'},
+ {key:'timebox', title:'今日时间盒', en:'Timeboxing', group:'总览', icon:'check', special:1, external:1},
  {key:'stats', title:'数据统计', en:'Statistics', group:'总览', icon:'chart'},
  {key:'notes', title:'笔记', en:'Notes', group:'日常办公', icon:'file', autoDate:'日期',
   fields:[{f:'标题',t:'text',req:1},{f:'内容',t:'textarea'},{f:'待办',t:'text'}],
@@ -1248,8 +1249,7 @@ var MODULES=[
  {key:'learn', title:'个人学习监控', en:'Learning', group:'成长沉淀', icon:'book', special:1, external:1},
   /* 独立服务（Python + SQLite），页面内嵌；不占 localStorage，故无 fields/cols */
   {key:'claims', title:'个人保险索赔', en:'Claims', group:'生活服务', icon:'shield', special:1, external:1},
-  {key:'reloc', title:'迪拜搬迁台', en:'Dubai Relocation', group:'生活服务', icon:'backup', special:1, external:1},
-  {key:'timebox', title:'今日时间盒', en:'Timeboxing', group:'生活服务', icon:'check', special:1, external:1}
+  {key:'reloc', title:'迪拜搬迁台', en:'Dubai Relocation', group:'生活服务', icon:'backup', special:1, external:1}
 ];
 var ICONS={
  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
@@ -3935,6 +3935,10 @@ function bindModule(m){
         }else if(y>0.75){                                      // 后置兄弟
           ok=apiMoveTask(tid, target.parent_tid||null, undefined);
         }else{                                                 // 变子任务
+          /* 已关闭（已完成/已取消）的任务不可作为新父任务——与「移动到…」菜单口径一致 */
+          if(target['状态']==='已完成'||target['状态']==='已取消'){
+            toast('「'+(target['标题']||'')+'」已关闭，不能移入其下'); dragTid=null; return;
+          }
           ok=apiMoveTask(tid, targetTid, undefined);
         }
         if(ok){ saveData('tasks',state.data.tasks); toast('任务已移动，进度已重新汇总'); refreshAll(); }
@@ -4637,7 +4641,10 @@ function openBatchSubtasks(parentTid){
 /* 移动到…菜单：树形缩进列出全部合法目标（自身及后代置灰），含「提升为顶级任务」 */
 function openMoveMenu(tid){
   var rec=taskByTid(tid); if(!rec) return;
-  var rows=(state.data.tasks||[]).filter(function(r){ return r&&!r._deleted; });
+  /* 目标只列未关闭的任务（已完成/已取消不可作为移动目标——历史关闭待办无挂载意义） */
+  var rows=(state.data.tasks||[]).filter(function(r){
+    return r&&!r._deleted&&r['状态']!=='已完成'&&r['状态']!=='已取消';
+  });
   var descendants={}; taskDescendants(tid).forEach(function(r){ descendants[r.tid]=1; });
   var h='<div class="modal-h"><h3>移动到… · '+esc(rec['标题']||'')+'</h3><button class="icon-btn" id="mClose">✕</button></div><div class="modal-b">';
   h+='<button class="btn" id="mvRoot" style="width:100%;margin-bottom:10px">提升为顶级任务</button>';
