@@ -2400,6 +2400,7 @@ var tbEstSel=50;
 /* P0 修复（2026-11-24）：tbFetch / tbState 此前未定义，时间盒页一打开即
    ReferenceError。tbFetch 复用 rHeaders()（X-HRD-Token，与 reloc 同步通道一致）。 */
 var tbState={boxes:[],stats:{},timer:null,tpl:[],week:[],weekMon:null};
+var tbEditId=null; /* 行内编辑中的盒 id（仅 planned 可编辑），非 null 时暂停 30s 轮询 */
 function tbFetch(url,opts){
   opts=opts||{};
   var h=rHeaders(); h['Content-Type']='application/json';
@@ -2539,11 +2540,22 @@ function tbRenderList(){
   var h='<div style="padding:10px 0 6px;color:var(--c-text-2);font-size:12.5px">今日 ' + bs.length + ' 盒 · 计划 ' + planMin + ' 分钟</div>';
   for(var i=0;i<bs.length;i++){
     var b=bs[i];
+    /* 行内编辑态：planned 盒渲染为可直接修改的表单（时段/标题/估时），替代原弹窗式修改 */
+    if(b.status==='planned' && String(b.id)===String(tbEditId)){
+      h+='<div style="display:flex;gap:8px;align-items:center;padding:12px 0;border-top:'+(i?'1px solid var(--c-border-3)':'0')+';flex-wrap:wrap;background:var(--c-border-4);border-radius:10px;padding-left:10px;padding-right:10px">'
+        +'<span style="font-size:12px;color:var(--c-text-3)">改盒</span>'
+        +'<select id="tbEditSlot" style="padding:7px 9px;border:1px solid var(--c-border);border-radius:8px;font-size:15px">'+tbSlotOpts()+'</select>'
+        +'<input id="tbEditTitle" value="'+esc(b.title)+'" style="flex:1;min-width:200px;padding:7px 11px;border:1px solid var(--c-border);border-radius:8px;font-size:15px">'
+        +'<span style="display:flex;align-items:center;gap:4px"><input id="tbEditEst" type="number" min="5" max="1440" value="'+esc(b.est_min)+'" style="width:72px;padding:7px 9px;border:1px solid var(--c-border);border-radius:8px;font-size:15px"><span style="font-size:12.5px;color:var(--c-text-3)">分</span></span>'
+        +'<button class="btn btn-pri tbE" data-a="save" data-id="'+b.id+'">保存</button>'
+        +'<button class="btn tbE" data-a="cancel">取消</button></div>';
+      continue;
+    }
     var mm=tbMinutesDoing(b);
     var diff = b.actual_min!=null? (b.actual_min-b.est_min) : null;
     var diffTx = diff===null? '' : ('<span style="font-size:12.5px;color:'+(diff<=0?'#18a058':'#c33')+'">实际 '+b.actual_min+' 分（'+(diff>0?'+':'')+diff+'）</span>');
     var btns='';
-    if(b.status==='planned') btns='<button class="btn btn-pri tbB" data-a="start" data-id="'+b.id+'">开始</button><button class="btn tbB" data-a="update" data-id="'+b.id+'">改</button><button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
+    if(b.status==='planned') btns='<button class="btn btn-pri tbB" data-a="start" data-id="'+b.id+'">开始</button><button class="btn tbB" data-a="edit" data-id="'+b.id+'">改</button><button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
     else if(b.status==='doing') btns='<button class="btn tbB" data-a="end" data-o="done" data-id="'+b.id+'">完成</button><button class="btn tbB" data-a="end" data-o="overflow" data-id="'+b.id+'">超时续</button><button class="btn tbB" data-a="end" data-o="dropped" data-id="'+b.id+'">放弃</button><button class="btn tbB" data-a="reset" data-id="'+b.id+'">回退</button>';
     else if(b.status==='done'||b.status==='overflow') btns='<button class="btn tbB" data-a="edit_actual" data-id="'+b.id+'">改实际</button><button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
     else btns='<button class="btn tbB" data-a="delete" data-id="'+b.id+'">删</button>';
@@ -2560,6 +2572,30 @@ function tbRenderList(){
   Array.prototype.forEach.call(document.querySelectorAll('.tbB'),function(x){
     x.onclick=function(){ tbAct(x.getAttribute('data-a'), x.getAttribute('data-id'), x.getAttribute('data-o')); };
   });
+  /* 行内编辑：时段回显（不在选项中则补插）、保存/取消/键盘 */
+  var selEl=$('#tbEditSlot');
+  if(selEl){
+    selEl.value=tbEditSlotVal;
+    if(selEl.value!==tbEditSlotVal){
+      var op=document.createElement('option'); op.value=tbEditSlotVal; op.textContent=tbEditSlotVal;
+      selEl.insertBefore(op, selEl.firstChild); selEl.value=tbEditSlotVal;
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.tbE'),function(x){
+      x.onclick=function(){
+        if(x.getAttribute('data-a')==='save') tbEditSave(x.getAttribute('data-id'));
+        else{ tbEditId=null; tbRenderList(); }
+      };
+    });
+    var editIdStr=String(tbEditId);
+    function tbEditKey(e){
+      if(e.key==='Enter'){ tbEditSave(editIdStr); }
+      else if(e.key==='Escape'){ tbEditId=null; tbRenderList(); }
+    }
+    ['tbEditSlot','tbEditTitle','tbEditEst'].forEach(function(eid){
+      var elx=document.getElementById(eid); if(elx) elx.onkeydown=tbEditKey;
+    });
+    $('#tbEditTitle').focus();
+  }
 }
 function tbLoad(){
   var ds=tbTodayStr();
@@ -2573,6 +2609,7 @@ function tbLoad(){
       /* 每 30 秒重新拉取：elapsed_min 由服务端计算，本地重渲染算不准时区 */
       tbState.timer=setInterval(function(){
         if(!document.getElementById('tbList')){ tbStopTimer(); return; }
+        if(document.getElementById('tbEditSlot')) return; /* 行内编辑中：跳过本轮轮询，避免覆盖正在输入的内容 */
         tbLoad();
       }, 30000);
     }
@@ -2717,8 +2754,29 @@ function tbLoadCal(){
     });
   }).catch(function(e){ el.textContent='日程加载失败：'+e; });
 }
+/* ---- 行内改盒（替代弹窗）：时段/标题/估时直接在盒行上编辑 ---- */
+var tbEditSlotVal='09:00';
+function tbEditStart(id){
+  tbEditId=parseInt(id,10);
+  var bx=null;
+  (tbState.boxes||[]).forEach(function(b){ if(String(b.id)===String(id)) bx=b; });
+  tbEditSlotVal=bx? bx.slot : '09:00';
+  tbRenderList();
+}
+function tbEditSave(id){
+  var st=$('#tbEditSlot').value;
+  var tt=($('#tbEditTitle').value||'').trim();
+  var ne=parseInt($('#tbEditEst').value,10);
+  if(!tt){ $('#tbEditTitle').focus(); return; }
+  if(!(ne>0 && ne<=1440)){ alert('估时须为 1-1440 分钟'); return; }
+  tbFetch('/api/hrd/timebox',{method:'POST',body:JSON.stringify({action:'update',id:parseInt(id,10),title:tt,est_min:ne,slot:st})}).then(function(j){
+    if(!j.ok){ alert('修改失败：'+(j.error||'')); return; }
+    tbEditId=null; tbLoad();
+  }).catch(function(e){ alert('网络错误：'+e); });
+}
 function tbAct(a,id,o){
   var body={action:a,id:parseInt(id,10)};
+  if(a==='edit'){ tbEditStart(parseInt(id,10)); return; }
   if(a==='end') body.outcome=o;
   if(a==='edit_actual'){
     var bx=null;
@@ -2728,21 +2786,6 @@ function tbAct(a,id,o){
     na=parseInt(na,10);
     if(!(na>0 && na<=1440)){ alert('实际用时须为 1-1440 的分钟数'); return; }
     body.actual_min=na;
-  }
-  if(a==='update'){
-    var box=null;
-    (tbState.boxes||[]).forEach(function(b){ if(String(b.id)===String(id)) box=b; });
-    var nt=prompt('修改标题：', box? box.title : '');
-    if(nt===null) return;
-    nt=nt.trim(); if(!nt){ alert('标题不能为空'); return; }
-    var ne=prompt('修改估时（分钟，正整数）：', box? box.est_min : 50);
-    if(ne===null) return;
-    ne=parseInt(ne,10);
-    if(!(ne>0 && ne<=1440)){ alert('估时须为 1-1440 的分钟数'); return; }
-    var ns=prompt('修改时段（HH:MM）：', box? box.slot : '09:00');
-    if(ns===null) return;
-    if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(ns)){ alert('时段格式须为 HH:MM'); return; }
-    body.title=nt; body.est_min=ne; body.slot=ns;
   }
   tbFetch('/api/hrd/timebox',{method:'POST',body:JSON.stringify(body)}).then(function(j){
     if(!j.ok){ alert('操作失败：'+(j.error||'')); return; }
