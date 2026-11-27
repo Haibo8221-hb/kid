@@ -2831,7 +2831,7 @@ function viewTimebox(){
    +'<span id="tbWkLabel" style="font-size:14px;font-weight:600;color:var(--c-navy)"></span>'
    +'<button class="btn" id="tbWkNow">本周</button>'
    +'<button class="btn" id="tbWkNext">下周 ›</button></div>'
-   +'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div id="tbWeekGrid" style="display:grid;grid-template-columns:repeat(7,minmax(118px,1fr));gap:8px;min-width:780px"></div></div></div>'
+   +'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div id="tbWeekGrid" style="display:grid;grid-template-columns:repeat(7,minmax(150px,1fr));gap:10px;min-width:1050px"></div></div></div>'
    +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;align-items:stretch">'
    +'<div class="card" style="padding:14px 16px;flex:1;min-width:340px">'
    +'<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">'
@@ -3304,8 +3304,7 @@ function tbWeekRender(){
     if(!bs.length){ h+='<div style="font-size:12px;color:var(--c-text-3)">—</div>'; }
     else{
       bs.forEach(function(b){
-        var tt=b.title.length>16? b.title.slice(0,16)+'…' : b.title;
-        h+='<div title="'+esc(b.title)+' · '+esc(b.slot)+'" style="font-size:12px;line-height:1.5;background:'+(stc[b.status]||stc.planned)+';border-radius:6px;padding:3px 6px;margin-bottom:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis"><b>'+esc(b.slot)+'</b> '+esc(tt)+'</div>';
+        h+='<div title="'+esc(b.title)+' · '+esc(b.slot)+'" style="font-size:12px;line-height:1.5;background:'+(stc[b.status]||stc.planned)+';border-radius:6px;padding:3px 6px;margin-bottom:4px;word-break:break-word"><b>'+esc(b.slot)+'</b> '+esc(b.title)+'</div>';
       });
     }
     h+='</div>';
