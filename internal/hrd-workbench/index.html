@@ -26,6 +26,7 @@ svg{display:block}
 .sb-logo .t1{color:#fff;font-size:15px;font-weight:600;letter-spacing:.3px}
 .sb-logo .t2{font-size:11px;color:var(--sb-tx-dim);margin-top:1px}
 .sb-group{padding:14px 12px 4px;font-size:11px;color:var(--sb-tx-dim);letter-spacing:1px}
+.sb-group:hover{color:#e8eef5}
 .sb-nav{flex:1;overflow-y:auto;padding-bottom:16px}
 .sb-item{display:flex;align-items:center;gap:11px;width:100%;padding:10px 14px 10px 18px;color:var(--sb-tx);font-size:13.5px;text-align:left;border-left:3px solid transparent;transition:background .15s,color .15s}
 .sb-item svg{width:17px;height:17px;flex:0 0 auto;opacity:.85}
@@ -2598,15 +2599,33 @@ function bindStats(){
 
 /* ---------- 渲染层 ---------- */
 function renderNav(){
+  /* 导航组折叠：状态存 localStorage（sbCollapsed），组头点击切换，折叠时隐藏该组成员 */
+  var collapsed={};
+  try{ collapsed=JSON.parse(localStorage.getItem('sbCollapsed')||'{}'); }catch(e){ collapsed={}; }
   var html='',lastGroup='';
   MODULES.forEach(function(m){
-    if(m.group!==lastGroup){ html+='<div class="sb-group">'+m.group+'</div>'; lastGroup=m.group; }
+    if(m.group!==lastGroup){
+      var isCol=!!collapsed[m.group];
+      html+='<div class="sb-group" data-g="'+esc(m.group)+'" title="点击折叠/展开" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">'
+        +'<span>'+m.group+'</span><span style="font-size:10px;transition:transform .15s">'+(isCol?'▸':'▾')+'</span></div>';
+      lastGroup=m.group;
+    }
+    if(collapsed[m.group]) return;
     var cnt=(m.key!=='overview'&&state.data[m.key])?'<span class="cnt">'+state.data[m.key].length+'</span>':'';
     html+='<button class="sb-item'+(state.page===m.key?' active':'')+'" data-page="'+m.key+'">'+icon(m.icon)+'<span>'+m.title+'</span>'+cnt+'</button>';
   });
   $('#sbNav').innerHTML=html;
   Array.prototype.forEach.call($('#sbNav').querySelectorAll('.sb-item'),function(b){
     b.addEventListener('click',function(){ state.page=b.getAttribute('data-page'); state.search=''; state.focusIndex=-1; closeMobileNav(); refreshAll(); });
+  });
+  Array.prototype.forEach.call($('#sbNav').querySelectorAll('.sb-group'),function(g){
+    g.addEventListener('click',function(){
+      var name=g.getAttribute('data-g'),c={};
+      try{ c=JSON.parse(localStorage.getItem('sbCollapsed')||'{}'); }catch(e){ c={}; }
+      if(c[name]) delete c[name]; else c[name]=1;
+      try{ localStorage.setItem('sbCollapsed',JSON.stringify(c)); }catch(e){}
+      renderNav();
+    });
   });
 }
 function renderTopbar(){ var m=MODULES.filter(function(x){return x.key===state.page;})[0];
@@ -2745,7 +2764,7 @@ function viewTimebox(){
    +'<span id="tbWkLabel" style="font-size:14px;font-weight:600;color:var(--c-navy)"></span>'
    +'<button class="btn" id="tbWkNow">本周</button>'
    +'<button class="btn" id="tbWkNext">下周 ›</button></div>'
-   +'<div id="tbWeekGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px"></div></div>'
+   +'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div id="tbWeekGrid" style="display:grid;grid-template-columns:repeat(7,minmax(118px,1fr));gap:8px;min-width:780px"></div></div></div>'
    +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;align-items:stretch">'
    +'<div class="card" style="padding:14px 16px;flex:1;min-width:340px">'
    +'<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">'

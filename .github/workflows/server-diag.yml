@@ -100,7 +100,7 @@ jobs:
               curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "function tbStopTimer" || echo "0"
               curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "tbCalPendingUid" || echo "0 (转盒自动移除 not in served page)"
               curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | grep -c "tbEditStart" || echo "0 (行内改盒 not in served page)"
-              curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | python3 -c "import sys; s=sys.stdin.read(); j=s.find('overview'+chr(39)+', title'); i=s.find('timebox'+chr(39)+', title'); print('nav order ok (timebox right after overview):', (-1<j<i and i-j<150)) if i>0 and j>0 else print('markers missing', j, i)" 2>/dev/null || echo "nav check skipped"
+              curl -sk -m 10 -H "Host: xgrow.me" "https://127.0.0.1/hrd/" 2>/dev/null | python3 -c "import sys; s=sys.stdin.read(); print('nav-collapse marker:', s.count('sbCollapsed'), '| week-minwidth marker:', s.count('minmax(118px'))" 2>/dev/null || echo "feature check skipped"
               echo
               echo "===== site root ====="
               ls -la "${{ secrets.SITE_ROOT }}" | head -30
