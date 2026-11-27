@@ -298,8 +298,14 @@ tr.row-focus td{background:#eef3fd!important;box-shadow:inset 0 0 0 1px var(--bl
 .lb-close{position:absolute;top:16px;right:18px;width:38px;height:38px;transform:none}
 .lb-count{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.75);font-size:12px;letter-spacing:.5px}
 /* ---------- 任务树（2026-11-26 分层分级 P0+P1）---------- */
-.tw{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;color:var(--tx3);cursor:pointer;font-size:11px;vertical-align:middle;margin-right:2px}
+.tw{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;color:var(--tx3);cursor:pointer;font-size:13px;flex:0 0 22px;transition:background .15s}
 .tw:hover{background:#eef3fd;color:var(--blue)}
+.tw.on{background:#eef3fd;color:var(--blue)}
+.tw-empty{pointer-events:none}
+.t-flex{display:flex;align-items:center;min-width:0}
+.tnum{flex:0 0 26px;text-align:right;font-size:12px;color:var(--tx3);font-variant-numeric:tabular-nums;margin-right:6px;line-height:1.4}
+.row-done-num{opacity:.55}
+.t-body{flex:1 1 auto;min-width:0;line-height:1.5}
 .t-auto-badge{display:inline-block;font-size:10px;line-height:1;padding:3px 6px;border-radius:10px;background:#eef3fd;color:#3a6fd8;border:1px solid #cfdefa;vertical-align:middle;margin-left:5px;font-weight:400}
 .tk-badge{cursor:pointer;vertical-align:middle;margin-left:5px}
 .t-trail{font-size:10.5px;color:var(--tx3);line-height:1.3;margin-bottom:1px;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -655,7 +661,8 @@ th.th-sort-on .th-sort-lb{font-weight:700}
 th .sort-arr{display:inline-block;margin-left:4px;font-size:9px;vertical-align:1px}
 /* 标题列加宽 + 内容加粗（仅待办任务表格；!important 用于压过单元格内联 font-weight:500） */
 .tbl-tasks th:first-child{min-width:260px}
-.tbl-tasks td:first-child span[style*="font-weight:500"]{font-weight:700!important}
+.tbl-tasks .t-flex.is-par .t-body>span[style*="font-weight:500"]{font-weight:700!important}
+.tbl-tasks .t-flex:not(.is-par) .t-body>span[style*="font-weight:500"]{font-weight:400!important}
 
 /* ---------- P1-5 上下文 / 筛选态常显条（滚动超过阈值才出现，不占静态高度） ---------- */
 .ui-context{
@@ -3786,6 +3793,7 @@ function viewModule(m){
     }
   });
   h+='<th style="width:80px">操作</th></tr></thead><tbody>';
+  var numStack=[];
   if(!rows.length){ h+='<tr><td colspan="'+(m.cols.length+1)+'"><div class="empty">'+icon('file')+'暂无数据</div></td></tr>'; }
   viewRows.forEach(function(vr,ri){
     var r=vr.rec;
@@ -3794,7 +3802,7 @@ function viewModule(m){
     var kids=taskChildren(r.tid);
     var kidDone=0; kids.forEach(function(k){ if(String(k['状态'])==='已完成') kidDone++; });
     var expanded=!!(state.search||tExp[r.tid]);
-    var indent=m.key==='tasks'?(vr.ind*22):0;
+    var indent=m.key==='tasks'?(vr.ind*16):0;
     h+='<tr'+(done?' class="row-done"':'')+(ri===state.focusIndex?' row-focus':'')+' data-idx="'+ri+'" data-task-row="'+r.tid+'" style="'+(indent?'--tind:'+indent+'px;':'')+'">';
     m.cols.forEach(function(c){
       var cell=cellHtml(c,r);
@@ -3805,17 +3813,22 @@ function viewModule(m){
         cell+=' <span class="tag tag-purple" title="重复任务：'+esc(r['重复'])+'">↻ '+esc(r['重复'])+'</span>';
       }
       if(m.key==='tasks'&&c.main){
+        /* 分层编号（随当前视图顺序实时重算：1 / 1.1 / 1.2 …）+ 统一槽位对齐 */
+        numStack[vr.ind]=(numStack[vr.ind]||0)+1; numStack.length=vr.ind+1;
+        var tnumStr=numStack.slice(0,vr.ind+1).join('.');
+        var trail=isPar?taskTrail(r):'';
+        var slots='<span class="tnum'+(done?' row-done-num':'')+'">'+tnumStr+'</span>'
+          +'<span class="tw'+(isPar?(expanded?' on':''):' tw-empty')+'"'+(isPar?' data-ttoggle="'+r.tid+'" title="'+(expanded?'折叠':'展开')+'子任务"':'')+'>'+(isPar?(expanded?'▾':'▸'):'')+'</span>';
+        var badges='';
         if(isPar){
-          /* 父任务：折叠箭头 + 子任务完成徽标 + 自动角标；面包屑在标题上方 */
-          var trail=taskTrail(r);
-          if(trail) cell='<div class="t-trail">'+esc(trail)+'</div>'+cell;
-          cell='<span class="tw'+(expanded?' on':'')+'" data-ttoggle="'+r.tid+'" title="'+(expanded?'折叠':'展开')+'子任务">'+(expanded?'▾':'▸')+'</span> '+cell;
-          cell+=' <span class="tag tag-gray tk-badge" data-ttoggle="'+r.tid+'" title="子任务完成进度（点击展开）">'+kidDone+'/'+kids.length+'</span>';
-          cell+=' <span class="t-auto-badge" title="状态与进度由子任务自动汇总">自动</span>';
+          badges=' <span class="tag tag-gray tk-badge" data-ttoggle="'+r.tid+'" title="子任务完成进度（点击展开）">'+kidDone+'/'+kids.length+'</span>'
+                 +' <span class="t-auto-badge" title="状态与进度由子任务自动汇总">自动</span>';
         }else if(kids.length){
-          cell+=' <span class="t-auto-badge" title="状态与进度由子任务自动汇总">自动</span>';
+          badges=' <span class="t-auto-badge" title="状态与进度由子任务自动汇总">自动</span>';
         }
-        if(indent&&!isPar) cell='<span class="t-lead"></span>'+cell;
+        cell='<div class="t-flex'+(isPar?' is-par':'')+'">'+slots+'<div class="t-body">'
+          +(trail?'<div class="t-trail">'+esc(trail)+'</div>':'')+cell+badges
+          +'</div></div>';
       }
       h+='<td data-label="'+c.f+'"'+(indent&&c.main?' style="padding-left:'+(8+indent)+'px"':'')+'>'+cell+'</td>';
     });
