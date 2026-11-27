@@ -646,6 +646,17 @@ img.ui-img-fail{opacity:.35;filter:grayscale(1)}
   .card.tbl-wrap thead th{position:static;box-shadow:none}
 }
 
+/* ---------- 列标题点击排序（仅 tasks 列表视图） ---------- */
+th.th-sort{cursor:pointer;user-select:none}
+th.th-sort:hover{color:var(--blue);background:#f0f4fe}
+th.th-sort .th-sort-lb{font-weight:600}
+th.th-sort-on{color:var(--blue);background:#eef3fd}
+th.th-sort-on .th-sort-lb{font-weight:700}
+th .sort-arr{display:inline-block;margin-left:4px;font-size:9px;vertical-align:1px}
+/* 标题列加宽 + 内容加粗（仅待办任务表格；!important 用于压过单元格内联 font-weight:500） */
+.tbl-tasks th:first-child{min-width:260px}
+.tbl-tasks td:first-child span[style*="font-weight:500"]{font-weight:700!important}
+
 /* ---------- P1-5 上下文 / 筛选态常显条（滚动超过阈值才出现，不占静态高度） ---------- */
 .ui-context{
   position:fixed;left:232px;right:0;top:62px;z-index:90;
@@ -1237,7 +1248,7 @@ var MODULES=[
   cols:[{f:'标题',t:'text',main:1},{f:'日期',t:'date'},{f:'内容',t:'text',wide:1},{f:'待办',t:'text'}]},
  {key:'tasks', title:'待办任务', en:'Tasks', group:'日常办公', icon:'check',
   fields:[{f:'标题',t:'text',req:1},{f:'分类',t:'select',opts:['个人','日常工作','上级沟通','其他'],def:'日常工作'},{f:'负责人',t:'text'},{f:'部门',t:'text'},{f:'优先级',t:'select',opts:['P0','P1','P2']},{f:'状态',t:'select',opts:['进行中','已完成','暂停']},{f:'截止',t:'date'},{f:'重复',t:'select',opts:['不重复','每天','每周','每月'],def:'不重复'},{f:'进度',t:'number'},{f:'完成日',t:'date'},{f:'备注',t:'textarea'}],
-  cols:[{f:'标题',t:'text',main:1},{f:'分类',t:'select',tag:1},{f:'负责人',t:'text'},{f:'部门',t:'text'},{f:'优先级',t:'select',tag:1},{f:'状态',t:'select',tag:1},{f:'截止',t:'date'},{f:'进度',t:'progress'}]},
+  cols:[{f:'标题',t:'text',main:1},{f:'分类',t:'select',tag:1},{f:'负责人',t:'text'},{f:'优先级',t:'select',tag:1},{f:'状态',t:'select',tag:1},{f:'截止',t:'date'},{f:'进度',t:'progress'}]},
  {key:'hrview', title:'HR工作视图', en:'MHR Work View', group:'日常办公', icon:'grid', special:1},
  {key:'skills', title:'AI Skill', en:'AI Skills', group:'成长沉淀', icon:'cpu', special:1,
   fields:[{f:'技能ID',t:'text',req:1},{f:'归属',t:'select',opts:['hermes','weclaw','weclaw-market']},{f:'来源',t:'select',opts:['self','system','market']},{f:'敏感度',t:'select',opts:['general','company_sensitive']},{f:'版本',t:'text'},{f:'更新日',t:'date'},{f:'健康状态',t:'select',opts:['正常','缺版本','断链','陈旧','重名']},{f:'备注',t:'textarea'}]},
@@ -1511,7 +1522,7 @@ function applySync(){
 /* ---------- 状态 ---------- */
 /* filters: 结构化筛选（B2），按模块键存 {字段:[值,...]} + tasks 的 due 区间
    taskView: B3 看板/列表偏好；repOnly: B9 仅看重复；focusIndex: B1 键盘焦点行 */
-var state={ page:'overview', search:'', data:{}, filters:{}, taskView:'list', repOnly:false, focusIndex:-1, filterOpen:false, sort:{} };
+var state={ page:'overview', search:'', data:{}, filters:{}, taskView:'list', repOnly:false, focusIndex:-1, filterOpen:false, sort:{}, colSort:{} };
 var $=function(s,r){return (r||document).querySelector(s);};
 /* 拉取真实 RAG 入库周报（rag_weekly.json）。成功后若当前在知识库页则重渲染。 */
 function loadRagWeekly(){
@@ -1534,6 +1545,7 @@ function boot_data(){
   try{ state.taskView=localStorage.getItem(LS+'taskview')||'list'; }catch(e){}
   try{ state.repOnly=localStorage.getItem(LS+'rep_only')==='1'; }catch(e){}
   try{ var _sv=JSON.parse(localStorage.getItem(LS+'sort')||'null'); if(_sv&&typeof _sv==='object') state.sort=_sv; }catch(e){}
+  try{ var _cs=JSON.parse(localStorage.getItem(LS+'colsort')||'null'); if(_cs&&typeof _cs==='object') state.colSort=_cs; }catch(e){}
   state.data.skills=loadData('skills', SEED_SKILLS, SKILL_COLS);
   state.data.prompts=loadData('prompts', SEED_PROMPTS, PROMPT_COLS);
   state.data.tasks=loadData('tasks', SEED_TASKS, ['标题','分类','负责人','部门','优先级','状态','截止','进度','完成日','备注']);
@@ -1878,8 +1890,11 @@ function treeAutoExpand(search){
   rows.forEach(function(r){ if(!hit[r.tid]) return; map[r.tid]=1; var cur=r; while(cur&&cur.parent_tid){ map[cur.parent_tid]=1; cur=taskByTid(cur.parent_tid); } });
   return map;
 }
-/* 树序 DFS：把扁平 rows 按父子关系+折叠状态排列（供列表渲染）。返回 [{rec,ind}] */
-function treeOrderRows(rows, expandMap){
+/* 树序 DFS：把扁平 rows 按父子关系+折叠状态排列（供列表渲染）。返回 [{rec,ind}]
+   colSort（可选）：列标题点击排序状态 {k,desc} —— 传入时同级节点按列排序键排列
+   （列排序在 sortRows 中已排好入参 rows 的顶层顺序，但树序会按 order 重排同级，
+   故此处需再次注入；未传时保持按手工 order 排列，"移动到…"菜单等调用不受影响）。 */
+function treeOrderRows(rows, expandMap, colSort){
   var byId={}, roots=[];
   rows.forEach(function(r){ byId[r.tid||('_id_'+r._id)]=r; });
   rows.forEach(function(r){
@@ -1889,7 +1904,20 @@ function treeOrderRows(rows, expandMap){
   });
   var out=[];
   function dfs(list, ind){
-    list.sort(function(a,b){ return (Number(a.order)||0)-(Number(b.order)||0); });
+    if(colSort){
+      list.sort(function(a,b){
+        var sa=statusRank(a), sb=statusRank(b);
+        if(sa!==sb) return sa-sb;                      // 与 sortRows 一致：已完成沉底
+        if(sa>=9) return 0;
+        var c=cmpTasksCol(a,b,colSort.k,colSort.desc);
+        if(c) return c;
+        c=cmpPrio(a,b); if(c) return c;
+        c=cmpDue(a,b,false); if(c) return c;
+        return (Number(a.order)||0)-(Number(b.order)||0);
+      });
+    }else{
+      list.sort(function(a,b){ return (Number(a.order)||0)-(Number(b.order)||0); });
+    }
     list.forEach(function(r){
       out.push({rec:r, ind:ind});
       var kids=r._treeKids||[]; delete r._treeKids;
@@ -2062,6 +2090,37 @@ function statusRank(r){
 /* _ord：总览拖拽排序字段（内部字段，不进 cols/fields，不影响表单与表格列）。
    无 _ord 的记录 ordVal=1e9（排在有 _ord 之后），保持原 sortRows 规则零感知兼容。 */
 function ordVal(r){ var v=r&&r._ord; return (typeof v==='number'&&isFinite(v))?v:1e9; }
+
+/* ---------- 列标题点击排序（2026-11-27，仅待办任务列表视图）----------
+   state.colSort.tasks={k:'分类'|'负责人'|'优先级'|'状态'|'截止', desc:bool}，
+   持久化到 localStorage（LS+'colsort'）。
+   排序位置：状态分组（已完成沉底）之后 -> 列排序主键 -> 智能规则（优先级->截止）兜底，
+   与页头下拉排序互不冲突：列排序激活期间优先于下拉偏好（渲染为高亮 + ↑/↓ 箭头），
+   点击同一表头切换升/降序，再次点击或切换其它排序方式即退出列排序。
+   兼容性：不写回数据、不影响 _ord 拖拽（总览「全部待办」用 smart + _ord，不走列排序）。 */
+var COL_SORTABLE={'分类':1,'负责人':1,'优先级':1,'状态':1,'截止':1};
+function colSortActive(key){
+  var cs=state.colSort&&state.colSort[key];
+  if(!cs||!COL_SORTABLE[cs.k]) return null;
+  return cs;
+}
+function colSortToggle(key, field){
+  var cur=colSortActive(key);
+  if(cur&&cur.k===field&&cur.desc){ delete state.colSort[key]; }   // 第三次点击：退出列排序，回到原排序
+  else if(cur&&cur.k===field){ state.colSort[key]={k:field,desc:true}; }  // 第二次点击：降序
+  else{ state.colSort[key]={k:field,desc:false}; }                 // 首次点击：升序
+  try{ localStorage.setItem(LS+'colsort', JSON.stringify(state.colSort)); }catch(e){}
+}
+function cmpTasksCol(a,b,k,desc){
+  var c=0;
+  if(k==='分类') c=cmpStr(a['分类'],b['分类']);
+  else if(k==='负责人') c=cmpStr(a['负责人'],b['负责人']);
+  else if(k==='优先级') c=cmpPrio(a,b);
+  else if(k==='状态') c=(statusRank(a)-statusRank(b))||cmpStr(a['状态'],b['状态']);
+  else if(k==='截止') c=cmpDue(a,b,desc);              // 截止复用 cmpDue：无截止始终沉底
+  if(c&&desc&&k!=='截止') return -c;                   // 截止列：desc 即远→近（cmpDue 内部已处理）
+  return c;
+}
 
 /* ---------- 笔记配图（2026-10-28，与手机版同构）----------
    存储方案：图片文件走独立端点 /api/hrd/img（sha256 内容寻址，服务端
@@ -2276,11 +2335,18 @@ function sortRows(key, rows){
   if(key!=='tasks'&&key!=='notes') return arr;
   if(key==='notes') return arr.sort(notesCmp(sortPref('notes')));
   var pref=sortPref('tasks');
+  var col=colSortActive('tasks');                    // 列排序：仅待办任务列表视图使用（总览/看板等不激活）
   return arr.sort(function(a,b){
     var sa=statusRank(a), sb=statusRank(b);
     if(sa!==sb) return sa-sb;                          // ① 未完成在上（所有 tasks 排序保持）
-    var c=0;
-    if(sa<9){                                          // ② 未完成组：主键按排序偏好
+    if(sa<9){                                          // ② 未完成组：列排序优先于下拉排序偏好
+      if(col){
+        var cc=cmpTasksCol(a,b,col.k,col.desc);        // 列排序：主键 -> 智能规则兜底（优先级->截止）
+        if(cc) return cc;
+        var c2=cmpPrio(a,b); if(c2) return c2;
+        c2=cmpDue(a,b,false); if(c2) return c2;
+      }else{
+      var c=0;
       if(pref==='smart') c=cmpNum(ordVal(a),ordVal(b));          // 拖拽 _ord 优先
       else if(pref==='due') c=cmpDue(a,b,false);
       else if(pref==='dueDesc') c=cmpDue(a,b,true);
@@ -2290,6 +2356,7 @@ function sortRows(key, rows){
       if(c) return c;
       c=cmpPrio(a,b); if(c) return c;                  // ③ 次级键：优先级 -> 截止（smart 的 _ord 之后同样兜底，还原默认规则）
       c=cmpDue(a,b,false); if(c) return c;
+      }
     }else{                                             // ④ 已完成组：完成日新→旧（排序维度不跨状态组）
       var da=String(a['完成日']||''), db=String(b['完成日']||'');
       if(da!==db) return da<db?1:-1;
@@ -3688,7 +3755,7 @@ function viewModule(m){
   var tStats=null, tExp=null, viewRows=null;
   if(m.key==='tasks'&&state.taskView!=='board'){
     tExp=state.search?treeAutoExpand(state.search):treeExpandMap();
-    viewRows=treeOrderRows(rows,tExp);
+    viewRows=treeOrderRows(rows,tExp,colSortActive('tasks'));
   }else{ viewRows=rows.map(function(r){ return {rec:r, ind:0}; }); }
   var specs=filterSpecs(m);
   var fcount=0; for(var fk in moduleFilters(m)){ fcount+=(moduleFilters(m)[fk]||[]).length; }
@@ -3706,8 +3773,19 @@ function viewModule(m){
     +'<button class="btn btn-pri" id="btnAdd">新增</button></div>'
     +activeFilterChips(m)+'</div>';
   if(m.key==='tasks'&&state.taskView==='board'){ h+=viewTasksBoard(rows); return h; }
-  h+='<div class="card tbl-wrap"><table><thead><tr>';
-  m.cols.forEach(function(c){ h+='<th>'+c.f+'</th>'; });
+  h+='<div class="card tbl-wrap'+(m.key==='tasks'?' tbl-tasks':'')+'"><table><thead><tr>';
+  var _col=colSortActive(m.key);
+  m.cols.forEach(function(c){
+    var sortable=(m.key==='tasks'&&COL_SORTABLE[c.f]);
+    if(sortable){
+      var on=_col&&_col.k===c.f;
+      var arrow=on?(_col.desc?'<span class="sort-arr" title="降序">▼</span>':'<span class="sort-arr" title="升序">▲</span>'):'';
+      h+='<th class="th-sort'+(on?' th-sort-on':'')+'" data-csort="'+esc(c.f)+'" title="点击按「'+esc(c.f)+'」排序'+(on?(_col.desc?'（当前降序，再点切换升序）':'（当前升序，再点切换降序）'):'（升序）')+'">'
+        +'<span class="th-sort-lb">'+esc(c.f)+'</span>'+arrow+'</th>';
+    }else{
+      h+='<th>'+c.f+'</th>';
+    }
+  });
   h+='<th style="width:80px">操作</th></tr></thead><tbody>';
   if(!rows.length){ h+='<tr><td colspan="'+(m.cols.length+1)+'"><div class="empty">'+icon('file')+'暂无数据</div></td></tr>'; }
   viewRows.forEach(function(vr,ri){
@@ -3858,6 +3936,15 @@ function bindModule(m){
     state.focusIndex=-1; renderContent();
     var e=$('#btnSort'); if(e) e.focus();
   });
+  /* 列标题点击排序（仅 tasks 列表视图表头；事件委托在 thead 上） */
+  if(m.key==='tasks'&&state.taskView!=='board'){
+    var thd=$('#content').querySelector('.tbl-wrap thead');
+    if(thd) thd.addEventListener('click',function(ev){
+      var el=ev.target.closest('[data-csort]'); if(!el) return;
+      colSortToggle('tasks', el.getAttribute('data-csort'));
+      state.focusIndex=-1; renderContent();
+    });
+  }
   Array.prototype.forEach.call($('#content').querySelectorAll('[data-imgs]'),function(el){
     el.addEventListener('click',function(e){
       if(e&&e.stopPropagation) e.stopPropagation();
