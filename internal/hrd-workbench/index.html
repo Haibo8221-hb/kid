@@ -661,6 +661,8 @@ th.th-sort-on .th-sort-lb{font-weight:700}
 th .sort-arr{display:inline-block;margin-left:4px;font-size:9px;vertical-align:1px}
 /* 标题列加宽 + 内容加粗（仅待办任务表格；!important 用于压过单元格内联 font-weight:500） */
 .tbl-tasks th:first-child{min-width:260px}
+.tbl-tasks th[data-col="截止"],.tbl-tasks td[data-label="截止"]{white-space:nowrap;min-width:104px}
+.tbl-tasks th[data-col="负责人"],.tbl-tasks td[data-label="负责人"]{white-space:nowrap;min-width:120px}
 .tbl-tasks .t-flex.is-par .t-body>span[style*="font-weight:500"]{font-weight:700!important}
 .tbl-tasks .t-flex:not(.is-par) .t-body>span[style*="font-weight:500"]{font-weight:400!important}
 
@@ -3786,10 +3788,10 @@ function viewModule(m){
     if(sortable){
       var on=_col&&_col.k===c.f;
       var arrow=on?(_col.desc?'<span class="sort-arr" title="降序">▼</span>':'<span class="sort-arr" title="升序">▲</span>'):'';
-      h+='<th class="th-sort'+(on?' th-sort-on':'')+'" data-csort="'+esc(c.f)+'" title="点击按「'+esc(c.f)+'」排序'+(on?(_col.desc?'（当前降序，再点切换升序）':'（当前升序，再点切换降序）'):'（升序）')+'">'
+      h+='<th data-col="'+esc(c.f)+'" class="th-sort'+(on?' th-sort-on':'')+'" data-csort="'+esc(c.f)+'" title="点击按「'+esc(c.f)+'」排序'+(on?(_col.desc?'（当前降序，再点切换升序）':'（当前升序，再点切换降序）'):'（升序）')+'">'
         +'<span class="th-sort-lb">'+esc(c.f)+'</span>'+arrow+'</th>';
     }else{
-      h+='<th>'+c.f+'</th>';
+      h+='<th data-col="'+esc(c.f)+'">'+c.f+'</th>';
     }
   });
   h+='<th style="width:80px">操作</th></tr></thead><tbody>';
