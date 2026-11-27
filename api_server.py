@@ -3705,11 +3705,12 @@ def hrd_state_put():
         _alive = [r for r in _tk if r and not r.get('_deleted')]
         _nested = [r for r in _alive if r.get('parent_tid')]
         _deep = [r for r in _alive if (r.get('depth') or 0) >= 2]
-        app.logger.info('hrd_put ip=%s ua=%.60s tasks_alive=%d nested=%d deep=%d nested_titles=%.120s',
-                        request.remote_addr,
-                        request.headers.get('User-Agent', ''),
-                        len(_alive), len(_nested), len(_deep),
-                        ' | '.join((r.get('标题') or '')[:14] for r in _nested[:4]))
+        print('hrd_put ip=%s ua=%.80s tasks_alive=%d nested=%d deep=%d nested_titles=%.150s'
+              % (request.remote_addr,
+                 request.headers.get('User-Agent', ''),
+                 len(_alive), len(_nested), len(_deep),
+                 ' | '.join((r.get('标题') or '')[:14] for r in _nested[:4])),
+              file=sys.stderr, flush=True)
     except Exception:
         pass
     _write_hrd(out)
