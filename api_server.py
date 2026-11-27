@@ -3699,6 +3699,19 @@ def hrd_state_put():
                     for k in _HRD_KEYS},
            'tombs': {k: (body['tombs'][k] if k in body['tombs'] else prev_tombs.get(k, {}))
                      for k in _HRD_KEYS}}
+    # 写入来源审计（2026-11-27）：排查灰字面包屑反复出现——定位是哪个客户端在推旧嵌套树
+    try:
+        _tk = (out['data'].get('tasks') or [])
+        _alive = [r for r in _tk if r and not r.get('_deleted')]
+        _nested = [r for r in _alive if r.get('parent_tid')]
+        _deep = [r for r in _alive if (r.get('depth') or 0) >= 2]
+        app.logger.info('hrd_put ip=%s ua=%.60s tasks_alive=%d nested=%d deep=%d nested_titles=%.120s',
+                        request.remote_addr,
+                        request.headers.get('User-Agent', ''),
+                        len(_alive), len(_nested), len(_deep),
+                        ' | '.join((r.get('标题') or '')[:14] for r in _nested[:4]))
+    except Exception:
+        pass
     _write_hrd(out)
     return _hrd_cors(jsonify({'ok': True, 'stamp': stamp,
                               'counts': {k: len(out['data'][k]) for k in _HRD_KEYS}}))
