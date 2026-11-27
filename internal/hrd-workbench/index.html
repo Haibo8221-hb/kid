@@ -1530,8 +1530,8 @@ function applySync(){
 
 /* ---------- 状态 ---------- */
 /* filters: 结构化筛选（B2），按模块键存 {字段:[值,...]} + tasks 的 due 区间
-   taskView: B3 看板/列表偏好；repOnly: B9 仅看重复；focusIndex: B1 键盘焦点行 */
-var state={ page:'overview', search:'', data:{}, filters:{}, taskView:'list', repOnly:false, focusIndex:-1, filterOpen:false, sort:{}, colSort:{} };
+   taskView: B3 看板/列表偏好；focusIndex: B1 键盘焦点行 */
+var state={ page:'overview', search:'', data:{}, filters:{}, taskView:'list', focusIndex:-1, filterOpen:false, sort:{}, colSort:{} };
 var $=function(s,r){return (r||document).querySelector(s);};
 /* 拉取真实 RAG 入库周报（rag_weekly.json）。成功后若当前在知识库页则重渲染。 */
 function loadRagWeekly(){
@@ -1552,7 +1552,6 @@ function boot_data(){
   loadFilters();
   syncCatOptions();
   try{ state.taskView=localStorage.getItem(LS+'taskview')||'list'; }catch(e){}
-  try{ state.repOnly=localStorage.getItem(LS+'rep_only')==='1'; }catch(e){}
   try{ var _sv=JSON.parse(localStorage.getItem(LS+'sort')||'null'); if(_sv&&typeof _sv==='object') state.sort=_sv; }catch(e){}
   try{ var _cs=JSON.parse(localStorage.getItem(LS+'colsort')||'null'); if(_cs&&typeof _cs==='object') state.colSort=_cs; }catch(e){}
   state.data.skills=loadData('skills', SEED_SKILLS, SKILL_COLS);
@@ -2275,8 +2274,7 @@ function closeLightbox(){
    同一套规则渲染 -> 多端排序结果天然一致。 */
 var SORT_OPTS={
   tasks:[
-    {k:'smart',  label:'智能排序（未完成→优先级→截止）', def:true},
-    {k:'due',    label:'截止日期（近→远）'},
+    {k:'due',    label:'截止日期（近→远）', def:true},
     {k:'dueDesc',label:'截止日期（远→近）'},
     {k:'prio',   label:'优先级（P0→P2）'},
     {k:'created',label:'创建时间（新→旧）'},
@@ -3757,7 +3755,6 @@ function viewModule(m){
   var all=(state.data[m.key]||[]).filter(matchSearch).filter(function(r){return !r._deleted;});
   all=filterRows(m, all);
   all=hrvApplyModuleFilter(all,m.key);
-  if(m.key==='tasks'&&state.repOnly) all=all.filter(function(r){ return r['重复']&&r['重复']!=='不重复'; });
   var rows=sortRows(m.key, all);
   /* 任务树：列表视图按 DFS 树序渲染（缩进+折叠记忆；搜索时自动展开祖先链并全展开保证命中可见） */
   var tStats=null, tExp=null, viewRows=null;
@@ -3773,7 +3770,6 @@ function viewModule(m){
     +'<div class="toolbar"><div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="searchInput" placeholder="搜索…（支持 分类:日常工作）" value="'+esc(state.search)+'"></div>'
     +(SORT_OPTS[m.key]?'<select class="sort-sel btn" id="btnSort" title="列表排序方式">'+SORT_OPTS[m.key].map(function(o){return '<option value="'+o.k+'"'+(sortPref(m.key)===o.k?' selected':'')+'>'+o.label+'</option>';}).join('')+'</select>':'')
     +(specs.length?'<div class="fbtn"><button class="btn" id="btnFilter">'+icon('filter')+'筛选'+(fcount?' ('+fcount+')':'')+'</button>'+(state.filterOpen?filterPanelHtml(m):'')+'</div>':'')
-    +(m.key==='tasks'?'<button class="btn" id="btnRep"'+((state.repOnly)?' style="border-color:var(--blue);color:var(--blue);background:#eef3fd"':'')+'>'+icon('repeat')+'仅看重复</button>':'')
     +(m.key==='tasks'?'<button class="btn" id="btnCats">分类管理</button>':'')
     +((m.key==='tasks'||m.key==='notes')?hrvInlineFilterHtml(state.hrvFilter):'')
     +(m.key==='tasks'?'<button class="btn" id="btnView">'+icon(state.taskView==='board'?'list':'board')+(state.taskView==='board'?'列表视图':'看板视图')+'</button>':'')
@@ -3978,11 +3974,6 @@ function bindModule(m){
   bindFilterPanel(m);
   var bf=$('#btnFilter'); if(bf) bf.addEventListener('click',function(){ state.filterOpen=!state.filterOpen; renderContent(); });
   if(m.key==='tasks'){
-    var br=$('#btnRep'); if(br) br.addEventListener('click',function(){
-      state.repOnly=!state.repOnly;
-      try{ localStorage.setItem(LS+'rep_only', state.repOnly?'1':'0'); }catch(e){}
-      state.focusIndex=-1; renderContent();
-    });
     var bc=$('#btnCats'); if(bc) bc.addEventListener('click',openCatManage);
     var bv=$('#btnView'); if(bv) bv.addEventListener('click',function(){
       state.taskView=state.taskView==='board'?'list':'board';
@@ -5457,7 +5448,6 @@ function focusableRows(){
   if(!m||m.key==='overview'||m.special||m.key==='stats') return {m:null, rows:[]};
   var rows=(state.data[m.key]||[]).filter(matchSearch).filter(function(r){return !r._deleted;});
   rows=filterRows(m, rows);
-  if(m.key==='tasks'&&state.repOnly) rows=rows.filter(function(r){ return r['重复']&&r['重复']!=='不重复'; });
   return {m:m, rows:sortRows(m.key, rows)};
 }
 function moveFocus(delta){
@@ -6323,13 +6313,12 @@ var UIENH = (function () {
     return (e && e.textContent) || '工作台';
   }
   function filtered() {
-    return !!(state.search || state.hrvFilter || state.repOnly);
+    return !!(state.search || state.hrvFilter);
   }
   function chips() {
     var c = [];
     if (state.search) c.push('搜索：' + state.search);
     if (state.hrvFilter) c.push('流程节点：' + state.hrvFilter);
-    if (state.repOnly) c.push('仅看重复');
     if (state.taskView === 'board') c.push('看板视图');
     try {
       var m = MODULES.filter(function (x) { return x.key === state.page; })[0];
@@ -6349,7 +6338,7 @@ var UIENH = (function () {
     if (b && b.click) b.click();
   }
   function clearFilter() {
-    state.search = ''; state.hrvFilter = ''; state.repOnly = false;
+    state.search = ''; state.hrvFilter = '';
     try {
       var m = MODULES.filter(function (x) { return x.key === state.page; })[0];
       if (m && typeof setModuleFilter === 'function') setModuleFilter(m, null);
