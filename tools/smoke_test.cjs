@@ -721,6 +721,72 @@ function runMobileAdaptation() {
   return { pass, fail };
 }
 
+// ── H1：HRD 工作台模块点击回归（2026-11-28）─────────────────────────────
+// 背景：viewModule 里 tExp[r.tid] 无空安全，notes/prompts 等非 tasks 模块渲染时
+// tExp 为 null -> TypeError -> 页面卡在总览（笔记/提示词打不开）。此类「点击切页崩溃」
+// 只有运行时冒烟能抓到，源码级扫描无效。本段真实点击侧边栏各模块按钮并断言：
+//   ① 无未捕获 JS 错误  ② #content 内容随模块切换变化（真的渲染出了新页面）
+function runHrdWorkbench() {
+  const pass = [], fail = [];
+  const file = path.resolve(__dirname, '..', 'internal', 'hrd-workbench', 'index.html');
+  if (!fs.existsSync(file)) {
+    return { pass, fail: ['H1：找不到 internal/hrd-workbench/index.html（真源文件缺失）'] };
+  }
+  const vc = new VirtualConsole();
+  const errors = [];
+  vc.on('jsdomError', (e) => errors.push('[jsdomError] ' + (e.detail?.stack || e.message)));
+  vc.on('error', (...a) => errors.push('[console.error] ' + a.join(' ')));
+  const dom = new JSDOM(fs.readFileSync(file, 'utf8'), {
+    runScripts: 'dangerously',
+    url: 'https://xgrow.me/hrd/',
+    pretendToBeVisual: true,
+    virtualConsole: vc,
+  });
+  const { window } = dom;
+  // fetch 打桩：在线版启动会拉 /api/hrd/state 与 RAG 统计，jsdom 环境不可达
+  window.fetch = () => Promise.resolve({ ok: false, status: 503, json: () => Promise.resolve({}) });
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const doc = window.document;
+      const content = doc.querySelector('#content');
+      if (!content) { fail.push('H1：#content 容器不存在'); window.close(); resolve({ pass, fail }); return; }
+      const overviewLen = content.innerHTML.length;
+      if (overviewLen > 500) pass.push('H1：总览页正常渲染（' + overviewLen + ' 字符）');
+      else fail.push('H1：总览页疑似空白（' + overviewLen + ' 字符）');
+
+      // 依次点击全部侧边栏模块：断言无 JS 错误 + 内容确实切换
+      const btns = [...doc.querySelectorAll('#sbNav .sb-item')];
+      if (btns.length >= 5) pass.push('H1：侧边栏模块按钮齐全（' + btns.length + ' 个）');
+      else fail.push('H1：侧边栏模块按钮过少（' + btns.length + ' 个，导航渲染可能已崩）');
+
+      const visited = [];
+      for (const btn of btns) {
+        const key = btn.getAttribute('data-page') || '(none)';
+        // 总览是初始页：点击它内容本就不变，跳过「内容必须切换」断言（只查 JS 错误）
+        const isInitial = btn.classList.contains('active');
+        errors.length = 0;
+        const before = content.innerHTML;
+        btn.click();
+        const after = content.innerHTML;
+        const label = (btn.textContent || '').trim().slice(0, 12);
+        visited.push(key);
+        if (errors.length) fail.push('H1：点击「' + label + '」抛 JS 错误 ' + errors[0].slice(0, 160));
+        else if (!isInitial && after === before) fail.push('H1：点击「' + label + '」内容未切换（渲染中断？）');
+        else pass.push('H1：模块「' + label + '」点击渲染正常');
+      }
+
+      // 关键回归点：曾崩溃的 notes / prompts 必须在 visited 里且当前渲染含模块标题
+      for (const must of ['notes', 'prompts']) {
+        if (visited.includes(must)) pass.push('H1：回归模块 ' + must + ' 已覆盖');
+        else fail.push('H1：回归模块 ' + must + ' 未被遍历（侧边栏缺该按钮）');
+      }
+      window.close();
+      resolve({ pass, fail });
+    }, 1200);
+  });
+}
+
 (async () => {
   console.log('\n===== 子女教育工作台 冒烟测试（双页回归）=====\n');
   let totalPass = 0, totalFail = 0;
@@ -755,6 +821,16 @@ function runMobileAdaptation() {
   if (m1.fail.length) {
     console.log(`失败 ${m1.fail.length} 项：`);
     m1.fail.forEach((f) => console.log('  ❌ ' + f));
+  }
+  const h1 = await runHrdWorkbench();
+  totalPass += h1.pass.length;
+  totalFail += h1.fail.length;
+  console.log('---- HRD 工作台模块点击回归（H1）----');
+  console.log(`通过 ${h1.pass.length} 项：`);
+  h1.pass.forEach((p) => console.log('  ✅ ' + p));
+  if (h1.fail.length) {
+    console.log(`失败 ${h1.fail.length} 项：`);
+    h1.fail.forEach((f) => console.log('  ❌ ' + f));
   }
   console.log('\n-----------------------------------');
   console.log(totalFail === 0 ? `RESULT: ALL PASS ✅ (${totalPass} 项)` : `RESULT: FAILED ❌ (${totalFail} 项失败)`);

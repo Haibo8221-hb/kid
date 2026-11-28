@@ -3799,7 +3799,7 @@ function viewModule(m){
     var isPar=isParentTask(r);
     var kids=taskChildren(r.tid);
     var kidDone=0; kids.forEach(function(k){ if(String(k['状态'])==='已完成') kidDone++; });
-    var expanded=!!(state.search||tExp[r.tid]);
+    var expanded=!!(state.search||(tExp&&tExp[r.tid]));   /* tExp 仅 tasks 列表视图非 null；notes/prompts 等模块为 null，须空安全（2026-11-28 修复：非 tasks 模块渲染崩溃） */
     var indent=m.key==='tasks'?(vr.ind*16):0;
     h+='<tr'+(done?' class="row-done"':'')+(ri===state.focusIndex?' row-focus':'')+' data-idx="'+ri+'" data-task-row="'+r.tid+'" style="'+(indent?'--tind:'+indent+'px;':'')+'">';
     m.cols.forEach(function(c){
